@@ -23,6 +23,7 @@ activities:
   - Validate capped and uncapped auto-compaction thresholds and Desktop editing
   - Validate the opt-in context relevance shadow operation without TypeSafe calls
   - Test error boundaries including nested delegation prevention
+  - Validate the alloc-only GDK agent loop and Cortex-M builds
   - Generate comprehensive test report
 
 parameters:
@@ -30,7 +31,7 @@ parameters:
     input_type: string
     requirement: optional
     default: "all"
-    description: "Which test phases to run: all, basic, extensions, delegation, code-mode, declared-vision, reasoning, zai-coding-plan, acp-effort, compaction, context-relevance, advanced"
+    description: "Which test phases to run: all, basic, extensions, delegation, code-mode, declared-vision, reasoning, zai-coding-plan, acp-effort, compaction, context-relevance, gdk-no-std, advanced"
 
   - key: test_depth
     input_type: string
@@ -641,3 +642,18 @@ prompt: |
   Be thorough but efficient based on the test_depth parameter.
 
   This is true first-person integration testing. Execute with precision and document with clarity.
+
+  {% if test_phases == "all" or "gdk-no-std" in test_phases %}
+  ## Alloc-only GDK Validation
+
+  When running in a goose checkout with the Rust toolchain:
+  1. Run `cargo test --manifest-path crates/goose-agent/examples/alloc-agent/Cargo.toml --locked`.
+     Verify the streamed provider/local-tool loop, generated IDs, and cancellation tests pass.
+  2. If installed, check Cortex-M0 with `cargo check --manifest-path crates/goose-agent/examples/alloc-agent/Cargo.toml --target thumbv6m-none-eabi --locked`.
+  3. If installed, link Cortex-M4 with `cargo build --manifest-path crates/goose-agent/examples/alloc-agent/Cargo.toml --release --target thumbv7em-none-eabi --features bare-metal --locked`.
+  4. Inspect `cargo tree --manifest-path crates/goose-agent/examples/alloc-agent/Cargo.toml --target thumbv7em-none-eabi -e normal,build --prefix none --locked`.
+     Confirm there are no Tokio, rmcp, Reqwest, Chrono, Zstd, tracing, or async-stream dependencies.
+  These checks use a fake transport and no provider credentials. Do not flash hardware,
+  install missing toolchains, or modify source/configuration; mark unavailable target checks SKIPPED.
+  Log results to {{ workspace_dir }}/gdk_no_std.md.
+  {% endif %}
