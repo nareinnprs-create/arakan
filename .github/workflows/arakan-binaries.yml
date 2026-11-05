@@ -28,7 +28,7 @@ jobs:
 
       - name: Install cargo-zigbuild (cross legs)
         if: matrix.cross != ''
-        run: pip3 install --quiet cargo-zigbuild
+        run: pip3 install --quiet --break-system-packages cargo-zigbuild || pip3 install --quiet cargo-zigbuild
 
       - name: Add cross target
         if: matrix.cross != ''
@@ -47,7 +47,9 @@ jobs:
         run: |
           mkdir -p stage
           if [ -n "${{ matrix.cross }}" ]; then
-            cp "target/${{ matrix.cross }}/release/arakan" stage/arakan
+            # zigbuild strips glibc suffixes (x86_64-unknown-linux-gnu.2.31 -> x86_64-unknown-linux-gnu dir)
+            CROSS_DIR=$(echo "${{ matrix.cross }}" | sed 's/\.2\.[0-9]*$//')
+            cp "target/$CROSS_DIR/release/arakan" stage/arakan
           else
             cp target/release/arakan stage/arakan
           fi
