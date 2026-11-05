@@ -1,0 +1,57 @@
+# Arakan binary distro pipeline (Octopus Shield batch C1).
+# Ships the lean ACP agent binary per platform; Shield embeds these via extraResources.
+name: Arakan binaries
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, target: linux-x64, exe: '', archive: tar.gz }
+          - { os: windows-latest, target: win-x64, exe: '.exe', archive: zip }
+          - { os: macos-14, target: mac-arm64, exe: '', archive: tar.gz }
+          - { os: macos-13, target: mac-x64, exe: '', archive: tar.gz }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Rust toolchain (repo-pinned)
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+
+      - name: Build lean ACP binary
+        run: cargo build --release -p arakan-cli --no-default-features --features rustls-tls
+
+      - name: Package (unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p stage
+          cp target/release/arakan stage/arakan
+          cp NOTICE-MODIFICATIONS.md LICENSE stage/
+          tar -czf arakan-${{ matrix.target }}.tar.gz -C stage .
+          ls -la arakan-${{ matrix.target }}.tar.gz
+
+      - name: Package (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force stage | Out-Null
+          Copy-Item target/release/arakan.exe stage/arakan.exe
+          Copy-Item NOTICE-MODIFICATIONS.md, LICENSE stage/
+          Compress-Archive -Path stage/* -DestinationPath arakan-${{ matrix.target }}.zip
+          Get-Item arakan-${{ matrix.target }}.zip | Select-Object Name, Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: arakan-${{ matrix.target }}
+          path: arakan-${{ matrix.target }}.*
+          if-no-files-found: error
+          retention-days: 14
