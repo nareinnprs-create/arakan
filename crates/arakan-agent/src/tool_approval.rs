@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use anyhow::{ensure, Result};
-use async_trait::async_trait;
 use arakan_provider_types::conversation::message::{Message, MessageContent, ToolRequest};
 use arakan_provider_types::conversation::Conversation;
 use arakan_provider_types::maybe_send::{MaybeSend, MaybeSync};
 use arakan_provider_types::permission::Permission;
+use async_trait::async_trait;
 use rmcp::model::CallToolRequestParams;
 
 use crate::operation::{

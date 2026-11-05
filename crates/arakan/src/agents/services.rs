@@ -17,7 +17,7 @@ use crate::agents::session_runtime::{Attachment, SessionRuntime};
 use crate::agents::state_machine::ops_recipe;
 use crate::agents::state_machine::{
     has_unapplied_tool_confirmation_response, pending_tool_confirmations,
-    persist_tool_confirmation_decision, run_arakan, AutoEffortOperation, Emitter, ArakanEffect,
+    persist_tool_confirmation_decision, run_arakan, ArakanEffect, AutoEffortOperation, Emitter,
     Operation, StateMachine, SteerQueue,
 };
 use crate::agents::state_machine_builder::{build_state_machine, StateMachineConfig};
@@ -27,7 +27,7 @@ use crate::agents::types::{
 };
 use crate::agents::AgentEvent;
 use crate::config::permission::PermissionManager;
-use crate::config::{Config, ArakanMode};
+use crate::config::{ArakanMode, Config};
 use crate::conversation::message::{ActionRequiredData, Message, MessageContent};
 use crate::permission::permission_inspector::PermissionInspector;
 use crate::permission::{Permission, PermissionConfirmation};

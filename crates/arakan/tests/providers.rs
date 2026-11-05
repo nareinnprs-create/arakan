@@ -1,13 +1,11 @@
 use anyhow::Result;
-use dotenvy::dotenv;
-use futures::StreamExt;
 use arakan::acp::ACP_CURRENT_MODEL;
 use arakan::agents::extension_manager::CallRequest;
 use arakan::agents::{
     AgentEvent, ArakanPlatform, PromptManager, SessionConfig, StateMachineServices,
     StateMachineServicesConfig,
 };
-use arakan::config::{ExtensionConfig, ArakanMode, PermissionManager};
+use arakan::config::{ArakanMode, ExtensionConfig, PermissionManager};
 use arakan::conversation::message::{ActionRequiredData, Message, MessageContent};
 use arakan::permission::Permission;
 use arakan::providers::anthropic::ANTHROPIC_DEFAULT_MODEL;
@@ -32,6 +30,8 @@ use arakan_providers::thinking::ThinkingEffortSupport;
 use arakan_test_support::{
     EnforceSessionId, ExpectedSessionId, IgnoreSessionId, McpFixture, FAKE_CODE,
 };
+use dotenvy::dotenv;
+use futures::StreamExt;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tokio_util::sync::CancellationToken;
@@ -729,7 +729,10 @@ async fn test_provider(config: ProviderTestConfig) -> Result<()> {
                 .await?;
         }
         if config.model_switch_name.is_some() {
-            run_test(ArakanMode::Auto).await?.test_model_switch().await?;
+            run_test(ArakanMode::Auto)
+                .await?
+                .test_model_switch()
+                .await?;
         }
         if config.test_context_length_exceeded {
             run_test(ArakanMode::Auto)

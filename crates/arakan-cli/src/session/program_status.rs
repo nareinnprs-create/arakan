@@ -1,6 +1,6 @@
+use arakan::config::Config;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use arakan::config::Config;
 use std::io::{IsTerminal, Write};
 use std::sync::Mutex;
 

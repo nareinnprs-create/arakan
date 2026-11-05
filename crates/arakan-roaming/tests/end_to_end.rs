@@ -8,11 +8,11 @@
 
 use std::sync::Arc;
 
-use futures::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use arakan_roaming::{
     AcpStreamServer, Directory, RelaySettings, RoamingConfig, RoamingIdentity, RoamingNode,
     TrustBook,
 };
+use futures::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use iroh::EndpointId;
 
 /// A stand-in ACP server that echoes one line back, upper-cased.

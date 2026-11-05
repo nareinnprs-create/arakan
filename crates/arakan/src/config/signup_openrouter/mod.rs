@@ -5,8 +5,8 @@ mod tests;
 
 use crate::config::Config;
 use anyhow::{anyhow, Result};
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use arakan_providers::openrouter::{OPENROUTER_DEFAULT_MODEL, OPENROUTER_PROVIDER_NAME};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use rand::{distr::Alphanumeric, RngExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};

@@ -1,6 +1,6 @@
 use anyhow::Result;
-use futures::future::BoxFuture;
 use arakan_providers::base::ProviderDescriptor;
+use futures::future::BoxFuture;
 use std::collections::HashMap;
 use std::sync::Arc;
 

@@ -1,7 +1,7 @@
 use crate::config::paths::Paths;
 use anyhow::{anyhow, Result};
-use fs_err::File;
 use arakan_providers::request_log::{install_logger, RequestLogHandle, RequestLogger};
+use fs_err::File;
 use serde_json::Value;
 use std::error::Error;
 use std::io::{BufWriter, Write};

@@ -1,10 +1,10 @@
 use crate::config::paths::Paths;
 use anyhow::Result;
+use arakan_providers::formats::anthropic::AnthropicFormatOptions;
 use async_stream::try_stream;
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use futures::TryStreamExt;
-use arakan_providers::formats::anthropic::AnthropicFormatOptions;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -28,10 +28,10 @@ use super::oauth_device_flow::{
 use super::openai_compatible::handle_status;
 use super::retry::ProviderRetry;
 use crate::conversation::message::Message;
-use futures::future::BoxFuture;
 use arakan_providers::errors::ProviderError;
 use arakan_providers::model::ModelConfig;
 use arakan_providers::request_log::{start_log, LoggerHandleExt};
+use futures::future::BoxFuture;
 use rmcp::model::Tool;
 
 const KIMI_CODE_PROVIDER_NAME: &str = "kimi_code";
@@ -519,8 +519,8 @@ impl Provider for KimiCodeProvider {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Utc;
     use arakan_providers::base::ProviderDescriptor as _;
+    use chrono::Utc;
     use serde_json::json;
     use wiremock::matchers::{body_string_contains, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};

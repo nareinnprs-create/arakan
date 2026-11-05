@@ -7,10 +7,10 @@ use super::openai_compatible::{
 use super::retry::ProviderRetry;
 use crate::conversation::message::Message;
 use anyhow::Result;
-use async_trait::async_trait;
-use futures::future::BoxFuture;
 use arakan_providers::errors::ProviderError;
 use arakan_providers::images::ImageFormat;
+use async_trait::async_trait;
+use futures::future::BoxFuture;
 
 use arakan_providers::formats::openai::create_request;
 use arakan_providers::model::ModelConfig;

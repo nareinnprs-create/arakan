@@ -1,5 +1,5 @@
 use arakan::agents::execute_commands::list_commands;
-use arakan::config::{Config, ArakanMode};
+use arakan::config::{ArakanMode, Config};
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
 use rustyline::highlight::{CmdKind, Highlighter};
 use rustyline::hint::Hinter;

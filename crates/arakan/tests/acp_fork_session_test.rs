@@ -4,15 +4,15 @@
 mod common_tests;
 
 use agent_client_protocol::schema::v1::{ForkSessionRequest, ForkSessionResponse, SessionId};
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageContent};
+use arakan::session::{SessionManager, SessionType};
 use common_tests::fixtures::server::{
     assert_session_response_precedes_available_commands, AcpServerConnection,
 };
 use common_tests::fixtures::{
     run_test, spawn_acp_server_in_process, Connection, OpenAiFixture, TestConnectionConfig,
 };
-use arakan::config::ArakanMode;
-use arakan::conversation::message::{Message, MessageContent};
-use arakan::session::{SessionManager, SessionType};
 use std::path::Path;
 
 async fn new_connection(data_root: &Path) -> AcpServerConnection {

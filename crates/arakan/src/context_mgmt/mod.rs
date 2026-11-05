@@ -540,8 +540,8 @@ pub async fn summarize_tool_call(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use async_trait::async_trait;
     use arakan_providers::conversation::token_usage::Usage;
+    use async_trait::async_trait;
     use rmcp::model::{CallToolRequestParams, Tool};
 
     #[test]

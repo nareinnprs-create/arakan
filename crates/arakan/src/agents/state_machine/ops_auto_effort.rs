@@ -2,17 +2,17 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
 use arakan_providers::conversation::{effective_role, Conversation, EffectiveRole};
 use arakan_providers::decision::{
     DecisionAnswer, DecisionProvider, DecisionQuestion, DecisionRequest,
 };
 use arakan_providers::thinking::ThinkingEffort;
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    applied, last_effective_role, messages_since_kickoff, not_applicable, ConversationEffect,
-    Emitter, ArakanEffect, Operation, OperationResult, CLIENT_LOG,
+    applied, last_effective_role, messages_since_kickoff, not_applicable, ArakanEffect,
+    ConversationEffect, Emitter, Operation, OperationResult, CLIENT_LOG,
 };
 use crate::session::Session;
 

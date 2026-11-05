@@ -12,7 +12,7 @@ use tokio_cron_scheduler::{job::JobId, Job, JobScheduler as TokioJobScheduler};
 use tokio_util::sync::CancellationToken;
 
 use crate::agents::{AgentEvent, SessionConfig, StateMachineServices};
-use crate::config::{resolve_extensions_for_new_session, Config, ArakanMode};
+use crate::config::{resolve_extensions_for_new_session, ArakanMode, Config};
 use crate::conversation::message::Message;
 use crate::conversation::Conversation;
 use crate::model_config::resolve_provider_and_model_config;

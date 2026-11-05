@@ -3,8 +3,8 @@
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
 use arakan_agent::post_tool_call_hook::PostToolCallHook;
+use async_trait::async_trait;
 use rmcp::model::{CallToolResult, ContentBlock, ErrorCode, ErrorData, Tool};
 use tracing_futures::Instrument;
 
@@ -18,8 +18,8 @@ use crate::agents::state_machine::ops_toolcalling::{
 };
 use crate::agents::state_machine::post_tool_hook::run_post_tool_call_hook;
 use crate::agents::state_machine::{
-    applied, ends_turn, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect,
-    Emitter, ArakanEffect, Operation, OperationResult, SlashCommand,
+    applied, ends_turn, messages_since_kickoff, not_applicable, yielded_with, ArakanEffect,
+    ConversationEffect, Emitter, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
 use crate::config::extensions::is_extension_available;

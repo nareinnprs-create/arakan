@@ -11,11 +11,11 @@ use agent_client_protocol::schema::v1::{
 };
 use agent_client_protocol::schema::ProtocolVersion;
 use agent_client_protocol::{Agent, Client, ConnectionTo};
+use arakan::config::PermissionManager;
+use arakan_test_support::{ExpectedSessionId, IgnoreSessionId};
 use async_trait::async_trait;
 use futures::io::BufReader;
 use futures::{AsyncBufReadExt, AsyncWriteExt, StreamExt};
-use arakan::config::PermissionManager;
-use arakan_test_support::{ExpectedSessionId, IgnoreSessionId};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::Notify;

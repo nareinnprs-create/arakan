@@ -1,6 +1,6 @@
 use super::*;
-use crate::config::paths::Paths;
 use crate::arakan_apps::{fetch_mcp_apps, mark_deletable_apps, ArakanApp, McpAppCache};
+use crate::config::paths::Paths;
 
 const APPS_EXTENSION_NAME: &str = "apps";
 

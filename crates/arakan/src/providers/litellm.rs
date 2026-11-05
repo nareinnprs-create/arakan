@@ -1,10 +1,10 @@
 use anyhow::Result;
-use async_trait::async_trait;
-use futures::future::BoxFuture;
 use arakan_providers::cache_semantics::apply_chat_payload_breakpoints;
 use arakan_providers::conversation::token_usage::ProviderUsage;
 use arakan_providers::errors::ProviderError;
 use arakan_providers::images::ImageFormat;
+use async_trait::async_trait;
+use futures::future::BoxFuture;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
@@ -394,8 +394,8 @@ fn parse_custom_headers(headers_str: String) -> HashMap<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use futures::StreamExt;
     use arakan_providers::request_log::{install_logger, RequestLogHandle, RequestLogger};
+    use futures::StreamExt;
     use serde_json::json;
     use std::sync::{Mutex, Once};
     use wiremock::matchers::{method, path};

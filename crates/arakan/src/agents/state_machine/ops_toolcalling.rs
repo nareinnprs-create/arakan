@@ -4,10 +4,10 @@ use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
-use futures::{FutureExt, StreamExt};
 use arakan_agent::post_tool_call_hook::PostToolCallHook;
 use arakan_agent::tool_call_state::request_executable;
+use async_trait::async_trait;
+use futures::{FutureExt, StreamExt};
 use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, ErrorData, Role, Tool};
 
 use crate::agents::extension::ExtensionInfo;
@@ -18,8 +18,8 @@ use crate::agents::state_machine::ops_recipe::final_output_called_with_other_too
 use crate::agents::state_machine::ops_skills::LOAD_SKILL_TOOL_NAME;
 use crate::agents::state_machine::post_tool_hook::run_post_tool_call_hook;
 use crate::agents::state_machine::{
-    applied, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter,
-    ArakanEffect, Operation, OperationResult, SlashCommand,
+    applied, messages_since_kickoff, not_applicable, yielded_with, ArakanEffect,
+    ConversationEffect, Emitter, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::tool_execution::{
     tool_stream, ToolCallResult, ToolStreamItem, CHAT_MODE_TOOL_SKIPPED_RESPONSE,
@@ -327,9 +327,7 @@ impl ToolExecutionOperation {
                     cancellation_token,
                 )
                 .await;
-            let result = result.unwrap_or_else(|error| {
-                ToolCallResult::from(Err(error))
-            });
+            let result = result.unwrap_or_else(|error| ToolCallResult::from(Err(error)));
             let result = self
                 .extension_manager
                 .applying_mutation(result, &session.id);
@@ -982,7 +980,12 @@ impl Operation<Session, ArakanEffect> for ToolExecutionOperation {
         let (actions, response) = self.take_batch();
         let response = response.ok_or_else(|| anyhow!("tool batch produced no responses"))?;
         emit.emit(AgentEvent::Message(response.user_visible_content()));
-        applied(actions.into_iter().chain([response]).map(ArakanEffect::from))
+        applied(
+            actions
+                .into_iter()
+                .chain([response])
+                .map(ArakanEffect::from),
+        )
     }
 }
 

@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
-use chrono;
 use arakan::config::Config;
 use arakan::conversation::message::{Message, MessageContent, MessageMetadata};
 use arakan::session::{SessionManager, SessionType};
+use chrono;
 use rmcp::model::Role;
 
 use crate::session::{build_session, SessionBuilderConfig};
@@ -458,7 +458,8 @@ mod tests {
 
     #[test]
     fn render_term_init_script_skips_unsupported_default_handler() {
-        let script = render_term_init_script(Shell::Fish, "session-123", "/tmp/arakan", true, false);
+        let script =
+            render_term_init_script(Shell::Fish, "session-123", "/tmp/arakan", true, false);
 
         assert!(!script.contains("command_not_found"));
     }
@@ -494,7 +495,8 @@ mod tests {
 
     #[test]
     fn render_term_init_script_bash_includes_history_when_opted_in() {
-        let script = render_term_init_script(Shell::Bash, "session-123", "/tmp/arakan", false, true);
+        let script =
+            render_term_init_script(Shell::Bash, "session-123", "/tmp/arakan", false, true);
 
         assert!(script.contains("('/tmp/arakan' term log \"$1\" &) 2>/dev/null"));
         assert!(script.contains("trap 'arakan_preexec \"$BASH_COMMAND\"' DEBUG"));
@@ -502,7 +504,8 @@ mod tests {
 
     #[test]
     fn render_term_init_script_zsh_excludes_history_by_default() {
-        let script = render_term_init_script(Shell::Zsh, "session-123", "/tmp/arakan", false, false);
+        let script =
+            render_term_init_script(Shell::Zsh, "session-123", "/tmp/arakan", false, false);
 
         assert!(!script.contains("term log"));
         assert!(!script.contains("arakan_preexec"));

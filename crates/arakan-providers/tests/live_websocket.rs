@@ -1,7 +1,6 @@
 #![cfg(feature = "live-websocket")]
 
 use anyhow::Result;
-use futures::{SinkExt, StreamExt};
 use arakan_providers::{
     api_client::TlsConfig,
     live_transport_websocket::WebSocketLiveTransport,
@@ -9,6 +8,7 @@ use arakan_providers::{
         OpenAiLiveClient, OpenAiLiveSessionConfig, OpenAiLiveSessionId, OpenAiLiveWebSocketRequest,
     },
 };
+use futures::{SinkExt, StreamExt};
 use serde_json::{json, Value};
 use std::{sync::Arc, time::Duration};
 use tokio::net::TcpListener;

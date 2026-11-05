@@ -33,6 +33,7 @@ jobs:
               - '!documentation/**'
 
   arakan-acp-npm-packages:
+    if: false # arakan distro: desktop/npm lanes not shipped (Octopus Shield ships the CLI)
     name: arakan ACP npm packages
     runs-on: ubuntu-latest
     needs: changes
@@ -344,6 +345,7 @@ jobs:
           cargo clippy --workspace --all-targets -- -D warnings
 
   schema-check:
+    if: false # arakan distro: desktop/npm lanes not shipped (Octopus Shield ships the CLI)
     name: Check Generated Schemas are Up-to-Date
     runs-on: ubuntu-latest
     needs: changes
@@ -396,6 +398,7 @@ jobs:
         run: python3 documentation/automation/gdk-api/generate.py --check
 
   desktop-lint:
+    if: false # arakan distro: desktop lanes not shipped (Octopus Shield ships the CLI)
     name: Test and Lint Electron Desktop App
     runs-on: macos-latest
     needs: changes
@@ -421,6 +424,7 @@ jobs:
         working-directory: ui/desktop
 
   desktop-updater-install:
+    if: false # arakan distro: desktop lanes not shipped (Octopus Shield ships the CLI)
     name: Test Desktop Updater Install (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     needs: changes

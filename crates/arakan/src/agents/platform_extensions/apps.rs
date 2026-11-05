@@ -4,10 +4,10 @@ use crate::agents::reply_parts::{
     coerce_tool_arguments, prepare_tools_for_provider, toolshim_postprocess,
 };
 use crate::agents::tool_execution::ToolCallContext;
-use crate::config::paths::Paths;
-use crate::conversation::message::Message;
 use crate::arakan_apps::McpAppResource;
 use crate::arakan_apps::{ArakanApp, McpAppCache, WindowProps};
+use crate::config::paths::Paths;
+use crate::conversation::message::Message;
 use crate::prompt_template::render_template;
 use crate::providers::base::{Provider, ProviderUsage};
 use async_trait::async_trait;

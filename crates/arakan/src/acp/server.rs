@@ -15,14 +15,14 @@ use crate::agents::state_machine::{
     has_unapplied_tool_confirmation_response, pending_tool_confirmations, turn_failure,
 };
 use crate::agents::{
-    Attachment, ExtensionConfig, ExtensionLoadResult, ArakanPlatform, SessionConfig,
+    ArakanPlatform, Attachment, ExtensionConfig, ExtensionLoadResult, SessionConfig,
     StateMachineServices, StateMachineServicesConfig,
 };
 use crate::config::base::CONFIG_YAML_NAME;
 use crate::config::extensions::{configured_enabled_state, get_enabled_extensions_with_config};
 use crate::config::paths::Paths;
 use crate::config::permission::PermissionManager;
-use crate::config::{Config, ArakanMode};
+use crate::config::{ArakanMode, Config};
 use crate::conversation::message::{
     ActionRequiredData, Message, MessageContent, SystemNotificationContent, SystemNotificationType,
     ToolConfirmationRequest, ToolRequest, ToolResponse,
@@ -63,10 +63,10 @@ use agent_client_protocol::{
     Responder,
 };
 use anyhow::Result;
+use arakan_providers::errors::ProviderError;
 use fs_err as fs;
 use futures::future::{BoxFuture, FutureExt};
 use futures::stream::{self, BoxStream, StreamExt};
-use arakan_providers::errors::ProviderError;
 use rmcp::model::{
     Annotations as RmcpAnnotations, ImageContent as RmcpImageContent, Role,
     TextContent as RmcpTextContent,
@@ -1718,7 +1718,9 @@ impl AcpConnection {
             arakan_client_capabilities.as_ref(),
         ));
         let _ = self.client_supports_arakan_custom_notifications.set(
-            extract_client_supports_arakan_custom_notifications(arakan_client_capabilities.as_ref()),
+            extract_client_supports_arakan_custom_notifications(
+                arakan_client_capabilities.as_ref(),
+            ),
         );
         let _ = self.client_supports_recipe_param_requests.set(
             extract_client_supports_recipe_param_requests(arakan_client_capabilities.as_ref()),

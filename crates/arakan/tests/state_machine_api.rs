@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan::agents::state_machine::{
-    yielded_with, Emitter, ArakanEffect, Inference, InferenceInput, Operation, OperationResult,
+    yielded_with, ArakanEffect, Emitter, Inference, InferenceInput, Operation, OperationResult,
     RunStatus, StateMachine, Step,
 };
 use arakan::agents::AgentEvent;
@@ -15,6 +14,7 @@ use arakan::session::session_manager::token_state_from_session_and_totals;
 use arakan::session::{Session, SessionManager, SessionType};
 use arakan_providers::conversation::token_usage::Usage;
 use arakan_providers::model::ModelConfig;
+use async_trait::async_trait;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 

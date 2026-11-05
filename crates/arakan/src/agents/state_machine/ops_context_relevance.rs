@@ -9,7 +9,6 @@ use std::{
 };
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_providers::{
     decision::{
         DecisionAnswer, DecisionProvider, DecisionQuestion, DecisionRequest, DecisionResponse,
@@ -18,6 +17,7 @@ use arakan_providers::{
     errors::ProviderError,
     typesafe::TYPESAFE_DEFAULT_MODEL,
 };
+use async_trait::async_trait;
 use rmcp::model::{Annotations, ContentBlock, Role};
 use serde::Serialize;
 use serde_json::{json, Value};

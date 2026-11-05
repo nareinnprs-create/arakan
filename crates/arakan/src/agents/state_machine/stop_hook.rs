@@ -1,6 +1,6 @@
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::stop_hook::{StopHook, StopHookDecision};
+use async_trait::async_trait;
 use rmcp::model::Role;
 
 use crate::conversation::message::{Message, SystemNotificationType};

@@ -1,5 +1,4 @@
 use anyhow::Result;
-use futures::future::BoxFuture;
 use arakan_providers::api_client::TlsConfig;
 use arakan_providers::base::ProviderDescriptor;
 use arakan_providers::databricks::DatabricksProvider;
@@ -7,6 +6,7 @@ use arakan_providers::databricks_auth::{
     DatabricksAuth, DatabricksOauthTokenProvider, DatabricksRefreshHook,
     DatabricksSessionIdProvider, DatabricksTokenResolver,
 };
+use futures::future::BoxFuture;
 use std::sync::Arc;
 
 use crate::config::{Config, ConfigError, ExtensionConfig};

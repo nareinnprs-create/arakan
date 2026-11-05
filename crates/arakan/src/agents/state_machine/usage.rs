@@ -1,7 +1,7 @@
 use anyhow::Result;
 use arakan_providers::conversation::token_usage::{ProviderUsage, Usage as TokenUsage};
 
-use crate::agents::state_machine::{ConversationEffect, ArakanEffect};
+use crate::agents::state_machine::{ArakanEffect, ConversationEffect};
 use crate::conversation::message::MessageUsage;
 use crate::conversation::Conversation;
 use crate::providers::canonical_cost::resolve_usage_cost;

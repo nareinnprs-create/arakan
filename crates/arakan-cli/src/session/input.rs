@@ -4,7 +4,7 @@ use super::paste::{
 };
 use super::{CompletionCache, HintStatus};
 use anyhow::Result;
-use arakan::config::{Config, ArakanMode};
+use arakan::config::{ArakanMode, Config};
 use rustyline::Editor;
 use shlex;
 use std::collections::HashMap;

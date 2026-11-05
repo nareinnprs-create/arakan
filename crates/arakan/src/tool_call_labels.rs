@@ -231,8 +231,8 @@ mod tests {
     use crate::config::{ArakanMode, PermissionManager};
     use crate::providers::base::{MessageStream, ProviderUsage, Usage};
     use crate::session::{SessionManager, SessionType};
-    use async_trait::async_trait;
     use arakan_providers::errors::ProviderError;
+    use async_trait::async_trait;
     use rmcp::model::{CallToolRequestParams, ErrorData, Tool};
     use serde_json::json;
     use std::collections::VecDeque;

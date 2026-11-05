@@ -1,5 +1,5 @@
 use crate::agents::{ExtensionLoadResult, StateMachineServices};
-use crate::config::{Config, ArakanMode};
+use crate::config::{ArakanMode, Config};
 use crate::providers::inventory::{ProviderInventoryEntry, ProviderInventoryService};
 use crate::session::session_manager::SessionUsageTotals;
 use crate::session::Session;

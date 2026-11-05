@@ -38,7 +38,10 @@ pub trait EffectHandler<S, E>: MaybeSend + MaybeSync {
 }
 
 pub trait EffectUsage<E>: MaybeSend + MaybeSync {
-    fn usage(&self, _effect: &E) -> Option<arakan_provider_types::conversation::token_usage::Usage> {
+    fn usage(
+        &self,
+        _effect: &E,
+    ) -> Option<arakan_provider_types::conversation::token_usage::Usage> {
         None
     }
 }

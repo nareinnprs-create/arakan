@@ -1,8 +1,8 @@
 //! Reveals the empty-response fallback when nothing else took over the turn.
 
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
 use arakan_agent::inference::is_empty_response_marker;
+use async_trait::async_trait;
 
 use crate::agents::state_machine::effects::ArakanEffect;
 use crate::agents::state_machine::{

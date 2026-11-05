@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use arakan_provider_types::base::Provider;
 use arakan_provider_types::conversation::message::Message;
 use arakan_provider_types::conversation::token_usage::ProviderUsage;
 use arakan_provider_types::errors::ProviderError;
 use arakan_provider_types::model::ModelConfig;
+use async_trait::async_trait;
 
 /// The single completion call compaction needs. Implementations decide model
 /// selection, fallbacks and session plumbing.

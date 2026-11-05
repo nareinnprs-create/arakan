@@ -1,12 +1,12 @@
 use anyhow::{Context, Result};
 
-use cliclack::{confirm, multiselect, select};
-use etcetera::home_dir;
 use arakan::session::{
     export_session_to_html, export_session_to_markdown, generate_diagnostics, DiagnosticsLevel,
     Session, SessionManager, SessionType,
 };
 use arakan::utils::safe_truncate;
+use cliclack::{confirm, multiselect, select};
+use etcetera::home_dir;
 use regex::Regex;
 use std::fs;
 use std::io::{self, Write};

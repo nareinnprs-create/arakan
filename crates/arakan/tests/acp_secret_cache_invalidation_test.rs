@@ -3,8 +3,6 @@
 #[path = "acp_common_tests/mod.rs"]
 mod common_tests;
 
-use common_tests::fixtures::server::AcpServerConnection;
-use common_tests::fixtures::{run_test, send_custom, Connection, TestConnectionConfig};
 use arakan::config::paths::Paths;
 use arakan::config::{Config, ConfigError};
 use arakan::providers::base::{MessageStream, Provider};
@@ -13,6 +11,8 @@ use arakan::session::session_manager::SessionStorage;
 use arakan_providers::errors::ProviderError;
 use arakan_providers::model::ModelConfig;
 use arakan_test_support::EnforceSessionId;
+use common_tests::fixtures::server::AcpServerConnection;
+use common_tests::fixtures::{run_test, send_custom, Connection, TestConnectionConfig};
 use serial_test::serial;
 use std::sync::Arc;
 

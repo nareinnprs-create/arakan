@@ -7,7 +7,6 @@ use std::{
 };
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::{
     machine::{MachineSession, StateMachine, Step},
     operation::{
@@ -22,6 +21,7 @@ use arakan_provider_types::conversation::{
     message::{Message, MessageContent, ToolRequest, ToolResponse},
     Conversation,
 };
+use async_trait::async_trait;
 use rmcp::{
     handler::server::router::tool::{AsyncTool, SyncTool, ToolBase},
     model::{CallToolRequestParams, CallToolResult, ErrorData, Tool},
@@ -162,8 +162,9 @@ async fn dispatches_calls_to_user_defined_tools() {
                 )
                 .with_tool_request(
                     "call-2",
-                    Ok(CallToolRequestParams::new("greet")
-                        .with_arguments(serde_json::from_value(json!({"name": "Arakan"})).unwrap())),
+                    Ok(CallToolRequestParams::new("greet").with_arguments(
+                        serde_json::from_value(json!({"name": "Arakan"})).unwrap(),
+                    )),
                 ),
         ),
     ]);

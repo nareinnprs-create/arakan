@@ -1,7 +1,7 @@
 use anyhow::Result;
-use console::{measure_text_width, Term};
 use arakan::skills::list_installed_skills;
 use arakan::token_counter::create_token_counter;
+use console::{measure_text_width, Term};
 use unicode_segmentation::UnicodeSegmentation;
 
 const DESCRIPTION_PREVIEW_CHARS: usize = 50;

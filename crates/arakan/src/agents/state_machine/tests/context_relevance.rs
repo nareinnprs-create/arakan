@@ -2,11 +2,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_providers::decision::{
     DecisionAnswer, DecisionProvider, DecisionRequest, DecisionResponse, DecisionUsage,
 };
 use arakan_providers::errors::ProviderError;
+use async_trait::async_trait;
 use rmcp::model::{
     Annotations, CallToolRequestParams, CallToolResult, ContentBlock, ErrorData, Role, TextContent,
 };
@@ -21,7 +21,7 @@ use super::pipeline::{
 use crate::agents::state_machine::ops_context_relevance::{
     truncated_json, with_turn, ContextRelevanceOperation, NAME, VERSION,
 };
-use crate::agents::state_machine::{Emitter, ArakanEffect, Operation, OperationResult};
+use crate::agents::state_machine::{ArakanEffect, Emitter, Operation, OperationResult};
 use crate::agents::state_machine_builder::context_relevance_provider;
 use crate::config::Config;
 use crate::conversation::message::{Message, MessageContent};

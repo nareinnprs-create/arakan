@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
 use arakan_providers::base::Provider;
 use arakan_providers::model::ModelConfig;
+use async_trait::async_trait;
 
 use crate::agents::state_machine::{
-    messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter, ArakanEffect,
-    Operation, OperationResult, SlashCommand,
+    messages_since_kickoff, not_applicable, yielded_with, ArakanEffect, ConversationEffect,
+    Emitter, Operation, OperationResult, SlashCommand,
 };
 use crate::conversation::message::Message;
 use crate::conversation::Conversation;

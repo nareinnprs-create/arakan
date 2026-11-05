@@ -2,8 +2,8 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::post_tool_call_hook::PostToolCallHook;
+use async_trait::async_trait;
 use rmcp::model::{CallToolResult, ErrorData};
 
 use crate::agents::extension_manager::ExtensionLease;

@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::tool_approval::{ApprovalDecision, ToolApproval};
+use async_trait::async_trait;
 
 use crate::agents::state_machine::ops_toolcalling::call_will_not_run;
 use crate::agents::tool_execution::DECLINED_RESPONSE;

@@ -10,7 +10,6 @@ use std::{
 };
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::{
     inference::{InferenceEffect, InferenceRunner},
     machine::{EffectHandler, MachineSession, SessionLoader, StateMachine, Step},
@@ -29,6 +28,7 @@ use arakan_provider_types::{
     model::ModelConfig,
     retry::{ProviderRetry, RetryConfig},
 };
+use async_trait::async_trait;
 use rmcp::{
     handler::server::router::tool::{AsyncTool, SyncTool, ToolBase},
     model::{CallToolRequestParams, ErrorData, Tool},

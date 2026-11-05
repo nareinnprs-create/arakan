@@ -6,12 +6,12 @@ use crate::providers::openai_compatible::{
 };
 use crate::providers::private_file::write_private_file;
 use anyhow::Result;
-use async_trait::async_trait;
-use axum::http;
-use chrono::{DateTime, Utc};
 use arakan_providers::errors::ProviderError;
 use arakan_providers::formats::openai::is_openai_responses_model;
 use arakan_providers::images::ImageFormat;
+use async_trait::async_trait;
+use axum::http;
+use chrono::{DateTime, Utc};
 use reqwest::{Client, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -40,10 +40,10 @@ use crate::config::{Config, ConfigError};
 use crate::conversation::message::{Message, MessageContent};
 
 use crate::providers::base::{ConfigKey, MessageStream};
-use futures::future::BoxFuture;
 use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
 use arakan_providers::model::ModelConfig;
 use arakan_providers::request_log::{start_log, LoggerHandleExt};
+use futures::future::BoxFuture;
 use rmcp::model::{ContentBlock, Tool};
 
 const GITHUB_COPILOT_PROVIDER_NAME: &str = "github_copilot";

@@ -8,7 +8,7 @@ use tracing_futures::Instrument;
 
 use crate::agents::state_machine::ops_llm::chat_span;
 use crate::agents::state_machine::{
-    applied, messages_since_kickoff, not_applicable, ConversationEffect, Emitter, ArakanEffect,
+    applied, messages_since_kickoff, not_applicable, ArakanEffect, ConversationEffect, Emitter,
     Operation, OperationResult,
 };
 use crate::context_mgmt::{summarize_tool_call, tool_ids_to_summarize};

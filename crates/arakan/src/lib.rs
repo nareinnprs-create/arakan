@@ -15,12 +15,12 @@ pub mod context_mgmt;
 pub mod conversation {
     pub use arakan_providers::conversation::*;
 }
+pub mod arakan_apps;
 pub mod dictation;
 pub mod doctor;
 pub mod download_manager;
 pub mod elicitation;
 pub mod gateway;
-pub mod arakan_apps;
 pub mod hints;
 pub mod hooks;
 pub mod instance_id;

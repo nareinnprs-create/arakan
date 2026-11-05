@@ -1,9 +1,9 @@
 use anyhow::{anyhow, Result};
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::thinking::ThinkingEffort;
 use async_trait::async_trait;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use futures::future::BoxFuture;
-use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
-use arakan_providers::thinking::ThinkingEffort;
 use serde_json::json;
 use std::collections::HashMap;
 use std::io::Write;
@@ -17,7 +17,7 @@ use super::base::{ConfigKey, MessageStream, Provider, ProviderDef, ProviderMetad
 use super::utils::filter_extensions_from_system_prompt;
 use crate::config::paths::Paths;
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, ExtensionConfig, ArakanMode};
+use crate::config::{ArakanMode, Config, ExtensionConfig};
 use crate::conversation::message::{Message, MessageContent};
 use crate::subprocess::configure_subprocess;
 use arakan_providers::errors::ProviderError;

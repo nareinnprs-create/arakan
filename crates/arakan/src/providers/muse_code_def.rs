@@ -1,7 +1,4 @@
 use anyhow::Result;
-use async_trait::async_trait;
-use chrono::{DateTime, Duration, Utc};
-use futures::future::BoxFuture;
 use arakan_providers::anthropic::{
     AnthropicFormatOptions, AnthropicProvider, AnthropicProviderBuilder, ANTHROPIC_API_VERSION,
 };
@@ -12,6 +9,9 @@ use arakan_providers::base::{
 };
 use arakan_providers::errors::ProviderError;
 use arakan_providers::model::ModelConfig;
+use async_trait::async_trait;
+use chrono::{DateTime, Duration, Utc};
+use futures::future::BoxFuture;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT};
 use reqwest::Client;
 use rmcp::model::Tool;
@@ -162,7 +162,8 @@ fn muse_cli_auth_path() -> PathBuf {
 fn muse_cli_keychain_token() -> Option<MuseToken> {
     #[cfg(feature = "system-keyring")]
     {
-        if std::env::var("MUSE_AUTH_PATH").is_ok() || std::env::var("ARAKAN_DISABLE_KEYRING").is_ok()
+        if std::env::var("MUSE_AUTH_PATH").is_ok()
+            || std::env::var("ARAKAN_DISABLE_KEYRING").is_ok()
         {
             return None;
         }

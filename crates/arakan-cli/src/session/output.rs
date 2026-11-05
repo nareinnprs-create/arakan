@@ -1,7 +1,5 @@
 use crate::session::builder::ExtensionFailure;
 use anstream::{adapter::strip_str, eprintln, println};
-use bat::WrappingMode;
-use console::{measure_text_width, style, Color, StyledObject, Term};
 use arakan::agents::platform_extensions::todo::TODO_WRITE_TOOL_NAME_COMPLETE;
 use arakan::config::Config;
 use arakan::conversation::message::{
@@ -13,6 +11,8 @@ use arakan::providers::canonical_cost::estimate_model_cost;
 use arakan::subprocess::SubprocessExt;
 use arakan::utils::safe_truncate;
 use arakan_providers::conversation::token_usage::Usage;
+use bat::WrappingMode;
+use console::{measure_text_width, style, Color, StyledObject, Term};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use rmcp::model::{CallToolRequestParams, JsonObject, PromptArgument, Role};
 use serde_json::Value;

@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
 use arakan::config::ArakanMode;
 use arakan::conversation::message::{Message, ToolRequest};
 use arakan::tool_inspection::{
     InspectionAction, InspectionResult, ToolInspectionManager, ToolInspector,
 };
+use async_trait::async_trait;
 
 struct MockInspectorOk {
     name: &'static str,

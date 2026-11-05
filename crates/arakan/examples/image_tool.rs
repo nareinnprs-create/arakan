@@ -1,11 +1,11 @@
 use anyhow::Result;
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
-use dotenvy::dotenv;
 use arakan::conversation::message::Message;
 use arakan::providers::anthropic::ANTHROPIC_DEFAULT_MODEL;
 use arakan::providers::create;
 use arakan::providers::openai::OPEN_AI_DEFAULT_MODEL;
 use arakan_providers::databricks::DATABRICKS_DEFAULT_MODEL;
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+use dotenvy::dotenv;
 use rmcp::model::{CallToolRequestParams, ContentBlock, Tool};
 use rmcp::object;
 use std::fs;

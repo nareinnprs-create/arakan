@@ -65,7 +65,8 @@ impl AcpConnection {
             .await
             .internal_err_ctx("Failed to get provider while forking ACP session")?;
         resume_saved_provider_session(&provider, arakan_session.conversation.as_ref()).await;
-        let effort_support = agent_thinking_effort_support(&self.services, &arakan_session.id).await;
+        let effort_support =
+            agent_thinking_effort_support(&self.services, &arakan_session.id).await;
 
         let acp_session_id = SessionId::new(new_session_id.clone());
         let mut meta = session_meta(&arakan_session);

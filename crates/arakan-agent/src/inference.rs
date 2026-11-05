@@ -4,8 +4,6 @@ use std::collections::HashSet;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use anyhow::Result;
-use async_trait::async_trait;
-use futures::StreamExt;
 use arakan_provider_types::base::Provider;
 use arakan_provider_types::conversation::message::{InferenceMetadata, Message, MessageContent};
 use arakan_provider_types::conversation::token_usage::ProviderUsage;
@@ -15,6 +13,8 @@ use arakan_provider_types::conversation::{
 };
 use arakan_provider_types::errors::ProviderError;
 use arakan_provider_types::model::ModelConfig;
+use async_trait::async_trait;
+use futures::StreamExt;
 use tracing_futures::Instrument;
 
 use crate::machine::MachineSession;

@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use futures::StreamExt;
-use arakan::agents::{AgentEvent, ArakanPlatform, StateMachineServices, StateMachineServicesConfig};
+use arakan::agents::{
+    AgentEvent, ArakanPlatform, StateMachineServices, StateMachineServicesConfig,
+};
 use arakan::config::extensions::{set_extension, ExtensionEntry};
+use futures::StreamExt;
 
 #[cfg(test)]
 mod tests {
@@ -12,14 +14,14 @@ mod tests {
     #[cfg(all(test, feature = "scheduler"))]
     mod schedule_tool_tests {
         use super::*;
-        use async_trait::async_trait;
-        use chrono::{DateTime, Utc};
         use arakan::agents::platform_extensions::scheduler::{
             EXTENSION_NAME as SCHEDULER_EXTENSION_NAME, MANAGE_SCHEDULE_TOOL_NAME_COMPLETE,
         };
         use arakan::agents::ExtensionConfig;
         use arakan::agents::{ScheduleTool, StateMachineServicesConfig};
         use arakan::config::permission::PermissionManager;
+        use async_trait::async_trait;
+        use chrono::{DateTime, Utc};
 
         use arakan::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
         use arakan::scheduler_trait::SchedulerTrait;
@@ -460,7 +462,6 @@ mod tests {
     #[cfg(test)]
     mod max_turns_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::SessionConfig;
         use arakan::config::ArakanMode;
         use arakan::conversation::message::{Message, MessageContent};
@@ -471,6 +472,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::{CallToolRequestParams, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -621,7 +623,6 @@ mod tests {
     #[cfg(test)]
     mod tool_pair_summarization_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::{SessionConfig, StateMachineServicesConfig};
         use arakan::config::permission::PermissionManager;
         use arakan::config::ArakanMode;
@@ -633,6 +634,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, Tool};
         use std::path::PathBuf;
         use std::sync::atomic::{AtomicUsize, Ordering};
@@ -976,7 +978,6 @@ mod tests {
     #[cfg(test)]
     mod streaming_persistence_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::{SessionConfig, StateMachineServicesConfig};
         use arakan::config::permission::PermissionManager;
         use arakan::config::ArakanMode;
@@ -987,6 +988,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::{CallToolRequestParams, Role, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -1250,7 +1252,6 @@ mod tests {
     #[cfg(test)]
     mod thinking_preservation_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::{SessionConfig, StateMachineServicesConfig};
         use arakan::config::permission::PermissionManager;
         use arakan::config::ArakanMode;
@@ -1261,6 +1262,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::{CallToolRequestParams, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -1616,7 +1618,6 @@ mod tests {
     #[cfg(test)]
     mod goal_checking_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::SessionConfig;
         use arakan::agents::StateMachineServicesConfig;
         use arakan::config::permission::PermissionManager;
@@ -1630,6 +1631,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::Tool;
         use std::path::PathBuf;
         use std::sync::atomic::{AtomicU32, Ordering};
@@ -2011,7 +2013,6 @@ mod tests {
 
     mod cumulative_token_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::{SessionConfig, StateMachineServicesConfig};
         use arakan::config::permission::PermissionManager;
         use arakan::config::ArakanMode;
@@ -2022,6 +2023,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::Tool;
         use std::path::PathBuf;
         use std::sync::Arc;
@@ -2128,9 +2130,8 @@ mod tests {
 
     mod audience_tool_result_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::{SessionConfig, StateMachineServicesConfig};
-        use arakan::config::{ExtensionConfig, ArakanMode, PermissionManager};
+        use arakan::config::{ArakanMode, ExtensionConfig, PermissionManager};
         use arakan::conversation::message::{Message, MessageContent};
         use arakan::providers::base::{stream_from_single_message, MessageStream, Provider};
         use arakan::session::{SessionManager, SessionType};
@@ -2138,6 +2139,7 @@ mod tests {
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
         use arakan_test_support::McpFixture;
+        use async_trait::async_trait;
         use rmcp::model::{CallToolRequestParams, Tool};
         use std::path::PathBuf;
         use std::sync::atomic::{AtomicUsize, Ordering};
@@ -2286,9 +2288,10 @@ mod tests {
 
     mod empty_turn_tests {
         use super::*;
-        use async_trait::async_trait;
         use arakan::agents::final_output_tool::FINAL_OUTPUT_TOOL_NAME;
-        use arakan::agents::{AgentEvent, ArakanPlatform, SessionConfig, StateMachineServicesConfig};
+        use arakan::agents::{
+            AgentEvent, ArakanPlatform, SessionConfig, StateMachineServicesConfig,
+        };
         use arakan::config::permission::PermissionManager;
         use arakan::config::ArakanMode;
         use arakan::conversation::message::{Message, MessageContent};
@@ -2300,6 +2303,7 @@ mod tests {
         use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
         use arakan_providers::errors::ProviderError;
         use arakan_providers::model::ModelConfig;
+        use async_trait::async_trait;
         use rmcp::model::{CallToolRequestParams, Tool};
         use rmcp::object;
         use std::path::PathBuf;

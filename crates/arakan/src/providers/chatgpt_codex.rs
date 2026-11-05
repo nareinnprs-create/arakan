@@ -9,6 +9,12 @@ use crate::providers::openai_compatible::handle_status;
 use crate::providers::private_file::write_private_file;
 use crate::providers::retry::ProviderRetry;
 use anyhow::{anyhow, Result};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::formats::openai_responses::{
+    is_encrypted_reasoning_error, reasoning_input_item, responses_api_to_streaming_message,
+    strip_reasoning_items,
+};
+use arakan_providers::model::ModelConfig;
 use async_stream::try_stream;
 use async_trait::async_trait;
 use axum::{extract::Query, response::Html, routing::get, Router};
@@ -16,12 +22,6 @@ use base64::Engine;
 use chrono::{DateTime, Utc};
 use futures::future::BoxFuture;
 use futures::{StreamExt, TryStreamExt};
-use arakan_providers::errors::ProviderError;
-use arakan_providers::formats::openai_responses::{
-    is_encrypted_reasoning_error, reasoning_input_item, responses_api_to_streaming_message,
-    strip_reasoning_items,
-};
-use arakan_providers::model::ModelConfig;
 use rmcp::model::{ContentBlock, Role, Tool};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};

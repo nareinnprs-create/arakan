@@ -2,8 +2,6 @@
 
 use std::sync::Arc;
 
-use async_trait::async_trait;
-use futures::StreamExt;
 use arakan_agent::inference::InferenceEffect;
 pub use arakan_agent::inference::InferenceRunner;
 use arakan_providers::base::{MessageStream, ModelInfo, Provider};
@@ -11,6 +9,8 @@ use arakan_providers::conversation::message::Message;
 use arakan_providers::conversation::token_usage::ProviderUsage;
 use arakan_providers::errors::ProviderError;
 use arakan_providers::model::ModelConfig;
+use async_trait::async_trait;
+use futures::StreamExt;
 
 use crate::agents::extension_manager::{get_tool_owner, recover_mangled_tool_name};
 use crate::agents::state_machine::ArakanEffect;

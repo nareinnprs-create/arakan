@@ -1,6 +1,4 @@
 use anyhow::Result;
-use async_trait::async_trait;
-use futures::StreamExt;
 use arakan::agents::{AgentEvent, SessionConfig, StateMachineServices, StateMachineServicesConfig};
 use arakan::config::ArakanMode;
 use arakan::conversation::message::{Message, MessageContent};
@@ -13,6 +11,8 @@ use arakan::session::Session;
 use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
 use arakan_providers::errors::ProviderError;
 use arakan_providers::model::ModelConfig;
+use async_trait::async_trait;
+use futures::StreamExt;
 use rmcp::model::Tool;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;

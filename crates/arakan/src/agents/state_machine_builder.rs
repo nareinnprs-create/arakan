@@ -12,14 +12,14 @@ use tokio_util::sync::CancellationToken;
 use crate::agents::extension_manager::{ExtensionLease, ExtensionManager};
 use crate::agents::state_machine::UnavailableDecisions;
 use crate::agents::state_machine::{
-    deny_limit_warning, BangShellOperation, CompactionOperation, ContextRelevanceOperation,
-    DoctorOperation, EmptyResponseOperation, ExitOnErrorOperation, ArakanEffect,
-    ArakanInferenceProvider, ArakanInferenceRequestPreparer, ArakanPostToolHook, ArakanPreToolHook,
-    ArakanStopHook, ArakanToolApproval, InferenceRunner, MaxTurnsOperation, Operation,
-    PreToolCallHookOperation, ProjectOperation, RecipeOperation, RemainingToolCallsOperation,
-    RetryOperation, SkillOperation, SlashCommandOperation, StateMachine, StatusOperation,
-    SteerOperation, SteerQueue, Step, StopHookOperation, SubagentOperation, ToolApprovalOperation,
-    ToolExecutionOperation, ToolPairCompactionOperation, UnhandledToolCallsOperation,
+    deny_limit_warning, ArakanEffect, ArakanInferenceProvider, ArakanInferenceRequestPreparer,
+    ArakanPostToolHook, ArakanPreToolHook, ArakanStopHook, ArakanToolApproval, BangShellOperation,
+    CompactionOperation, ContextRelevanceOperation, DoctorOperation, EmptyResponseOperation,
+    ExitOnErrorOperation, InferenceRunner, MaxTurnsOperation, Operation, PreToolCallHookOperation,
+    ProjectOperation, RecipeOperation, RemainingToolCallsOperation, RetryOperation, SkillOperation,
+    SlashCommandOperation, StateMachine, StatusOperation, SteerOperation, SteerQueue, Step,
+    StopHookOperation, SubagentOperation, ToolApprovalOperation, ToolExecutionOperation,
+    ToolPairCompactionOperation, UnhandledToolCallsOperation,
 };
 use crate::agents::subagent_handler::ForegroundSubagentRunner;
 use crate::agents::tool_execution::DECLINED_RESPONSE;
@@ -116,10 +116,9 @@ pub(crate) fn build_state_machine(
     } = config;
     let manages_own_context = provider.manages_own_context();
 
-    let post_tool_call_hook: Arc<dyn PostToolCallHook<Session>> = Arc::new(ArakanPostToolHook::new(
-        hook_manager.clone(),
-        Arc::clone(&extension_lease),
-    ));
+    let post_tool_call_hook: Arc<dyn PostToolCallHook<Session>> = Arc::new(
+        ArakanPostToolHook::new(hook_manager.clone(), Arc::clone(&extension_lease)),
+    );
     let mut operations: Vec<Arc<dyn Operation<Session, ArakanEffect> + '_>> = vec![
         Arc::new(
             ToolApprovalOperation::new(Arc::new(ArakanToolApproval::new(tool_inspection_manager)))

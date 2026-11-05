@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
-use console::style;
 use arakan::recipe::template_recipe::parse_recipe_content;
 use arakan::recipe::RECIPE_FILE_EXTENSIONS;
+use console::style;
 use serde::{Deserialize, Serialize};
 
 use arakan::recipe::read_recipe_file_content::RecipeFile;

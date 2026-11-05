@@ -1,7 +1,6 @@
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::{
     events::AgentEvent,
     operation::{ConversationEffect, Emitter, Operation, OperationResult, RunStatus},
@@ -18,6 +17,7 @@ use arakan_provider_types::conversation::{
     Conversation,
 };
 use arakan_provider_types::permission::Permission;
+use async_trait::async_trait;
 use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, ErrorData};
 use serde_json::json;
 use tokio::sync::mpsc;

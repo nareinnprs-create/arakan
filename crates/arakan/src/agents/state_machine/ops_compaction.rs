@@ -9,8 +9,8 @@ use tracing_futures::Instrument;
 use crate::agents::state_machine::ops_llm::{chat_span, record_chat_usage};
 use crate::agents::state_machine::proactive_compaction::proactive_compaction_tokens;
 use crate::agents::state_machine::{
-    applied, messages_since_kickoff, not_applicable, trailing_error, yielded_with,
-    ConversationEffect, Emitter, ArakanEffect, Operation, OperationResult, SlashCommand,
+    applied, messages_since_kickoff, not_applicable, trailing_error, yielded_with, ArakanEffect,
+    ConversationEffect, Emitter, Operation, OperationResult, SlashCommand,
 };
 use crate::context_mgmt::compact_messages;
 use crate::conversation::message::{Message, MessageErrorKind, SystemNotificationType};

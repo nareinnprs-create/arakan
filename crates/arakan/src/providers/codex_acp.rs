@@ -7,7 +7,7 @@ use crate::acp::{
     extension_configs_to_mcp_servers, AcpProvider, AcpProviderConfig, ACP_CURRENT_MODEL,
 };
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, ArakanMode};
+use crate::config::{ArakanMode, Config};
 use crate::providers::base::{
     current_working_dir, ProviderDef, ProviderDescriptor, ProviderMetadata,
 };
@@ -210,7 +210,9 @@ mod tests {
             let mut command = Command::new(std::env::current_exe().unwrap());
             command
                 .arg("--exact")
-                .arg("providers::codex_acp::tests::arakan_mode_validation_precedes_codex_acp_launch")
+                .arg(
+                    "providers::codex_acp::tests::arakan_mode_validation_precedes_codex_acp_launch",
+                )
                 .arg("--nocapture")
                 .env(CHILD_ENV, "1")
                 .env("ARAKAN_SEARCH_PATHS", &search_paths)

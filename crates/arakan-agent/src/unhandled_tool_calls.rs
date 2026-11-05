@@ -1,8 +1,8 @@
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_provider_types::conversation::message::{Message, ToolRequest};
 use arakan_provider_types::conversation::Conversation;
 use arakan_provider_types::maybe_send::{MaybeSend, MaybeSync};
+use async_trait::async_trait;
 
 use crate::operation::{
     applied, messages_since_kickoff, not_applicable, yielded, ConversationEffect, Emitter,

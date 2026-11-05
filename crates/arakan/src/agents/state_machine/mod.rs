@@ -41,7 +41,6 @@ mod usage;
 #[cfg(test)]
 mod tests;
 
-pub use effects::ArakanEffect;
 pub use arakan_agent::machine::{
     EffectHandler, EffectUsage, MachineSession, SessionLoader, StateMachine, Step,
 };
@@ -56,6 +55,7 @@ pub(super) use arakan_agent::stop_hook::StopHookOperation;
 pub(super) use arakan_agent::subagent::SubagentOperation;
 pub(super) use arakan_agent::tool_approval::ToolApprovalOperation;
 pub(super) use arakan_agent::unhandled_tool_calls::UnhandledToolCallsOperation;
+pub use effects::ArakanEffect;
 pub(crate) use tool_confirmation::{
     has_unapplied_tool_confirmation_response, pending_tool_confirmations,
     persist_tool_confirmation_decision,

@@ -18,7 +18,6 @@
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use clap::Subcommand;
 use arakan::acp::server::AcpBuiltinSelection;
 use arakan::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
 use arakan::agents::ArakanPlatform;
@@ -28,6 +27,7 @@ use arakan_roaming::{
     default_key_path, parse_endpoint_id, ConnectionCard, Directory, EndpointId, RelayEntry,
     RelaySettings, RoamingConfig, RoamingIdentity, RoamingNode, TrustBook,
 };
+use clap::Subcommand;
 
 use crate::commands::roam_full_bridge::FullAcpBridge;
 

@@ -16,9 +16,9 @@
 //!
 //! Output: target/man/arakan.1, target/man/arakan-session.1, etc.
 
+use arakan_cli::Cli;
 use clap::CommandFactory;
 use clap_mangen::Man;
-use arakan_cli::Cli;
 use std::env;
 use std::fs;
 use std::io::Result;

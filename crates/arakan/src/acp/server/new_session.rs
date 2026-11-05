@@ -1,7 +1,7 @@
 use crate::acp::custom_requests::ArakanExtension;
 use crate::acp::server::{meta_string, validate_absolute_cwd, ResultExt};
 use crate::agents::ExtensionLoadResult;
-use crate::config::{Config, ArakanMode};
+use crate::config::{ArakanMode, Config};
 use crate::model_config::resolve_provider_and_model_config;
 use crate::providers::get_from_registry;
 use crate::recipe::Recipe;

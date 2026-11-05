@@ -1,7 +1,6 @@
 use std::env;
 
 use anyhow::Result;
-use futures::StreamExt;
 use arakan_providers::{
     api_client::{ApiClient, AuthMethod},
     base::Provider,
@@ -9,6 +8,7 @@ use arakan_providers::{
     model::ModelConfig,
     openai::OpenAiProvider,
 };
+use futures::StreamExt;
 
 async fn stream(provider: impl Provider, model: ModelConfig) -> Result<()> {
     let system = "You are a knowledgable geography expert";

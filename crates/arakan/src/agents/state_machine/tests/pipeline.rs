@@ -13,7 +13,7 @@ use crate::agents::extension::ExtensionConfig;
 use crate::agents::extension_manager::ExtensionLease;
 use crate::agents::mcp_client::McpClientTrait;
 use crate::agents::state_machine::{
-    messages_since_kickoff, Emitter, ArakanEffect, Operation, RunStatus, StateMachine,
+    messages_since_kickoff, ArakanEffect, Emitter, Operation, RunStatus, StateMachine,
 };
 use crate::agents::{AgentEvent, StateMachineServices, StateMachineServicesConfig, TurnSettings};
 use crate::config::permission::{PermissionLevel, PermissionManager};
@@ -48,7 +48,10 @@ impl Provider for RecordingProvider {
         self.inner.provider_session_id()
     }
 
-    async fn resume(&self, session_id: &str) -> Result<(), arakan_providers::errors::ProviderError> {
+    async fn resume(
+        &self,
+        session_id: &str,
+    ) -> Result<(), arakan_providers::errors::ProviderError> {
         self.inner.resume(session_id).await
     }
 
@@ -58,7 +61,8 @@ impl Provider for RecordingProvider {
         system: &str,
         messages: &[Message],
         tools: &[rmcp::model::Tool],
-    ) -> Result<crate::providers::base::MessageStream, arakan_providers::errors::ProviderError> {
+    ) -> Result<crate::providers::base::MessageStream, arakan_providers::errors::ProviderError>
+    {
         self.model_configs
             .lock()
             .unwrap()
@@ -96,7 +100,8 @@ impl Provider for FeatureProvider {
         system: &str,
         messages: &[Message],
         tools: &[rmcp::model::Tool],
-    ) -> Result<crate::providers::base::MessageStream, arakan_providers::errors::ProviderError> {
+    ) -> Result<crate::providers::base::MessageStream, arakan_providers::errors::ProviderError>
+    {
         self.inner
             .stream(model_config, system, messages, tools)
             .await

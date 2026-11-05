@@ -9,6 +9,15 @@ use agent_client_protocol::schema::v1::{
     StopReason, TextContent,
 };
 use agent_client_protocol::ErrorCode;
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageMetadata};
+use arakan::custom_requests::{
+    GetSessionInfoRequest, GetSessionInfoResponse, UpdateSessionProjectRequest,
+};
+use arakan::recipe::{Recipe, Settings};
+use arakan::recipe_deeplink;
+use arakan::session::{SessionManager, SessionType};
+use arakan_test_support::{McpFixture, FAKE_CODE};
 use common_tests::fixtures::server::{
     assert_session_response_precedes_available_commands, AcpServerConnection,
 };
@@ -29,15 +38,6 @@ use common_tests::{
     run_prompt_model_mismatch, run_prompt_skill, run_session_name_update_notification, run_shell,
     run_write_file, GENERATED_SESSION_TITLE, OPENAI_SESSION_NAME_RESPONSE, TURN_CONTEXT_OPEN,
 };
-use arakan::config::ArakanMode;
-use arakan::conversation::message::{Message, MessageMetadata};
-use arakan::custom_requests::{
-    GetSessionInfoRequest, GetSessionInfoResponse, UpdateSessionProjectRequest,
-};
-use arakan::recipe::{Recipe, Settings};
-use arakan::recipe_deeplink;
-use arakan::session::{SessionManager, SessionType};
-use arakan_test_support::{McpFixture, FAKE_CODE};
 use std::path::Path;
 
 tests_config_option_set_error!(AcpServerConnection);

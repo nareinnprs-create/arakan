@@ -22,7 +22,7 @@ use super::extension::{
 use super::tool_execution::ToolCallResult;
 use crate::action_required_manager::ActionRequiredManager;
 use crate::agents::mcp_client::{
-    ConnectContext, ArakanMcpClientCapabilities, ArakanMcpHostInfo, McpClientTrait,
+    ArakanMcpClientCapabilities, ArakanMcpHostInfo, ConnectContext, McpClientTrait,
 };
 use crate::agents::provider_manager::{provider_name_for, ProviderManager};
 use crate::agents::services::ArakanPlatform;
@@ -1185,8 +1185,8 @@ mod tests {
     use rmcp::model::ServerNotification;
 
     use super::super::tool_execution::{ToolCallContext, ToolCallNotificationEmitter};
-    use futures::StreamExt;
     use arakan_test_support::mcp::{McpFixtureServer, FAKE_CODE};
+    use futures::StreamExt;
     use rmcp::model::{CallToolRequestParams, GetPromptResult, Resource};
     use rmcp::ServiceExt;
     use std::sync::atomic::AtomicUsize;

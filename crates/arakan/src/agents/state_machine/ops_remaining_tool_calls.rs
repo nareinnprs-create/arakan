@@ -3,8 +3,8 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::post_tool_call_hook::PostToolCallHook;
+use async_trait::async_trait;
 use rmcp::model::{CallToolResult, ContentBlock, ErrorCode, ErrorData};
 use tracing_futures::Instrument;
 

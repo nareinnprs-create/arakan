@@ -10,9 +10,9 @@ use crate::{
     session::{Session, SessionManager, SessionType},
 };
 use anyhow::{anyhow, Result};
+use arakan_agent::subagent::{SubagentOutcome, SubagentUpdate};
 use futures::stream::BoxStream;
 use futures::StreamExt;
-use arakan_agent::subagent::{SubagentOutcome, SubagentUpdate};
 use rmcp::model::Role;
 use serde::Serialize;
 use std::future::Future;

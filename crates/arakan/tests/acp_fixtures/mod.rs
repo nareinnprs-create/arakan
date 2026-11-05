@@ -5,9 +5,6 @@ use agent_client_protocol::schema::v1::{
     ListSessionsResponse, McpServer, SessionModeState, SessionUpdate, ToolCallContent,
     ToolCallStatus, ToolKind,
 };
-use async_trait::async_trait;
-use chrono::{DateTime, Utc};
-use fs_err as fs;
 use arakan::acp::server::{serve, AcpConnection, AcpConnectionOptions, AcpProviderFactory};
 pub use arakan::acp::{map_permission_response, PermissionDecision};
 use arakan::agents::ArakanPlatform;
@@ -22,6 +19,9 @@ use arakan::scheduler_trait::SchedulerTrait;
 use arakan::session::Session as ArakanSession;
 use arakan::session_context::SESSION_ID_HEADER;
 use arakan_test_support::{ExpectedSessionId, TEST_MODEL};
+use async_trait::async_trait;
+use chrono::{DateTime, Utc};
+use fs_err as fs;
 use std::collections::VecDeque;
 use std::future::Future;
 use std::path::{Path, PathBuf};
@@ -411,7 +411,9 @@ pub async fn spawn_acp_server_in_process(
     });
 
     let mut services_config = arakan::acp::server::acp_services_config(
-        Arc::new(arakan::session::SessionManager::new(data_root.to_path_buf())),
+        Arc::new(arakan::session::SessionManager::new(
+            data_root.to_path_buf(),
+        )),
         data_root.to_path_buf(),
         disable_session_naming,
         ArakanPlatform::ArakanCli,

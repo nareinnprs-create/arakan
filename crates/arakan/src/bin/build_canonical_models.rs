@@ -8,9 +8,9 @@
 ///   cargo run --bin build_canonical_models --no-check   # Build only, skip checker
 ///
 use anyhow::{Context, Result};
-use clap::Parser;
 use arakan::providers::create;
 use arakan_providers::canonical::ModelMapping;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet, HashMap};

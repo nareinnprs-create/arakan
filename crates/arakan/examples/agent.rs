@@ -1,5 +1,3 @@
-use dotenvy::dotenv;
-use futures::StreamExt;
 use arakan::agents::{
     AgentEvent, ExtensionConfig, SessionConfig, StateMachineServices, StateMachineServicesConfig,
 };
@@ -8,6 +6,8 @@ use arakan::conversation::message::Message;
 use arakan::providers::create;
 use arakan::session::session_manager::SessionType;
 use arakan_providers::databricks::DATABRICKS_DEFAULT_MODEL;
+use dotenvy::dotenv;
+use futures::StreamExt;
 use std::path::PathBuf;
 
 #[tokio::main]
@@ -15,8 +15,10 @@ async fn main() -> anyhow::Result<()> {
     let _ = dotenv();
 
     let provider = create("databricks", Vec::new()).await?;
-    let model_config =
-        arakan::model_config::model_config_from_user_config("databricks", DATABRICKS_DEFAULT_MODEL)?;
+    let model_config = arakan::model_config::model_config_from_user_config(
+        "databricks",
+        DATABRICKS_DEFAULT_MODEL,
+    )?;
 
     let services = StateMachineServices::with_config(StateMachineServicesConfig::cli());
 

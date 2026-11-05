@@ -1,9 +1,9 @@
 use anyhow::{anyhow, Error, Result};
-use async_trait::async_trait;
 use arakan_providers::live_voice_provider::{
     DelegationUpdate, DelegationUpdateDelivery, LiveVoiceInputMessage, LiveVoiceProvider,
     ProviderConnection, ProviderConnectionEvent, WebRtcAnswer, WebRtcOffer,
 };
+use async_trait::async_trait;
 use std::sync::Arc;
 use tokio::sync::{mpsc, oneshot};
 

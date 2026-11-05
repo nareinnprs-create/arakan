@@ -1,9 +1,9 @@
 use anyhow::Result;
-use futures::StreamExt;
 use arakan::conversation::message::{Message, MessageContent};
 use arakan::providers::base::Provider;
 use arakan::providers::tetrate::TetrateProvider;
 use arakan_providers::model::ModelConfig;
+use futures::StreamExt;
 use rmcp::model::Tool;
 use rmcp::object;
 use serial_test::serial;

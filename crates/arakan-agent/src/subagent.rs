@@ -3,12 +3,12 @@ use std::num::NonZeroUsize;
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_trait::async_trait;
-use futures::stream::{self, SelectAll, StreamExt};
-use futures::FutureExt;
 use arakan_provider_types::conversation::message::Message;
 use arakan_provider_types::conversation::Conversation;
 use arakan_provider_types::maybe_send::{MaybeSend, MaybeSync};
+use async_trait::async_trait;
+use futures::stream::{self, SelectAll, StreamExt};
+use futures::FutureExt;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 

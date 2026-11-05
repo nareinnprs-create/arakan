@@ -4,16 +4,16 @@ use super::output;
 use super::{
     derive_extension_name_from_command, session_provider, split_extension_name_prefix, CliSession,
 };
-use console::style;
 use arakan::agents::final_output_tool::FinalOutputTool;
 use arakan::agents::{Container, ExtensionError, StateMachineServices, StateMachineServicesConfig};
 use arakan::config::extensions::name_to_key;
 use arakan::config::resolve_extensions_for_new_session;
-use arakan::config::{Config, ExtensionConfig, ArakanMode};
+use arakan::config::{ArakanMode, Config, ExtensionConfig};
 use arakan::model_config::model_config_from_user_config;
 use arakan::recipe::Recipe;
 use arakan::session::session_manager::SessionType;
 use arakan::session::{EnabledExtensionsState, SessionManager};
+use console::style;
 use rustyline::EditMode;
 use std::collections::{HashMap, HashSet};
 use std::process;
@@ -626,7 +626,8 @@ async fn configure_session_prompts(
             .await?;
     }
 
-    let system_prompt_file: Option<String> = config.get_param("ARAKAN_SYSTEM_PROMPT_FILE_PATH").ok();
+    let system_prompt_file: Option<String> =
+        config.get_param("ARAKAN_SYSTEM_PROMPT_FILE_PATH").ok();
     if let Some(ref path) = system_prompt_file {
         let override_prompt = std::fs::read_to_string(path).unwrap_or_else(|e| {
             output::render_error(&format!(
@@ -1301,7 +1302,9 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
         config.set_param("ARAKAN_PROVIDER", "openai").unwrap();
-        config.set_param("ARAKAN_MODEL", "configured-model").unwrap();
+        config
+            .set_param("ARAKAN_MODEL", "configured-model")
+            .unwrap();
         let recipe = serde_json::from_value(serde_json::json!({
             "version": "1.0.0",
             "title": "test recipe",

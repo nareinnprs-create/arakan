@@ -6,11 +6,11 @@ use crate::config::ArakanMode;
 use crate::session::Session;
 use crate::tool_inspection::ToolInspectionManager;
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::inference::{InferenceRequestPreparer, PreparedInferenceRequest};
 use arakan_agent::operation::{messages_since_kickoff, InferenceInput};
 use arakan_providers::conversation::message::Message;
 use arakan_providers::conversation::Conversation;
+use async_trait::async_trait;
 use std::sync::{Arc, Mutex as StdMutex};
 
 pub struct ArakanInferenceRequestPreparer<'a> {

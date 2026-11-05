@@ -2,16 +2,16 @@ use std::collections::HashMap;
 use std::num::NonZeroUsize;
 use std::sync::{Arc, Mutex};
 
-use async_trait::async_trait;
-use futures::future;
-use futures::stream;
-use futures::FutureExt;
 use arakan_agent::events::AgentEvent;
 use arakan_agent::operation::{
     ConversationEffect, Emitter, Operation, OperationResult, OperationStream,
 };
 use arakan_agent::subagent::{SubagentOperation, SubagentOutcome, SubagentRunner, SubagentUpdate};
 use arakan_provider_types::conversation::{message::Message, Conversation};
+use async_trait::async_trait;
+use futures::future;
+use futures::stream;
+use futures::FutureExt;
 use serde_json::json;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;

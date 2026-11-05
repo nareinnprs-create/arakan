@@ -6,8 +6,6 @@ use agent_client_protocol::schema::v1::{
     ListSessionsResponse, McpServer, SessionUpdate, ToolCallStatus,
 };
 use agent_client_protocol::{Client, DynConnectTo};
-use async_trait::async_trait;
-use futures::StreamExt;
 use arakan::acp::{AcpProvider, AcpProviderConfig};
 use arakan::config::{ArakanMode, PermissionManager};
 use arakan::conversation::message::{ActionRequiredData, Message, MessageContent};
@@ -16,6 +14,8 @@ use arakan::permission::{Permission, PermissionConfirmation};
 use arakan::providers::base::Provider;
 use arakan_providers::model::ModelConfig;
 use arakan_test_support::{ExpectedSessionId, IgnoreSessionId, TEST_MODEL};
+use async_trait::async_trait;
+use futures::StreamExt;
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;

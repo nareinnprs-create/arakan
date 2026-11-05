@@ -36,13 +36,13 @@ use arakan::providers::base::{Provider, ProviderUsage};
 use arakan::utils::safe_truncate;
 
 use anyhow::Result;
-use completion::ArakanCompleter;
 use arakan::agents::extension::{Envs, ExtensionConfig, PLATFORM_EXTENSIONS};
 use arakan::agents::{
     context_management_unsupported_message, SessionConfig, StateMachineServices, COMPACT_TRIGGERS,
 };
 use arakan::config::extensions::name_to_key;
-use arakan::config::{Config, ArakanMode};
+use arakan::config::{ArakanMode, Config};
+use completion::ArakanCompleter;
 use input::InputResult;
 use rmcp::model::ServerNotification;
 use rmcp::model::{ElicitationAction, PromptMessage};
@@ -1221,7 +1221,8 @@ impl CliSession {
         let session_manager = &self.services.session_manager;
         let old_session = session_manager.get_session(&self.session_id, false).await?;
         let new_session_id =
-            create_successor_session(session_manager, &old_session, old_session.arakan_mode).await?;
+            create_successor_session(session_manager, &old_session, old_session.arakan_mode)
+                .await?;
         let extensions = self
             .services
             .extension_manager
@@ -1257,9 +1258,9 @@ impl CliSession {
     }
 
     async fn handle_list_skills(&mut self) -> Result<()> {
-        use comfy_table::{presets, Cell, ContentArrangement, Table};
         use arakan::custom_requests::SourceType;
         use arakan::skills::list_installed_skills;
+        use comfy_table::{presets, Cell, ContentArrangement, Table};
         let cwd = std::env::current_dir().unwrap_or_default();
         let skills = list_installed_skills(Some(&cwd));
 
@@ -3121,7 +3122,8 @@ mod tests {
             vec![r"C:\tools\mcp.exe", "--arg", "value"]
         );
         assert_eq!(
-            arakan::utils::split_command_args(r#""C:\Program Files\server\mcp.exe" --arg"#).unwrap(),
+            arakan::utils::split_command_args(r#""C:\Program Files\server\mcp.exe" --arg"#)
+                .unwrap(),
             vec![r"C:\Program Files\server\mcp.exe", "--arg"]
         );
     }

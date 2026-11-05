@@ -24,8 +24,8 @@ use tracing::warn;
 use super::{
     get_tool_meta_value, get_tool_owner, get_tool_resource_uri, insert_trusted_tool_update_meta,
     recover_mangled_tool_name, remove_subagent_session_meta, remove_untrusted_mcp_app_meta,
-    ActionRequiredStream, Extension, ExtensionLoadResult, ExtensionMutation, ExtensionSlot,
-    ArakanMcpAppToolAttachment, TOOL_CALL_NOTIFICATION_CHANNEL_CAPACITY,
+    ActionRequiredStream, ArakanMcpAppToolAttachment, Extension, ExtensionLoadResult,
+    ExtensionMutation, ExtensionSlot, TOOL_CALL_NOTIFICATION_CHANNEL_CAPACITY,
 };
 use crate::action_required_manager::ActionRequiredManager;
 use crate::agents::container::Container;

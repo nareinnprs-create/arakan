@@ -2,13 +2,13 @@
 #![recursion_limit = "256"]
 use std::sync::Arc;
 
-use axum::body::Body;
-use axum::http::{HeaderValue, Method, Request, Response, StatusCode};
-use axum::Router;
 use arakan::acp::server::AcpBuiltinSelection;
 use arakan::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
 use arakan::acp::transport::{create_acp_router, create_router};
 use arakan::agents::ArakanPlatform;
+use axum::body::Body;
+use axum::http::{HeaderValue, Method, Request, Response, StatusCode};
+use axum::Router;
 use tower::ServiceExt;
 
 const SECRET: &str = "test-secret-token";

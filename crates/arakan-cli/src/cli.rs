@@ -1,11 +1,8 @@
 use anyhow::Result;
-use clap::{Args, CommandFactory, Parser, Subcommand};
-use clap_complete::{generate, Shell as ClapShell};
-use clap_complete_nushell::Nushell as ClapNushell;
 use arakan::agents::{ArakanPlatform, StateMachineServices, StateMachineServicesConfig};
 #[cfg(feature = "bundled-mcp")]
 use arakan::builtin_extension::register_builtin_extensions;
-use arakan::config::{Config, ArakanMode};
+use arakan::config::{ArakanMode, Config};
 use arakan::recipe::Recipe;
 #[cfg(feature = "acp-http")]
 use arakan::source_roots::SourceRoot;
@@ -13,6 +10,9 @@ use arakan::source_roots::SourceRoot;
 use arakan_mcp::mcp_server_runner::{serve, McpCommand};
 #[cfg(feature = "bundled-mcp")]
 use arakan_mcp::{AutoVisualiserRouter, ComputerControllerServer, MemoryServer, TutorialServer};
+use clap::{Args, CommandFactory, Parser, Subcommand};
+use clap_complete::{generate, Shell as ClapShell};
+use clap_complete_nushell::Nushell as ClapNushell;
 
 use crate::commands::configure::{configure_provider_dialog, handle_configure};
 use crate::commands::info::handle_info;
@@ -1748,11 +1748,11 @@ async fn start_roam_share(
 
 #[cfg(feature = "acp-http")]
 async fn handle_serve_command(args: ServeCommandArgs) -> Result<()> {
-    use axum::http::HeaderValue;
     use arakan::acp::server::AcpBuiltinSelection;
     use arakan::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
     use arakan::acp::transport::create_router;
     use arakan::config::paths::Paths;
+    use axum::http::HeaderValue;
     use std::net::SocketAddr;
     use std::sync::Arc;
     use tracing::{info, warn};

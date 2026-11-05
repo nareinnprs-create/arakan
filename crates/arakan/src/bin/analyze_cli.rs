@@ -1,8 +1,8 @@
 //! CLI wrapper for the analyze platform extension.
 //! Usage: cargo run -p arakan --bin analyze_cli -- <path> [--focus <symbol>] [--depth <n>] [--follow <n>] [--force]
 
-use clap::Parser;
 use arakan::agents::platform_extensions::analyze::{format, graph, AnalyzeClient};
+use clap::Parser;
 use rayon::prelude::*;
 use std::path::PathBuf;
 

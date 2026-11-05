@@ -1,6 +1,4 @@
 use crate::recipes::github_recipe::ARAKAN_RECIPE_GITHUB_REPO_CONFIG_KEY;
-use cliclack::spinner;
-use console::style;
 use arakan::agents::extension::{ToolInfo, PLATFORM_EXTENSIONS};
 use arakan::agents::extension_manager::get_parameter_names;
 use arakan::agents::{extension::Envs, ExtensionConfig};
@@ -16,7 +14,7 @@ use arakan::config::paths::Paths;
 use arakan::config::permission::PermissionLevel;
 use arakan::config::signup_tetrate::TetrateAuth;
 use arakan::config::{
-    configure_tetrate, Config, ConfigError, ExperimentManager, ExtensionEntry, ArakanMode,
+    configure_tetrate, ArakanMode, Config, ConfigError, ExperimentManager, ExtensionEntry,
     PermissionManager,
 };
 use arakan::providers::base::ConfigKey;
@@ -24,6 +22,8 @@ use arakan::providers::provider_test::test_provider_configuration;
 use arakan::providers::{create, providers, retry_operation, RetryConfig};
 use arakan::session::SessionType;
 use arakan_providers::thinking::ThinkingEffort;
+use cliclack::spinner;
+use console::style;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::io::{IsTerminal, Write};
@@ -160,7 +160,10 @@ pub async fn handle_configure() -> anyhow::Result<()> {
 
 async fn handle_first_time_setup(config: &Config) -> anyhow::Result<()> {
     println!();
-    println!("{}", style("Welcome to arakan! Let's get you set up.").dim());
+    println!(
+        "{}",
+        style("Welcome to arakan! Let's get you set up.").dim()
+    );
     println!(
         "{}",
         style("  you can rerun this command later to update your configuration").dim()
@@ -1582,8 +1585,9 @@ pub fn configure_keyring_dialog() -> anyhow::Result<()> {
             // Set to empty string to enable keyring (absence or empty = enabled)
             config.set_param("ARAKAN_DISABLE_KEYRING", Value::String("".to_string()))?;
             cliclack::outro("Secret storage set to system keyring (secure)")?;
-            let _ =
-                cliclack::log::info("You may need to restart arakan for this change to take effect");
+            let _ = cliclack::log::info(
+                "You may need to restart arakan for this change to take effect",
+            );
         }
         "file" => {
             // Set the disable flag to use file storage
@@ -1592,8 +1596,9 @@ pub fn configure_keyring_dialog() -> anyhow::Result<()> {
                 "Secret storage set to file ({}). Keep this file secure!",
                 secrets_path.display(),
             ))?;
-            let _ =
-                cliclack::log::info("You may need to restart arakan for this change to take effect");
+            let _ = cliclack::log::info(
+                "You may need to restart arakan for this change to take effect",
+            );
         }
         _ => unreachable!(),
     };
@@ -1889,15 +1894,17 @@ pub async fn handle_openrouter_auth() -> anyhow::Result<()> {
     // Test configuration - get the model that was configured
     println!("\nTesting configuration...");
     let configured_model: String = config.get_arakan_model()?;
-    let model_config =
-        match arakan::model_config::model_config_from_user_config("openrouter", &configured_model) {
-            Ok(config) => config,
-            Err(e) => {
-                eprintln!("⚠️  Invalid model configuration: {}", e);
-                eprintln!("Your settings have been saved. Please check your model configuration.");
-                return Ok(());
-            }
-        };
+    let model_config = match arakan::model_config::model_config_from_user_config(
+        "openrouter",
+        &configured_model,
+    ) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("⚠️  Invalid model configuration: {}", e);
+            eprintln!("Your settings have been saved. Please check your model configuration.");
+            return Ok(());
+        }
+    };
 
     match create("openrouter", Vec::new()).await {
         Ok(provider) => {
@@ -1926,7 +1933,9 @@ pub async fn handle_openrouter_auth() -> anyhow::Result<()> {
                             config: ExtensionConfig::Platform {
                                 name: "developer".to_string(),
                                 description: "Developer extension".to_string(),
-                                display_name: Some(arakan::config::DEFAULT_DISPLAY_NAME.to_string()),
+                                display_name: Some(
+                                    arakan::config::DEFAULT_DISPLAY_NAME.to_string(),
+                                ),
                                 bundled: Some(true),
                                 available_tools: Vec::new(),
                             },
@@ -1969,7 +1978,8 @@ pub async fn handle_tetrate_auth() -> anyhow::Result<()> {
     // Test configuration
     println!("\nTesting configuration...");
     let configured_model: String = config.get_arakan_model()?;
-    if let Err(e) = arakan::model_config::model_config_from_user_config("tetrate", &configured_model)
+    if let Err(e) =
+        arakan::model_config::model_config_from_user_config("tetrate", &configured_model)
     {
         eprintln!("⚠️  Invalid model configuration: {}", e);
         eprintln!("Your settings have been saved. Please check your model configuration.");
@@ -1995,7 +2005,9 @@ pub async fn handle_tetrate_auth() -> anyhow::Result<()> {
                             config: ExtensionConfig::Platform {
                                 name: "developer".to_string(),
                                 description: "Developer extension".to_string(),
-                                display_name: Some(arakan::config::DEFAULT_DISPLAY_NAME.to_string()),
+                                display_name: Some(
+                                    arakan::config::DEFAULT_DISPLAY_NAME.to_string(),
+                                ),
                                 bundled: Some(true),
                                 available_tools: Vec::new(),
                             },

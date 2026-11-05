@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex as StdMutex};
 
 use anyhow::{anyhow, Result};
-use async_trait::async_trait;
 use arakan_agent::post_tool_call_hook::PostToolCallHook;
 use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
+use async_trait::async_trait;
 use rmcp::model::{CallToolResult, ContentBlock, ErrorData, JsonObject, Tool};
 use schemars::{schema_for, JsonSchema};
 use serde::Deserialize;
@@ -19,8 +19,8 @@ use crate::agents::state_machine::ops_toolcalling::{
 };
 use crate::agents::state_machine::post_tool_hook::run_post_tool_call_hook;
 use crate::agents::state_machine::{
-    applied, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter,
-    ArakanEffect, Operation, OperationResult, SlashCommand,
+    applied, messages_since_kickoff, not_applicable, yielded_with, ArakanEffect,
+    ConversationEffect, Emitter, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
 use crate::config::ArakanMode;

@@ -1,7 +1,7 @@
 use crate::agents::Container;
 use crate::config::paths::Paths;
-use crate::config::ExtensionConfig;
 use crate::config::ArakanMode;
+use crate::config::ExtensionConfig;
 use crate::conversation::message::{Message, MessageMetadata, MessageUsage, TokenState};
 use crate::conversation::Conversation;
 use crate::providers::base::CostSource;
@@ -14,9 +14,9 @@ use crate::session::session_naming::{
     generate_session_name, MSG_COUNT_FOR_SESSION_NAME_GENERATION,
 };
 use anyhow::Result;
-use chrono::{DateTime, TimeZone, Utc};
 use arakan_providers::conversation::token_usage::Usage;
 use arakan_providers::model::ModelConfig;
+use chrono::{DateTime, TimeZone, Utc};
 use indexmap::IndexMap;
 use rmcp::model::Role;
 use serde::de::DeserializeOwned;

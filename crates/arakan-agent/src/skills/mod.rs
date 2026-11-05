@@ -9,8 +9,8 @@ mod discovery;
 pub use discovery::{discover_skills, SkillRoot};
 
 use anyhow::Result;
-use arguments::apply_skill_arguments;
 use arakan_sdk_types::custom_requests::SourceEntry;
+use arguments::apply_skill_arguments;
 use std::path::Path;
 
 fn skill_argument_names(skill: &SourceEntry) -> Vec<String> {

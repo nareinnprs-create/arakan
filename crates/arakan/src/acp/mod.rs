@@ -10,8 +10,8 @@ pub(crate) mod tool_call_notifier;
 #[cfg(feature = "acp-http")]
 pub mod transport;
 
-pub use common::{map_permission_response, PermissionDecision};
 pub use arakan_sdk_types::{custom_notifications, custom_requests};
+pub use common::{map_permission_response, PermissionDecision};
 pub use provider::{
     extension_configs_to_mcp_servers, AcpProvider, AcpProviderConfig, ACP_CURRENT_MODEL,
 };
@@ -69,7 +69,9 @@ mod tests {
         let config =
             crate::config::Config::new(directory.path().join("config.yaml"), "test").unwrap();
         config.set_arakan_provider("pi-acp").unwrap();
-        config.set_arakan_model("anthropic/claude-sonnet-4").unwrap();
+        config
+            .set_arakan_model("anthropic/claude-sonnet-4")
+            .unwrap();
 
         assert_eq!(
             configured_model_for_provider(&config, "pi-acp"),

@@ -4,7 +4,7 @@ use crate::agents::mcp_client::{Error, McpClientTrait};
 use crate::agents::state_machine::DELEGATED_META_KEY;
 use crate::agents::tool_execution::ToolCallContext;
 use crate::config::paths::Paths;
-use crate::config::{resolve_extensions_for_new_session, Config, ArakanMode};
+use crate::config::{resolve_extensions_for_new_session, ArakanMode, Config};
 use crate::conversation::message::Message;
 use crate::providers;
 use crate::recipe::build_recipe::build_recipe_from_template;
@@ -15,8 +15,8 @@ use crate::session::{Session, SessionType};
 use crate::sources::parse_frontmatter;
 use crate::utils::safe_truncate;
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
+use async_trait::async_trait;
 use rmcp::model::{
     CallToolResult, ContentBlock, Implementation, InitializeResult, JsonObject, ListToolsResult,
     MetaObject, ServerCapabilities, Tool,

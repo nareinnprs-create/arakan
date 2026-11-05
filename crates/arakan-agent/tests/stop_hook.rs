@@ -4,7 +4,6 @@ use std::sync::{
 };
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::{
     events::AgentEvent,
     operation::{ConversationEffect, Emitter, Operation, OperationResult, RunStatus},
@@ -14,6 +13,7 @@ use arakan_provider_types::conversation::{
     message::{Message, MessageContent, SystemNotificationType},
     Conversation,
 };
+use async_trait::async_trait;
 use serde_json::json;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;

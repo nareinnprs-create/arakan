@@ -23,9 +23,6 @@ mod tool_emulation;
 mod tool_parsing;
 
 use anyhow::{bail, Result};
-use async_stream::try_stream;
-use async_trait::async_trait;
-use backend::{BackendLoadedModel, LocalInferenceBackend};
 use arakan_provider_types::base::{MessageStream, Provider, ProviderDescriptor, ProviderMetadata};
 use arakan_provider_types::conversation::message::{
     Message, MessageContent, SystemNotificationType,
@@ -35,6 +32,9 @@ use arakan_provider_types::errors::ProviderError;
 use arakan_provider_types::images::ImageFormat;
 use arakan_provider_types::model::ModelConfig;
 use arakan_provider_types::request_log::{start_log, LoggerHandleExt, RequestLogHandle};
+use async_stream::try_stream;
+use async_trait::async_trait;
+use backend::{BackendLoadedModel, LocalInferenceBackend};
 use llamacpp::{LlamaCppBackend, LLAMACPP_BACKEND_ID};
 use mlx::{MlxBackend, MLX_BACKEND_ID};
 use model::ChatTemplate;

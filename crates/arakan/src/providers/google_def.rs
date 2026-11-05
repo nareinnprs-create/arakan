@@ -1,8 +1,8 @@
 use anyhow::Result;
-use futures::future::BoxFuture;
 use arakan_providers::api_client::TlsConfig;
 use arakan_providers::base::{ProviderDescriptor, ProviderMetadata};
 use arakan_providers::google::{GoogleProvider, GOOGLE_API_HOST};
+use futures::future::BoxFuture;
 
 use crate::config::{Config, ExtensionConfig};
 use crate::providers::base::ProviderDef;

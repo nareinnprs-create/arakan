@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Result};
-use console::style;
 use arakan::config::paths::Paths;
 use arakan::config::Config;
 use arakan::conversation::message::Message;
 use arakan::session::session_manager::{DB_NAME, SESSIONS_FOLDER};
 use arakan_providers::errors::ProviderError;
+use console::style;
 use serde_yaml;
 use std::time::Duration;
 

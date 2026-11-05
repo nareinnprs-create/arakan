@@ -4,13 +4,13 @@ use super::openai_compatible::{handle_status, stream_openai_compat};
 use super::retry::ProviderRetry;
 use crate::conversation::message::Message;
 use anyhow::Result;
-use async_trait::async_trait;
-use futures::future::BoxFuture;
 use arakan_providers::errors::ProviderError;
 use arakan_providers::formats::openai::create_request;
 use arakan_providers::images::ImageFormat;
 use arakan_providers::model::ModelConfig;
 use arakan_providers::request_log::{start_log, LoggerHandleExt};
+use async_trait::async_trait;
+use futures::future::BoxFuture;
 use rmcp::model::Tool;
 
 pub const NANOGPT_PROVIDER_NAME: &str = "nano-gpt";

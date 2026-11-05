@@ -1,7 +1,7 @@
+use arakan_agent::subagent::{SubagentOutcome, SubagentRunner, SubagentUpdate};
 use async_trait::async_trait;
 use futures::future;
 use futures::stream::{self, BoxStream, StreamExt};
-use arakan_agent::subagent::{SubagentOutcome, SubagentRunner, SubagentUpdate};
 use rmcp::model::Role;
 use tokio_util::sync::CancellationToken;
 
@@ -180,7 +180,7 @@ mod tests {
     use super::*;
     use crate::agents::final_output_tool::{FINAL_OUTPUT_SUCCESS_MESSAGE, FINAL_OUTPUT_TOOL_NAME};
     use crate::agents::state_machine::{
-        ConversationEffect, ArakanEffect, Operation, OperationResult, RunStatus,
+        ArakanEffect, ConversationEffect, Operation, OperationResult, RunStatus,
     };
     use crate::config::ArakanMode;
     use crate::conversation::Conversation;
@@ -307,7 +307,8 @@ mod tests {
         let session = manager.get_session(session_id, true).await?;
         let conversation = session.conversation.as_ref().unwrap();
         let result =
-            Operation::<Session, ArakanEffect>::run(operation, &session, conversation, emit).await?;
+            Operation::<Session, ArakanEffect>::run(operation, &session, conversation, emit)
+                .await?;
         Ok((session, result))
     }
 

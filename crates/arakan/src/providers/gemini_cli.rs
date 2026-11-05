@@ -15,11 +15,11 @@ use crate::config::Config;
 use crate::conversation::message::{Message, MessageContent};
 use crate::providers::base::ConfigKey;
 use crate::subprocess::configure_subprocess;
-use async_stream::try_stream;
-use futures::future::BoxFuture;
 use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
 use arakan_providers::errors::ProviderError;
 use arakan_providers::model::ModelConfig;
+use async_stream::try_stream;
+use futures::future::BoxFuture;
 use rmcp::model::Role;
 use rmcp::model::Tool;
 

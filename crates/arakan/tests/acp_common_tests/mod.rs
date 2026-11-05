@@ -8,16 +8,16 @@ use agent_client_protocol::schema::v1::{
     ContentBlock, ListSessionsResponse, McpServer, McpServerHttp, SessionInfo, SessionModeId,
     SessionUpdate, ToolCallStatus,
 };
-use fixtures::{
-    assert_notifications, Connection, Notification, OpenAiFixture, PermissionDecision, Session,
-    SessionData, TestConnectionConfig,
-};
-use fs_err as fs;
 use arakan::acp::server::AcpProviderFactory;
 use arakan::config::base::CONFIG_YAML_NAME;
 use arakan::config::ArakanMode;
 use arakan::session::{EnabledExtensionsState, SessionManager};
 use arakan_test_support::{McpFixture, FAKE_CODE, TEST_IMAGE_B64, TEST_MODEL};
+use fixtures::{
+    assert_notifications, Connection, Notification, OpenAiFixture, PermissionDecision, Session,
+    SessionData, TestConnectionConfig,
+};
+use fs_err as fs;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::sync::Arc;
 use std::time::Duration;

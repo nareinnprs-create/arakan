@@ -8,7 +8,6 @@ use std::{
 };
 
 use anyhow::Result;
-use async_trait::async_trait;
 use arakan_agent::{
     machine::{EffectHandler, MachineSession, SessionLoader, StateMachine, Step},
     operation::{applied, not_applicable, ConversationEffect, Emitter, Operation, OperationResult},
@@ -20,6 +19,7 @@ use arakan_provider_types::conversation::{
     message::{Message, MessageContent, ToolRequest, ToolResponse},
     Conversation,
 };
+use async_trait::async_trait;
 use rmcp::{
     handler::server::router::tool::{SyncTool, ToolBase},
     model::{CallToolRequestParams, CallToolResult, ContentBlock, ErrorData, Tool},

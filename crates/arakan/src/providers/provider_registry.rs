@@ -6,8 +6,8 @@ use super::base::{
 use super::inventory::{InventoryIdentityInput, InventoryRegistration, InventoryResolvers};
 use crate::config::{DeclarativeProviderConfig, ExtensionConfig};
 use anyhow::Result;
-use futures::future::BoxFuture;
 use arakan_providers::model::ModelConfig;
+use futures::future::BoxFuture;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
