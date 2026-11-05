@@ -160,65 +160,6 @@ pub async fn handle_configure() -> anyhow::Result<()> {
 
 async fn handle_first_time_setup(config: &Config) -> anyhow::Result<()> {
     println!();
-    println!("{}", style("Help improve arakan").bold());
-    println!();
-    println!(
-        "{}",
-        style("Would you like to help improve arakan by sharing anonymous usage data?").dim()
-    );
-    println!(
-        "{}",
-        style("This helps us understand how arakan is used and identify areas for improvement.")
-            .dim()
-    );
-    println!();
-    println!("{}", style("What we collect:").dim());
-    println!(
-        "{}",
-        style("  • Operating system, version, and architecture").dim()
-    );
-    println!("{}", style("  • arakan version and install method").dim());
-    println!("{}", style("  • Provider and model used").dim());
-    println!(
-        "{}",
-        style("  • Extensions and tool usage counts (names only)").dim()
-    );
-    println!(
-        "{}",
-        style("  • Session metrics (duration, interaction count, token usage)").dim()
-    );
-    println!(
-        "{}",
-        style("  • Error types (e.g., \"rate_limit\", \"auth\" - no details)").dim()
-    );
-    println!();
-    println!(
-        "{}",
-        style("We never collect your conversations, code, tool arguments, error messages,").dim()
-    );
-    println!(
-        "{}",
-        style("or any personal data. You can change this anytime with 'arakan configure'.").dim()
-    );
-    println!();
-
-    let enabled = cliclack::confirm("Share anonymous usage data to help improve arakan?")
-        .initial_value(true)
-        .interact()?;
-
-    config.set_param(TELEMETRY_ENABLED_KEY, enabled)?;
-
-    if enabled {
-        let _ = cliclack::log::success("Thank you for helping improve arakan!");
-    } else {
-        let _ = cliclack::log::info("Telemetry disabled. You can enable it anytime in settings.");
-    }
-
-    Ok(enabled)
-}
-
-async fn handle_first_time_setup(config: &Config) -> anyhow::Result<()> {
-    println!();
     println!("{}", style("Welcome to arakan! Let's get you set up.").dim());
     println!(
         "{}",
