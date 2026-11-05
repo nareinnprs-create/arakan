@@ -32,8 +32,9 @@ jobs:
             code:
               - '!documentation/**'
 
-  arakan-acp-npm-packages:
-    if: false # (Octopus Shield ships the CLI)
+    name: arakan ACP npm packages
+    runs-on: ubuntu-latest
+    needs: changes
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -340,8 +341,9 @@ jobs:
           export CARGO_INCREMENTAL=0
           cargo clippy --workspace --all-targets -- -D warnings
 
-  schema-check:
-    if: false # (Octopus Shield ships the CLI)
+    name: Check Generated Schemas are Up-to-Date
+    runs-on: ubuntu-latest
+    needs: changes
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -389,8 +391,9 @@ jobs:
       - name: Check generated GDK API reference data
         run: python3 documentation/automation/gdk-api/generate.py --check
 
-  desktop-lint:
-    if: false # (Octopus Shield ships the CLI)
+    name: Test and Lint Electron Desktop App
+    runs-on: macos-latest
+    needs: changes
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -411,8 +414,9 @@ jobs:
         run: source ../../bin/activate-hermit && node --test scripts/mac-update-requirements.test.cjs
         working-directory: ui/desktop
 
-  desktop-updater-install:
-    if: false # (Octopus Shield ships the CLI)
+    name: Test Desktop Updater Install (`${{ matrix.os }})
+    runs-on: `${{ matrix.os }}
+    needs: changes
     strategy:
       fail-fast: false
       matrix:
