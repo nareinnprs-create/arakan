@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-22.04, target: linux-x64, exe: '', archive: tar.gz }
+          - { os: ubuntu-22.04, target: linux-x64, exe: '', archive: tar.gz, cross: 'x86_64-unknown-linux-gnu.2.31' }
           - { os: windows-latest, target: win-x64, exe: '.exe', archive: zip }
           - { os: macos-14, target: mac-arm64, exe: '', archive: tar.gz }
           - { os: macos-14, target: mac-x64, exe: '', archive: tar.gz, cross: 'x86_64-apple-darwin' }
@@ -26,14 +26,21 @@ jobs:
       - name: Install Rust toolchain (repo-pinned)
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
-      - name: Build lean ACP binary
+      - name: Install cargo-zigbuild (cross legs)
+        if: matrix.cross != ''
+        run: pip3 install --quiet cargo-zigbuild
+
+      - name: Add cross target
+        if: matrix.cross != ''
+        run: rustup target add x86_64-unknown-linux-gnu x86_64-apple-darwin
+
+      - name: Build lean ACP binary (native)
+        if: matrix.cross == ''
         run: cargo build --release -p arakan-cli --no-default-features --features rustls-tls
 
-      - name: Cross-compile mac-x64 (Intel) from arm runner
+      - name: Build lean ACP binary (zigbuild cross)
         if: matrix.cross != ''
-        run: |
-          rustup target add ${{ matrix.cross }}
-          cargo build --release --target ${{ matrix.cross }} -p arakan-cli --no-default-features --features rustls-tls
+        run: cargo zigbuild --release --target ${{ matrix.cross }} -p arakan-cli --no-default-features --features rustls-tls
 
       - name: Package (unix)
         if: runner.os != 'Windows'
