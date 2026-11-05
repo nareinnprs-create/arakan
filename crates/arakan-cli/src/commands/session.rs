@@ -6,8 +6,9 @@ use arakan::session::{
 };
 use arakan::utils::safe_truncate;
 use cliclack::{confirm, multiselect, select};
-use etcetera::home_dir;
 use regex::Regex;
+#[cfg(not(target_os = "windows"))]
+use etcetera::home_dir;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
