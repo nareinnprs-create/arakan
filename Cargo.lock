@@ -258,6 +258,469 @@ dependencies = [
 ]
 
 [[package]]
+name = "arakan"
+version = "1.58.0"
+dependencies = [
+ "agent-client-protocol",
+ "agent-client-protocol-http",
+ "agent-client-protocol-schema",
+ "anyhow",
+ "arakan-acp-macros",
+ "arakan-agent",
+ "arakan-context-management",
+ "arakan-download-manager",
+ "arakan-mcp",
+ "arakan-providers",
+ "arakan-sdk-types",
+ "arakan-test-support",
+ "arboard",
+ "async-stream",
+ "async-trait",
+ "aws-config",
+ "aws-lc-rs",
+ "aws-sdk-bedrockruntime",
+ "aws-sdk-sagemakerruntime",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "axum",
+ "axum-server",
+ "base64 0.23.1",
+ "blake3",
+ "boa_engine",
+ "byteorder",
+ "bytes",
+ "candle-core",
+ "candle-nn",
+ "candle-transformers",
+ "chrono",
+ "clap",
+ "ctor",
+ "dirs 7.0.0",
+ "dotenvy",
+ "dtor",
+ "env-lock",
+ "etcetera",
+ "fs-err",
+ "fs2",
+ "futures",
+ "gethostname",
+ "http 1.5.0",
+ "ignore",
+ "image 0.24.9",
+ "include_dir",
+ "indexmap 2.14.2",
+ "indoc",
+ "insta",
+ "jsonschema",
+ "keyring",
+ "libc",
+ "lru",
+ "minijinja",
+ "mockall",
+ "nanoid",
+ "ntapi",
+ "oauth2",
+ "once_cell",
+ "openssl",
+ "opentelemetry",
+ "opentelemetry-appender-tracing",
+ "opentelemetry-otlp",
+ "opentelemetry-stdout",
+ "opentelemetry_sdk",
+ "pastey",
+ "pem 4.0.0",
+ "pkcs8",
+ "rand 0.10.2",
+ "rayon",
+ "rcgen",
+ "regex",
+ "reqwest",
+ "ring",
+ "rmcp",
+ "rubato",
+ "rustls",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serde_path_to_error",
+ "serde_urlencoded",
+ "serde_yaml",
+ "serial_test",
+ "sha2 0.11.0",
+ "shell-words",
+ "shellexpand",
+ "smithy-transport-reqwest",
+ "sqlx",
+ "strum 0.28.0",
+ "subtle",
+ "symphonia",
+ "sys-info",
+ "tempfile",
+ "test-case",
+ "thiserror 2.0.20",
+ "tiktoken-rs",
+ "tokenizers 0.23.2",
+ "tokio",
+ "tokio-cron-scheduler",
+ "tokio-stream",
+ "tokio-util",
+ "tower",
+ "tower-http 0.7.1",
+ "tracing",
+ "tracing-appender",
+ "tracing-futures",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "tree-sitter",
+ "tree-sitter-go",
+ "tree-sitter-java",
+ "tree-sitter-javascript",
+ "tree-sitter-kotlin-ng",
+ "tree-sitter-python",
+ "tree-sitter-ruby",
+ "tree-sitter-rust",
+ "tree-sitter-swift",
+ "tree-sitter-typescript",
+ "unicode-normalization",
+ "url",
+ "urlencoding",
+ "uuid",
+ "v_htmlescape",
+ "webbrowser",
+ "which 8.0.6",
+ "winapi",
+ "wiremock",
+]
+
+[[package]]
+name = "arakan-acp-macros"
+version = "1.58.0"
+dependencies = [
+ "quote",
+ "syn 3.0.5",
+]
+
+[[package]]
+name = "arakan-agent"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "anyhow",
+ "arakan-provider-types",
+ "arakan-sdk-types",
+ "async-trait",
+ "futures",
+ "js-sys",
+ "regex",
+ "rmcp",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-futures",
+ "uuid",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+]
+
+[[package]]
+name = "arakan-cli"
+version = "1.58.0"
+dependencies = [
+ "agent-client-protocol",
+ "anstream",
+ "anyhow",
+ "arakan",
+ "arakan-mcp",
+ "arakan-providers",
+ "arakan-roaming",
+ "async-trait",
+ "axum",
+ "axum-server",
+ "base64 0.23.1",
+ "bat",
+ "bzip2",
+ "chrono",
+ "clap",
+ "clap_complete",
+ "clap_complete_nushell",
+ "clap_mangen",
+ "cliclack",
+ "comfy-table",
+ "console",
+ "env-lock",
+ "etcetera",
+ "fs2",
+ "futures",
+ "indicatif",
+ "libc",
+ "ntapi",
+ "open",
+ "qrcode",
+ "rand 0.10.2",
+ "regex",
+ "reqwest",
+ "rmcp",
+ "rustyline",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "sha2 0.11.0",
+ "shlex 2.0.1",
+ "strsim",
+ "strum 0.28.0",
+ "tar",
+ "tempfile",
+ "test-case",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-subscriber",
+ "unicode-segmentation",
+ "url",
+ "urlencoding",
+ "webbrowser",
+ "winapi",
+ "zip 9.0.5",
+]
+
+[[package]]
+name = "arakan-context-management"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "anyhow",
+ "arakan-provider-types",
+ "async-trait",
+ "include_dir",
+ "minijinja",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "arakan-download-manager"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "anyhow",
+ "once_cell",
+ "reqwest",
+ "serde",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "arakan-local-inference"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "anyhow",
+ "arakan-download-manager",
+ "arakan-provider-types",
+ "arakan-sdk-types",
+ "async-stream",
+ "async-trait",
+ "base64 0.23.1",
+ "chrono",
+ "encoding_rs",
+ "env-lock",
+ "etcetera",
+ "futures",
+ "hf-hub",
+ "include_dir",
+ "llama-cpp-2",
+ "llama-cpp-sys-2",
+ "minijinja",
+ "pulldown-cmark",
+ "regex",
+ "rmcp",
+ "safemlx",
+ "safemlx-lm",
+ "safemlx-lm-utils",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "arakan-mcp"
+version = "1.58.0"
+dependencies = [
+ "anyhow",
+ "base64 0.23.1",
+ "chrono",
+ "docx-rs",
+ "etcetera",
+ "image 0.24.9",
+ "include_dir",
+ "indoc",
+ "lopdf",
+ "once_cell",
+ "process-wrap 9.1.0",
+ "rmcp",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "shell-words",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "umya-spreadsheet",
+]
+
+[[package]]
+name = "arakan-provider-types"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "anyhow",
+ "async-stream",
+ "async-trait",
+ "base64 0.23.1",
+ "chrono",
+ "env-lock",
+ "futures",
+ "getrandom 0.4.3",
+ "gloo-timers",
+ "once_cell",
+ "rand 0.10.2",
+ "regex",
+ "reqwest",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "strum 0.28.0",
+ "tempfile",
+ "test-case",
+ "thiserror 2.0.20",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "unicode-normalization",
+ "uuid",
+ "zstd",
+]
+
+[[package]]
+name = "arakan-providers"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "anyhow",
+ "arakan-local-inference",
+ "arakan-provider-types",
+ "async-stream",
+ "async-trait",
+ "base64 0.23.1",
+ "chrono",
+ "env-lock",
+ "flate2",
+ "futures",
+ "http 1.5.0",
+ "include_dir",
+ "pem 4.0.0",
+ "pkcs8",
+ "rcgen",
+ "reqwest",
+ "reqwest-websocket",
+ "rmcp",
+ "sec1",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "test-case",
+ "tokio",
+ "tokio-rustls",
+ "tokio-stream",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+ "tracing",
+ "url",
+ "urlencoding",
+ "uuid",
+ "wiremock",
+]
+
+[[package]]
+name = "arakan-roaming"
+version = "1.58.0"
+dependencies = [
+ "anyhow",
+ "base64 0.23.1",
+ "fs2",
+ "futures",
+ "iroh",
+ "iroh-relay",
+ "serde",
+ "serde_json",
+ "sha2 0.11.0",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "arakan-sdk"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "agent-client-protocol",
+ "agent-client-protocol-schema",
+ "anyhow",
+ "arakan-context-management",
+ "arakan-providers",
+ "arakan-sdk-types",
+ "base64 0.23.1",
+ "futures",
+ "rmcp",
+ "serde_json",
+ "thiserror 2.0.20",
+ "tokio",
+ "tokio-util",
+ "uniffi",
+]
+
+[[package]]
+name = "arakan-sdk-types"
+version = "0.1.0-alpha.13"
+dependencies = [
+ "agent-client-protocol",
+ "agent-client-protocol-schema",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "arakan-test"
+version = "1.58.0"
+dependencies = [
+ "clap",
+ "serde_json",
+]
+
+[[package]]
+name = "arakan-test-support"
+version = "1.58.0"
+dependencies = [
+ "axum",
+ "env-lock",
+ "opentelemetry",
+ "rmcp",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "arbitrary"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2075,30 +2538,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a"
 
 [[package]]
-name = "cmpv2"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "961b955a666e25ee5a1091d219128d6e6401e3dab84efb1a2bf6b4035d797b39"
-dependencies = [
- "crmf",
- "der 0.7.10",
- "spki 0.7.3",
- "x509-cert",
-]
-
-[[package]]
-name = "cms"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b77c319abfd5219629c45c34c89ba945ed3c5e49fcde9d16b6c3885f118a730"
-dependencies = [
- "const-oid 0.9.6",
- "der 0.7.10",
- "spki 0.7.3",
- "x509-cert",
-]
-
-[[package]]
 name = "cobs"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2203,12 +2642,6 @@ dependencies = [
  "unicode-width",
  "windows-sys 0.61.2",
 ]
-
-[[package]]
-name = "const-oid"
-version = "0.9.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
 
 [[package]]
 name = "const-oid"
@@ -2398,18 +2831,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "crmf"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36fe21b96d5b87f5de4b5b7202ec41c00110ac817ce6728fe75fb2fe5962ed92"
-dependencies = [
- "cms",
- "der 0.7.10",
- "spki 0.7.3",
- "x509-cert",
 ]
 
 [[package]]
@@ -2819,25 +3240,12 @@ dependencies = [
 
 [[package]]
 name = "der"
-version = "0.7.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7c1832837b905bbfb5101e07cc24c8deddf52f93225eee6ead5f4d63d53ddcb"
-dependencies = [
- "const-oid 0.9.6",
- "der_derive",
- "flagset",
- "pem-rfc7468 0.7.0",
- "zeroize",
-]
-
-[[package]]
-name = "der"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a878c850e9e421b20262e9b41f9c860e4785fa07541c266b62ff9d1ef998a80a"
 dependencies = [
- "const-oid 0.10.2",
- "pem-rfc7468 1.0.0",
+ "const-oid",
+ "pem-rfc7468",
  "zeroize",
 ]
 
@@ -2853,17 +3261,6 @@ dependencies = [
  "num-bigint 0.4.8",
  "num-traits",
  "rusticata-macros",
-]
-
-[[package]]
-name = "der_derive"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8034092389675178f570469e6c3b0465d3d30b4505c294a6550db47f3c17ad18"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]
@@ -2963,7 +3360,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
 dependencies = [
  "block-buffer 0.12.1",
- "const-oid 0.10.2",
+ "const-oid",
  "crypto-common 0.2.2",
  "ctutils",
 ]
@@ -3144,7 +3541,7 @@ checksum = "29fcf32e6c73d1079f83ab4d782de2d81620346a5f38c6237a86a22f8368980a"
 dependencies = [
  "pkcs8",
  "serdect",
- "signature 3.0.0",
+ "signature",
 ]
 
 [[package]]
@@ -3158,7 +3555,7 @@ dependencies = [
  "rand_core 0.10.1",
  "serde",
  "sha2 0.11.0",
- "signature 3.0.0",
+ "signature",
  "subtle",
  "zeroize",
 ]
@@ -3475,12 +3872,6 @@ name = "fixedbitset"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d674e81391d1e1ab681a28d99df07927c6d4aa5b027d7da16ba32d1d21ecd99"
-
-[[package]]
-name = "flagset"
-version = "0.4.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7ac824320a75a52197e8f2d787f6a38b6718bb6897a35142d749af3c0e8f4fe"
 
 [[package]]
 name = "flate2"
@@ -4183,471 +4574,6 @@ dependencies = [
  "log",
  "plain",
  "scroll",
-]
-
-[[package]]
-name = "arakan"
-version = "1.58.0"
-dependencies = [
- "agent-client-protocol",
- "agent-client-protocol-http",
- "agent-client-protocol-schema",
- "anyhow",
- "arboard",
- "async-stream",
- "async-trait",
- "aws-config",
- "aws-lc-rs",
- "aws-sdk-bedrockruntime",
- "aws-sdk-sagemakerruntime",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "axum",
- "axum-server",
- "base64 0.23.1",
- "blake3",
- "boa_engine",
- "byteorder",
- "bytes",
- "candle-core",
- "candle-nn",
- "candle-transformers",
- "chrono",
- "clap",
- "ctor",
- "dirs 7.0.0",
- "dotenvy",
- "dtor",
- "env-lock",
- "etcetera",
- "fs-err",
- "fs2",
- "futures",
- "gethostname",
- "arakan-acp-macros",
- "arakan-agent",
- "arakan-context-management",
- "arakan-download-manager",
- "arakan-mcp",
- "arakan-providers",
- "arakan-sdk-types",
- "arakan-test-support",
- "http 1.5.0",
- "ignore",
- "image 0.24.9",
- "include_dir",
- "indexmap 2.14.2",
- "indoc",
- "insta",
- "jsonschema",
- "keyring",
- "libc",
- "lru",
- "minijinja",
- "mockall",
- "nanoid",
- "ntapi",
- "oauth2",
- "once_cell",
- "openssl",
- "opentelemetry",
- "opentelemetry-appender-tracing",
- "opentelemetry-otlp",
- "opentelemetry-stdout",
- "opentelemetry_sdk",
- "pastey",
- "pem 4.0.0",
- "pkcs8",
- "rand 0.10.2",
- "rayon",
- "rcgen",
- "regex",
- "reqwest",
- "ring",
- "rmcp",
- "rubato",
- "rustls",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serde_path_to_error",
- "serde_urlencoded",
- "serde_yaml",
- "serial_test",
- "sha2 0.11.0",
- "shell-words",
- "shellexpand",
- "smithy-transport-reqwest",
- "sqlx",
- "strum 0.28.0",
- "subtle",
- "symphonia",
- "sys-info",
- "tempfile",
- "test-case",
- "thiserror 2.0.20",
- "tiktoken-rs",
- "tokenizers 0.23.2",
- "tokio",
- "tokio-cron-scheduler",
- "tokio-stream",
- "tokio-util",
- "tower",
- "tower-http 0.7.1",
- "tracing",
- "tracing-appender",
- "tracing-futures",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "tree-sitter",
- "tree-sitter-go",
- "tree-sitter-java",
- "tree-sitter-javascript",
- "tree-sitter-kotlin-ng",
- "tree-sitter-python",
- "tree-sitter-ruby",
- "tree-sitter-rust",
- "tree-sitter-swift",
- "tree-sitter-typescript",
- "unicode-normalization",
- "url",
- "urlencoding",
- "uuid",
- "v_htmlescape",
- "webbrowser",
- "which 8.0.6",
- "winapi",
- "wiremock",
-]
-
-[[package]]
-name = "arakan-acp-macros"
-version = "1.58.0"
-dependencies = [
- "quote",
- "syn 3.0.5",
-]
-
-[[package]]
-name = "arakan-agent"
-version = "0.1.0-alpha.13"
-dependencies = [
- "anyhow",
- "async-trait",
- "futures",
- "arakan-provider-types",
- "arakan-sdk-types",
- "js-sys",
- "regex",
- "rmcp",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serde_yaml",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-futures",
- "uuid",
- "wasm-bindgen-futures",
- "wasm-bindgen-test",
-]
-
-[[package]]
-name = "arakan-cli"
-version = "1.58.0"
-dependencies = [
- "agent-client-protocol",
- "anstream",
- "anyhow",
- "async-trait",
- "axum",
- "axum-server",
- "base64 0.23.1",
- "bat",
- "bzip2",
- "chrono",
- "clap",
- "clap_complete",
- "clap_complete_nushell",
- "clap_mangen",
- "cliclack",
- "comfy-table",
- "console",
- "env-lock",
- "etcetera",
- "fs2",
- "futures",
- "arakan",
- "arakan-mcp",
- "arakan-providers",
- "arakan-roaming",
- "indicatif",
- "libc",
- "ntapi",
- "open",
- "qrcode",
- "rand 0.10.2",
- "regex",
- "reqwest",
- "rmcp",
- "rustyline",
- "serde",
- "serde_json",
- "serde_yaml",
- "sha2 0.11.0",
- "shlex 2.0.1",
- "sigstore-verify",
- "snap",
- "strsim",
- "strum 0.28.0",
- "tar",
- "tempfile",
- "test-case",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-subscriber",
- "unicode-segmentation",
- "url",
- "urlencoding",
- "webbrowser",
- "winapi",
- "zip 9.0.5",
-]
-
-[[package]]
-name = "arakan-context-management"
-version = "0.1.0-alpha.13"
-dependencies = [
- "anyhow",
- "async-trait",
- "arakan-provider-types",
- "include_dir",
- "minijinja",
- "rmcp",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "arakan-download-manager"
-version = "0.1.0-alpha.13"
-dependencies = [
- "anyhow",
- "once_cell",
- "reqwest",
- "serde",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "arakan-local-inference"
-version = "0.1.0-alpha.13"
-dependencies = [
- "anyhow",
- "async-stream",
- "async-trait",
- "base64 0.23.1",
- "chrono",
- "encoding_rs",
- "env-lock",
- "etcetera",
- "futures",
- "arakan-download-manager",
- "arakan-provider-types",
- "arakan-sdk-types",
- "hf-hub",
- "include_dir",
- "llama-cpp-2",
- "llama-cpp-sys-2",
- "minijinja",
- "pulldown-cmark",
- "regex",
- "rmcp",
- "safemlx",
- "safemlx-lm",
- "safemlx-lm-utils",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "arakan-mcp"
-version = "1.58.0"
-dependencies = [
- "anyhow",
- "base64 0.23.1",
- "chrono",
- "docx-rs",
- "etcetera",
- "image 0.24.9",
- "include_dir",
- "indoc",
- "lopdf",
- "once_cell",
- "process-wrap 9.1.0",
- "rmcp",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "shell-words",
- "tempfile",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "umya-spreadsheet",
-]
-
-[[package]]
-name = "arakan-provider-types"
-version = "0.1.0-alpha.13"
-dependencies = [
- "anyhow",
- "async-stream",
- "async-trait",
- "base64 0.23.1",
- "chrono",
- "env-lock",
- "futures",
- "getrandom 0.4.3",
- "gloo-timers",
- "once_cell",
- "rand 0.10.2",
- "regex",
- "reqwest",
- "rmcp",
- "serde",
- "serde_json",
- "strum 0.28.0",
- "tempfile",
- "test-case",
- "thiserror 2.0.20",
- "tokio",
- "tokio-stream",
- "tracing",
- "unicode-normalization",
- "uuid",
- "zstd",
-]
-
-[[package]]
-name = "arakan-providers"
-version = "0.1.0-alpha.13"
-dependencies = [
- "anyhow",
- "async-stream",
- "async-trait",
- "base64 0.23.1",
- "chrono",
- "env-lock",
- "flate2",
- "futures",
- "arakan-local-inference",
- "arakan-provider-types",
- "http 1.5.0",
- "include_dir",
- "pem 4.0.0",
- "pkcs8",
- "rcgen",
- "reqwest",
- "reqwest-websocket",
- "rmcp",
- "sec1",
- "serde",
- "serde_json",
- "tempfile",
- "test-case",
- "tokio",
- "tokio-rustls",
- "tokio-stream",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
- "tracing",
- "url",
- "urlencoding",
- "uuid",
- "wiremock",
-]
-
-[[package]]
-name = "arakan-roaming"
-version = "1.58.0"
-dependencies = [
- "anyhow",
- "base64 0.23.1",
- "fs2",
- "futures",
- "iroh",
- "iroh-relay",
- "serde",
- "serde_json",
- "sha2 0.11.0",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "arakan-sdk"
-version = "0.1.0-alpha.13"
-dependencies = [
- "agent-client-protocol",
- "agent-client-protocol-schema",
- "anyhow",
- "base64 0.23.1",
- "futures",
- "arakan-context-management",
- "arakan-providers",
- "arakan-sdk-types",
- "rmcp",
- "serde_json",
- "thiserror 2.0.20",
- "tokio",
- "tokio-util",
- "uniffi",
-]
-
-[[package]]
-name = "arakan-sdk-types"
-version = "0.1.0-alpha.13"
-dependencies = [
- "agent-client-protocol",
- "agent-client-protocol-schema",
- "schemars 1.2.2",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "arakan-test"
-version = "1.58.0"
-dependencies = [
- "clap",
- "serde_json",
-]
-
-[[package]]
-name = "arakan-test-support"
-version = "1.58.0"
-dependencies = [
- "axum",
- "env-lock",
- "opentelemetry",
- "rmcp",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -7374,15 +7300,6 @@ dependencies = [
 
 [[package]]
 name = "pem-rfc7468"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88b39c9bfcfc231068454382784bb460aae594343fb030d46e9f50a645418412"
-dependencies = [
- "base64ct",
-]
-
-[[package]]
-name = "pem-rfc7468"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6305423e0e7738146434843d1694d621cce767262b2a86910beab705e4493d9"
@@ -7516,8 +7433,8 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "451913da69c775a56034ea8d9003d27ee8948e12443eae7c038ba100a4f21cb7"
 dependencies = [
- "der 0.8.2",
- "spki 0.8.0",
+ "der",
+ "spki",
 ]
 
 [[package]]
@@ -8836,7 +8753,7 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d56d437c2f19203ce5f7122e507831de96f3d2d4d3be5af44a0b0a09d8a80e4d"
 dependencies = [
- "der 0.8.2",
+ "der",
  "zeroize",
 ]
 
@@ -8967,17 +8884,6 @@ dependencies = [
  "serde",
  "serde_core",
  "zmij",
-]
-
-[[package]]
-name = "serde_json_canonicalizer"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe52319a927259afbfa5180c5157cd8167edfd3e8c254f9558c7fef44c5649f2"
-dependencies = [
- "ryu-js",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -9210,201 +9116,11 @@ dependencies = [
 
 [[package]]
 name = "signature"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
-dependencies = [
- "rand_core 0.6.4",
-]
-
-[[package]]
-name = "signature"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28d567dcbaf0049cb8ac2608a76cd95ff9e4412e1899d389ee400918ca7537f5"
 dependencies = [
  "rand_core 0.10.1",
-]
-
-[[package]]
-name = "sigstore-bundle"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5948e95f63e900fa92936ecf72c7f2251f83d27560a35a4aae560cc745f8b687"
-dependencies = [
- "base64 0.22.1",
- "hex",
- "serde",
- "serde_json",
- "sigstore-crypto",
- "sigstore-rekor",
- "sigstore-tsa",
- "sigstore-types",
- "thiserror 2.0.20",
-]
-
-[[package]]
-name = "sigstore-crypto"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22f27364b37bec104a904f10a675c8cdf05d5e48a980569368f0cd0c119b2652"
-dependencies = [
- "aws-lc-rs",
- "base64 0.22.1",
- "const-oid 0.9.6",
- "der 0.7.10",
- "digest 0.10.7",
- "pem 3.0.6",
- "rand_core 0.9.5",
- "sha2 0.10.9",
- "signature 2.2.0",
- "sigstore-types",
- "spki 0.7.3",
- "thiserror 2.0.20",
- "tracing",
- "x509-cert",
-]
-
-[[package]]
-name = "sigstore-merkle"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ee85fd9fb550efd7c8a59447cb0ef4eb02f1258f3ffa80c88d38427c3930af3"
-dependencies = [
- "base64 0.22.1",
- "hex",
- "sigstore-crypto",
- "sigstore-types",
- "thiserror 2.0.20",
-]
-
-[[package]]
-name = "sigstore-rekor"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b97c5a866f849a9445ae657bef0caa2db053a82827e6dae3a2b3de9c15a6a1a"
-dependencies = [
- "base64 0.22.1",
- "hex",
- "reqwest",
- "serde",
- "serde_json",
- "sigstore-crypto",
- "sigstore-merkle",
- "sigstore-types",
- "thiserror 2.0.20",
- "url",
-]
-
-[[package]]
-name = "sigstore-trust-root"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "389b54d1b8ace20ba86fdf90e5e655495f65f1abbc7d5d0eb7494defa9ad32f0"
-dependencies = [
- "base64 0.22.1",
- "hex",
- "jiff",
- "rustls-pki-types",
- "serde",
- "serde_json",
- "sigstore-crypto",
- "sigstore-tuf",
- "sigstore-types",
- "thiserror 2.0.20",
- "x509-cert",
-]
-
-[[package]]
-name = "sigstore-tsa"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b58fe92d4d8cf4b7215b927b70bc1245b6e0d70d801febdfe0cd265ad97ebf8b"
-dependencies = [
- "aws-lc-rs",
- "base64 0.22.1",
- "cmpv2",
- "cms",
- "const-oid 0.9.6",
- "der 0.7.10",
- "hex",
- "jiff",
- "rand 0.9.5",
- "reqwest",
- "rustls-pki-types",
- "rustls-webpki",
- "sigstore-crypto",
- "sigstore-types",
- "thiserror 2.0.20",
- "tracing",
- "x509-cert",
- "x509-tsp",
-]
-
-[[package]]
-name = "sigstore-tuf"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eedac50883a917b7b434db22e2e6e853ace8c00f4a9c27f53e1e9c87e6d89fe4"
-dependencies = [
- "globset",
- "hex",
- "jiff",
- "reqwest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "sigstore-crypto",
- "sigstore-types",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "sigstore-types"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "236474c535a3157839926a0ae18f9c0c22b151e49634da6e5b18ad7cac8a3b69"
-dependencies = [
- "base64 0.22.1",
- "hex",
- "pem 3.0.6",
- "serde",
- "serde_json",
- "thiserror 2.0.20",
-]
-
-[[package]]
-name = "sigstore-verify"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "558f71aad0e1c5925d29ae2024f55f0f8898a7ad450c93668f99086624c421e0"
-dependencies = [
- "base64 0.22.1",
- "cms",
- "const-oid 0.9.6",
- "hex",
- "jiff",
- "pem 3.0.6",
- "rustls-pki-types",
- "rustls-webpki",
- "serde",
- "serde_json",
- "serde_json_canonicalizer",
- "sigstore-bundle",
- "sigstore-crypto",
- "sigstore-merkle",
- "sigstore-rekor",
- "sigstore-trust-root",
- "sigstore-tsa",
- "sigstore-types",
- "thiserror 2.0.20",
- "tls_codec",
- "tracing",
- "x509-cert",
 ]
 
 [[package]]
@@ -9494,12 +9210,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "snap"
-version = "1.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "199905e6153d6405f9728fe44daace35f8f837bbf830bb6e85fbd5828709a886"
-
-[[package]]
 name = "socket2"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9543,22 +9253,12 @@ checksum = "023a211cb3138dbc438680b32560ad89f699977624c9f8dbb95a47d5b4c07dd3"
 
 [[package]]
 name = "spki"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
-dependencies = [
- "base64ct",
- "der 0.7.10",
-]
-
-[[package]]
-name = "spki"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d9efca8738c78ee9484207732f728b1ef517bbb1833d6fc0879ca898a522f6f"
 dependencies = [
  "base64ct",
- "der 0.8.2",
+ "der",
 ]
 
 [[package]]
@@ -10431,27 +10131,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
 
 [[package]]
-name = "tls_codec"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0de2e01245e2bb89d6f05801c564fa27624dbd7b1846859876c7dad82e90bf6b"
-dependencies = [
- "tls_codec_derive",
- "zeroize",
-]
-
-[[package]]
-name = "tls_codec_derive"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d2e76690929402faae40aebdda620a2c0e25dd6d3b9afe48867dfd95991f4bd"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
 name = "tokenizers"
 version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10526,7 +10205,6 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
- "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2",
@@ -12409,20 +12087,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea6fc2961e4ef194dcbfe56bb845534d0dc8098940c7e5c012a258bfec6701bd"
 
 [[package]]
-name = "x509-cert"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1301e935010a701ae5f8655edc0ad17c44bad3ac5ce8c39185f75453b720ae94"
-dependencies = [
- "const-oid 0.9.6",
- "der 0.7.10",
- "sha1 0.10.7",
- "signature 2.2.0",
- "spki 0.7.3",
- "tls_codec",
-]
-
-[[package]]
 name = "x509-parser"
 version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12439,17 +12103,6 @@ dependencies = [
  "rusticata-macros",
  "thiserror 2.0.20",
  "time",
-]
-
-[[package]]
-name = "x509-tsp"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5ceece934a21607055b7ac5c25adb56a2ff559804b10705dc674d1d838c15e1"
-dependencies = [
- "cmpv2",
- "cms",
- "der 0.7.10",
 ]
 
 [[package]]

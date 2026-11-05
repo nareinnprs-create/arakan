@@ -105,6 +105,7 @@ default = [
     "acp-http",
     "online-model-meta",
 ]
+system-keyring = ["arakan/system-keyring"]
 online-model-meta = ["arakan/online-model-meta"]
 roaming = ["dep:arakan-roaming", "dep:qrcode", "dep:fs2", "dep:agent-client-protocol"]
 code-mode = ["arakan/code-mode"]
