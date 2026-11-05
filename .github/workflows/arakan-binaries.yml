@@ -17,7 +17,7 @@ jobs:
           - { os: ubuntu-22.04, target: linux-x64, exe: '', archive: tar.gz }
           - { os: windows-latest, target: win-x64, exe: '.exe', archive: zip }
           - { os: macos-14, target: mac-arm64, exe: '', archive: tar.gz }
-          - { os: macos-13, target: mac-x64, exe: '', archive: tar.gz }
+          - { os: macos-14, target: mac-x64, exe: '', archive: tar.gz, cross: 'x86_64-apple-darwin' }
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Code
@@ -29,11 +29,21 @@ jobs:
       - name: Build lean ACP binary
         run: cargo build --release -p arakan-cli --no-default-features --features rustls-tls
 
+      - name: Cross-compile mac-x64 (Intel) from arm runner
+        if: matrix.cross != ''
+        run: |
+          rustup target add ${{ matrix.cross }}
+          cargo build --release --target ${{ matrix.cross }} -p arakan-cli --no-default-features --features rustls-tls
+
       - name: Package (unix)
         if: runner.os != 'Windows'
         run: |
           mkdir -p stage
-          cp target/release/arakan stage/arakan
+          if [ -n "${{ matrix.cross }}" ]; then
+            cp "target/${{ matrix.cross }}/release/arakan" stage/arakan
+          else
+            cp target/release/arakan stage/arakan
+          fi
           cp NOTICE-MODIFICATIONS.md LICENSE stage/
           tar -czf arakan-${{ matrix.target }}.tar.gz -C stage .
           ls -la arakan-${{ matrix.target }}.tar.gz
