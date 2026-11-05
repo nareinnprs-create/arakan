@@ -1,7 +1,7 @@
 use crate::conversation::message::{Message, MessageContent, ToolResult};
 use crate::session::Session;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::model::ModelConfig;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::model::ModelConfig;
 use rmcp::model::{CallToolRequestParams, CallToolResult, Role};
 use serde_json::{json, Value};
 use tracing::Span;
@@ -114,7 +114,7 @@ pub(super) fn agent_name(session: &Session) -> &str {
     session
         .recipe
         .as_ref()
-        .map_or("goose", |recipe| recipe.title.as_str())
+        .map_or("arakan", |recipe| recipe.title.as_str())
 }
 
 pub(super) fn successful_tool_result_json(result: &ToolResult<CallToolResult>) -> Option<String> {
@@ -357,7 +357,7 @@ pub(super) mod test_support {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use goose_test_support::otel::clear_otel_env;
+    use arakan_test_support::otel::clear_otel_env;
     use rmcp::{model::CallToolRequestParams, object};
 
     fn test_recipe(title: &str) -> crate::recipe::Recipe {
@@ -564,8 +564,8 @@ mod tests {
     }
 
     #[test]
-    fn agent_name_returns_goose_default() {
+    fn agent_name_returns_arakan_default() {
         let session = Session::default();
-        assert_eq!(agent_name(&session), "goose");
+        assert_eq!(agent_name(&session), "arakan");
     }
 }

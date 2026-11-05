@@ -2,17 +2,17 @@ use crate::session::builder::ExtensionFailure;
 use anstream::{adapter::strip_str, eprintln, println};
 use bat::WrappingMode;
 use console::{measure_text_width, style, Color, StyledObject, Term};
-use goose::agents::platform_extensions::todo::TODO_WRITE_TOOL_NAME_COMPLETE;
-use goose::config::Config;
-use goose::conversation::message::{
+use arakan::agents::platform_extensions::todo::TODO_WRITE_TOOL_NAME_COMPLETE;
+use arakan::config::Config;
+use arakan::conversation::message::{
     ActionRequiredData, Message, MessageContent, SystemNotificationContent, SystemNotificationType,
     ToolNameParts, ToolRequest, ToolResponse,
 };
-use goose::providers::canonical_cost::estimate_model_cost;
+use arakan::providers::canonical_cost::estimate_model_cost;
 #[cfg(target_os = "windows")]
-use goose::subprocess::SubprocessExt;
-use goose::utils::safe_truncate;
-use goose_providers::conversation::token_usage::Usage;
+use arakan::subprocess::SubprocessExt;
+use arakan::utils::safe_truncate;
+use arakan_providers::conversation::token_usage::Usage;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use rmcp::model::{CallToolRequestParams, JsonObject, PromptArgument, Role};
 use serde_json::Value;
@@ -59,10 +59,10 @@ impl Theme {
     fn as_str(&self) -> String {
         match self {
             Theme::Light => Config::global()
-                .get_param::<String>("GOOSE_CLI_LIGHT_THEME")
+                .get_param::<String>("ARAKAN_CLI_LIGHT_THEME")
                 .unwrap_or(DEFAULT_CLI_LIGHT_THEME.to_string()),
             Theme::Dark => Config::global()
-                .get_param::<String>("GOOSE_CLI_DARK_THEME")
+                .get_param::<String>("ARAKAN_CLI_DARK_THEME")
                 .unwrap_or(DEFAULT_CLI_DARK_THEME.to_string()),
             Theme::Ansi => "base16".to_string(),
         }
@@ -89,23 +89,23 @@ impl Theme {
 
 thread_local! {
     static CURRENT_THEME: RefCell<Theme> = RefCell::new(
-        std::env::var("GOOSE_CLI_THEME").ok()
+        std::env::var("ARAKAN_CLI_THEME").ok()
             .map(|val| Theme::from_config_str(&val))
             .unwrap_or_else(||
-                Config::global().get_param::<String>("GOOSE_CLI_THEME").ok()
+                Config::global().get_param::<String>("ARAKAN_CLI_THEME").ok()
                     .map(|val| Theme::from_config_str(&val))
                     .unwrap_or(Theme::Ansi)
             )
     );
     static SHOW_FULL_TOOL_OUTPUT: RefCell<bool> = RefCell::new(
-        Config::global().get_param::<bool>("GOOSE_SHOW_FULL_OUTPUT").unwrap_or(false)
+        Config::global().get_param::<bool>("ARAKAN_SHOW_FULL_OUTPUT").unwrap_or(false)
     );
 }
 
 pub fn set_theme(theme: Theme) {
     let config = Config::global();
     config
-        .set_param("GOOSE_CLI_THEME", theme.as_config_string())
+        .set_param("ARAKAN_CLI_THEME", theme.as_config_string())
         .expect("Failed to set theme");
     CURRENT_THEME.with(|t| *t.borrow_mut() = theme);
 
@@ -116,13 +116,13 @@ pub fn set_theme(theme: Theme) {
         Theme::Ansi => "ansi",
     };
 
-    if let Err(e) = config.set_param("GOOSE_CLI_THEME", theme_str) {
+    if let Err(e) = config.set_param("ARAKAN_CLI_THEME", theme_str) {
         eprintln!("Failed to save theme setting to config: {}", e);
     }
 }
 
 /// Ring the terminal bell so an unfocused terminal can badge or chime.
-/// Opt-in via `GOOSE_CLI_BELL=true` (environment or config); terminals
+/// Opt-in via `ARAKAN_CLI_BELL=true` (environment or config); terminals
 /// decide how to surface it, typically only when the window lacks focus.
 pub fn emit_attention_bell() {
     if !bell_enabled() {
@@ -138,7 +138,7 @@ pub fn emit_attention_bell() {
 
 fn bell_enabled() -> bool {
     Config::global()
-        .get_param::<bool>("GOOSE_CLI_BELL")
+        .get_param::<bool>("ARAKAN_CLI_BELL")
         .unwrap_or(false)
 }
 
@@ -250,7 +250,7 @@ pub fn show_extension_failures(failures: &[ExtensionFailure]) {
         eprintln!(
             "{}",
             style(format!(
-                "    Hint: ask goose to help debug the '{}' extension",
+                "    Hint: ask arakan to help debug the '{}' extension",
                 failure.label
             ))
             .dim()
@@ -259,7 +259,7 @@ pub fn show_extension_failures(failures: &[ExtensionFailure]) {
 }
 
 pub fn run_status_hook(status: &str) {
-    if let Ok(hook) = Config::global().get_param::<String>("GOOSE_STATUS_HOOK") {
+    if let Ok(hook) = Config::global().get_param::<String>("ARAKAN_STATUS_HOOK") {
         let status = status.to_string();
         std::thread::spawn(move || {
             #[cfg(target_os = "windows")]
@@ -537,16 +537,16 @@ pub fn render_text_no_newlines(text: &str, color: Option<Color>, dim: bool) {
     print!("{}", styled_text);
 }
 
-pub fn goose_mode_message(text: &str) {
+pub fn arakan_mode_message(text: &str) {
     println!("\n{} {}", accent("mode:"), text);
 }
 
 /// Any value of the environment variable turns thinking output on, which is what the
 /// documentation promises; the configured boolean is read only when it is not set.
 fn thinking_enabled(config: &Config) -> bool {
-    std::env::var_os("GOOSE_CLI_SHOW_THINKING").is_some()
+    std::env::var_os("ARAKAN_CLI_SHOW_THINKING").is_some()
         || config
-            .get_param::<bool>("GOOSE_CLI_SHOW_THINKING")
+            .get_param::<bool>("ARAKAN_CLI_SHOW_THINKING")
             .unwrap_or(false)
 }
 
@@ -617,7 +617,7 @@ fn render_tool_response(resp: &ToolResponse, debug: bool) {
                 }
 
                 let min_priority = config
-                    .get_param::<f32>("GOOSE_CLI_MIN_PRIORITY")
+                    .get_param::<f32>("ARAKAN_CLI_MIN_PRIORITY")
                     .ok()
                     .unwrap_or(DEFAULT_MIN_PRIORITY);
 
@@ -1504,7 +1504,7 @@ pub fn display_session_info(
         .map(|p| p.display().to_string())
         .unwrap_or_else(|| "unknown".to_string());
 
-    // ASCII art goose with session info on the right
+    // ASCII art arakan with session info on the right
     println!();
     println!(
         "  {}  {} {} {} {} {}",
@@ -1535,7 +1535,7 @@ pub fn display_session_info(
     println!(
         "  {}  {}",
         style("   L L").white(),
-        style("   goose is ready").white()
+        style("   arakan is ready").white()
     );
 }
 
@@ -1770,8 +1770,8 @@ mod tests {
     #[test]
     fn terminal_line_sanitizer_preserves_plain_unicode_text() {
         assert_eq!(
-            sanitize_terminal_line("goose 🪿\t日本語"),
-            "goose 🪿\t日本語"
+            sanitize_terminal_line("arakan 🪿\t日本語"),
+            "arakan 🪿\t日本語"
         );
     }
 
@@ -1890,7 +1890,7 @@ mod tests {
 
     #[test]
     fn tool_confirmation_renders_authoritative_details_on_stderr() {
-        const CHILD_ENV: &str = "GOOSE_TEST_TOOL_CONFIRMATION_STDERR_CHILD";
+        const CHILD_ENV: &str = "ARAKAN_TEST_TOOL_CONFIRMATION_STDERR_CHILD";
         const AUTHORITATIVE_TOKEN: &str = "authoritative-redirect-token";
         const PROVIDER_TOKEN: &str = "provider-prompt-token";
 
@@ -2064,7 +2064,7 @@ mod tests {
 
     #[test]
     fn any_environment_value_shows_thinking() {
-        let _guard = env_lock::lock_env([("GOOSE_CLI_SHOW_THINKING", Some("1"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CLI_SHOW_THINKING", Some("1"))]);
         let (config, _config_file, _secrets_file) = config_with("");
 
         assert!(thinking_enabled(&config));
@@ -2072,7 +2072,7 @@ mod tests {
 
     #[test]
     fn empty_environment_value_shows_thinking() {
-        let _guard = env_lock::lock_env([("GOOSE_CLI_SHOW_THINKING", Some(""))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CLI_SHOW_THINKING", Some(""))]);
         let (config, _config_file, _secrets_file) = config_with("");
 
         assert!(thinking_enabled(&config));
@@ -2080,12 +2080,12 @@ mod tests {
 
     #[test]
     fn configured_value_is_used_when_the_variable_is_unset() {
-        let _guard = env_lock::lock_env([("GOOSE_CLI_SHOW_THINKING", None::<&str>)]);
+        let _guard = env_lock::lock_env([("ARAKAN_CLI_SHOW_THINKING", None::<&str>)]);
 
-        let (enabled, _c1, _s1) = config_with("GOOSE_CLI_SHOW_THINKING: true\n");
+        let (enabled, _c1, _s1) = config_with("ARAKAN_CLI_SHOW_THINKING: true\n");
         assert!(thinking_enabled(&enabled));
 
-        let (disabled, _c2, _s2) = config_with("GOOSE_CLI_SHOW_THINKING: false\n");
+        let (disabled, _c2, _s2) = config_with("ARAKAN_CLI_SHOW_THINKING: false\n");
         assert!(!thinking_enabled(&disabled));
 
         let (unset, _c3, _s3) = config_with("");
@@ -2094,7 +2094,7 @@ mod tests {
 
     #[test]
     fn thinking_output_needs_a_terminal() {
-        let _guard = env_lock::lock_env([("GOOSE_CLI_SHOW_THINKING", Some("1"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CLI_SHOW_THINKING", Some("1"))]);
 
         assert_eq!(should_show_thinking(), std::io::stdout().is_terminal());
     }

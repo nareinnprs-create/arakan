@@ -3,7 +3,7 @@ mod fake_live_voice_provider;
 use super::super::interaction::{LiveMainAgent, DELEGATION_INSTRUCTION, PROVIDER_CLEANUP_TIMEOUT};
 use super::*;
 use fake_live_voice_provider::{provider_channel, FakeConnectionDriver};
-use goose_providers::{live_voice_provider::ProviderConnectionEvent, model::ModelConfig};
+use arakan_providers::{live_voice_provider::ProviderConnectionEvent, model::ModelConfig};
 use rmcp::model::Role;
 use std::time::Duration;
 use tokio::task::JoinHandle;
@@ -71,7 +71,7 @@ async fn live_session(
             std::path::PathBuf::from("/tmp/test"),
             "Live voice".into(),
             crate::session::session_manager::SessionType::User,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await
         .unwrap();
@@ -89,7 +89,7 @@ fn spawn_start(
 ) -> JoinHandle<StartResult> {
     tokio::spawn(async move {
         let reservation = service
-            .reserve_interaction(&session_id, GooseMode::Auto)
+            .reserve_interaction(&session_id, ArakanMode::Auto)
             .unwrap();
         service
             .start_interaction(
@@ -105,7 +105,7 @@ fn spawn_start(
 
 fn assert_availability(service: &LiveVoiceService, expected: Result<(), &'static str>) {
     assert_eq!(
-        service.availability(Some("main-session"), GooseMode::Auto),
+        service.availability(Some("main-session"), ArakanMode::Auto),
         expected
     );
 }
@@ -142,7 +142,7 @@ async fn establish_interaction_with(
     let start_manager = manager.clone();
     let start_task = tokio::spawn(async move {
         let reservation = start_service
-            .reserve_interaction(&start_session_id, GooseMode::Auto)
+            .reserve_interaction(&start_session_id, ArakanMode::Auto)
             .unwrap();
         start_service
             .start_interaction(
@@ -189,13 +189,13 @@ fn reports_each_eligibility_gate() {
     let ready = service();
     assert!(ready.active_runs.start_live("main-session"));
     assert_eq!(
-        ready.availability(Some("main-session"), GooseMode::Auto),
+        ready.availability(Some("main-session"), ArakanMode::Auto),
         Err("Live voice is unavailable while this session is busy")
     );
-    assert_eq!(ready.availability(None, GooseMode::Auto), Ok(()));
+    assert_eq!(ready.availability(None, ArakanMode::Auto), Ok(()));
     ready.active_runs.finish_live("main-session");
     assert_eq!(
-        ready.availability(Some("main-session"), GooseMode::Approve),
+        ready.availability(Some("main-session"), ArakanMode::Approve),
         Err("Live voice requires Autonomous mode")
     );
     assert_availability(&ready, Ok(()));
@@ -217,7 +217,7 @@ async fn start_rechecks_requirements_before_contacting_the_provider() {
     service.live_voice_resolver = Arc::new(|| Err("Live voice is disabled"));
     let (_manager, session_id) = live_session([]).await;
 
-    let result = service.reserve_interaction(&session_id, GooseMode::Auto);
+    let result = service.reserve_interaction(&session_id, ArakanMode::Auto);
 
     assert!(matches!(result, Err(LiveVoiceError::Unavailable)));
     assert!(starts.try_recv().is_err());
@@ -305,11 +305,11 @@ async fn a_start_reserves_the_session_until_it_finishes() {
     );
 
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Err("Live voice is unavailable while this session is busy")
     );
 
-    let second = service.reserve_interaction(&session_id, GooseMode::Auto);
+    let second = service.reserve_interaction(&session_id, ArakanMode::Auto);
     assert!(matches!(second, Err(LiveVoiceError::Unavailable)));
 
     pending.reject("failed").unwrap();
@@ -318,7 +318,7 @@ async fn a_start_reserves_the_session_until_it_finishes() {
         Err(LiveVoiceError::StartFailed)
     ));
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }
@@ -329,7 +329,7 @@ async fn a_cancelled_reservation_does_not_contact_the_provider() {
     let service = LiveVoiceService::for_test(provider, Arc::new(ActiveRunRegistry::default()));
     let (manager, session_id) = live_session([]).await;
     let reservation = service
-        .reserve_interaction(&session_id, GooseMode::Auto)
+        .reserve_interaction(&session_id, ArakanMode::Auto)
         .unwrap();
     reservation.stop_requested().cancel();
 
@@ -346,7 +346,7 @@ async fn a_cancelled_reservation_does_not_contact_the_provider() {
     assert!(matches!(result, Err(LiveVoiceError::Unavailable)));
     assert!(starts.try_recv().is_err());
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }
@@ -365,7 +365,7 @@ async fn a_cancelled_start_releases_the_session() {
     start_task.abort();
     assert!(matches!(start_task.await, Err(error) if error.is_cancelled()));
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
     drop(pending);
@@ -406,7 +406,7 @@ async fn session_stop_tracks_provider_start_until_the_interaction_stops() {
         .unwrap()
         .contains_key(&session_id));
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }
@@ -496,7 +496,7 @@ async fn stop_failure_releases_the_session() {
         Err(LiveVoiceError::StopFailed)
     ));
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }
@@ -524,7 +524,7 @@ async fn repeated_stop_uses_one_provider_shutdown() {
     assert!(first.is_ok());
     assert!(second.is_ok());
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }
@@ -739,7 +739,7 @@ async fn transcript_is_projected_and_flushed_before_delegation() {
             std::path::PathBuf::from("/tmp/test"),
             "Live transcript".into(),
             crate::session::session_manager::SessionType::User,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await
         .unwrap();
@@ -772,7 +772,7 @@ async fn transcript_is_projected_and_flushed_before_delegation() {
     let start_manager = session_manager.clone();
     let start = tokio::spawn(async move {
         let reservation = start_service
-            .reserve_interaction(&start_session_id, GooseMode::Auto)
+            .reserve_interaction(&start_session_id, ArakanMode::Auto)
             .unwrap();
         start_service
             .start_interaction(
@@ -973,7 +973,7 @@ async fn running_transcript_is_saved_user_only_and_steered_to_the_main_agent() {
     let (stop, ()) = tokio::join!(stop, provider);
     assert!(stop.is_ok());
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Err("Live voice is unavailable while this session is busy")
     );
     assert_eq!(
@@ -991,7 +991,7 @@ async fn running_transcript_is_saved_user_only_and_steered_to_the_main_agent() {
     finish_run.send("done".into()).unwrap();
     tokio::time::timeout(Duration::from_secs(1), async {
         while service
-            .availability(Some(&session_id), GooseMode::Auto)
+            .availability(Some(&session_id), ArakanMode::Auto)
             .is_err()
         {
             tokio::task::yield_now().await;
@@ -1058,7 +1058,7 @@ async fn provider_terminal_events_fail_and_release_the_session() {
             .await
             .is_ok());
         assert_eq!(
-            service.availability(Some(&session_id), GooseMode::Auto),
+            service.availability(Some(&session_id), ArakanMode::Auto),
             Ok(())
         );
     }
@@ -1076,7 +1076,7 @@ async fn provider_terminal_publishes_completion_after_release() {
     let start_session_id = session_id.clone();
     let start_task = tokio::spawn(async move {
         let reservation = start_service
-            .reserve_interaction(&start_session_id, GooseMode::Auto)
+            .reserve_interaction(&start_session_id, ArakanMode::Auto)
             .unwrap();
         start_service
             .start_interaction(
@@ -1103,7 +1103,7 @@ async fn provider_terminal_publishes_completion_after_release() {
 
     assert_eq!(completion, LiveVoiceInteractionCompletion::Failed);
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }
@@ -1127,7 +1127,7 @@ async fn cleanup_timeout_fails_and_releases_the_session() {
         Err(LiveVoiceError::StopFailed)
     ));
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
     drop(pending_response);
@@ -1153,7 +1153,7 @@ async fn queued_stop_wins_a_provider_close_race() {
 
     assert!(stop.is_ok());
     assert_eq!(
-        service.availability(Some(&session_id), GooseMode::Auto),
+        service.availability(Some(&session_id), ArakanMode::Auto),
         Ok(())
     );
 }

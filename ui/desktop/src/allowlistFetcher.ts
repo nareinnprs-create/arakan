@@ -11,7 +11,7 @@ export function parseAllowlistCommands(content: string): string[] {
     typeof parsed !== 'object' ||
     !Array.isArray((parsed as { extensions?: unknown }).extensions)
   ) {
-    throw new Error('Invalid GOOSE_ALLOWLIST policy: expected an extensions array');
+    throw new Error('Invalid ARAKAN_ALLOWLIST policy: expected an extensions array');
   }
 
   return (parsed as { extensions: unknown[] }).extensions.map((extension, index) => {
@@ -21,7 +21,7 @@ export function parseAllowlistCommands(content: string): string[] {
       typeof (extension as { command?: unknown }).command !== 'string' ||
       (extension as { command: string }).command.trim() === ''
     ) {
-      throw new Error(`Invalid GOOSE_ALLOWLIST policy: extension ${index} requires a command`);
+      throw new Error(`Invalid ARAKAN_ALLOWLIST policy: extension ${index} requires a command`);
     }
 
     return (extension as { command: string }).command;
@@ -67,7 +67,7 @@ export function fetchAllowlistContent(url: string): Promise<string> {
         return;
       }
       if (parsed.protocol !== 'https:') {
-        finishReject(new Error(`GOOSE_ALLOWLIST must use HTTPS: ${currentUrl}`));
+        finishReject(new Error(`ARAKAN_ALLOWLIST must use HTTPS: ${currentUrl}`));
         return;
       }
       try {

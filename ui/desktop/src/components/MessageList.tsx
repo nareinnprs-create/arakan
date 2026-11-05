@@ -1,7 +1,7 @@
 import { Fragment, memo, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { defineMessages, useIntl } from '../i18n';
-import GooseMessage from './GooseMessage';
+import ArakanMessage from './ArakanMessage';
 import UserMessage from './UserMessage';
 import {
   SystemNotificationInline,
@@ -135,7 +135,7 @@ function MessageRowComponent({
             <UserMessage message={message} onMessageUpdate={onMessageUpdate} />
           )
         ) : (
-          <GooseMessage
+          <ArakanMessage
             sessionId={sessionId}
             message={message}
             hideTimestamp={rowContext.hideTimestamp}

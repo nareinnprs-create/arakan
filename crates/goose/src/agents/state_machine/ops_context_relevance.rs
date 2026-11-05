@@ -10,7 +10,7 @@ use std::{
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_providers::{
+use arakan_providers::{
     decision::{
         DecisionAnswer, DecisionProvider, DecisionQuestion, DecisionRequest, DecisionResponse,
         NoulCriteria,
@@ -22,7 +22,7 @@ use rmcp::model::{Annotations, ContentBlock, Role};
 use serde::Serialize;
 use serde_json::{json, Value};
 
-use super::{applied, not_applicable, GooseEffect, Operation, OperationResult};
+use super::{applied, not_applicable, ArakanEffect, Operation, OperationResult};
 use crate::{
     agents::state_machine::proactive_compaction::proactive_compaction_tokens,
     conversation::message::{Message, MessageContent},
@@ -393,7 +393,7 @@ impl ContextRelevanceOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for ContextRelevanceOperation {
+impl Operation<Session, ArakanEffect> for ContextRelevanceOperation {
     fn name(&self) -> &'static str {
         NAME
     }
@@ -403,7 +403,7 @@ impl Operation<Session, GooseEffect> for ContextRelevanceOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &super::Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let Some(context_tokens) = proactive_compaction_tokens(
             session,
             conversation,
@@ -504,7 +504,7 @@ impl Operation<Session, GooseEffect> for ContextRelevanceOperation {
                 }
             }
         }
-        applied([GooseEffect::SetExtensionState {
+        applied([ArakanEffect::SetExtensionState {
             extension_name: NAME,
             version: VERSION,
             value: with_turn(previous, note),

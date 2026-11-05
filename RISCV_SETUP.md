@@ -1,17 +1,17 @@
-# Building goose for RISC-V (riscv64gc-unknown-linux-gnu)
+# Building arakan for RISC-V (riscv64gc-unknown-linux-gnu)
 
-This document describes how to build goose-cli for RISC-V 64-bit systems.
+This document describes how to build arakan-cli for RISC-V 64-bit systems.
 
 > [!WARNING]
 > This is an experimental, community-contributed build process. RISC-V is not
-> officially supported by the goose project.
+> officially supported by the arakan project.
 
 ## Prerequisites
 
 - The Rust toolchain pinned in `rust-toolchain.toml`
 - Target: `rustup target add riscv64gc-unknown-linux-gnu`
 - For cross-compilation, a RISC-V toolchain such as `gcc-riscv64-linux-gnu`
-  and the target libraries required by Goose's native dependencies
+  and the target libraries required by Arakan's native dependencies
 
 ### Linker configuration
 
@@ -38,10 +38,10 @@ different name.
 Run from the repository root:
 
 ```bash
-cargo build --release --target riscv64gc-unknown-linux-gnu -p goose-cli --bin goose
+cargo build --release --target riscv64gc-unknown-linux-gnu -p arakan-cli --bin arakan
 ```
 
-Output: `target/riscv64gc-unknown-linux-gnu/release/goose`
+Output: `target/riscv64gc-unknown-linux-gnu/release/arakan`
 
 Self-update is unavailable on RISC-V because release artifacts are not published
 for this platform. Rebuild from source to update.
@@ -51,12 +51,12 @@ for this platform. Rebuild from source to update.
 Check the binary's architecture:
 
 ```bash
-file target/riscv64gc-unknown-linux-gnu/release/goose
+file target/riscv64gc-unknown-linux-gnu/release/arakan
 ```
 
 On RISC-V hardware, run:
 
 ```bash
-./target/riscv64gc-unknown-linux-gnu/release/goose --version
-./target/riscv64gc-unknown-linux-gnu/release/goose doctor
+./target/riscv64gc-unknown-linux-gnu/release/arakan --version
+./target/riscv64gc-unknown-linux-gnu/release/arakan doctor
 ```

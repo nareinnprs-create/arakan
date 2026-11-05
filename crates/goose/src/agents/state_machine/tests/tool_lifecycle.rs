@@ -16,13 +16,13 @@ use crate::agents::state_machine::MAX_TURNS_MESSAGE;
 use crate::agents::tool_execution::{CHAT_MODE_TOOL_SKIPPED_RESPONSE, DECLINED_RESPONSE};
 use crate::agents::AgentEvent;
 use crate::config::permission::PermissionLevel;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, MessageContent};
 use crate::permission::Permission;
 
 async fn pipeline_with_gated_divide() -> Result<(TestPipeline, Arc<DummyApi>)> {
     let (pipeline, api) = test_pipeline().await?;
-    let pipeline = pipeline.with_goose_mode(GooseMode::Approve).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Approve).await;
     pipeline.set_permission(ADD, PermissionLevel::AlwaysAllow);
     api.on("add four and halve it")
         .calls([("free", ADD, value(4)), ("gated", DIVIDE, value(2))]);
@@ -223,7 +223,7 @@ async fn provider_turn_canonicalizes_only_advertised_mangled_tool_names() -> Res
 async fn toolshim_provider_turn_executes_advertised_tools() -> Result<()> {
     let (pipeline, api) = test_pipeline().await?;
     let model_config =
-        goose_providers::model::ModelConfig::new(goose_providers::openai::OPEN_AI_DEFAULT_MODEL)
+        arakan_providers::model::ModelConfig::new(arakan_providers::openai::OPEN_AI_DEFAULT_MODEL)
             .with_canonical_limits("openai")
             .with_toolshim(true);
     let pipeline = pipeline.with_model_config(model_config).await;
@@ -290,7 +290,7 @@ async fn recover_from_missing_tool() -> Result<()> {
 
     let (pipeline, api) = test_pipeline().await?;
     let model_config =
-        goose_providers::model::ModelConfig::new(goose_providers::openai::OPEN_AI_DEFAULT_MODEL)
+        arakan_providers::model::ModelConfig::new(arakan_providers::openai::OPEN_AI_DEFAULT_MODEL)
             .with_canonical_limits("openai")
             .with_toolshim(true);
     let pipeline = pipeline.with_model_config(model_config).await;
@@ -373,7 +373,7 @@ async fn multiple_tool_calls_are_paired_and_executed_once() -> Result<()> {
 #[tokio::test]
 async fn approvals_and_per_tool_permissions() -> Result<()> {
     let (pipeline, api) = test_pipeline().await?;
-    let pipeline = pipeline.with_goose_mode(GooseMode::Approve).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Approve).await;
 
     pipeline.synchronize_calculator(2);
     api.on("add one and two")
@@ -428,7 +428,7 @@ async fn approvals_and_per_tool_permissions() -> Result<()> {
 async fn security_inspection_requires_approval_in_auto_mode() -> Result<()> {
     let _env = env_lock::lock_env([("SECURITY_PROMPT_ENABLED_OVERRIDE", Some("true"))]);
     let (pipeline, api) = test_pipeline().await?;
-    let pipeline = pipeline.with_goose_mode(GooseMode::Auto).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Auto).await;
     pipeline.add_extension("developer").await?;
     api.on("run a dangerous command").calls([(
         "dangerous",
@@ -590,7 +590,7 @@ async fn tool_availability_tracks_mode_and_extension_removal() -> Result<()> {
         assert!(api.calls().last().unwrap().advertises_tool("analyze"));
     }
 
-    let pipeline = pipeline.with_goose_mode(GooseMode::Chat).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Chat).await;
     api.on("try the tool").call(ADD, value(1));
     api.on(CHAT_MODE_TOOL_SKIPPED_RESPONSE)
         .reply("here is the plan");
@@ -601,7 +601,7 @@ async fn tool_availability_tracks_mode_and_extension_removal() -> Result<()> {
     assert!(api.calls().last().unwrap().advertises_tool(ADD));
     assert_eq!(pipeline.calculator_total(), 0);
 
-    let pipeline = pipeline.with_goose_mode(GooseMode::Auto).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Auto).await;
     pipeline.remove_extension("calculator").await?;
     api.on("continue without the calculator")
         .reply("calculator removed");
@@ -652,7 +652,7 @@ async fn stale_orphaned_tool_request_is_not_executed() -> Result<()> {
 }
 
 #[tokio::test]
-async fn a_pinned_provider_running_its_own_tool_loop_keeps_mcp_servers_out_of_goose() -> Result<()>
+async fn a_pinned_provider_running_its_own_tool_loop_keeps_mcp_servers_out_of_arakan() -> Result<()>
 {
     let (pipeline, _api) =
         super::pipeline::test_pipeline_with(super::dummy_api::ProviderFeatures {

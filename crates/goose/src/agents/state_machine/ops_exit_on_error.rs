@@ -3,7 +3,7 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::agents::state_machine::effects::GooseEffect;
+use crate::agents::state_machine::effects::ArakanEffect;
 use crate::agents::state_machine::{not_applicable, yielded, Emitter, Operation, OperationResult};
 use crate::conversation::message::Message;
 use crate::conversation::Conversation;
@@ -18,7 +18,7 @@ pub(crate) fn turn_failure(conversation: &Conversation) -> Option<&Message> {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for ExitOnErrorOperation {
+impl Operation<Session, ArakanEffect> for ExitOnErrorOperation {
     fn name(&self) -> &'static str {
         "exit_on_error"
     }
@@ -28,7 +28,7 @@ impl Operation<Session, GooseEffect> for ExitOnErrorOperation {
         _session: &Session,
         conversation: &Conversation,
         _emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         if turn_failure(conversation).is_none() {
             return not_applicable();
         }

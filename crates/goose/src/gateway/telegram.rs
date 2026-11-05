@@ -72,7 +72,7 @@ impl VoiceTempFiles {
 
     fn save(&self, bytes: &[u8], extension: &str) -> io::Result<PathBuf> {
         let mut file = tempfile::Builder::new()
-            .prefix("goose_voice_")
+            .prefix("arakan_voice_")
             .suffix(&format!(".{extension}"))
             .tempfile_in(&self.parent)?;
         file.write_all(bytes)?;
@@ -158,7 +158,7 @@ fn cleanup_orphaned_voice_files(
         let Ok(entry) = entry else {
             continue;
         };
-        if !is_goose_voice_file_name(&entry.file_name()) {
+        if !is_arakan_voice_file_name(&entry.file_name()) {
             continue;
         }
         let path = entry.path();
@@ -188,11 +188,11 @@ fn cleanup_orphaned_voice_files(
     Ok(removed)
 }
 
-fn is_goose_voice_file_name(name: &std::ffi::OsStr) -> bool {
+fn is_arakan_voice_file_name(name: &std::ffi::OsStr) -> bool {
     let Some(name) = name.to_str() else {
         return false;
     };
-    let Some(rest) = name.strip_prefix("goose_voice_") else {
+    let Some(rest) = name.strip_prefix("arakan_voice_") else {
         return false;
     };
     let Some((random, extension)) = rest.split_once('.') else {
@@ -235,7 +235,7 @@ fn cleanup_legacy_voice_files(
     cutoff: std::time::SystemTime,
     after_opened_candidate: &mut impl FnMut(&std::path::Path),
 ) -> io::Result<u32> {
-    let root_path = parent.join("goose_voice");
+    let root_path = parent.join("arakan_voice");
     let Ok(root) = open_legacy_voice_root(&root_path) else {
         return Ok(0);
     };
@@ -859,7 +859,7 @@ impl TelegramGateway {
     /// Save voice bytes to a temporary file and return the path.
     ///
     /// Files are stored as protected, exclusively created temporary files so
-    /// Goose can access them via its shell tools. The extension is derived from
+    /// Arakan can access them via its shell tools. The extension is derived from
     /// the MIME type when available, falling back to `.ogg` for voice notes.
     ///
     /// On Unix files are created with mode `0600` so other local users cannot
@@ -899,7 +899,7 @@ impl TelegramGateway {
         }
     }
 
-    /// Build the text prompt that tells Goose about a voice message file.
+    /// Build the text prompt that tells Arakan about a voice message file.
     fn voice_prompt(
         path: &std::path::Path,
         duration: Option<i32>,
@@ -1012,7 +1012,7 @@ impl Gateway for TelegramGateway {
                                 // Determine the text to send to the handler.
                                 // Voice/audio messages are downloaded, saved to
                                 // disk, and converted into a prompt that asks
-                                // Goose to transcribe the file using CLI tools.
+                                // Arakan to transcribe the file using CLI tools.
                                 let text = if let Some(voice) = Self::voice_info(&tg_msg) {
                                     // Reject files that exceed the Telegram bot
                                     // download limit.
@@ -1546,9 +1546,9 @@ mod tests {
 
     #[test]
     fn voice_prompt_includes_path_and_duration() {
-        let path = std::path::PathBuf::from("/tmp/goose_voice/voice_test.ogg");
+        let path = std::path::PathBuf::from("/tmp/arakan_voice/voice_test.ogg");
         let prompt = TelegramGateway::voice_prompt(&path, Some(10), Some("audio/ogg"));
-        assert!(prompt.contains("/tmp/goose_voice/voice_test.ogg"));
+        assert!(prompt.contains("/tmp/arakan_voice/voice_test.ogg"));
         assert!(prompt.contains("(duration: 10s)"));
         assert!(prompt.contains("audio/ogg"));
         assert!(prompt.contains("transcribe"));
@@ -1556,15 +1556,15 @@ mod tests {
 
     #[test]
     fn voice_prompt_without_duration() {
-        let path = std::path::PathBuf::from("/tmp/goose_voice/voice_test.ogg");
+        let path = std::path::PathBuf::from("/tmp/arakan_voice/voice_test.ogg");
         let prompt = TelegramGateway::voice_prompt(&path, None, None);
         assert!(!prompt.contains("duration"));
-        assert!(prompt.contains("/tmp/goose_voice/voice_test.ogg"));
+        assert!(prompt.contains("/tmp/arakan_voice/voice_test.ogg"));
     }
 
     #[test]
     fn voice_prompt_with_mp3_mime() {
-        let path = std::path::PathBuf::from("/tmp/goose_voice/voice_test.mp3");
+        let path = std::path::PathBuf::from("/tmp/arakan_voice/voice_test.mp3");
         let prompt = TelegramGateway::voice_prompt(&path, Some(60), Some("audio/mpeg"));
         assert!(prompt.contains("audio/mpeg"));
         assert!(!prompt.contains("OGG"));
@@ -1659,7 +1659,7 @@ mod tests {
 
         assert_eq!(path.parent(), Some(gateway.voice_temp_files.parent()));
         let filename = path.file_name().unwrap().to_str().unwrap();
-        assert!(filename.starts_with("goose_voice_"));
+        assert!(filename.starts_with("arakan_voice_"));
         assert!(filename.ends_with(".ogg"));
         assert!(!filename.chars().any(|c| matches!(c, '/' | '\\' | ':')));
         assert_eq!(std::fs::read(&path).unwrap(), bytes);
@@ -1761,7 +1761,7 @@ mod tests {
     #[test]
     fn cleanup_reclaims_only_stale_legacy_voice_files() {
         let temp = tempfile::tempdir().unwrap();
-        let legacy_root = temp.path().join("goose_voice");
+        let legacy_root = temp.path().join("arakan_voice");
         std::fs::create_dir(&legacy_root).unwrap();
         #[cfg(unix)]
         {
@@ -1808,8 +1808,8 @@ mod tests {
         use std::os::unix::fs::PermissionsExt;
 
         let temp = tempfile::tempdir().unwrap();
-        let legacy_root = temp.path().join("goose_voice");
-        let moved_root = temp.path().join("moved-goose-voice");
+        let legacy_root = temp.path().join("arakan_voice");
+        let moved_root = temp.path().join("moved-arakan-voice");
         let filename = "voice_01234567-89ab-cdef-0123-456789abcdef.ogg";
         std::fs::create_dir(&legacy_root).unwrap();
         std::fs::set_permissions(&legacy_root, std::fs::Permissions::from_mode(0o700)).unwrap();
@@ -1850,7 +1850,7 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         let unrelated = temp.path().join("unrelated.txt");
         let victim = temp.path().join("victim.txt");
-        let disguised_symlink = temp.path().join("goose_voice_ABC123.ogg");
+        let disguised_symlink = temp.path().join("arakan_voice_ABC123.ogg");
         std::fs::write(&unrelated, b"unrelated").unwrap();
         std::fs::write(&victim, b"victim").unwrap();
         std::os::unix::fs::symlink(&victim, &disguised_symlink).unwrap();
@@ -1906,7 +1906,7 @@ mod tests {
         let victim_file = victim_dir.join("voice_01234567-89ab-cdef-0123-456789abcdef.ogg");
         std::fs::write(&victim_file, b"keep me").unwrap();
         std::fs::set_permissions(&victim_file, std::fs::Permissions::from_mode(0o600)).unwrap();
-        std::os::unix::fs::symlink(&victim_dir, fake_tmp.join("goose_voice")).unwrap();
+        std::os::unix::fs::symlink(&victim_dir, fake_tmp.join("arakan_voice")).unwrap();
         let gateway = gateway_with_voice_temp_files(VoiceTempFiles::new_in(&fake_tmp));
 
         let saved = gateway
@@ -1932,7 +1932,7 @@ mod tests {
         std::fs::create_dir(&victim_dir).unwrap();
         let victim_file = victim_dir.join("unrelated.txt");
         std::fs::write(&victim_file, b"keep me").unwrap();
-        let replaced_root = fake_tmp.join("goose_voice");
+        let replaced_root = fake_tmp.join("arakan_voice");
         std::fs::create_dir(&replaced_root).unwrap();
         std::fs::write(replaced_root.join("attacker-controlled.txt"), b"keep me").unwrap();
         let gateway = gateway_with_voice_temp_files(VoiceTempFiles::new_in(&fake_tmp));

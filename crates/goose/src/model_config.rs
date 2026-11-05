@@ -4,10 +4,10 @@ use crate::providers::base::Provider;
 use crate::providers::get_from_registry;
 use crate::recipe::Settings;
 use anyhow::{anyhow, Result};
-use goose_providers::conversation::token_usage::ProviderUsage;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_providers::thinking::ThinkingEffort;
+use arakan_providers::conversation::token_usage::ProviderUsage;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::thinking::ThinkingEffort;
 use rmcp::model::Tool;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -25,9 +25,9 @@ pub async fn resolve_provider_and_model_config(
     requested_provider: Option<String>,
     recipe_settings: Option<&Settings>,
 ) -> Result<(String, ModelConfig)> {
-    let recipe_model = recipe_settings.and_then(|s| s.goose_model.clone());
+    let recipe_model = recipe_settings.and_then(|s| s.arakan_model.clone());
     let explicit_provider = recipe_settings
-        .and_then(|s| s.goose_provider.clone())
+        .and_then(|s| s.arakan_provider.clone())
         .or(requested_provider);
 
     let (provider, model) = match explicit_provider {
@@ -43,10 +43,10 @@ pub async fn resolve_provider_and_model_config(
             (provider, model)
         }
         None => {
-            let provider = config.get_goose_provider()?;
+            let provider = config.get_arakan_provider()?;
             let model = match recipe_model {
                 Some(model) => model,
-                None => config.get_goose_model()?,
+                None => config.get_arakan_model()?,
             };
             (provider, model)
         }
@@ -70,7 +70,7 @@ pub fn model_config_from_user_config_with_session_settings(
     let model = base_model_config_from_user_config(provider_name, model_name.as_ref())?;
     let model = materialize_model_config_inner(model, provider_name, false)?
         .with_inherited_session_settings_from(previous, request_params)
-        .with_default_thinking_effort(config.get_goose_thinking_effort());
+        .with_default_thinking_effort(config.get_arakan_thinking_effort());
 
     Ok(apply_canonical_limits(provider_name, model))
 }
@@ -81,7 +81,7 @@ pub fn materialize_model_config(provider_name: &str, model: ModelConfig) -> Resu
 }
 
 fn apply_canonical_limits(provider_name: &str, model: ModelConfig) -> ModelConfig {
-    if provider_name == goose_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME {
+    if provider_name == arakan_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME {
         model
     } else {
         model
@@ -98,26 +98,26 @@ fn materialize_model_config_inner(
     let config = Config::global();
 
     if model.temperature.is_none() {
-        model = model.with_temperature(get_goose_temperature(config)?);
+        model = model.with_temperature(get_arakan_temperature(config)?);
     }
 
     if model.toolshim && model.toolshim_model.is_none() {
-        model = model.with_toolshim_model(get_goose_toolshim_model(config)?);
+        model = model.with_toolshim_model(get_arakan_toolshim_model(config)?);
     }
 
-    model = model.with_default_max_tokens(config.get_goose_max_tokens()?);
+    model = model.with_default_max_tokens(config.get_arakan_max_tokens()?);
 
     if include_default_thinking_effort {
-        model = model.with_default_thinking_effort(config.get_goose_thinking_effort());
+        model = model.with_default_thinking_effort(config.get_arakan_thinking_effort());
     }
 
     if model.cache_ttl().is_none() {
-        if let Some(ttl) = get_goose_cache_ttl(config)? {
+        if let Some(ttl) = get_arakan_cache_ttl(config)? {
             model = model.with_cache_ttl(&ttl);
         }
     }
 
-    if provider_name == goose_providers::openai::OPEN_AI_PROVIDER_NAME {
+    if provider_name == arakan_providers::openai::OPEN_AI_PROVIDER_NAME {
         model = apply_openai_request_params(model);
     }
 
@@ -169,16 +169,16 @@ fn base_model_config_from_user_config(
     let mut model = ModelConfig {
         model_name: model_name.to_string(),
         context_limit: None,
-        temperature: get_goose_temperature(config)?,
+        temperature: get_arakan_temperature(config)?,
         max_tokens: None,
-        toolshim: get_goose_toolshim(config)?.unwrap_or(false),
-        toolshim_model: get_goose_toolshim_model(config)?,
+        toolshim: get_arakan_toolshim(config)?.unwrap_or(false),
+        toolshim_model: get_arakan_toolshim_model(config)?,
         request_params: None,
         reasoning: None,
         supports_vision: None,
         request_headers: None,
     };
-    if provider_name != goose_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME {
+    if provider_name != arakan_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME {
         model.normalize_effort_suffix();
     }
     Ok(model)
@@ -190,20 +190,20 @@ fn base_model_config_from_user_config(
 /// not a value persisted by an earlier (possibly clamped) run.
 pub fn with_rederived_cache_ttl(model: ModelConfig) -> Result<ModelConfig> {
     let mut model = model.without_cache_ttl();
-    if let Some(ttl) = get_goose_cache_ttl(Config::global())? {
+    if let Some(ttl) = get_arakan_cache_ttl(Config::global())? {
         model = model.with_cache_ttl(&ttl);
     }
     Ok(model)
 }
 
-fn get_goose_cache_ttl(config: &Config) -> Result<Option<String>> {
-    match config.get_param::<String>("GOOSE_CACHE_TTL") {
+fn get_arakan_cache_ttl(config: &Config) -> Result<Option<String>> {
+    match config.get_param::<String>("ARAKAN_CACHE_TTL") {
         Ok(ttl) => {
             let ttl = ttl.trim().to_lowercase();
             match ttl.as_str() {
                 "5m" | "1h" => Ok(Some(ttl)),
                 other => Err(anyhow!(
-                    "GOOSE_CACHE_TTL must be '5m' or '1h', got '{other}'"
+                    "ARAKAN_CACHE_TTL must be '5m' or '1h', got '{other}'"
                 )),
             }
         }
@@ -212,10 +212,10 @@ fn get_goose_cache_ttl(config: &Config) -> Result<Option<String>> {
     }
 }
 
-fn get_goose_temperature(config: &Config) -> Result<Option<f32>> {
-    match config.get_param::<f32>("GOOSE_TEMPERATURE") {
+fn get_arakan_temperature(config: &Config) -> Result<Option<f32>> {
+    match config.get_param::<f32>("ARAKAN_TEMPERATURE") {
         Ok(temp) if temp < 0.0 => Err(anyhow!(
-            "Value for 'GOOSE_TEMPERATURE' is out of valid range: {temp}"
+            "Value for 'ARAKAN_TEMPERATURE' is out of valid range: {temp}"
         )),
         Ok(temp) => Ok(Some(temp)),
         Err(ConfigError::NotFound(_)) => Ok(None),
@@ -223,9 +223,9 @@ fn get_goose_temperature(config: &Config) -> Result<Option<f32>> {
     }
 }
 
-fn get_goose_toolshim(config: &Config) -> Result<Option<bool>> {
-    match config.get_param::<serde_yaml::Value>("GOOSE_TOOLSHIM") {
-        Ok(value) => parse_yaml_bool_config("GOOSE_TOOLSHIM", value).map(Some),
+fn get_arakan_toolshim(config: &Config) -> Result<Option<bool>> {
+    match config.get_param::<serde_yaml::Value>("ARAKAN_TOOLSHIM") {
+        Ok(value) => parse_yaml_bool_config("ARAKAN_TOOLSHIM", value).map(Some),
         Err(ConfigError::NotFound(_)) => Ok(None),
         Err(e) => Err(e.into()),
     }
@@ -233,16 +233,16 @@ fn get_goose_toolshim(config: &Config) -> Result<Option<bool>> {
 
 /// Resolve the global toolshim setting, defaulting to false when unset.
 pub fn global_toolshim() -> bool {
-    get_goose_toolshim(Config::global())
+    get_arakan_toolshim(Config::global())
         .ok()
         .flatten()
         .unwrap_or(false)
 }
 
-fn get_goose_toolshim_model(config: &Config) -> Result<Option<String>> {
-    match config.get_param::<String>("GOOSE_TOOLSHIM_OLLAMA_MODEL") {
+fn get_arakan_toolshim_model(config: &Config) -> Result<Option<String>> {
+    match config.get_param::<String>("ARAKAN_TOOLSHIM_OLLAMA_MODEL") {
         Ok(value) if value.trim().is_empty() => Err(anyhow!(
-            "Invalid value for 'GOOSE_TOOLSHIM_OLLAMA_MODEL': '{value}' - cannot be empty if set"
+            "Invalid value for 'ARAKAN_TOOLSHIM_OLLAMA_MODEL': '{value}' - cannot be empty if set"
         )),
         Ok(value) => Ok(Some(value)),
         Err(ConfigError::NotFound(_)) => Ok(None),
@@ -295,7 +295,7 @@ mod cache_ttl_tests {
 
     #[test]
     fn env_var_populates_cache_ttl() {
-        let _guard = env_lock::lock_env([("GOOSE_CACHE_TTL", Some("1h"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CACHE_TTL", Some("1h"))]);
         let model = materialize_model_config_inner(
             ModelConfig::new("claude-sonnet-4-5"),
             "anthropic",
@@ -307,7 +307,7 @@ mod cache_ttl_tests {
 
     #[test]
     fn absent_env_var_leaves_cache_ttl_unset() {
-        let _guard = env_lock::lock_env([("GOOSE_CACHE_TTL", None::<&str>)]);
+        let _guard = env_lock::lock_env([("ARAKAN_CACHE_TTL", None::<&str>)]);
         let model = materialize_model_config_inner(
             ModelConfig::new("claude-sonnet-4-5"),
             "anthropic",
@@ -319,7 +319,7 @@ mod cache_ttl_tests {
 
     #[test]
     fn invalid_env_var_is_rejected() {
-        let _guard = env_lock::lock_env([("GOOSE_CACHE_TTL", Some("2h"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CACHE_TTL", Some("2h"))]);
         let result = materialize_model_config_inner(
             ModelConfig::new("claude-sonnet-4-5"),
             "anthropic",
@@ -330,7 +330,7 @@ mod cache_ttl_tests {
 
     #[test]
     fn rederive_replaces_stored_ttl_with_configured_value() {
-        let _guard = env_lock::lock_env([("GOOSE_CACHE_TTL", Some("1h"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CACHE_TTL", Some("1h"))]);
         let model =
             with_rederived_cache_ttl(ModelConfig::new("claude-sonnet-4-5").with_cache_ttl("5m"))
                 .unwrap();
@@ -339,7 +339,7 @@ mod cache_ttl_tests {
 
     #[test]
     fn rederive_drops_stored_ttl_when_config_absent() {
-        let _guard = env_lock::lock_env([("GOOSE_CACHE_TTL", None::<&str>)]);
+        let _guard = env_lock::lock_env([("ARAKAN_CACHE_TTL", None::<&str>)]);
         let model =
             with_rederived_cache_ttl(ModelConfig::new("claude-sonnet-4-5").with_cache_ttl("1h"))
                 .unwrap();
@@ -348,7 +348,7 @@ mod cache_ttl_tests {
 
     #[test]
     fn explicit_model_ttl_wins_over_env_var() {
-        let _guard = env_lock::lock_env([("GOOSE_CACHE_TTL", Some("1h"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CACHE_TTL", Some("1h"))]);
         let model = materialize_model_config_inner(
             ModelConfig::new("claude-sonnet-4-5").with_cache_ttl("5m"),
             "anthropic",

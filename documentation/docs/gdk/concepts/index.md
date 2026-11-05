@@ -36,4 +36,4 @@ links to the full APIs. Examples here follow the GDK APIs in this checkout
 (`0.1.0-alpha.13`); Hello World follows the example's pinned alpha.12 release.
 
 If you want an existing agent behind your own interface instead, you can
-[build an app with goose over ACP](/docs/gdk/acp) without assembling the runtime.
+[build an app with arakan over ACP](/docs/gdk/acp) without assembling the runtime.

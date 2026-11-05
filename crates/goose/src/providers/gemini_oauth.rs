@@ -8,9 +8,9 @@ use crate::providers::base::{
 use crate::providers::formats::google::{create_request, response_to_streaming_message};
 use crate::providers::google::GOOGLE_DOC_URL;
 use crate::providers::private_file::write_private_file;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 
 const GEMINI_OAUTH_DEFAULT_MODEL: &str = "gemini-3-flash-preview";
 use crate::providers::retry::ProviderRetry;
@@ -502,7 +502,7 @@ async fn setup_code_assist(access_token: &str) -> Result<String> {
 const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
 <html>
   <head>
-    <title>goose - Google Authorization Successful</title>
+    <title>arakan - Google Authorization Successful</title>
     <style>
       body {
         font-family: system-ui, -apple-system, sans-serif;
@@ -522,7 +522,7 @@ const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
   <body>
     <div class="container">
       <h1>Authorization Successful</h1>
-      <p>You can close this window and return to goose.</p>
+      <p>You can close this window and return to arakan.</p>
     </div>
     <script>const AUTO_CLOSE_TIMEOUT_MS = __AUTO_CLOSE_TIMEOUT_MS__; setTimeout(() => window.close(), AUTO_CLOSE_TIMEOUT_MS)</script>
   </body>
@@ -541,7 +541,7 @@ fn html_error(error: &str) -> String {
         r#"<!doctype html>
 <html>
   <head>
-    <title>goose - Google Authorization Failed</title>
+    <title>arakan - Google Authorization Failed</title>
     <style>
       body {{
         font-family: system-ui, -apple-system, sans-serif;
@@ -890,7 +890,7 @@ impl GeminiOAuthProvider {
 
         let request = (self.request_builder)(request.json(&wrapped))
             .map_err(|e| ProviderError::ExecutionError(e.to_string()))?;
-        let response = goose_providers::http_status::send_bounded(
+        let response = arakan_providers::http_status::send_bounded(
             request,
             Duration::from_secs(DEFAULT_PROVIDER_TIMEOUT_SECS),
         )
@@ -898,7 +898,7 @@ impl GeminiOAuthProvider {
 
         if !response.status().is_success() {
             let status = response.status();
-            let text = goose_providers::http_status::read_error_body(response)
+            let text = arakan_providers::http_status::read_error_body(response)
                 .await
                 .unwrap_or_else(|| "unknown error".to_string());
 
@@ -928,7 +928,7 @@ impl GeminiOAuthProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for GeminiOAuthProvider {
+impl arakan_providers::base::ProviderDescriptor for GeminiOAuthProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             GEMINI_OAUTH_PROVIDER_NAME,
@@ -1106,7 +1106,7 @@ mod tests {
     fn test_token_cache_roundtrip() {
         let root = tempfile::tempdir().unwrap();
         let root_path = root.path().to_string_lossy().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path.as_str()))]);
 
         let cache = TokenCache::new();
         cache.clear();

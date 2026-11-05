@@ -3,7 +3,7 @@
 //! Pi sessions start with a header line `{"type":"session","version":N,"cwd":..}`
 //! followed by entries with `type` in `{message, model_change, compaction,
 //! branch_summary, thinking_level_change, custom, ...}`. The interesting
-//! ones for replay-in-goose are `message`, whose `message` field carries an
+//! ones for replay-in-arakan are `message`, whose `message` field carries an
 //! `AgentMessage` (`role` is one of `user`, `assistant`, `toolResult`,
 //! `bashExecution`, ...).
 //!
@@ -17,7 +17,7 @@ use serde_json::{json, Map, Value};
 use crate::conversation::message::Message;
 use crate::conversation::Conversation;
 use crate::utils::sanitize_unicode_tags;
-use goose_providers::conversation::token_usage::Usage;
+use arakan_providers::conversation::token_usage::Usage;
 
 pub fn convert(content: &str) -> Result<String> {
     let mut lines = content.lines().filter(|l| !l.trim().is_empty());

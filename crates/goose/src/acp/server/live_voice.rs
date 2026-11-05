@@ -33,9 +33,9 @@ impl AcpConnection {
         req: LiveVoiceAvailabilityRequest,
     ) -> Result<LiveVoiceAvailabilityResponse, agent_client_protocol::Error> {
         let mode = match req.session_id.as_deref() {
-            Some(session_id) => self.load_live_voice_session(session_id).await?.goose_mode,
+            Some(session_id) => self.load_live_voice_session(session_id).await?.arakan_mode,
             None => crate::config::Config::global()
-                .get_goose_mode()
+                .get_arakan_mode()
                 .unwrap_or_default(),
         };
         Ok(
@@ -66,7 +66,7 @@ impl AcpConnection {
         let session = self.load_live_voice_session(&session_id).await?;
         let reservation = self
             .live_voice
-            .reserve_interaction(&session_id, session.goose_mode)
+            .reserve_interaction(&session_id, session.arakan_mode)
             .map_err(map_live_voice_error)?;
         let transcript_publisher = Self::live_transcript_publisher(cx, &req.session_id);
         self.open_live_session(&req.session_id)
@@ -151,7 +151,7 @@ impl AcpConnection {
         let completion_rx = interaction.completion_rx.clone();
         let live_voice = self.live_voice.clone();
         let connection = cx.clone();
-        let notify_interaction_ended = self.supports_goose_custom_notifications();
+        let notify_interaction_ended = self.supports_arakan_custom_notifications();
         tokio::spawn(async move {
             tokio::select! {
                 biased;
@@ -165,9 +165,9 @@ impl AcpConnection {
                                 LiveVoiceInteractionCompletion::Stopped => LiveVoiceInteractionOutcome::Stopped,
                                 LiveVoiceInteractionCompletion::Failed => LiveVoiceInteractionOutcome::Failed,
                             };
-                            let _ = connection.send_notification(GooseSessionNotification {
+                            let _ = connection.send_notification(ArakanSessionNotification {
                                 session_id,
-                                update: GooseSessionUpdate::LiveVoiceInteractionEnded(LiveVoiceInteractionEndedUpdate {
+                                update: ArakanSessionUpdate::LiveVoiceInteractionEnded(LiveVoiceInteractionEndedUpdate {
                                     interaction_id: interaction_id.0,
                                     outcome,
                                 }),
@@ -205,7 +205,7 @@ impl AcpConnection {
             .start_live_delegation(&session_id, run_id.clone(), cancel_token.clone())
             .is_err()
         {
-            return Err("Goose is already working on a task.".into());
+            return Err("Arakan is already working on a task.".into());
         }
         let run_guard = ActiveRunDropGuard {
             services: Arc::clone(&self.services),
@@ -253,7 +253,7 @@ impl AcpConnection {
             Err(_) => {
                 self.clear_active_run(&session_id, &run_id).await;
                 let _ = Self::send_active_run_update(&cx, &acp_session_id, None);
-                return "Goose couldn't start the task.".into();
+                return "Arakan couldn't start the task.".into();
             }
         };
 
@@ -324,10 +324,10 @@ impl AcpConnection {
                     }
                 }
                 Ok(crate::agents::AgentEvent::MessageUsage { message_id, usage }) => {
-                    if self.supports_goose_custom_notifications() {
-                        let _ = cx.send_notification(GooseSessionNotification {
+                    if self.supports_arakan_custom_notifications() {
+                        let _ = cx.send_notification(ArakanSessionNotification {
                             session_id: session_id.clone(),
-                            update: GooseSessionUpdate::MessageUsage(message_usage_update(
+                            update: ArakanSessionUpdate::MessageUsage(message_usage_update(
                                 message_id, &usage,
                             )),
                         });
@@ -373,7 +373,7 @@ impl AcpConnection {
     async fn open_live_session(&self, session_id: &str) -> Result<(), String> {
         self.open_session(session_id)
             .await
-            .map_err(|_| "Goose could not activate the coding agent.".to_string())
+            .map_err(|_| "Arakan could not activate the coding agent.".to_string())
     }
 }
 

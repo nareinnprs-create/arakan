@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use futures::StreamExt;
-use goose::agents::{AgentEvent, GoosePlatform, StateMachineServices, StateMachineServicesConfig};
-use goose::config::extensions::{set_extension, ExtensionEntry};
+use arakan::agents::{AgentEvent, ArakanPlatform, StateMachineServices, StateMachineServicesConfig};
+use arakan::config::extensions::{set_extension, ExtensionEntry};
 
 #[cfg(test)]
 mod tests {
@@ -14,16 +14,16 @@ mod tests {
         use super::*;
         use async_trait::async_trait;
         use chrono::{DateTime, Utc};
-        use goose::agents::platform_extensions::scheduler::{
+        use arakan::agents::platform_extensions::scheduler::{
             EXTENSION_NAME as SCHEDULER_EXTENSION_NAME, MANAGE_SCHEDULE_TOOL_NAME_COMPLETE,
         };
-        use goose::agents::ExtensionConfig;
-        use goose::agents::{ScheduleTool, StateMachineServicesConfig};
-        use goose::config::permission::PermissionManager;
+        use arakan::agents::ExtensionConfig;
+        use arakan::agents::{ScheduleTool, StateMachineServicesConfig};
+        use arakan::config::permission::PermissionManager;
 
-        use goose::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
-        use goose::scheduler_trait::SchedulerTrait;
-        use goose::session::{Session, SessionManager};
+        use arakan::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
+        use arakan::scheduler_trait::SchedulerTrait;
+        use arakan::session::{Session, SessionManager};
         use std::path::PathBuf;
         use std::sync::Arc;
         use tempfile::TempDir;
@@ -134,8 +134,8 @@ mod tests {
                 .create_session(
                     PathBuf::from("."),
                     "schedule".to_string(),
-                    goose::session::SessionType::Hidden,
-                    goose::config::GooseMode::default(),
+                    arakan::session::SessionType::Hidden,
+                    arakan::config::ArakanMode::default(),
                 )
                 .await
                 .unwrap();
@@ -257,7 +257,7 @@ mod tests {
                 permission_manager,
                 Some(mock_scheduler),
                 false,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let session_id = add_scheduler_extension(&services).await;
@@ -273,7 +273,7 @@ mod tests {
                 .description
                 .clone()
                 .unwrap_or_default()
-                .contains("Manage goose's internal scheduled recipe execution"));
+                .contains("Manage arakan's internal scheduled recipe execution"));
         }
 
         #[tokio::test]
@@ -300,7 +300,7 @@ mod tests {
                 permission_manager,
                 Some(mock_scheduler),
                 false,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let session_id = add_scheduler_extension(&services).await;
@@ -320,7 +320,7 @@ mod tests {
                 .description
                 .clone()
                 .unwrap_or_default()
-                .contains("Manage goose's internal scheduled recipe execution"));
+                .contains("Manage arakan's internal scheduled recipe execution"));
 
             // Verify the tool has the expected actions in its schema
             if let Some(properties) = tool.input_schema.get("properties") {
@@ -355,7 +355,7 @@ mod tests {
                 permission_manager,
                 Some(mock_scheduler),
                 false,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let session_id = add_scheduler_extension(&services).await;
@@ -432,7 +432,7 @@ mod tests {
     #[cfg(test)]
     mod retry_tests {
         use super::*;
-        use goose::agents::types::RetryConfig;
+        use arakan::agents::types::RetryConfig;
 
         #[tokio::test]
         async fn test_retry_logic_with_validation_errors() -> Result<()> {
@@ -461,16 +461,16 @@ mod tests {
     mod max_turns_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::SessionConfig;
-        use goose::config::GooseMode;
-        use goose::conversation::message::{Message, MessageContent};
-        use goose::providers::base::{
+        use arakan::agents::SessionConfig;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::{Message, MessageContent};
+        use arakan::providers::base::{
             stream_from_single_message, MessageStream, Provider, ProviderDef, ProviderMetadata,
         };
-        use goose::session::session_manager::SessionType;
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::session::session_manager::SessionType;
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::{CallToolRequestParams, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -483,7 +483,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for MockToolProvider {
+        impl arakan::providers::base::ProviderDescriptor for MockToolProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "mock".to_string(),
@@ -504,8 +504,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 Box::pin(async { Ok(Self::new()) })
             }
@@ -549,7 +549,7 @@ mod tests {
                     PathBuf::default(),
                     "max-turn-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -574,12 +574,12 @@ mod tests {
                         if let Some(MessageContent::ActionRequired(action)) =
                             response.content.first()
                         {
-                            if let goose::conversation::message::ActionRequiredData::ToolConfirmation { id, .. } = &action.data {
+                            if let arakan::conversation::message::ActionRequiredData::ToolConfirmation { id, .. } = &action.data {
                                 services
                                     .submit_tool_confirmation(
                                         &session_id,
                                         id,
-                                        goose::permission::Permission::AllowOnce,
+                                        arakan::permission::Permission::AllowOnce,
                                     )
                                     .await?;
                             }
@@ -622,17 +622,17 @@ mod tests {
     mod tool_pair_summarization_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::{SessionConfig, StateMachineServicesConfig};
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::conversation::message::Message;
-        use goose::providers::base::{
+        use arakan::agents::{SessionConfig, StateMachineServicesConfig};
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::Message;
+        use arakan::providers::base::{
             stream_from_single_message, MessageStream, Provider, ProviderDef, ProviderMetadata,
         };
-        use goose::session::{SessionManager, SessionType};
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::session::{SessionManager, SessionType};
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, Tool};
         use std::path::PathBuf;
         use std::sync::atomic::{AtomicUsize, Ordering};
@@ -653,7 +653,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for SummarizationTestProvider {
+        impl arakan::providers::base::ProviderDescriptor for SummarizationTestProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "mock-summarization".to_string(),
@@ -674,8 +674,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 Box::pin(async { Ok(Self::new()) })
             }
@@ -720,8 +720,8 @@ mod tests {
         #[tokio::test]
         async fn test_batch_summarization_preserves_all_summaries() -> Result<()> {
             let _guard = env_lock::lock_env([
-                ("GOOSE_TOOL_PAIR_SUMMARIZATION", Some("true")),
-                ("GOOSE_TOOL_CALL_CUTOFF", Some("2")),
+                ("ARAKAN_TOOL_PAIR_SUMMARIZATION", Some("true")),
+                ("ARAKAN_TOOL_CALL_CUTOFF", Some("2")),
             ]);
 
             let temp_dir = tempfile::tempdir()?;
@@ -731,7 +731,7 @@ mod tests {
                 Arc::new(PermissionManager::new(temp_dir.path().join("config"))),
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let provider = Arc::new(SummarizationTestProvider::new());
 
@@ -740,7 +740,7 @@ mod tests {
                     PathBuf::from("."),
                     "summarization-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await?;
 
@@ -878,18 +878,18 @@ mod tests {
     #[cfg(test)]
     mod extension_manager_tests {
         use super::*;
-        use goose::agents::extension::ExtensionConfig;
-        use goose::agents::platform_extensions::{
+        use arakan::agents::extension::ExtensionConfig;
+        use arakan::agents::platform_extensions::{
             MANAGE_EXTENSIONS_TOOL_NAME, SEARCH_AVAILABLE_EXTENSIONS_TOOL_NAME,
         };
-        use goose::agents::StateMachineServicesConfig;
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::session::SessionManager;
+        use arakan::agents::StateMachineServicesConfig;
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::session::SessionManager;
 
         async fn setup_agent_with_extension_manager(
         ) -> (Arc<StateMachineServices>, String, tempfile::TempDir) {
-            use goose::session::session_manager::SessionType;
+            use arakan::session::session_manager::SessionType;
 
             // Add the TODO extension to the config so it can be discovered by search_available_extensions
             // Set it as disabled initially so tests can enable it
@@ -898,7 +898,7 @@ mod tests {
                 config: ExtensionConfig::Platform {
                     name: "todo".to_string(),
                     description:
-                        "Enable a todo list for goose so it can keep track of what it is doing"
+                        "Enable a todo list for arakan so it can keep track of what it is doing"
                             .to_string(),
                     display_name: Some("Todo".to_string()),
                     bundled: Some(true),
@@ -915,7 +915,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 false,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
 
             let services = StateMachineServices::with_config(config);
@@ -925,7 +925,7 @@ mod tests {
                     std::path::PathBuf::from("."),
                     "Test Session".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await
                 .expect("Failed to create session");
@@ -977,16 +977,16 @@ mod tests {
     mod streaming_persistence_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::{SessionConfig, StateMachineServicesConfig};
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::conversation::message::Message;
-        use goose::providers::base::{MessageStream, Provider, ProviderDef, ProviderMetadata};
-        use goose::session::session_manager::SessionType;
-        use goose::session::SessionManager;
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::agents::{SessionConfig, StateMachineServicesConfig};
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::Message;
+        use arakan::providers::base::{MessageStream, Provider, ProviderDef, ProviderMetadata};
+        use arakan::session::session_manager::SessionType;
+        use arakan::session::SessionManager;
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::{CallToolRequestParams, Role, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -1007,7 +1007,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for MultiStepProvider {
+        impl arakan::providers::base::ProviderDescriptor for MultiStepProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "multi-step-mock".to_string(),
@@ -1028,8 +1028,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 unimplemented!()
             }
@@ -1110,7 +1110,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 true, // disable session naming so it doesn't consume a provider call
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let provider = Arc::new(MultiStepProvider::new(cancel_token.clone()));
@@ -1120,7 +1120,7 @@ mod tests {
                     PathBuf::default(),
                     "streaming-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -1251,16 +1251,16 @@ mod tests {
     mod thinking_preservation_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::{SessionConfig, StateMachineServicesConfig};
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::conversation::message::{Message, MessageContent};
-        use goose::providers::base::{MessageStream, Provider, ProviderDef, ProviderMetadata};
-        use goose::session::session_manager::SessionType;
-        use goose::session::SessionManager;
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::agents::{SessionConfig, StateMachineServicesConfig};
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::{Message, MessageContent};
+        use arakan::providers::base::{MessageStream, Provider, ProviderDef, ProviderMetadata};
+        use arakan::session::session_manager::SessionType;
+        use arakan::session::SessionManager;
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::{CallToolRequestParams, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -1282,7 +1282,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for ThinkingStreamProvider {
+        impl arakan::providers::base::ProviderDescriptor for ThinkingStreamProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "thinking-stream-mock".to_string(),
@@ -1303,8 +1303,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 unimplemented!()
             }
@@ -1362,7 +1362,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let provider = Arc::new(ThinkingStreamProvider::new(provider_name));
@@ -1372,7 +1372,7 @@ mod tests {
                     PathBuf::default(),
                     format!("{provider_name}-thinking-test"),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -1409,10 +1409,10 @@ mod tests {
         }
 
         fn assert_formatter_adds_reasoning_to_tool_calls(messages: &[Message], provider: &str) {
-            use goose_providers::formats::openai::{
+            use arakan_providers::formats::openai::{
                 format_messages_with_options, OpenAiFormatOptions,
             };
-            use goose_providers::images::ImageFormat;
+            use arakan_providers::images::ImageFormat;
 
             assert!(
                 messages.iter().any(|m| m
@@ -1481,7 +1481,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for CombinedThinkingToolProvider {
+        impl arakan::providers::base::ProviderDescriptor for CombinedThinkingToolProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "combined-thinking-tool-mock".to_string(),
@@ -1502,8 +1502,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 unimplemented!()
             }
@@ -1561,7 +1561,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let provider = Arc::new(CombinedThinkingToolProvider::new());
@@ -1571,7 +1571,7 @@ mod tests {
                     PathBuf::default(),
                     "combined-thinking-tool-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -1617,19 +1617,19 @@ mod tests {
     mod goal_checking_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::SessionConfig;
-        use goose::agents::StateMachineServicesConfig;
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::conversation::message::Message;
-        use goose::providers::base::{
+        use arakan::agents::SessionConfig;
+        use arakan::agents::StateMachineServicesConfig;
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::Message;
+        use arakan::providers::base::{
             stream_from_single_message, MessageStream, Provider, ProviderDef, ProviderMetadata,
         };
-        use goose::session::session_manager::SessionType;
-        use goose::session::{GoalState, SessionManager};
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::session::session_manager::SessionType;
+        use arakan::session::{GoalState, SessionManager};
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::Tool;
         use std::path::PathBuf;
         use std::sync::atomic::{AtomicU32, Ordering};
@@ -1647,7 +1647,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for GoalTextProvider {
+        impl arakan::providers::base::ProviderDescriptor for GoalTextProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "goal-mock".to_string(),
@@ -1668,8 +1668,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 Box::pin(async { Ok(Self::new()) })
             }
@@ -1707,7 +1707,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             StateMachineServices::with_config(config)
         }
@@ -1724,7 +1724,7 @@ mod tests {
                     PathBuf::default(),
                     "goal-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -1811,7 +1811,7 @@ mod tests {
                     PathBuf::default(),
                     "no-goal-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -1862,7 +1862,7 @@ mod tests {
                     PathBuf::default(),
                     "goal-start-turn".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
             services
@@ -1925,7 +1925,7 @@ mod tests {
                     PathBuf::default(),
                     "goal-query-no-turn".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
             services
@@ -2012,16 +2012,16 @@ mod tests {
     mod cumulative_token_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::{SessionConfig, StateMachineServicesConfig};
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::conversation::message::Message;
-        use goose::providers::base::{stream_from_single_message, MessageStream, Provider};
-        use goose::session::session_manager::SessionType;
-        use goose::session::SessionManager;
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::agents::{SessionConfig, StateMachineServicesConfig};
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::Message;
+        use arakan::providers::base::{stream_from_single_message, MessageStream, Provider};
+        use arakan::session::session_manager::SessionType;
+        use arakan::session::SessionManager;
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::Tool;
         use std::path::PathBuf;
         use std::sync::Arc;
@@ -2087,7 +2087,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             );
             let services = StateMachineServices::with_config(config);
             let provider = Arc::new(FixedUsageProvider {
@@ -2100,7 +2100,7 @@ mod tests {
                     PathBuf::default(),
                     "cumulative-token-test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
 
@@ -2129,15 +2129,15 @@ mod tests {
     mod audience_tool_result_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::{SessionConfig, StateMachineServicesConfig};
-        use goose::config::{ExtensionConfig, GooseMode, PermissionManager};
-        use goose::conversation::message::{Message, MessageContent};
-        use goose::providers::base::{stream_from_single_message, MessageStream, Provider};
-        use goose::session::{SessionManager, SessionType};
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
-        use goose_test_support::McpFixture;
+        use arakan::agents::{SessionConfig, StateMachineServicesConfig};
+        use arakan::config::{ExtensionConfig, ArakanMode, PermissionManager};
+        use arakan::conversation::message::{Message, MessageContent};
+        use arakan::providers::base::{stream_from_single_message, MessageStream, Provider};
+        use arakan::session::{SessionManager, SessionType};
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
+        use arakan_test_support::McpFixture;
         use rmcp::model::{CallToolRequestParams, Tool};
         use std::path::PathBuf;
         use std::sync::atomic::{AtomicUsize, Ordering};
@@ -2218,7 +2218,7 @@ mod tests {
                 permission_manager,
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let provider = Arc::new(AudienceToolProvider {
                 call_count: AtomicUsize::new(0),
@@ -2228,7 +2228,7 @@ mod tests {
                     PathBuf::default(),
                     "audience-tool-result".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await?;
             let session_id = session.id.clone();
@@ -2287,19 +2287,19 @@ mod tests {
     mod empty_turn_tests {
         use super::*;
         use async_trait::async_trait;
-        use goose::agents::final_output_tool::FINAL_OUTPUT_TOOL_NAME;
-        use goose::agents::{AgentEvent, GoosePlatform, SessionConfig, StateMachineServicesConfig};
-        use goose::config::permission::PermissionManager;
-        use goose::config::GooseMode;
-        use goose::conversation::message::{Message, MessageContent};
-        use goose::conversation::Conversation;
-        use goose::providers::base::{
+        use arakan::agents::final_output_tool::FINAL_OUTPUT_TOOL_NAME;
+        use arakan::agents::{AgentEvent, ArakanPlatform, SessionConfig, StateMachineServicesConfig};
+        use arakan::config::permission::PermissionManager;
+        use arakan::config::ArakanMode;
+        use arakan::conversation::message::{Message, MessageContent};
+        use arakan::conversation::Conversation;
+        use arakan::providers::base::{
             stream_from_single_message, MessageStream, Provider, ProviderDef, ProviderMetadata,
         };
-        use goose::session::session_manager::SessionType;
-        use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-        use goose_providers::errors::ProviderError;
-        use goose_providers::model::ModelConfig;
+        use arakan::session::session_manager::SessionType;
+        use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+        use arakan_providers::errors::ProviderError;
+        use arakan_providers::model::ModelConfig;
         use rmcp::model::{CallToolRequestParams, Tool};
         use rmcp::object;
         use std::path::PathBuf;
@@ -2328,7 +2328,7 @@ mod tests {
             call_count: AtomicUsize,
         }
 
-        impl goose::providers::base::ProviderDescriptor for AssistantOnlyProvider {
+        impl arakan::providers::base::ProviderDescriptor for AssistantOnlyProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "assistant-only-mock".to_string(),
@@ -2349,8 +2349,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 unimplemented!()
             }
@@ -2399,7 +2399,7 @@ mod tests {
             }
         }
 
-        impl goose::providers::base::ProviderDescriptor for EmptyThenTextProvider {
+        impl arakan::providers::base::ProviderDescriptor for EmptyThenTextProvider {
             fn metadata() -> ProviderMetadata {
                 ProviderMetadata {
                     name: "empty-then-text-mock".to_string(),
@@ -2420,8 +2420,8 @@ mod tests {
             type Provider = Self;
 
             fn from_env(
-                _extensions: Vec<goose::config::ExtensionConfig>,
-                _tls_config: Option<goose::providers::api_client::TlsConfig>,
+                _extensions: Vec<arakan::config::ExtensionConfig>,
+                _tls_config: Option<arakan::providers::api_client::TlsConfig>,
             ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
                 unimplemented!()
             }
@@ -2502,7 +2502,7 @@ mod tests {
                     PathBuf::default(),
                     session_name.to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
             services
@@ -2599,7 +2599,7 @@ mod tests {
                     PathBuf::default(),
                     "empty-steer".to_string(),
                     SessionType::Hidden,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await?;
             services
@@ -2669,8 +2669,8 @@ mod tests {
 
         #[tokio::test]
         async fn test_final_output_result_id_matches_persisted_message() -> Result<()> {
-            use goose::recipe::{Recipe, Response};
-            use goose::session::SessionManager;
+            use arakan::recipe::{Recipe, Response};
+            use arakan::session::SessionManager;
             use tempfile::TempDir;
 
             let temp_dir = TempDir::new()?;
@@ -2680,7 +2680,7 @@ mod tests {
                 Arc::new(PermissionManager::new(temp_dir.path().join("config"))),
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
 
             let session = session_manager
@@ -2688,7 +2688,7 @@ mod tests {
                     PathBuf::default(),
                     "final-output-result".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await?;
             let session_id = session.id.clone();

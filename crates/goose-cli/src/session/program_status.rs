@@ -1,6 +1,6 @@
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use goose::config::Config;
+use arakan::config::Config;
 use std::io::{IsTerminal, Write};
 use std::sync::Mutex;
 
@@ -36,7 +36,7 @@ pub fn enable(text_output: bool) {
     REPORTER.lock().unwrap().enabled = text_output
         && std::io::stdout().is_terminal()
         && Config::global()
-            .get_param::<bool>("GOOSE_CLI_PROGRAM_STATUS")
+            .get_param::<bool>("ARAKAN_CLI_PROGRAM_STATUS")
             .unwrap_or(true);
 }
 
@@ -80,7 +80,7 @@ fn encode(status: ProgramStatus, msg: Option<&str>) -> String {
         ProgramStatus::Blocked(BlockedKind::Question) => body.push_str(":kind=question"),
         _ => {}
     }
-    body.push_str(":app=goose");
+    body.push_str(":app=arakan");
     if let Some(msg) = msg {
         let line: String = msg
             .chars()
@@ -110,7 +110,7 @@ mod tests {
                 Some("run\n\x1b]0;x\x07 shell")
             ),
             format!(
-                "\x1b]7501;state=blocked:kind=permission:app=goose:msg={}\x1b\\",
+                "\x1b]7501;state=blocked:kind=permission:app=arakan:msg={}\x1b\\",
                 STANDARD.encode("run  ]0;x  shell")
             )
         );
@@ -118,7 +118,7 @@ mod tests {
         let long = "é".repeat(MAX_MSG_BYTES);
         let encoded = encode(ProgramStatus::Done, Some(&long));
         let msg = encoded
-            .strip_prefix("\x1b]7501;state=done:app=goose:msg=")
+            .strip_prefix("\x1b]7501;state=done:app=arakan:msg=")
             .and_then(|s| s.strip_suffix("\x1b\\"))
             .unwrap();
         assert_eq!(

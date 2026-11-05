@@ -9,7 +9,7 @@ static CORE_PROMPTS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/prompts");
 static TEMPLATE_REGISTRY: &[(&str, &str)] = &[
     (
         "system.md",
-        "Main system prompt that defines goose's personality and behavior",
+        "Main system prompt that defines arakan's personality and behavior",
     ),
     (
         "compaction.md",
@@ -25,11 +25,11 @@ static TEMPLATE_REGISTRY: &[(&str, &str)] = &[
     ),
     (
         "apps_create.md",
-        "Prompt for generating new Goose apps based on the user instructions",
+        "Prompt for generating new Arakan apps based on the user instructions",
     ),
     (
         "apps_iterate.md",
-        "Prompt for updating existing Goose apps based on feedback",
+        "Prompt for updating existing Arakan apps based on feedback",
     ),
     (
         "permission_judge.md",
@@ -60,7 +60,7 @@ fn builtin_content(name: &str) -> Option<String> {
     CORE_PROMPTS_DIR
         .get_file(name)
         .map(|file| String::from_utf8_lossy(file.contents()).to_string())
-        .or_else(|| goose_context_management::templates::builtin_template(name))
+        .or_else(|| arakan_context_management::templates::builtin_template(name))
 }
 
 fn user_prompts_dir() -> PathBuf {

@@ -4,7 +4,7 @@ use regex::Regex;
 use std::collections::HashSet;
 use std::sync::OnceLock;
 
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, ToolRequest};
 use crate::tool_inspection::{InspectionAction, InspectionResult, ToolInspector};
 
@@ -319,7 +319,7 @@ impl ToolInspector for EgressInspector {
         _session_id: &str,
         tool_requests: &[ToolRequest],
         _messages: &[Message],
-        _goose_mode: GooseMode,
+        _arakan_mode: ArakanMode,
     ) -> Result<Vec<InspectionResult>> {
         let mut results = Vec::new();
         let mut seen_destinations: HashSet<String> = HashSet::new();

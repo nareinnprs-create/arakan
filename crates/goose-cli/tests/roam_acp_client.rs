@@ -2,7 +2,7 @@
 //! transport.
 //!
 //! Roaming is just an authenticated p2p ACP transport, so a stub ACP *agent*
-//! stands in for goose's real `serve` and implements the session surface the
+//! stands in for arakan's real `serve` and implements the session surface the
 //! client exercises: `session/list`, `session/new`, `session/load`,
 //! `session/prompt`. This proves `roam_client::list_sessions` and the
 //! session-aware `roam_client::delegate` drive plain ACP correctly across a
@@ -24,8 +24,8 @@ use anyhow::{anyhow, Result};
 use futures::future::BoxFuture;
 use futures::io::{AsyncRead, AsyncWrite};
 
-use goose_cli::commands::roam_client;
-use goose_roaming::{
+use arakan_cli::commands::roam_client;
+use arakan_roaming::{
     AcpStreamServer, Directory, EndpointId, RelaySettings, RoamingConfig, RoamingIdentity,
     RoamingNode, TrustBook,
 };
@@ -136,7 +136,7 @@ async fn bind_node(trust: TrustBook) -> Arc<RoamingNode> {
 /// Bind a host serving the stub ACP agent and return a client stream connected
 /// to it over the real (relay-disabled, loopback) iroh transport. The host
 /// accepts the client's key first (mutual, key-based trust).
-async fn connect_to_stub() -> (Arc<RoamingNode>, goose_roaming::RoamingClientStream) {
+async fn connect_to_stub() -> (Arc<RoamingNode>, arakan_roaming::RoamingClientStream) {
     let host = bind_node(TrustBook::new()).await;
     host.share(Arc::new(StubAcpAgent)).await.expect("share");
 

@@ -1,1 +1,1 @@
-export { resolveGooseBinary } from "./resolve-binary.js";
+export { resolveArakanBinary } from "./resolve-binary.js";

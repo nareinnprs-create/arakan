@@ -1,19 +1,19 @@
 ---
-title: goose Perception
-description: A background application that turns desktop activity into a personal wiki using goose over ACP.
+title: arakan Perception
+description: A background application that turns desktop activity into a personal wiki using arakan over ACP.
 displayed_sidebar: gdkSidebar
 ---
 
-# goose Perception
+# arakan Perception
 
 Perception periodically captures the desktop and turns what it observes into a
 linked personal wiki about projects, people, and daily activity. A local web
 interface lets you browse, search, and edit the result.
 
-Built with **goose over ACP**, using the TypeScript `@aaif/goose-sdk` client.
+Built with **arakan over ACP**, using the TypeScript `@aaif/arakan-sdk` client.
 The application does not embed the Rust GDK runtime.
 
-[Source](https://github.com/DOsinga/goose_perception)
+[Source](https://github.com/DOsinga/arakan_perception)
 
 ## The clever bit
 
@@ -36,7 +36,7 @@ agent's tools, provider configuration, and execution.
 4. Update pages and cross-references. During idle periods, review existing
    pages using a separate lint prompt.
 
-The [agent client](https://github.com/DOsinga/goose_perception/blob/main/src/agent.ts)
+The [agent client](https://github.com/DOsinga/arakan_perception/blob/main/src/agent.ts)
 creates sessions with the wiki as their working directory:
 
 ```typescript
@@ -49,24 +49,24 @@ const session = await client.newSession({
 
 The same client sends image content to the extraction session and text
 observations to the wiki session. The
-[main loop](https://github.com/DOsinga/goose_perception/blob/main/src/main.ts)
+[main loop](https://github.com/DOsinga/arakan_perception/blob/main/src/main.ts)
 handles batching, change detection, and scheduling; the
-[prompts](https://github.com/DOsinga/goose_perception/blob/main/src/prompt.ts)
+[prompts](https://github.com/DOsinga/arakan_perception/blob/main/src/prompt.ts)
 define what the agent should preserve.
 
 ## Run it yourself
 
 You need Node.js 20 or later, macOS or Linux with a supported screenshot tool,
-and goose configured with a vision-capable model. The package can install goose
+and arakan configured with a vision-capable model. The package can install arakan
 if it is not already available.
 
 ```bash
-npx goose_perception
+npx arakan_perception
 ```
 
 This starts desktop capture and opens the wiki browser at
 `http://localhost:8112`. Stop the process to stop capture. See the
-[README](https://github.com/DOsinga/goose_perception#options) for capture intervals,
+[README](https://github.com/DOsinga/arakan_perception#options) for capture intervals,
 storage location, and connection options.
 
 :::warning Desktop capture

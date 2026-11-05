@@ -10,63 +10,63 @@ import type {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 
-export const GOOSE_MCP_UI_EXTENSION_ID = "io.modelcontextprotocol/ui" as const;
+export const ARAKAN_MCP_UI_EXTENSION_ID = "io.modelcontextprotocol/ui" as const;
 
-export interface GooseMcpUiExtensionSettings {
+export interface ArakanMcpUiExtensionSettings {
   mimeTypes: string[];
 }
 
-export interface GooseMcpHostCapabilities {
-  extensions: Record<string, GooseMcpUiExtensionSettings>;
+export interface ArakanMcpHostCapabilities {
+  extensions: Record<string, ArakanMcpUiExtensionSettings>;
 }
 
-export type GooseToolUiMetadata = Extract<
+export type ArakanToolUiMetadata = Extract<
   McpUiAppToolConfig["_meta"],
   { ui: unknown }
 >["ui"];
 
-export type GooseToolMetadata = NonNullable<Tool["_meta"]> & {
-  ui?: GooseToolUiMetadata;
-  goose_extension?: string;
+export type ArakanToolMetadata = NonNullable<Tool["_meta"]> & {
+  ui?: ArakanToolUiMetadata;
+  arakan_extension?: string;
 };
 
-export type GooseSessionTool = Tool & {
-  meta?: GooseToolMetadata;
-  _meta?: GooseToolMetadata;
+export type ArakanSessionTool = Tool & {
+  meta?: ArakanToolMetadata;
+  _meta?: ArakanToolMetadata;
 };
 
-export type GooseTextResourceContents = TextResourceContents;
+export type ArakanTextResourceContents = TextResourceContents;
 
-export type GooseBlobResourceContents = BlobResourceContents;
+export type ArakanBlobResourceContents = BlobResourceContents;
 
-export type GooseResourceContents = TextResourceContents | BlobResourceContents;
+export type ArakanResourceContents = TextResourceContents | BlobResourceContents;
 
-export type GooseReadResourceResult = ReadResourceResult;
+export type ArakanReadResourceResult = ReadResourceResult;
 
-export type GooseResourceMetadata = NonNullable<
+export type ArakanResourceMetadata = NonNullable<
   Extract<NonNullable<McpUiAppResourceConfig["_meta"]>, { ui?: unknown }>["ui"]
 >;
 
-export interface GooseMcpAppToolPayload {
+export interface ArakanMcpAppToolPayload {
   toolName: string;
   extensionName: string;
   resourceUri: string;
-  toolMeta?: GooseToolMetadata;
-  resourceResult?: GooseReadResourceResult | null;
+  toolMeta?: ArakanToolMetadata;
+  resourceResult?: ArakanReadResourceResult | null;
   readError?: string;
 }
 
-export interface GooseToolCallUpdateMeta {
-  goose?: {
-    mcpApp?: GooseMcpAppToolPayload;
+export interface ArakanToolCallUpdateMeta {
+  arakan?: {
+    mcpApp?: ArakanMcpAppToolPayload;
     [key: string]: unknown;
   };
   [key: string]: unknown;
 }
 
-export const DEFAULT_GOOSE_MCP_HOST_CAPABILITIES: GooseMcpHostCapabilities = {
+export const DEFAULT_ARAKAN_MCP_HOST_CAPABILITIES: ArakanMcpHostCapabilities = {
   extensions: {
-    [GOOSE_MCP_UI_EXTENSION_ID]: {
+    [ARAKAN_MCP_UI_EXTENSION_ID]: {
       mimeTypes: [RESOURCE_MIME_TYPE],
     },
   },

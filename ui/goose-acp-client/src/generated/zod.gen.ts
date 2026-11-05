@@ -67,7 +67,7 @@ export const zMcpServer = z.union([
     zMcpServerStdio
 ]);
 
-export const zGooseExtension = z.union([
+export const zArakanExtension = z.union([
     z.object({
         name: z.string(),
         description: z.string().nullish(),
@@ -105,7 +105,7 @@ export const zGooseExtension = z.union([
  */
 export const zAddSessionExtensionRequest_unstable = z.object({
     sessionId: z.string(),
-    extension: zGooseExtension
+    extension: zArakanExtension
 });
 
 /**
@@ -177,7 +177,7 @@ export const zSetToolPermissionsResponse_unstable = z.record(z.string(), z.unkno
 /**
  * Call a tool from an extension.
  */
-export const zGooseToolCallRequest_unstable = z.object({
+export const zArakanToolCallRequest_unstable = z.object({
     sessionId: z.string(),
     extensionName: z.string(),
     name: z.string(),
@@ -187,7 +187,7 @@ export const zGooseToolCallRequest_unstable = z.object({
 /**
  * Tool call response.
  */
-export const zGooseToolCallResponse_unstable = z.object({
+export const zArakanToolCallResponse_unstable = z.object({
     content: z.array(z.unknown()).optional().default([]),
     structuredContent: z.unknown().optional(),
     isError: z.boolean(),
@@ -211,7 +211,7 @@ export const zReadResourceResponse_unstable = z.object({
 });
 
 /**
- * List available goose apps, optionally scoped to a session.
+ * List available arakan apps, optionally scoped to a session.
  */
 export const zAppsListRequest_unstable = z.object({
     sessionId: z.string().nullish()
@@ -222,7 +222,7 @@ export const zAppsListResponse_unstable = z.object({
 });
 
 /**
- * Export a goose app as HTML.
+ * Export a arakan app as HTML.
  */
 export const zAppsExportRequest_unstable = z.object({
     name: z.string()
@@ -233,7 +233,7 @@ export const zAppsExportResponse_unstable = z.object({
 });
 
 /**
- * Import a goose app from HTML.
+ * Import a arakan app from HTML.
  */
 export const zAppsImportRequest_unstable = z.object({
     html: z.string()
@@ -245,7 +245,7 @@ export const zAppsImportResponse_unstable = z.object({
 });
 
 /**
- * Delete a goose app by name.
+ * Delete a arakan app by name.
  */
 export const zAppsDeleteRequest_unstable = z.object({
     name: z.string()
@@ -275,7 +275,7 @@ export const zSessionSystemPromptMode = z.union([
 /**
  * Set, append, or clear system prompt text for a session.
  *
- * `mode: "set"` replaces goose's base system prompt. `mode: "append"` adds an
+ * `mode: "set"` replaces arakan's base system prompt. `mode: "append"` adds an
  * instruction under "Additional Instructions". Reusing a key replaces the
  * previous value for that mode/key; sending empty text clears it.
  */
@@ -522,7 +522,7 @@ export const zContextReportResponse_unstable = z.object({
 });
 
 /**
- * List all available goose prompt templates.
+ * List all available arakan prompt templates.
  */
 export const zListPromptsRequest_unstable = z.record(z.string(), z.unknown());
 
@@ -542,7 +542,7 @@ export const zListPromptsResponse_unstable = z.object({
 });
 
 /**
- * Read a goose prompt template.
+ * Read a arakan prompt template.
  */
 export const zGetPromptRequest_unstable = z.object({
     name: z.string()
@@ -556,7 +556,7 @@ export const zGetPromptResponse_unstable = z.object({
 });
 
 /**
- * Save a custom goose prompt template.
+ * Save a custom arakan prompt template.
  */
 export const zSavePromptRequest_unstable = z.object({
     name: z.string(),
@@ -568,7 +568,7 @@ export const zPromptOperationResponse_unstable = z.object({
 });
 
 /**
- * Reset a goose prompt template to its default content.
+ * Reset a arakan prompt template to its default content.
  */
 export const zResetPromptRequest_unstable = z.object({
     name: z.string()
@@ -579,8 +579,8 @@ export const zResetPromptRequest_unstable = z.object({
  */
 export const zGetConfigExtensionsRequest_unstable = z.record(z.string(), z.unknown());
 
-export const zGooseExtensionEntry = z.object({
-    extension: zGooseExtension,
+export const zArakanExtensionEntry = z.object({
+    extension: zArakanExtension,
     enabled: z.boolean(),
     configKey: z.string().nullish()
 });
@@ -589,27 +589,27 @@ export const zGooseExtensionEntry = z.object({
  * List configured extensions and any warnings.
  */
 export const zGetConfigExtensionsResponse_unstable = z.object({
-    extensions: z.array(zGooseExtensionEntry),
+    extensions: z.array(zArakanExtensionEntry),
     warnings: z.array(z.string()).optional().default([])
 });
 
 /**
- * Persist a new extension to the user's global goose config.
+ * Persist a new extension to the user's global arakan config.
  */
 export const zAddConfigExtensionRequest_unstable = z.object({
-    extension: zGooseExtension,
+    extension: zArakanExtension,
     enabled: z.boolean().optional().default(false)
 });
 
 /**
- * Remove a persisted extension from the user's global goose config.
+ * Remove a persisted extension from the user's global arakan config.
  */
 export const zRemoveConfigExtensionRequest_unstable = z.object({
     configKey: z.string()
 });
 
 /**
- * Set the `enabled` flag for a persisted extension in the user's global goose config.
+ * Set the `enabled` flag for a persisted extension in the user's global arakan config.
  */
 export const zSetConfigExtensionEnabledRequest_unstable = z.object({
     configKey: z.string(),
@@ -624,7 +624,7 @@ export const zGetSessionExtensionsRequest_unstable = z.object({
 });
 
 export const zSessionExtensionEntry = z.object({
-    extension: zGooseExtension,
+    extension: zArakanExtension,
     extensionKey: z.string()
 });
 
@@ -818,7 +818,7 @@ export const zProviderCatalogTemplateResponse_unstable = z.object({
 });
 
 /**
- * Create a custom provider backed by goose's declarative provider store.
+ * Create a custom provider backed by arakan's declarative provider store.
  */
 export const zCustomProviderCreateRequest_unstable = z.object({
     engine: z.string(),
@@ -897,7 +897,7 @@ export const zCustomProviderReadResponse_unstable = z.object({
 });
 
 /**
- * Update a custom provider backed by goose's declarative provider store.
+ * Update a custom provider backed by arakan's declarative provider store.
  */
 export const zCustomProviderUpdateRequest_unstable = z.object({
     providerId: z.string(),
@@ -922,7 +922,7 @@ export const zCustomProviderUpdateResponse_unstable = z.object({
 });
 
 /**
- * Delete a custom provider from goose's declarative provider store.
+ * Delete a custom provider from arakan's declarative provider store.
  */
 export const zCustomProviderDeleteRequest_unstable = z.object({
     providerId: z.string()
@@ -1016,7 +1016,7 @@ export const zProviderConfigAuthenticateRequest_unstable = z.object({
 });
 
 /**
- * List provider credentials stored locally by goose.
+ * List provider credentials stored locally by arakan.
  */
 export const zProviderSecretsListRequest_unstable = z.record(z.string(), z.unknown());
 
@@ -1081,7 +1081,7 @@ export const zCanonicalModelInfoResponse_unstable = z.object({
 
 export const zPreferenceKey = z.enum([
     'autoCompactThreshold',
-    'gooseThinkingEffort',
+    'arakanThinkingEffort',
     'voiceAutoSubmitPhrases',
     'voiceDictationProvider',
     'voiceDictationPreferredMic'
@@ -1111,7 +1111,7 @@ export const zPreferencesSaveRequest_unstable = z.object({
 });
 
 /**
- * Read one goose configuration value.
+ * Read one arakan configuration value.
  */
 export const zConfigReadRequest_unstable = z.object({
     key: z.string(),
@@ -1123,7 +1123,7 @@ export const zConfigReadResponse_unstable = z.object({
 });
 
 /**
- * Create or replace one goose configuration value.
+ * Create or replace one arakan configuration value.
  */
 export const zConfigUpsertRequest_unstable = z.object({
     key: z.string(),
@@ -1132,7 +1132,7 @@ export const zConfigUpsertRequest_unstable = z.object({
 });
 
 /**
- * Remove one goose configuration value.
+ * Remove one arakan configuration value.
  */
 export const zConfigRemoveRequest_unstable = z.object({
     key: z.string(),
@@ -1140,7 +1140,7 @@ export const zConfigRemoveRequest_unstable = z.object({
 });
 
 /**
- * Read all non-secret goose configuration values.
+ * Read all non-secret arakan configuration values.
  */
 export const zConfigReadAllRequest_unstable = z.record(z.string(), z.unknown());
 
@@ -1149,7 +1149,7 @@ export const zConfigReadAllResponse_unstable = z.object({
 });
 
 /**
- * Read goose default provider and model configuration.
+ * Read arakan default provider and model configuration.
  */
 export const zDefaultsReadRequest_unstable = z.record(z.string(), z.unknown());
 
@@ -1159,7 +1159,7 @@ export const zDefaultsReadResponse_unstable = z.object({
 });
 
 /**
- * Save goose default provider and model configuration.
+ * Save arakan default provider and model configuration.
  */
 export const zDefaultsSaveRequest_unstable = z.object({
     providerId: z.string(),
@@ -1167,17 +1167,17 @@ export const zDefaultsSaveRequest_unstable = z.object({
 });
 
 /**
- * Clear goose default provider and model configuration.
+ * Clear arakan default provider and model configuration.
  */
 export const zDefaultsClearRequest_unstable = z.record(z.string(), z.unknown());
 
 /**
  * Sources that onboarding knows how to discover and import.
  */
-export const zOnboardingImportSourceKind = z.enum(['goose_config', 'claude_desktop']);
+export const zOnboardingImportSourceKind = z.enum(['arakan_config', 'claude_desktop']);
 
 /**
- * Scan for existing goose and compatible app data that onboarding can import.
+ * Scan for existing arakan and compatible app data that onboarding can import.
  */
 export const zOnboardingImportScanRequest_unstable = z.object({
     sources: z.array(zOnboardingImportSourceKind).optional().default([])
@@ -1231,7 +1231,7 @@ export const zExportSessionRequest_unstable = z.object({
 });
 
 /**
- * Export session response — raw JSON of the goose session with `conversation`,
+ * Export session response — raw JSON of the arakan session with `conversation`,
  * or a markdown transcript when `format` is `markdown`.
  */
 export const zExportSessionResponse_unstable = z.object({
@@ -1305,8 +1305,8 @@ export const zRecipeExtensionDto = z.union([
 ]);
 
 export const zRecipeSettingsDto = z.object({
-    goose_provider: z.string().nullish(),
-    goose_model: z.string().nullish(),
+    arakan_provider: z.string().nullish(),
+    arakan_model: z.string().nullish(),
     temperature: z.number().nullish(),
     max_turns: z.int().gte(0).nullish()
 });
@@ -1382,7 +1382,7 @@ export const zRecipeDto = z.object({
 });
 
 /**
- * Encode a recipe as a goose deep link.
+ * Encode a recipe as a arakan deep link.
  */
 export const zEncodeRecipeRequest_unstable = z.object({
     recipe: zRecipeDto
@@ -1393,7 +1393,7 @@ export const zEncodeRecipeResponse_unstable = z.object({
 });
 
 /**
- * Decode a goose deep link into a recipe.
+ * Decode a arakan deep link into a recipe.
  */
 export const zDecodeRecipeRequest_unstable = z.object({
     deeplink: z.string()
@@ -1721,7 +1721,7 @@ export const zCreateSourceRequest_unstable = z.object({
 });
 
 /**
- * A source discovered by Goose. Filesystem sources use an on-disk path;
+ * A source discovered by Arakan. Filesystem sources use an on-disk path;
  * built-in sources use a stable synthetic path. Sources may be either
  * `global` (shared across all projects) or project-specific.
  */
@@ -1855,7 +1855,7 @@ export const zExportSourceResponse_unstable = z.object({
 });
 
 /**
- * Import a source from a JSON export payload produced by `_goose/unstable/sources/export`.
+ * Import a source from a JSON export payload produced by `_arakan/unstable/sources/export`.
  * The imported source is written into the explicit target scope; on name
  * collisions a `-imported` suffix is appended.
  */
@@ -2272,7 +2272,7 @@ export const zCostSourceData = z.union([
 
 /**
  * Wire mirror of the conversation `MessageUsage` (this crate cannot depend on
- * goose-provider-types); field names and serde casing MUST stay in parity.
+ * arakan-provider-types); field names and serde casing MUST stay in parity.
  */
 export const zMessageUsageData = z.object({
     inputTokens: z.int().nullish(),
@@ -2304,14 +2304,14 @@ export const zLiveVoiceInteractionEndedUpdate = z.object({
 });
 
 /**
- * Discriminated union of goose-specific session update payloads.
+ * Discriminated union of arakan-specific session update payloads.
  * Variant tag matches ACP's convention (`sessionUpdate: "<snake_case>"`).
  *
  * `discriminator.mapping` is what makes TS codegen (`@hey-api/openapi-ts`)
  * emit the correct snake_case tag value even when this enum has a single
  * variant. Add a mapping entry per variant.
  */
-export const zGooseSessionUpdate = z.discriminatedUnion('sessionUpdate', [
+export const zArakanSessionUpdate = z.discriminatedUnion('sessionUpdate', [
     zSessionUsageUpdate.extend({ sessionUpdate: z.literal('usage_update') }),
     zStatusMessageUpdate.extend({ sessionUpdate: z.literal('status_message') }),
     zMessageUsageUpdate.extend({ sessionUpdate: z.literal('message_usage') }),
@@ -2319,18 +2319,18 @@ export const zGooseSessionUpdate = z.discriminatedUnion('sessionUpdate', [
 ]);
 
 /**
- * Goose-custom session update notification — a parallel to ACP's
- * `session/update` carrying goose-specific update variants.
+ * Arakan-custom session update notification — a parallel to ACP's
+ * `session/update` carrying arakan-specific update variants.
  */
-export const zGooseSessionNotification_unstable = z.object({
+export const zArakanSessionNotification_unstable = z.object({
     sessionId: z.string(),
-    update: zGooseSessionUpdate
+    update: zArakanSessionUpdate
 });
 
 /**
  * Dedicated provider notification for OAuth device-code flow.
  * Sent during provider authentication when the ACP client supports
- * `goose.customNotifications` — avoids a fake empty session ID.
+ * `arakan.customNotifications` — avoids a fake empty session ID.
  */
 export const zProviderDeviceCodeNotification_unstable = z.object({
     providerId: z.string(),
@@ -2364,7 +2364,7 @@ export const zExtRequest = z.object({
             zRemoveSessionExtensionRequest_unstable,
             zGetToolsRequest_unstable,
             zSetToolPermissionsRequest_unstable,
-            zGooseToolCallRequest_unstable,
+            zArakanToolCallRequest_unstable,
             zReadResourceRequest_unstable,
             zAppsListRequest_unstable,
             zAppsExportRequest_unstable,
@@ -2484,7 +2484,7 @@ export const zExtResponse = z.union([
                 zEmptyResponse,
                 zGetToolsResponse_unstable,
                 zSetToolPermissionsResponse_unstable,
-                zGooseToolCallResponse_unstable,
+                zArakanToolCallResponse_unstable,
                 zReadResourceResponse_unstable,
                 zAppsListResponse_unstable,
                 zAppsExportResponse_unstable,
@@ -2576,7 +2576,7 @@ export const zExtNotification = z.object({
     method: z.string(),
     params: z.union([
         z.union([
-            zGooseSessionNotification_unstable,
+            zArakanSessionNotification_unstable,
             zProviderDeviceCodeNotification_unstable
         ]),
         z.record(z.string(), z.unknown())

@@ -22,14 +22,14 @@ use super::{Gateway, GatewayConfig, IncomingMessage, OutgoingMessage, PairingSta
 /// Conservative default cap on tool-calling loops for gateway sessions.
 ///
 /// Chat platforms like Telegram favor short, snappy replies, so the gateway
-/// keeps a stricter default than the global `GOOSE_MAX_TURNS` ceiling.  Users
-/// can override this through `GOOSE_GATEWAY_MAX_TURNS` (gateway-specific) or
-/// `GOOSE_MAX_TURNS` (applies globally).
+/// keeps a stricter default than the global `ARAKAN_MAX_TURNS` ceiling.  Users
+/// can override this through `ARAKAN_GATEWAY_MAX_TURNS` (gateway-specific) or
+/// `ARAKAN_MAX_TURNS` (applies globally).
 const DEFAULT_GATEWAY_MAX_TURNS: u32 = 5;
 
 /// Resolve the max turns to use for a gateway session.
 ///
-/// Precedence: `GOOSE_GATEWAY_MAX_TURNS` -> `GOOSE_MAX_TURNS` ->
+/// Precedence: `ARAKAN_GATEWAY_MAX_TURNS` -> `ARAKAN_MAX_TURNS` ->
 /// `DEFAULT_GATEWAY_MAX_TURNS`.  Extracted as a pure function so the
 /// precedence rules can be unit-tested without touching the global config.
 fn resolve_gateway_max_turns(gateway_override: Option<u32>, global_max_turns: Option<u32>) -> u32 {
@@ -155,7 +155,7 @@ impl GatewayHandler {
                         .send_message(
                             &message.user,
                             OutgoingMessage::Text {
-                                body: "Welcome! Enter your pairing code to connect to goose."
+                                body: "Welcome! Enter your pairing code to connect to arakan."
                                     .into(),
                             },
                         )
@@ -318,7 +318,7 @@ impl GatewayHandler {
                 working_dir,
                 session_name,
                 SessionType::Gateway,
-                config.get_goose_mode().unwrap_or_default(),
+                config.get_arakan_mode().unwrap_or_default(),
             )
             .await?;
 
@@ -327,11 +327,11 @@ impl GatewayHandler {
         // Store the current provider and model config on the session so the agent
         // can be restored after LRU eviction, matching the start_agent flow.
         let mut update = manager.update(&session.id);
-        let provider = config.get_goose_provider().ok();
+        let provider = config.get_arakan_provider().ok();
         if let Some(ref provider) = provider {
             update = update.provider_name(provider);
         }
-        if let (Some(ref provider), Ok(model_name)) = (&provider, config.get_goose_model()) {
+        if let (Some(ref provider), Ok(model_name)) = (&provider, config.get_arakan_model()) {
             if let Ok(model_config) =
                 crate::model_config::model_config_from_user_config(provider, &model_name)
             {
@@ -366,7 +366,7 @@ impl GatewayHandler {
             .send_message(
                 user,
                 OutgoingMessage::Text {
-                    body: "Paired! You can now chat with goose.".into(),
+                    body: "Paired! You can now chat with arakan.".into(),
                 },
             )
             .await?;
@@ -382,13 +382,13 @@ impl GatewayHandler {
         let manager = &self.services.session_manager;
 
         // --- current global config ---
-        let current_provider = config.get_goose_provider().ok();
-        let current_model_name = config.get_goose_model().ok();
+        let current_provider = config.get_arakan_provider().ok();
+        let current_model_name = config.get_arakan_model().ok();
         let mut current_extensions = get_enabled_extensions();
         current_extensions.extend(crate::plugins::mcp_servers::enabled_plugin_mcp_servers(
             Some(&session.working_dir),
         ));
-        let current_mode = config.get_goose_mode().unwrap_or_default();
+        let current_mode = config.get_arakan_mode().unwrap_or_default();
 
         // --- what the session has ---
         let session_extensions: Vec<ExtensionConfig> =
@@ -400,7 +400,7 @@ impl GatewayHandler {
         let model_changed = current_model_name.as_deref()
             != session.model_config.as_ref().map(|m| m.model_name.as_str());
         let extensions_changed = current_extensions != session_extensions;
-        let mode_changed = current_mode != session.goose_mode;
+        let mode_changed = current_mode != session.arakan_mode;
 
         if !provider_changed && !model_changed && !extensions_changed && !mode_changed {
             return Ok(());
@@ -430,7 +430,7 @@ impl GatewayHandler {
         }
 
         if mode_changed {
-            update = update.goose_mode(current_mode);
+            update = update.arakan_mode(current_mode);
         }
 
         update.apply().await?;
@@ -497,13 +497,13 @@ impl GatewayHandler {
         // LLM→tool round-trips the agent will stop and reply with
         // whatever it has.
         //
-        // Honors `GOOSE_GATEWAY_MAX_TURNS` (gateway-specific override) and
-        // `GOOSE_MAX_TURNS` (global), falling back to a conservative default
+        // Honors `ARAKAN_GATEWAY_MAX_TURNS` (gateway-specific override) and
+        // `ARAKAN_MAX_TURNS` (global), falling back to a conservative default
         // so the limit is configurable without editing the source.
         let config = Config::global();
         let max_turns = resolve_gateway_max_turns(
-            config.get_param::<u32>("GOOSE_GATEWAY_MAX_TURNS").ok(),
-            config.get_param::<u32>("GOOSE_MAX_TURNS").ok(),
+            config.get_param::<u32>("ARAKAN_GATEWAY_MAX_TURNS").ok(),
+            config.get_param::<u32>("ARAKAN_MAX_TURNS").ok(),
         );
 
         let session_config = SessionConfig {

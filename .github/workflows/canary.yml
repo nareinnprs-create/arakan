@@ -149,10 +149,10 @@ jobs:
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
         with:
           subject-path: |
-            goose-*.tar.bz2
-            goose-*.tar.gz
-            goose-*.zip
-            Goose*.zip
+            arakan-*.tar.bz2
+            arakan-*.tar.gz
+            arakan-*.zip
+            Arakan*.zip
             *.deb
             *.rpm
             *.flatpak
@@ -166,10 +166,10 @@ jobs:
           name: Canary
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            goose-*.tar.bz2
-            goose-*.tar.gz
-            goose-*.zip
-            Goose*.zip
+            arakan-*.tar.bz2
+            arakan-*.tar.gz
+            arakan-*.zip
+            Arakan*.zip
             *.deb
             *.rpm
             *.flatpak

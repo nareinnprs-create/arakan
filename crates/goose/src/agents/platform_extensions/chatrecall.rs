@@ -342,7 +342,7 @@ impl McpClientTrait for ChatRecallClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::GooseMode;
+    use crate::config::ArakanMode;
     use crate::conversation::message::{Message, MessageContent, MessageMetadata};
     use crate::session::SessionManager;
     use std::sync::Arc;
@@ -421,7 +421,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "current".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -430,7 +430,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "target".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();

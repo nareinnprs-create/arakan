@@ -26,8 +26,8 @@ export const gdkNavbarItems = [
     activeBasePath: "blog",
   },
   {
-    href: "https://github.com/aaif-goose/goose",
+    href: "https://github.com/aaif-arakan/arakan",
     label: "GitHub",
   },
-  { to: "/", label: "Back to goose", exact: true },
+  { to: "/", label: "Back to arakan", exact: true },
 ] satisfies NavbarItemConfig[];

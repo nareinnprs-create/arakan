@@ -5,9 +5,9 @@ use std::fs;
 use std::path::PathBuf;
 use tracing::warn;
 
-use super::app::GooseApp;
+use super::app::ArakanApp;
 
-static CLOCK_HTML: &str = include_str!("../goose_apps/clock.html");
+static CLOCK_HTML: &str = include_str!("../arakan_apps/clock.html");
 const APPS_EXTENSION_NAME: &str = "apps";
 
 pub const BUNDLED_DEFAULT_APP_URIS: &[&str] = &["ui://apps/clock"];
@@ -15,7 +15,7 @@ pub const BUNDLED_DEFAULT_APP_URIS: &[&str] = &["ui://apps/clock"];
 /// Bundled default apps: (cache URI, HTML source).
 const DEFAULT_APPS: &[(&str, &str)] = &[("ui://apps/clock", CLOCK_HTML)];
 
-pub fn mark_deletable_apps(apps: &mut [GooseApp]) {
+pub fn mark_deletable_apps(apps: &mut [ArakanApp]) {
     for app in apps.iter_mut() {
         let is_apps_extension = app
             .mcp_servers
@@ -76,14 +76,14 @@ impl McpAppCache {
         extension_name == APPS_EXTENSION_NAME && Self::is_bundled_default_uri(resource_uri)
     }
 
-    fn bundled_default_app(resource_uri: &str) -> Option<GooseApp> {
+    fn bundled_default_app(resource_uri: &str) -> Option<ArakanApp> {
         let (_, html) = DEFAULT_APPS.iter().find(|(uri, _)| *uri == resource_uri)?;
-        let mut app = GooseApp::from_html(html).ok()?;
+        let mut app = ArakanApp::from_html(html).ok()?;
         app.mcp_servers = vec![APPS_EXTENSION_NAME.to_string()];
         Some(app)
     }
 
-    pub fn restore_bundled_default_apps(apps: &mut [GooseApp]) {
+    pub fn restore_bundled_default_apps(apps: &mut [ArakanApp]) {
         for app in apps {
             let is_bundled_identity = app.mcp_servers.iter().any(|extension_name| {
                 Self::is_bundled_default_identity(extension_name, &app.resource.uri)
@@ -96,7 +96,7 @@ impl McpAppCache {
         }
     }
 
-    pub fn list_apps(&self) -> Result<Vec<GooseApp>, std::io::Error> {
+    pub fn list_apps(&self) -> Result<Vec<ArakanApp>, std::io::Error> {
         let mut apps = Vec::new();
 
         if self.cache_dir.exists() {
@@ -115,7 +115,7 @@ impl McpAppCache {
 
                 if path.extension().and_then(|s| s.to_str()) == Some("json") {
                     match fs::read_to_string(&path) {
-                        Ok(content) => match serde_json::from_str::<GooseApp>(&content) {
+                        Ok(content) => match serde_json::from_str::<ArakanApp>(&content) {
                             Ok(app) => apps.push(app),
                             Err(e) => warn!("Failed to parse cached app from {:?}: {}", path, e),
                         },
@@ -142,7 +142,7 @@ impl McpAppCache {
         Ok(apps)
     }
 
-    pub fn store_app(&self, app: &GooseApp) -> Result<(), std::io::Error> {
+    pub fn store_app(&self, app: &ArakanApp) -> Result<(), std::io::Error> {
         fs::create_dir_all(&self.cache_dir)?;
 
         // Store the app once for each MCP server it's associated with
@@ -159,7 +159,7 @@ impl McpAppCache {
         Ok(())
     }
 
-    pub fn get_app(&self, extension_name: &str, resource_uri: &str) -> Option<GooseApp> {
+    pub fn get_app(&self, extension_name: &str, resource_uri: &str) -> Option<ArakanApp> {
         if Self::is_bundled_default_identity(extension_name, resource_uri) {
             return Self::bundled_default_app(resource_uri);
         }
@@ -173,7 +173,7 @@ impl McpAppCache {
 
         fs::read_to_string(&app_path)
             .ok()
-            .and_then(|content| serde_json::from_str::<GooseApp>(&content).ok())
+            .and_then(|content| serde_json::from_str::<ArakanApp>(&content).ok())
     }
 
     pub fn delete_app(
@@ -217,7 +217,7 @@ impl McpAppCache {
 
             if path.extension().and_then(|s| s.to_str()) == Some("json") {
                 if let Ok(content) = fs::read_to_string(&path) {
-                    if let Ok(app) = serde_json::from_str::<GooseApp>(&content) {
+                    if let Ok(app) = serde_json::from_str::<ArakanApp>(&content) {
                         if app.mcp_servers.contains(&extension_name.to_string())
                             && !Self::is_bundled_default_identity(extension_name, &app.resource.uri)
                             && fs::remove_file(&path).is_ok()
@@ -244,8 +244,8 @@ mod tests {
 <head>
   <script type="application/ld+json">
     {
-      "@context": "https://goose.ai/schema",
-      "@type": "GooseApp",
+      "@context": "https://arakan.ai/schema",
+      "@type": "ArakanApp",
       "name": "test-app",
       "description": "Test app",
       "width": 100,
@@ -262,9 +262,9 @@ mod tests {
         F: FnOnce(),
     {
         let root = TempDir::new().unwrap();
-        std::env::set_var("GOOSE_PATH_ROOT", root.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", root.path());
         test();
-        std::env::remove_var("GOOSE_PATH_ROOT");
+        std::env::remove_var("ARAKAN_PATH_ROOT");
     }
 
     #[test]
@@ -275,18 +275,18 @@ mod tests {
 
     #[test]
     fn mark_deletable_apps_protects_bundled_uri_not_name() {
-        let mut bundled_clock = GooseApp::from_html(CLOCK_HTML).unwrap();
+        let mut bundled_clock = ArakanApp::from_html(CLOCK_HTML).unwrap();
         bundled_clock.mcp_servers = vec![APPS_EXTENSION_NAME.to_string()];
 
-        let mut user_clock = GooseApp::from_html(CUSTOM_APP_HTML).unwrap();
+        let mut user_clock = ArakanApp::from_html(CUSTOM_APP_HTML).unwrap();
         user_clock.resource.name = "clock".to_string();
         user_clock.resource.uri = "ui://apps/user-clock".to_string();
         user_clock.mcp_servers = vec![APPS_EXTENSION_NAME.to_string()];
 
-        let mut custom = GooseApp::from_html(CUSTOM_APP_HTML).unwrap();
+        let mut custom = ArakanApp::from_html(CUSTOM_APP_HTML).unwrap();
         custom.mcp_servers = vec![APPS_EXTENSION_NAME.to_string()];
 
-        let mut external = GooseApp::from_html(CUSTOM_APP_HTML).unwrap();
+        let mut external = ArakanApp::from_html(CUSTOM_APP_HTML).unwrap();
         external.mcp_servers = vec!["other-extension".to_string()];
 
         let mut apps = vec![bundled_clock, user_clock, custom, external];
@@ -303,7 +303,7 @@ mod tests {
     fn delete_app_removes_cached_entry() {
         with_temp_config(|| {
             let cache = McpAppCache::new().unwrap();
-            let mut app = GooseApp::from_html(CUSTOM_APP_HTML).unwrap();
+            let mut app = ArakanApp::from_html(CUSTOM_APP_HTML).unwrap();
             app.mcp_servers = vec![APPS_EXTENSION_NAME.to_string()];
             let uri = app.resource.uri.clone();
 
@@ -334,8 +334,8 @@ mod tests {
     fn bundled_default_identity_cannot_be_replaced_or_deleted() {
         with_temp_config(|| {
             let cache = McpAppCache::new().unwrap();
-            let expected = GooseApp::from_html(CLOCK_HTML).unwrap();
-            let mut attacker_app = GooseApp::from_html(CUSTOM_APP_HTML).unwrap();
+            let expected = ArakanApp::from_html(CLOCK_HTML).unwrap();
+            let mut attacker_app = ArakanApp::from_html(CUSTOM_APP_HTML).unwrap();
             attacker_app.resource.uri = "ui://apps/clock".to_string();
             attacker_app.resource.text = Some("<script>malicious()</script>".to_string());
             attacker_app.mcp_servers = vec![APPS_EXTENSION_NAME.to_string()];
@@ -379,8 +379,8 @@ mod tests {
 
         with_temp_config(|| {
             let cache = McpAppCache::new().unwrap();
-            let expected = GooseApp::from_html(CLOCK_HTML).unwrap();
-            let mut attacker_app = GooseApp::from_html(CUSTOM_APP_HTML).unwrap();
+            let expected = ArakanApp::from_html(CLOCK_HTML).unwrap();
+            let mut attacker_app = ArakanApp::from_html(CUSTOM_APP_HTML).unwrap();
             attacker_app.resource.uri = "ui://apps/clock".to_string();
             attacker_app.resource.text = Some("<script>malicious()</script>".to_string());
             attacker_app.mcp_servers.clear();
@@ -415,7 +415,7 @@ mod tests {
 
         with_temp_config(|| {
             let cache = McpAppCache::new().unwrap();
-            let expected = GooseApp::from_html(CLOCK_HTML).unwrap();
+            let expected = ArakanApp::from_html(CLOCK_HTML).unwrap();
             let app_path = cache.app_path(APPS_EXTENSION_NAME, "ui://apps/clock");
             fs::remove_file(&app_path).unwrap();
             fs::set_permissions(&cache.cache_dir, fs::Permissions::from_mode(0o555)).unwrap();

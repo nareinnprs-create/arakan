@@ -72,8 +72,8 @@ permissions:
   contents: read
 
 jobs:
-  build-goose-windows:
-    name: Build Goose (Windows)
+  build-arakan-windows:
+    name: Build Arakan (Windows)
     runs-on: ${{ inputs.windows_variant == 'cuda' && 'windows-2022' || 'windows-latest' }}
     steps:
       - name: Checkout repository
@@ -133,12 +133,12 @@ jobs:
           $isCuda = "${{ inputs.windows_variant }}" -eq "cuda"
 
           if ($isCuda) {
-            cargo build --release --target x86_64-pc-windows-msvc -p goose-cli --bin goose --features cuda
+            cargo build --release --target x86_64-pc-windows-msvc -p arakan-cli --bin arakan --features cuda
           } else {
-            cargo build --release --target x86_64-pc-windows-msvc -p goose-cli --bin goose
+            cargo build --release --target x86_64-pc-windows-msvc -p arakan-cli --bin arakan
           }
 
-          $binaryPath = "./target/x86_64-pc-windows-msvc/release/goose.exe"
+          $binaryPath = "./target/x86_64-pc-windows-msvc/release/arakan.exe"
           if (-not (Test-Path $binaryPath)) {
             Write-Error "Windows binary not found: $binaryPath"
             Get-ChildItem ./target/x86_64-pc-windows-msvc/release/ -ErrorAction SilentlyContinue
@@ -149,8 +149,8 @@ jobs:
       - name: Upload binary artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: internal-goose-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
-          path: target/x86_64-pc-windows-msvc/release/goose.exe
+          name: internal-arakan-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
+          path: target/x86_64-pc-windows-msvc/release/arakan.exe
           if-no-files-found: error
           retention-days: 1
           overwrite: true
@@ -158,13 +158,13 @@ jobs:
   package-cli-windows:
     name: Package CLI (Windows)
     if: ${{ inputs.package_cli }}
-    needs: build-goose-windows
+    needs: build-arakan-windows
     runs-on: ${{ inputs.windows_variant == 'cuda' && 'windows-2022' || 'windows-latest' }}
     steps:
       - name: Download binary artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
-          name: internal-goose-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
+          name: internal-arakan-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
           path: package
 
       - name: Package CLI
@@ -172,22 +172,22 @@ jobs:
         env:
           VARIANT_SUFFIX: ${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
         run: |
-          mkdir -p goose-package
-          cp package/goose.exe goose-package/
-          7z a -tzip "goose-x86_64-pc-windows-msvc${VARIANT_SUFFIX}.zip" goose-package/
+          mkdir -p arakan-package
+          cp package/arakan.exe arakan-package/
+          7z a -tzip "arakan-x86_64-pc-windows-msvc${VARIANT_SUFFIX}.zip" arakan-package/
 
       - name: Upload CLI artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: goose-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
-          path: goose-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}.zip
+          name: arakan-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
+          path: arakan-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}.zip
           if-no-files-found: error
           overwrite: true
 
   build-desktop-windows:
     name: Build Desktop (Windows)
     if: ${{ inputs.package_desktop }}
-    needs: build-goose-windows
+    needs: build-arakan-windows
     runs-on: ${{ inputs.windows_variant == 'cuda' && 'windows-2022' || 'windows-latest' }}
     steps:
       - name: Checkout repository
@@ -226,7 +226,7 @@ jobs:
       - name: Download binary artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
-          name: internal-goose-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
+          name: internal-arakan-x86_64-pc-windows-msvc${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
           path: backend
 
       - name: Prepare Windows binary
@@ -234,18 +234,18 @@ jobs:
         run: |
           rm -rf ./ui/desktop/src/bin
           mkdir -p ./ui/desktop/src/bin
-          cp -f ./backend/goose.exe ./ui/desktop/src/bin/
+          cp -f ./backend/arakan.exe ./ui/desktop/src/bin/
 
           if [ -d "./ui/desktop/src/platform/windows/bin" ]; then
             for file in ./ui/desktop/src/platform/windows/bin/*.{exe,dll,cmd}; do
               filename="$(basename "$file")"
-              if [ -f "$file" ] && [ "$filename" != "goose.exe" ]; then
+              if [ -f "$file" ] && [ "$filename" != "arakan.exe" ]; then
                 cp -f "$file" ./ui/desktop/src/bin/
               fi
             done
 
-            if [ -d "./ui/desktop/src/platform/windows/bin/goose-npm" ]; then
-              cp -r ./ui/desktop/src/platform/windows/bin/goose-npm/ ./ui/desktop/src/bin/goose-npm/
+            if [ -d "./ui/desktop/src/platform/windows/bin/arakan-npm" ]; then
+              cp -r ./ui/desktop/src/platform/windows/bin/arakan-npm/ ./ui/desktop/src/bin/arakan-npm/
             fi
           fi
 
@@ -271,11 +271,11 @@ jobs:
         shell: bash
         run: |
           cd ui/desktop
-          mkdir -p ./out/Goose-win32-x64/resources/bin
-          cp -r src/bin/* out/Goose-win32-x64/resources/bin/
+          mkdir -p ./out/Arakan-win32-x64/resources/bin
+          cp -r src/bin/* out/Arakan-win32-x64/resources/bin/
 
           mkdir -p ./dist-windows
-          cp -r ./out/Goose-win32-x64/* ./dist-windows/
+          cp -r ./out/Arakan-win32-x64/* ./dist-windows/
 
           ls -la ./dist-windows/
           ls -la ./dist-windows/resources/bin/
@@ -318,15 +318,15 @@ jobs:
           trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
           files: |
-            ${{ github.workspace }}/dist-windows/Goose.exe
-            ${{ github.workspace }}/dist-windows/resources/bin/goose.exe
+            ${{ github.workspace }}/dist-windows/Arakan.exe
+            ${{ github.workspace }}/dist-windows/resources/bin/arakan.exe
 
       - name: Verify signed executables
         shell: pwsh
         run: |
           $files = @(
-            "dist-windows/Goose.exe",
-            "dist-windows/resources/bin/goose.exe"
+            "dist-windows/Arakan.exe",
+            "dist-windows/resources/bin/arakan.exe"
           )
           foreach ($file in $files) {
             Write-Output "Verifying signature: $file"
@@ -349,13 +349,13 @@ jobs:
         shell: bash
         env:
           VARIANT_SUFFIX: ${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
-        run: 7z a -tzip "Goose-win32-x64${VARIANT_SUFFIX}.zip" dist-windows/
+        run: 7z a -tzip "Arakan-win32-x64${VARIANT_SUFFIX}.zip" dist-windows/
 
       - name: Upload signed Windows build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: Goose-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
-          path: Goose-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}.zip
+          name: Arakan-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
+          path: Arakan-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}.zip
           if-no-files-found: error
           overwrite: true
 
@@ -375,13 +375,13 @@ jobs:
         shell: bash
         env:
           VARIANT_SUFFIX: ${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
-        run: 7z a -tzip "Goose-win32-x64${VARIANT_SUFFIX}.zip" dist-windows/
+        run: 7z a -tzip "Arakan-win32-x64${VARIANT_SUFFIX}.zip" dist-windows/
 
       - name: Upload Windows build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: Goose-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
-          path: Goose-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}.zip
+          name: Arakan-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}
+          path: Arakan-win32-x64${{ inputs.windows_variant == 'cuda' && '-cuda' || '' }}.zip
           if-no-files-found: error
           overwrite: true
 
@@ -487,9 +487,9 @@ jobs:
         if: ${{ inputs.signing }}
         shell: pwsh
         run: |
-          $setup = (Resolve-Path "ui/desktop/out/make/nsis/win32/x64/Goose-win32-x64-setup.exe").Path
+          $setup = (Resolve-Path "ui/desktop/out/make/nsis/win32/x64/Arakan-win32-x64-setup.exe").Path
           Start-Process -FilePath $setup -ArgumentList "/S" -Wait
-          $files = @($setup, "$env:LOCALAPPDATA\Programs\Goose\Uninstall Goose.exe")
+          $files = @($setup, "$env:LOCALAPPDATA\Programs\Arakan\Uninstall Arakan.exe")
           foreach ($file in $files) {
             Write-Output "Verifying signature: $file"
             $sig = Get-AuthenticodeSignature $file
@@ -500,7 +500,7 @@ jobs:
       - name: Upload Windows installer
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: Goose-win32-x64-setup
-          path: ui/desktop/out/make/nsis/win32/x64/Goose-win32-x64-setup.exe
+          name: Arakan-win32-x64-setup
+          path: ui/desktop/out/make/nsis/win32/x64/Arakan-win32-x64-setup.exe
           if-no-files-found: error
           overwrite: true

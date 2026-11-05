@@ -17,9 +17,9 @@ use crate::providers::base::ConfigKey;
 use crate::subprocess::configure_subprocess;
 use async_stream::try_stream;
 use futures::future::BoxFuture;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 use rmcp::model::Role;
 use rmcp::model::Tool;
 
@@ -160,7 +160,7 @@ impl GeminiCliProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for GeminiCliProvider {
+impl arakan_providers::base::ProviderDescriptor for GeminiCliProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             GEMINI_CLI_PROVIDER_NAME,

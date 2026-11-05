@@ -152,7 +152,7 @@
   // TOOL RENDERING
   // ============================================================
 
-  // Split "extension__tool" into { namespace, tool }, mirroring goose's own
+  // Split "extension__tool" into { namespace, tool }, mirroring arakan's own
   // tool-name convention (see ToolNameParts / markdown export).
   function toolNameParts(name) {
     if (!name) return { namespace: null, tool: 'tool' };
@@ -428,7 +428,7 @@
         '<div class="role-label user">you</div>' + tsHtml + bodyParts.join('') + '</div>';
     }
     return '<div class="assistant-message" id="' + id + '">' +
-      '<div class="role-label assistant">goose</div>' + tsHtml +
+      '<div class="role-label assistant">arakan</div>' + tsHtml +
       bodyParts.join('') + '</div>';
   }
 
@@ -467,7 +467,7 @@
         const role = e.role === 'user' ? 'user' : 'assistant';
         return '<a class="toc-item ' + role + (e.internal ? ' internal' : '') +
           '" href="#' + e.id + '" data-target="' + e.id + '">' +
-          '<span class="toc-role">' + (role === 'user' ? 'you' : 'goose') + '</span>' +
+          '<span class="toc-role">' + (role === 'user' ? 'you' : 'arakan') + '</span>' +
           '<span class="toc-text">' + escapeHtml(truncate(e.label, 52)) + '</span></a>';
       })
       .join('');
@@ -625,7 +625,7 @@
   // INIT
   // ============================================================
 
-  document.title = 'goose · ' + (session.name || session.id || 'session');
+  document.title = 'arakan · ' + (session.name || session.id || 'session');
   renderHeader();
   renderMessages();
 })();

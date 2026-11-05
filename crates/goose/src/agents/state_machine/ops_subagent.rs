@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use futures::future;
 use futures::stream::{self, BoxStream, StreamExt};
-use goose_agent::subagent::{SubagentOutcome, SubagentRunner, SubagentUpdate};
+use arakan_agent::subagent::{SubagentOutcome, SubagentRunner, SubagentUpdate};
 use rmcp::model::Role;
 use tokio_util::sync::CancellationToken;
 
@@ -171,8 +171,8 @@ mod tests {
     use std::sync::Arc;
 
     use anyhow::Result;
-    use goose_agent::events::AgentEvent;
-    use goose_agent::subagent::SubagentOperation;
+    use arakan_agent::events::AgentEvent;
+    use arakan_agent::subagent::SubagentOperation;
     use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, MetaObject};
     use tempfile::TempDir;
     use tokio::sync::mpsc;
@@ -180,12 +180,12 @@ mod tests {
     use super::*;
     use crate::agents::final_output_tool::{FINAL_OUTPUT_SUCCESS_MESSAGE, FINAL_OUTPUT_TOOL_NAME};
     use crate::agents::state_machine::{
-        ConversationEffect, GooseEffect, Operation, OperationResult, RunStatus,
+        ConversationEffect, ArakanEffect, Operation, OperationResult, RunStatus,
     };
-    use crate::config::GooseMode;
+    use crate::config::ArakanMode;
     use crate::conversation::Conversation;
     use crate::session::SessionManager;
-    use goose_agent::machine::EffectHandler;
+    use arakan_agent::machine::EffectHandler;
 
     const OPERATION_NAME: &str = "foreground_subagent";
     const DELIVERED: &str = "delivered";
@@ -204,7 +204,7 @@ mod tests {
                 crate::config::permission::PermissionManager::instance(),
                 None,
                 true,
-                crate::agents::GoosePlatform::GooseCli,
+                crate::agents::ArakanPlatform::ArakanCli,
             );
             config.hooks = Some(crate::hooks::HookManager::default());
             ForegroundSubagentRunner::new(crate::agents::StateMachineServices::with_config(config))
@@ -223,7 +223,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "parent".to_string(),
                 SessionType::User,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await?;
         manager
@@ -248,7 +248,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "subagent".to_string(),
                 SessionType::SubAgent,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await?;
         manager
@@ -303,15 +303,15 @@ mod tests {
         manager: &SessionManager,
         session_id: &str,
         emit: &Emitter,
-    ) -> Result<(Session, OperationResult<GooseEffect>)> {
+    ) -> Result<(Session, OperationResult<ArakanEffect>)> {
         let session = manager.get_session(session_id, true).await?;
         let conversation = session.conversation.as_ref().unwrap();
         let result =
-            Operation::<Session, GooseEffect>::run(operation, &session, conversation, emit).await?;
+            Operation::<Session, ArakanEffect>::run(operation, &session, conversation, emit).await?;
         Ok((session, result))
     }
 
-    fn delivery_effects(result: OperationResult<GooseEffect>) -> Vec<GooseEffect> {
+    fn delivery_effects(result: OperationResult<ArakanEffect>) -> Vec<ArakanEffect> {
         let OperationResult::Applied(step) = result else {
             panic!("expected the operation to apply");
         };
@@ -319,8 +319,8 @@ mod tests {
         step.effects
     }
 
-    fn delivered(effect: &GooseEffect) -> &str {
-        let GooseEffect::Conversation(ConversationEffect::AppendMessage(message)) = effect else {
+    fn delivered(effect: &ArakanEffect) -> &str {
+        let ArakanEffect::Conversation(ConversationEffect::AppendMessage(message)) = effect else {
             panic!("expected a subagent delivery");
         };
         message

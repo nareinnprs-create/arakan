@@ -18,7 +18,7 @@ pub struct Attachment {
     pub session_names: Option<mpsc::UnboundedSender<SessionNameUpdate>>,
 }
 
-/// Everything goose keeps for a live session besides its record: which connections have it
+/// Everything arakan keeps for a live session besides its record: which connections have it
 /// open, whether it is resident, its run, confirmations and pending steers.
 pub struct SessionRuntime {
     max_sessions: usize,

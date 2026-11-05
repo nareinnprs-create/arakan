@@ -1,5 +1,5 @@
 use super::*;
-use goose_acp_macros::custom_methods;
+use arakan_acp_macros::custom_methods;
 
 #[custom_methods]
 impl AcpConnection {
@@ -62,11 +62,11 @@ impl AcpConnection {
         self.on_set_tool_permissions(req).await
     }
 
-    #[custom_method(GooseToolCallRequest)]
+    #[custom_method(ArakanToolCallRequest)]
     async fn dispatch_call_tool(
         &self,
-        req: GooseToolCallRequest,
-    ) -> Result<GooseToolCallResponse, agent_client_protocol::Error> {
+        req: ArakanToolCallRequest,
+    ) -> Result<ArakanToolCallResponse, agent_client_protocol::Error> {
         self.on_call_tool(req).await
     }
 

@@ -2,17 +2,17 @@
 //!
 //! These tests require a downloaded GGUF model and are ignored by default.
 //! Download a model first:
-//!   goose local-models download bartowski/Llama-3.2-1B-Instruct-GGUF:Q4_K_M
+//!   arakan local-models download bartowski/Llama-3.2-1B-Instruct-GGUF:Q4_K_M
 //!
 //! Run with the default model:
-//!   cargo test -p goose --test local_inference_perf -- --ignored --nocapture
+//!   cargo test -p arakan --test local_inference_perf -- --ignored --nocapture
 //!
 //! Run with a specific model:
-//!   TEST_MODEL="bartowski/Qwen_Qwen3-32B-GGUF:Q4_K_M" cargo test -p goose --test local_inference_perf -- --ignored --nocapture
+//!   TEST_MODEL="bartowski/Qwen_Qwen3-32B-GGUF:Q4_K_M" cargo test -p arakan --test local_inference_perf -- --ignored --nocapture
 
-use goose::conversation::message::Message;
-use goose::providers::create;
-use goose_providers::model::ModelConfig;
+use arakan::conversation::message::Message;
+use arakan::providers::create;
+use arakan_providers::model::ModelConfig;
 use std::time::Instant;
 
 const DEFAULT_TEST_MODEL: &str = "bartowski/Llama-3.2-1B-Instruct-GGUF:Q4_K_M";

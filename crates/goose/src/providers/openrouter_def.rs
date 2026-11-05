@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use futures::future::BoxFuture;
-use goose_providers::{
+use arakan_providers::{
     api_client::{ApiClient, AuthMethod, TlsConfig},
     base::{ProviderDescriptor, ProviderMetadata},
     openrouter::OpenRouterProvider,
@@ -55,8 +55,8 @@ async fn from_env(tls_config: Option<TlsConfig>) -> Result<OpenRouterProvider> {
 
     let api_client = ApiClient::new_with_tls(host, AuthMethod::BearerToken(api_key), tls_config)?
         .with_request_builder(crate::session_context::session_id_request_builder())
-        .with_header("HTTP-Referer", "https://goose-docs.ai")?
-        .with_header("X-Title", "goose")?
+        .with_header("HTTP-Referer", "https://arakan-docs.ai")?
+        .with_header("X-Title", "arakan")?
         .with_header("X-OpenRouter-Categories", "cli-agent,productivity")?;
 
     Ok(OpenRouterProvider::new(

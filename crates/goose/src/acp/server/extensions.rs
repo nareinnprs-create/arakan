@@ -10,7 +10,7 @@ impl AcpConnection {
         req: AddSessionExtensionRequest,
     ) -> Result<EmptyResponse, agent_client_protocol::Error> {
         let session_id = &req.session_id;
-        let config = goose_extension_to_config_without_secrets(req.extension)?;
+        let config = arakan_extension_to_config_without_secrets(req.extension)?;
         self.open_session(&req.session_id).await?;
         self.services
             .extension_manager
@@ -51,7 +51,7 @@ impl AcpConnection {
         let warnings = crate::config::extensions::get_warnings();
         let extensions = extensions
             .into_iter()
-            .map(config_entry_to_goose_entry)
+            .map(config_entry_to_arakan_entry)
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .flatten()
@@ -66,7 +66,7 @@ impl AcpConnection {
         &self,
         req: AddConfigExtensionRequest,
     ) -> Result<EmptyResponse, agent_client_protocol::Error> {
-        let conversion = goose_extension_to_config(req.extension)?;
+        let conversion = arakan_extension_to_config(req.extension)?;
 
         Config::global()
             .set_secret_values(&conversion.secret_updates)
@@ -135,7 +135,7 @@ fn session_configs_to_entries(
             return Err(agent_client_protocol::Error::internal_error()
                 .data(format!("Duplicate session extension key '{extension_key}'")));
         }
-        if let Some(extension) = config_to_goose_extension(&config)? {
+        if let Some(extension) = config_to_arakan_extension(&config)? {
             entries.push(SessionExtensionEntry {
                 extension,
                 extension_key,
@@ -145,9 +145,9 @@ fn session_configs_to_entries(
     Ok(entries)
 }
 
-fn config_to_goose_extension(
+fn config_to_arakan_extension(
     config: &ExtensionConfig,
-) -> Result<Option<GooseExtension>, agent_client_protocol::Error> {
+) -> Result<Option<ArakanExtension>, agent_client_protocol::Error> {
     let extension = match config {
         ExtensionConfig::Builtin {
             name,
@@ -156,7 +156,7 @@ fn config_to_goose_extension(
             timeout,
             bundled,
             available_tools,
-        } => GooseExtension::Builtin {
+        } => ArakanExtension::Builtin {
             name: name.clone(),
             description: empty_string_to_none(description),
             display_name: display_name.clone(),
@@ -170,7 +170,7 @@ fn config_to_goose_extension(
             display_name,
             bundled,
             available_tools,
-        } => GooseExtension::Platform {
+        } => ArakanExtension::Platform {
             name: name.clone(),
             description: empty_string_to_none(description),
             display_name: display_name.clone(),
@@ -187,7 +187,7 @@ fn config_to_goose_extension(
             bundled,
             available_tools,
             ..
-        } => GooseExtension::Mcp {
+        } => ArakanExtension::Mcp {
             server: Box::new(McpServer::Stdio(
                 McpServerStdio::new(name, cmd).args(args.clone()),
             )),
@@ -220,7 +220,7 @@ fn config_to_goose_extension(
                 .iter()
                 .map(|(key, value)| HttpHeader::new(key, value))
                 .collect();
-            GooseExtension::Mcp {
+            ArakanExtension::Mcp {
                 server: Box::new(McpServer::Http(
                     McpServerHttp::new(name, uri).headers(headers),
                 )),
@@ -244,12 +244,12 @@ struct ConfigExtensionConversion {
     secret_updates: Vec<(String, serde_json::Value)>,
 }
 
-fn goose_extension_to_config(
-    extension: GooseExtension,
+fn arakan_extension_to_config(
+    extension: ArakanExtension,
 ) -> Result<ConfigExtensionConversion, agent_client_protocol::Error> {
     let mut secret_updates = Vec::new();
     let config = match extension {
-        GooseExtension::Builtin {
+        ArakanExtension::Builtin {
             name,
             description,
             display_name,
@@ -264,7 +264,7 @@ fn goose_extension_to_config(
             bundled,
             available_tools: available_tools.unwrap_or_default(),
         },
-        GooseExtension::Platform {
+        ArakanExtension::Platform {
             name,
             description,
             display_name,
@@ -277,7 +277,7 @@ fn goose_extension_to_config(
             bundled,
             available_tools: available_tools.unwrap_or_default(),
         },
-        GooseExtension::Mcp {
+        ArakanExtension::Mcp {
             server,
             env_keys,
             description,
@@ -355,10 +355,10 @@ fn goose_extension_to_config(
     })
 }
 
-fn goose_extension_to_config_without_secrets(
-    extension: GooseExtension,
+fn arakan_extension_to_config_without_secrets(
+    extension: ArakanExtension,
 ) -> Result<ExtensionConfig, agent_client_protocol::Error> {
-    let conversion = goose_extension_to_config(extension)?;
+    let conversion = arakan_extension_to_config(extension)?;
     if !conversion.secret_updates.is_empty() {
         return Err(agent_client_protocol::Error::invalid_params().data(
             "extension env values must be passed via envKeys referencing stored secrets, not inline env",
@@ -367,23 +367,23 @@ fn goose_extension_to_config_without_secrets(
     Ok(conversion.config)
 }
 
-pub(super) fn goose_extensions_to_configs(
-    extensions: Vec<GooseExtension>,
+pub(super) fn arakan_extensions_to_configs(
+    extensions: Vec<ArakanExtension>,
 ) -> Result<Vec<ExtensionConfig>, agent_client_protocol::Error> {
     extensions
         .into_iter()
-        .map(goose_extension_to_config_without_secrets)
+        .map(arakan_extension_to_config_without_secrets)
         .collect()
 }
 
-fn config_entry_to_goose_entry(
+fn config_entry_to_arakan_entry(
     entry: ExtensionEntry,
-) -> Result<Option<GooseExtensionEntry>, agent_client_protocol::Error> {
+) -> Result<Option<ArakanExtensionEntry>, agent_client_protocol::Error> {
     let config_key = entry.config.key();
-    let Some(extension) = config_to_goose_extension(&entry.config)? else {
+    let Some(extension) = config_to_arakan_extension(&entry.config)? else {
         return Ok(None);
     };
-    Ok(Some(GooseExtensionEntry {
+    Ok(Some(ArakanExtensionEntry {
         extension,
         enabled: entry.enabled,
         config_key: Some(config_key),
@@ -442,7 +442,7 @@ mod tests {
     }
 
     #[test]
-    fn builtin_config_converts_to_goose_builtin_extension() {
+    fn builtin_config_converts_to_arakan_builtin_extension() {
         let config = ExtensionConfig::Builtin {
             name: "developer".to_string(),
             description: "Developer tools".to_string(),
@@ -452,11 +452,11 @@ mod tests {
             available_tools: vec!["shell".to_string()],
         };
 
-        let extension = config_to_goose_extension(&config)
+        let extension = config_to_arakan_extension(&config)
             .expect("conversion should succeed")
             .expect("builtin should be supported");
 
-        let GooseExtension::Builtin {
+        let ArakanExtension::Builtin {
             name,
             description,
             display_name,
@@ -477,7 +477,7 @@ mod tests {
     }
 
     #[test]
-    fn platform_config_converts_to_goose_platform_extension() {
+    fn platform_config_converts_to_arakan_platform_extension() {
         let config = ExtensionConfig::Platform {
             name: "todo".to_string(),
             description: "Todo tools".to_string(),
@@ -486,11 +486,11 @@ mod tests {
             available_tools: vec!["write_todos".to_string()],
         };
 
-        let extension = config_to_goose_extension(&config)
+        let extension = config_to_arakan_extension(&config)
             .expect("conversion should succeed")
             .expect("platform should be supported");
 
-        let GooseExtension::Platform {
+        let ArakanExtension::Platform {
             name,
             description,
             display_name,
@@ -509,7 +509,7 @@ mod tests {
     }
 
     #[test]
-    fn stdio_config_converts_to_goose_mcp_extension_without_literal_envs() {
+    fn stdio_config_converts_to_arakan_mcp_extension_without_literal_envs() {
         let config = ExtensionConfig::Stdio {
             name: "test-stdio".to_string(),
             description: "Test stdio".to_string(),
@@ -526,11 +526,11 @@ mod tests {
             available_tools: vec!["run".to_string()],
         };
 
-        let extension = config_to_goose_extension(&config)
+        let extension = config_to_arakan_extension(&config)
             .expect("conversion should succeed")
             .expect("stdio should be supported");
 
-        let GooseExtension::Mcp {
+        let ArakanExtension::Mcp {
             server,
             env_keys,
             description,
@@ -567,7 +567,7 @@ mod tests {
     }
 
     #[test]
-    fn streamable_http_config_converts_to_goose_mcp_extension_without_literal_envs() {
+    fn streamable_http_config_converts_to_arakan_mcp_extension_without_literal_envs() {
         let config = ExtensionConfig::StreamableHttp {
             name: "test-http".to_string(),
             description: "Test HTTP".to_string(),
@@ -590,11 +590,11 @@ mod tests {
             available_tools: vec!["fetch".to_string()],
         };
 
-        let extension = config_to_goose_extension(&config)
+        let extension = config_to_arakan_extension(&config)
             .expect("conversion should succeed")
             .expect("streamable http should be supported");
 
-        let GooseExtension::Mcp {
+        let ArakanExtension::Mcp {
             server,
             env_keys,
             description,
@@ -632,8 +632,8 @@ mod tests {
     }
 
     #[test]
-    fn goose_mcp_stdio_extension_converts_to_config_without_literal_envs() {
-        let extension = GooseExtension::Mcp {
+    fn arakan_mcp_stdio_extension_converts_to_config_without_literal_envs() {
+        let extension = ArakanExtension::Mcp {
             server: Box::new(McpServer::Stdio(
                 McpServerStdio::new("test-stdio", "test-command")
                     .args(vec!["--flag".to_string(), "value".to_string()]),
@@ -649,7 +649,7 @@ mod tests {
             available_tools: Some(vec!["run".to_string()]),
         };
 
-        let conversion = goose_extension_to_config(extension).expect("conversion should succeed");
+        let conversion = arakan_extension_to_config(extension).expect("conversion should succeed");
         assert!(conversion.secret_updates.is_empty());
 
         let ExtensionConfig::Stdio {
@@ -683,8 +683,8 @@ mod tests {
     }
 
     #[test]
-    fn goose_mcp_stdio_extension_extracts_literal_envs_for_config_add() {
-        let extension = GooseExtension::Mcp {
+    fn arakan_mcp_stdio_extension_extracts_literal_envs_for_config_add() {
+        let extension = ArakanExtension::Mcp {
             server: Box::new(McpServer::Stdio(
                 McpServerStdio::new("test-stdio", "test-command").env(vec![
                     agent_client_protocol::schema::v1::EnvVariable::new(
@@ -708,7 +708,7 @@ mod tests {
             available_tools: None,
         };
 
-        let conversion = goose_extension_to_config(extension).expect("conversion should succeed");
+        let conversion = arakan_extension_to_config(extension).expect("conversion should succeed");
 
         assert_eq!(
             conversion.secret_updates,
@@ -736,8 +736,8 @@ mod tests {
     }
 
     #[test]
-    fn goose_mcp_streamable_http_extension_converts_to_config_without_literal_envs() {
-        let extension = GooseExtension::Mcp {
+    fn arakan_mcp_streamable_http_extension_converts_to_config_without_literal_envs() {
+        let extension = ArakanExtension::Mcp {
             server: Box::new(McpServer::Http(
                 McpServerHttp::new("test-http", "https://example.com/mcp").headers(vec![
                     HttpHeader::new("Authorization", "Bearer ${API_TOKEN}"),
@@ -754,7 +754,7 @@ mod tests {
             available_tools: Some(vec!["fetch".to_string()]),
         };
 
-        let conversion = goose_extension_to_config(extension).expect("conversion should succeed");
+        let conversion = arakan_extension_to_config(extension).expect("conversion should succeed");
         assert!(conversion.secret_updates.is_empty());
 
         let ExtensionConfig::StreamableHttp {
@@ -801,8 +801,8 @@ mod tests {
     }
 
     #[test]
-    fn goose_builtin_extension_converts_to_config() {
-        let builtin = GooseExtension::Builtin {
+    fn arakan_builtin_extension_converts_to_config() {
+        let builtin = ArakanExtension::Builtin {
             name: "developer".to_string(),
             description: Some("Developer tools".to_string()),
             display_name: Some("Developer".to_string()),
@@ -811,7 +811,7 @@ mod tests {
             available_tools: Some(vec!["shell".to_string()]),
         };
 
-        let conversion = goose_extension_to_config(builtin).expect("conversion should succeed");
+        let conversion = arakan_extension_to_config(builtin).expect("conversion should succeed");
         assert!(conversion.secret_updates.is_empty());
 
         let ExtensionConfig::Builtin {
@@ -835,8 +835,8 @@ mod tests {
     }
 
     #[test]
-    fn goose_platform_extension_converts_to_config() {
-        let platform = GooseExtension::Platform {
+    fn arakan_platform_extension_converts_to_config() {
+        let platform = ArakanExtension::Platform {
             name: "todo".to_string(),
             description: Some("Todo tools".to_string()),
             display_name: Some("Todo".to_string()),
@@ -844,7 +844,7 @@ mod tests {
             available_tools: Some(vec!["write_todos".to_string()]),
         };
 
-        let conversion = goose_extension_to_config(platform).expect("conversion should succeed");
+        let conversion = arakan_extension_to_config(platform).expect("conversion should succeed");
         assert!(conversion.secret_updates.is_empty());
 
         let ExtensionConfig::Platform {
@@ -866,8 +866,8 @@ mod tests {
     }
 
     #[test]
-    fn goose_mcp_sse_extension_is_rejected_for_config_add() {
-        let extension = GooseExtension::Mcp {
+    fn arakan_mcp_sse_extension_is_rejected_for_config_add() {
+        let extension = ArakanExtension::Mcp {
             server: Box::new(McpServer::Sse(McpServerSse::new(
                 "legacy-sse",
                 "https://example.com/sse",
@@ -883,6 +883,6 @@ mod tests {
             available_tools: None,
         };
 
-        assert!(goose_extension_to_config(extension).is_err());
+        assert!(arakan_extension_to_config(extension).is_err());
     }
 }

@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::pre_tool_call_hook::{PreToolCallDecision, PreToolCallHook};
+use arakan_agent::pre_tool_call_hook::{PreToolCallDecision, PreToolCallHook};
 
 use crate::agents::extension_manager::ExtensionLease;
 use crate::agents::state_machine::messages_since_kickoff;
@@ -74,12 +74,12 @@ async fn pre_tool_use_denial(
     outcome.denial()
 }
 
-pub struct GoosePreToolHook {
+pub struct ArakanPreToolHook {
     hook_manager: HookManager,
     extension_lease: Arc<Mutex<Option<Arc<ExtensionLease>>>>,
 }
 
-impl GoosePreToolHook {
+impl ArakanPreToolHook {
     pub fn new(
         hook_manager: HookManager,
         extension_lease: Arc<Mutex<Option<Arc<ExtensionLease>>>>,
@@ -92,7 +92,7 @@ impl GoosePreToolHook {
 }
 
 #[async_trait]
-impl PreToolCallHook<Session> for GoosePreToolHook {
+impl PreToolCallHook<Session> for ArakanPreToolHook {
     async fn before_call(
         &self,
         session: &Session,

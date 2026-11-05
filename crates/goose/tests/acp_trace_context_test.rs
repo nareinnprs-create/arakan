@@ -13,8 +13,8 @@ use common_tests::fixtures::{
     run_test, Connection, OpenAiFixture, Session, SessionData, TestConnectionConfig,
 };
 use common_tests::TURN_CONTEXT_OPEN;
-use goose_test_support::mcp::ContextReport;
-use goose_test_support::McpFixture;
+use arakan_test_support::mcp::ContextReport;
+use arakan_test_support::McpFixture;
 use opentelemetry::trace::{SpanId, TraceId, TracerProvider as _};
 use opentelemetry_sdk::trace::{InMemorySpanExporter, SdkTracerProvider, SpanData};
 use std::sync::OnceLock;

@@ -1,5 +1,5 @@
 [package]
-name = "goose"
+name = "arakan"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,7 +11,6 @@ description.workspace = true
 [features]
 default = []
 online-model-meta = []
-telemetry = []
 otel = [
     "dep:tracing-opentelemetry",
     "dep:opentelemetry",
@@ -33,12 +32,12 @@ tree-sitter = [
     "dep:tree-sitter-swift",
     "dep:tree-sitter-typescript",
 ]
-live-voice = ["goose-providers/live-websocket"]
+live-voice = ["arakan-providers/live-websocket"]
 local-inference = [
     "dep:candle-core",
     "dep:candle-nn",
     "dep:candle-transformers",
-    "goose-providers/local-inference-hf-hub",
+    "arakan-providers/local-inference-hf-hub",
     "dep:tokenizers",
     "dep:symphonia",
     "dep:rubato",
@@ -52,9 +51,9 @@ aws-providers = [
     "dep:aws-sdk-sagemakerruntime",
     "dep:smithy-transport-reqwest",
 ]
-cuda = ["local-inference", "candle-core/cuda", "candle-nn/cuda", "goose-providers/cuda"]
-vulkan = ["local-inference", "goose-providers/vulkan"]
-mlx = ["local-inference", "goose-providers/mlx"]
+cuda = ["local-inference", "candle-core/cuda", "candle-nn/cuda", "arakan-providers/cuda"]
+vulkan = ["local-inference", "arakan-providers/vulkan"]
+mlx = ["local-inference", "arakan-providers/mlx"]
 rustls-tls = [
     "dep:rustls",
     "dep:rcgen",
@@ -66,8 +65,8 @@ rustls-tls = [
     "rmcp/reqwest",
     "smithy-transport-reqwest?/rustls",
     "sqlx/tls-rustls",
-    "goose-providers/rustls-tls",
-    "goose-context-management/rustls-tls",
+    "arakan-providers/rustls-tls",
+    "arakan-context-management/rustls-tls",
 ]
 native-tls = [
     "dep:rcgen",
@@ -81,8 +80,8 @@ native-tls = [
     "rmcp/reqwest-native-tls",
     "smithy-transport-reqwest?/native-tls",
     "sqlx/tls-native-tls",
-    "goose-providers/native-tls",
-    "goose-context-management/native-tls",
+    "arakan-providers/native-tls",
+    "arakan-context-management/native-tls",
 ]
 system-keyring = ["dep:keyring"]
 portable-default = [
@@ -90,7 +89,6 @@ portable-default = [
     "tree-sitter",
     "live-voice",
     "aws-providers",
-    "telemetry",
     "otel",
     "scheduler",
     "platform-apps",
@@ -159,11 +157,11 @@ strum = { workspace = true }
 once_cell = { workspace = true }
 etcetera = { workspace = true }
 fs-err = { version = "3.1", default-features = false }
-goose-context-management = { path = "../goose-context-management" }
-goose-providers = { path = "../goose-providers", default-features = false }
-goose-download-manager = { path = "../goose-download-manager" }
-goose-sdk-types = { path = "../goose-sdk-types" }
-goose-agent = { path = "../goose-agent" }
+arakan-context-management = { path = "../arakan-context-management" }
+arakan-providers = { path = "../arakan-providers", default-features = false }
+arakan-download-manager = { path = "../arakan-download-manager" }
+arakan-sdk-types = { path = "../arakan-sdk-types" }
+arakan-agent = { path = "../arakan-agent" }
 rand = { workspace = true }
 tokio-cron-scheduler = { version = "0.15", default-features = false, optional = true }
 urlencoding = { workspace = true }
@@ -230,7 +228,7 @@ tree-sitter-typescript = { workspace = true, optional = true }
 which = { workspace = true }
 pastey = { version = "0.2", default-features = false }
 shell-words = { workspace = true }
-goose-acp-macros = { path = "../goose-acp-macros", default-features = false }
+arakan-acp-macros = { path = "../arakan-acp-macros", default-features = false }
 tower-http = { workspace = true, features = ["cors"] }
 tracing-appender = { workspace = true }
 rustls = { workspace = true, optional = true }
@@ -275,10 +273,10 @@ test-case = { workspace = true }
 env-lock = { workspace = true }
 rmcp = { workspace = true, features = ["transport-streamable-http-server"] }
 opentelemetry_sdk = { workspace = true, features = ["testing"] }
-goose-test-support = { path = "../goose-test-support", default-features = false }
+arakan-test-support = { path = "../arakan-test-support", default-features = false }
 bytes = { workspace = true }
 http = { workspace = true }
-goose-mcp = { path = "../goose-mcp", default-features = false }
+arakan-mcp = { path = "../arakan-mcp", default-features = false }
 insta = { version = "1", default-features = false }
 dtor = { version = "1.0.5", default-features = false, features = ["proc_macro"] }
 tower = { version = "0.5.2", default-features = false, features = ["util"] }
@@ -298,8 +296,8 @@ path = "examples/test_whisper.rs"
 required-features = ["local-inference"]
 
 [[bin]]
-name = "goose-acp"
-path = "src/bin/goose-acp.rs"
+name = "arakan-acp"
+path = "src/bin/arakan-acp.rs"
 
 [[bin]]
 name = "analyze_cli"

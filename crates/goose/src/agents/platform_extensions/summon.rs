@@ -4,7 +4,7 @@ use crate::agents::mcp_client::{Error, McpClientTrait};
 use crate::agents::state_machine::DELEGATED_META_KEY;
 use crate::agents::tool_execution::ToolCallContext;
 use crate::config::paths::Paths;
-use crate::config::{resolve_extensions_for_new_session, Config, GooseMode};
+use crate::config::{resolve_extensions_for_new_session, Config, ArakanMode};
 use crate::conversation::message::Message;
 use crate::providers;
 use crate::recipe::build_recipe::build_recipe_from_template;
@@ -16,7 +16,7 @@ use crate::sources::parse_frontmatter;
 use crate::utils::safe_truncate;
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_sdk_types::custom_requests::{SourceEntry, SourceType};
+use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
 use rmcp::model::{
     CallToolResult, ContentBlock, Implementation, InitializeResult, JsonObject, ListToolsResult,
     MetaObject, ServerCapabilities, Tool,
@@ -61,7 +61,7 @@ const DEFAULT_RESUME_INSTRUCTIONS: &str = "Continue the task from where you left
 
 struct SubagentConfig {
     provider_name: String,
-    model_config: goose_providers::model::ModelConfig,
+    model_config: arakan_providers::model::ModelConfig,
     extensions: Vec<crate::config::ExtensionConfig>,
     working_dir: PathBuf,
     max_turns: usize,
@@ -253,11 +253,11 @@ pub fn discover_filesystem_sources(working_dir: &Path) -> Vec<SourceEntry> {
     let config = Paths::config_dir();
 
     let local_recipe_dirs: Vec<PathBuf> = vec![
-        working_dir.join(".goose/recipes"),
+        working_dir.join(".arakan/recipes"),
         working_dir.join(".agents/recipes"),
     ];
 
-    let global_recipe_dirs: Vec<PathBuf> = std::env::var("GOOSE_RECIPE_PATH")
+    let global_recipe_dirs: Vec<PathBuf> = std::env::var("ARAKAN_RECIPE_PATH")
         .ok()
         .into_iter()
         .flat_map(|p| {
@@ -266,7 +266,7 @@ pub fn discover_filesystem_sources(working_dir: &Path) -> Vec<SourceEntry> {
         })
         .chain(
             [
-                home.as_ref().map(|h| h.join(".goose/recipes")),
+                home.as_ref().map(|h| h.join(".arakan/recipes")),
                 Some(config.join("recipes")),
                 home.as_ref().map(|h| h.join(".agents/recipes")),
             ]
@@ -276,13 +276,13 @@ pub fn discover_filesystem_sources(working_dir: &Path) -> Vec<SourceEntry> {
         .collect();
 
     let local_agent_dirs: Vec<PathBuf> = vec![
-        working_dir.join(".goose/agents"),
+        working_dir.join(".arakan/agents"),
         working_dir.join(".claude/agents"),
         working_dir.join(".agents/agents"),
     ];
 
     let global_agent_dirs: Vec<PathBuf> = [
-        home.as_ref().map(|h| h.join(".goose/agents")),
+        home.as_ref().map(|h| h.join(".arakan/agents")),
         home.as_ref().map(|h| h.join(".agents/agents")),
         Some(config.join("agents")),
         home.as_ref().map(|h| h.join(".claude/agents")),
@@ -413,15 +413,15 @@ impl SummonClient {
         parent_session_id: &str,
         name: String,
     ) -> Result<crate::session::Session, String> {
-        let goose_mode = if parent_session_id.is_empty() {
-            GooseMode::Auto
+        let arakan_mode = if parent_session_id.is_empty() {
+            ArakanMode::Auto
         } else {
             self.context
                 .session_manager
                 .get_session(parent_session_id, false)
                 .await
                 .map_err(|e| format!("Failed to read the parent session: {}", e))?
-                .goose_mode
+                .arakan_mode
         };
         let session = self
             .context
@@ -430,7 +430,7 @@ impl SummonClient {
                 working_dir.to_path_buf(),
                 name,
                 SessionType::SubAgent,
-                goose_mode,
+                arakan_mode,
             )
             .await
             .map_err(|e| format!("Failed to create subagent session: {}", e))?;
@@ -509,7 +509,7 @@ impl SummonClient {
                 "max_turns": {
                     "type": "integer",
                     "minimum": 1,
-                    "description": "Maximum turns for this delegate. Overrides recipe settings.max_turns and GOOSE_SUBAGENT_MAX_TURNS."
+                    "description": "Maximum turns for this delegate. Overrides recipe settings.max_turns and ARAKAN_SUBAGENT_MAX_TURNS."
                 },
                 "context": {
                     "type": "string",
@@ -765,7 +765,7 @@ impl SummonClient {
                  • Current recipe's sub_recipes\n\
                  • .agents/recipes/, .agents/agents/ (project-level)\n\
                  • ~/.agents/agents/ (global)\n\
-                 • GOOSE_RECIPE_PATH directories",
+                 • ARAKAN_RECIPE_PATH directories",
             )]);
         }
 
@@ -949,8 +949,8 @@ impl SummonClient {
         recipe
             .settings
             .get_or_insert(Settings {
-                goose_provider: None,
-                goose_model: None,
+                arakan_provider: None,
+                arakan_model: None,
                 temperature: None,
                 max_turns: None,
             })
@@ -1212,8 +1212,8 @@ impl SummonClient {
             .map(str::to_string);
 
         let settings = model.map(|m| Settings {
-            goose_model: Some(m),
-            goose_provider: params.provider.clone(),
+            arakan_model: Some(m),
+            arakan_provider: params.provider.clone(),
             temperature: params.temperature,
             max_turns: None,
         });
@@ -1307,26 +1307,26 @@ impl SummonClient {
         session: &crate::session::Session,
         provider_name: &str,
         provider_default_model: Option<&str>,
-    ) -> Result<goose_providers::model::ModelConfig, anyhow::Error> {
-        let env_model = std::env::var("GOOSE_SUBAGENT_MODEL").ok();
-        let env_provider = std::env::var("GOOSE_SUBAGENT_PROVIDER").ok();
+    ) -> Result<arakan_providers::model::ModelConfig, anyhow::Error> {
+        let env_model = std::env::var("ARAKAN_SUBAGENT_MODEL").ok();
+        let env_provider = std::env::var("ARAKAN_SUBAGENT_PROVIDER").ok();
         let recipe_settings = recipe.settings.as_ref();
         let configured = Config::global().all_values().ok();
         let configured_provider = configured
             .as_ref()
-            .and_then(|values| values.get("GOOSE_SUBAGENT_PROVIDER"))
+            .and_then(|values| values.get("ARAKAN_SUBAGENT_PROVIDER"))
             .and_then(serde_json::Value::as_str);
         let configured_model = configured
             .as_ref()
-            .and_then(|values| values.get("GOOSE_SUBAGENT_MODEL"))
+            .and_then(|values| values.get("ARAKAN_SUBAGENT_MODEL"))
             .and_then(serde_json::Value::as_str);
         let matches_provider =
             |candidate: Option<&str>| candidate.is_none() || candidate == Some(provider_name);
         let model = recipe_settings
-            .and_then(|settings| settings.goose_model.clone())
+            .and_then(|settings| settings.arakan_model.clone())
             .filter(|_| {
                 matches_provider(
-                    recipe_settings.and_then(|settings| settings.goose_provider.as_deref()),
+                    recipe_settings.and_then(|settings| settings.arakan_provider.as_deref()),
                 )
             })
             .or_else(|| {
@@ -1359,7 +1359,7 @@ impl SummonClient {
             })
             .ok_or_else(|| {
                 anyhow::anyhow!(
-                    "No model configured for provider '{}'; set GOOSE_SUBAGENT_MODEL",
+                    "No model configured for provider '{}'; set ARAKAN_SUBAGENT_MODEL",
                     provider_name
                 )
             })?;
@@ -1399,17 +1399,17 @@ impl SummonClient {
         params: &DelegateParams,
         recipe: &Recipe,
         session: &crate::session::Session,
-    ) -> Result<(String, goose_providers::model::ModelConfig)> {
-        let env_provider = std::env::var("GOOSE_SUBAGENT_PROVIDER").ok();
+    ) -> Result<(String, arakan_providers::model::ModelConfig)> {
+        let env_provider = std::env::var("ARAKAN_SUBAGENT_PROVIDER").ok();
         let provider_name = recipe
             .settings
             .as_ref()
-            .and_then(|s| s.goose_provider.clone())
+            .and_then(|s| s.arakan_provider.clone())
             .or_else(|| env_provider.clone())
             .or_else(|| params.provider.clone())
             .or_else(|| {
                 Config::global()
-                    .get_param::<String>("GOOSE_SUBAGENT_PROVIDER")
+                    .get_param::<String>("ARAKAN_SUBAGENT_PROVIDER")
                     .ok()
             })
             .or_else(|| session.provider_name.clone())
@@ -1434,7 +1434,7 @@ impl SummonClient {
         params
             .max_turns
             .or_else(|| recipe.settings.as_ref().and_then(|s| s.max_turns))
-            .or_else(|| config.get_param::<usize>("GOOSE_SUBAGENT_MAX_TURNS").ok())
+            .or_else(|| config.get_param::<usize>("ARAKAN_SUBAGENT_MAX_TURNS").ok())
             .unwrap_or_else(|| config.default_max_turns() as usize)
     }
 }
@@ -1575,11 +1575,11 @@ mod tests {
     #[serial]
     async fn delegate_extension_selection() -> Result<()> {
         let _env = env_lock::lock_env([
-            ("GOOSE_SUBAGENT_PROVIDER", Some("openai")),
-            ("GOOSE_SUBAGENT_MODEL", Some("test-model")),
+            ("ARAKAN_SUBAGENT_PROVIDER", Some("openai")),
+            ("ARAKAN_SUBAGENT_MODEL", Some("test-model")),
         ]);
         let client = SummonClient::new(create_test_context())?;
-        let mut parent = session_with(goose_providers::model::ModelConfig::new("test-model"));
+        let mut parent = session_with(arakan_providers::model::ModelConfig::new("test-model"));
         let inherited = Recipe::from_content(
             "title: Parent\ndescription: Parent\nprompt: Run\nextensions:\n  - type: platform\n    name: summon\n",
         )?.extensions.unwrap();
@@ -1628,7 +1628,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "Parent".to_string(),
                 SessionType::User,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await
             .unwrap();
@@ -1636,7 +1636,7 @@ mod tests {
             .update(&parent.id)
             .provider_name("openai")
             .model_config(
-                goose_providers::model::ModelConfig::new("test-model").with_cache_ttl("1h"),
+                arakan_providers::model::ModelConfig::new("test-model").with_cache_ttl("1h"),
             )
             .apply()
             .await
@@ -1739,7 +1739,7 @@ mod tests {
                 crate::config::permission::PermissionManager::instance(),
                 None,
                 true,
-                crate::agents::GoosePlatform::GooseCli,
+                crate::agents::ArakanPlatform::ArakanCli,
             ),
         );
         crate::agents::subagent_handler::prepare_subagent(&reloaded_agent, &child)
@@ -1762,7 +1762,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "session".to_string(),
                 session_type,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await?;
         manager
@@ -1998,7 +1998,7 @@ mod tests {
             (old_working_dir.path(), "old-agent"),
             (new_working_dir.path(), "new-agent"),
         ] {
-            let agents = working_dir.join(".goose/agents");
+            let agents = working_dir.join(".arakan/agents");
             fs::create_dir_all(&agents).unwrap();
             fs::write(
                 agents.join(format!("{name}.md")),
@@ -2030,7 +2030,7 @@ mod tests {
             (old_working_dir.path(), "old instructions"),
             (new_working_dir.path(), "new instructions"),
         ] {
-            let agents = working_dir.join(".goose/agents");
+            let agents = working_dir.join(".arakan/agents");
             fs::create_dir_all(&agents).unwrap();
             fs::write(
                 agents.join("reviewer.md"),
@@ -2046,7 +2046,7 @@ mod tests {
                 old_working_dir.path().to_path_buf(),
                 "moving".to_string(),
                 SessionType::Hidden,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await
             .unwrap();
@@ -2279,7 +2279,7 @@ You review code."#;
     async fn test_discover_recipes_and_agents() {
         let temp_dir = TempDir::new().unwrap();
 
-        let recipes = temp_dir.path().join(".goose/recipes");
+        let recipes = temp_dir.path().join(".arakan/recipes");
         fs::create_dir_all(&recipes).unwrap();
         fs::write(
             recipes.join("deploy.yaml"),
@@ -2287,7 +2287,7 @@ You review code."#;
         )
         .unwrap();
 
-        let agents = temp_dir.path().join(".goose/agents");
+        let agents = temp_dir.path().join(".arakan/agents");
         fs::create_dir_all(&agents).unwrap();
         fs::write(
             agents.join("reviewer.md"),
@@ -2317,7 +2317,7 @@ You review code."#;
     async fn test_recipe_deduplication_local_wins() {
         let temp_dir = TempDir::new().unwrap();
 
-        let local = temp_dir.path().join(".goose/recipes");
+        let local = temp_dir.path().join(".arakan/recipes");
         fs::create_dir_all(&local).unwrap();
         fs::write(
             local.join("deploy.yaml"),
@@ -2344,7 +2344,7 @@ You review code."#;
     async fn test_load_recipe_source() {
         let temp_dir = TempDir::new().unwrap();
 
-        let recipes = temp_dir.path().join(".goose/recipes");
+        let recipes = temp_dir.path().join(".arakan/recipes");
         fs::create_dir_all(&recipes).unwrap();
         fs::write(
             recipes.join("deploy.yaml"),
@@ -2399,7 +2399,7 @@ You review code."#;
     async fn test_load_agent_source() {
         let temp_dir = TempDir::new().unwrap();
 
-        let agents = temp_dir.path().join(".goose/agents");
+        let agents = temp_dir.path().join(".arakan/agents");
         fs::create_dir_all(&agents).unwrap();
         fs::write(
             agents.join("reviewer.md"),
@@ -2423,7 +2423,7 @@ You review code."#;
     async fn test_load_nonexistent_source_suggests_similar() {
         let temp_dir = TempDir::new().unwrap();
 
-        let recipes = temp_dir.path().join(".goose/recipes");
+        let recipes = temp_dir.path().join(".arakan/recipes");
         fs::create_dir_all(&recipes).unwrap();
         fs::write(
             recipes.join("deploy.yaml"),
@@ -2571,12 +2571,12 @@ You review code."#;
             Config::new_with_file_secrets(config_file.path(), secrets_file.path()).unwrap();
         fs::write(
             config_file.path(),
-            "GOOSE_SUBAGENT_MAX_TURNS: 7\nGOOSE_MAX_TURNS: 8\n",
+            "ARAKAN_SUBAGENT_MAX_TURNS: 7\nARAKAN_MAX_TURNS: 8\n",
         )
         .unwrap();
         let _env = env_lock::lock_env([
-            ("GOOSE_SUBAGENT_MAX_TURNS", Some("99")),
-            ("GOOSE_MAX_TURNS", Some("42")),
+            ("ARAKAN_SUBAGENT_MAX_TURNS", Some("99")),
+            ("ARAKAN_MAX_TURNS", Some("42")),
         ]);
 
         for (delegate_limit, recipe_limit, expected) in
@@ -2588,8 +2588,8 @@ You review code."#;
             };
             let mut recipe = empty_recipe();
             recipe.settings = Some(Settings {
-                goose_provider: None,
-                goose_model: None,
+                arakan_provider: None,
+                arakan_model: None,
                 temperature: None,
                 max_turns: recipe_limit,
             });
@@ -2608,14 +2608,14 @@ You review code."#;
         let config =
             Config::new_with_file_secrets(config_file.path(), secrets_file.path()).unwrap();
         let _env = env_lock::lock_env([
-            ("GOOSE_SUBAGENT_MAX_TURNS", None::<&str>),
-            ("GOOSE_MAX_TURNS", None),
+            ("ARAKAN_SUBAGENT_MAX_TURNS", None::<&str>),
+            ("ARAKAN_MAX_TURNS", None),
         ]);
 
         for (contents, expected) in [
             ("", 1000),
-            ("GOOSE_MAX_TURNS: 42\n", 42),
-            ("GOOSE_SUBAGENT_MAX_TURNS: 7\nGOOSE_MAX_TURNS: 42\n", 7),
+            ("ARAKAN_MAX_TURNS: 42\n", 42),
+            ("ARAKAN_SUBAGENT_MAX_TURNS: 7\nARAKAN_MAX_TURNS: 42\n", 7),
         ] {
             fs::write(config_file.path(), contents).unwrap();
             assert_eq!(
@@ -2651,7 +2651,7 @@ You review code."#;
     const OVERRIDE_MODEL: &str = "claude-opus-4-6";
     const PROVIDER: &str = "anthropic";
 
-    fn session_with(parent: goose_providers::model::ModelConfig) -> crate::session::Session {
+    fn session_with(parent: arakan_providers::model::ModelConfig) -> crate::session::Session {
         crate::session::Session {
             provider_name: Some(PROVIDER.to_string()),
             model_config: Some(parent),
@@ -2661,8 +2661,8 @@ You review code."#;
 
     fn resolve_with_override(
         model: Option<&str>,
-        parent: goose_providers::model::ModelConfig,
-    ) -> goose_providers::model::ModelConfig {
+        parent: arakan_providers::model::ModelConfig,
+    ) -> arakan_providers::model::ModelConfig {
         let client = SummonClient::new(create_test_context()).unwrap();
         let params = DelegateParams {
             model: model.map(String::from),
@@ -2679,21 +2679,21 @@ You review code."#;
             .expect("resolve_model_config")
     }
 
-    fn parent_config() -> goose_providers::model::ModelConfig {
-        goose_providers::model::ModelConfig::new(PARENT_MODEL).with_canonical_limits(PROVIDER)
+    fn parent_config() -> arakan_providers::model::ModelConfig {
+        arakan_providers::model::ModelConfig::new(PARENT_MODEL).with_canonical_limits(PROVIDER)
     }
 
     #[tokio::test]
     #[serial]
     async fn test_resolve_model_config_applies_canonical_limits_to_overridden_model() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
         ]);
 
         let parent = parent_config();
-        let overridden = goose_providers::model::ModelConfig::new(OVERRIDE_MODEL)
+        let overridden = arakan_providers::model::ModelConfig::new(OVERRIDE_MODEL)
             .with_canonical_limits(PROVIDER);
         assert_ne!(parent.reasoning, overridden.reasoning);
 
@@ -2708,9 +2708,9 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_does_not_inherit_provider_specific_request_params() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
         ]);
 
         // Parent session is a Claude model with anthropic_beta in request_params.
@@ -2739,9 +2739,9 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_inherits_thinking_effort_on_override() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
         ]);
 
         // Reasoning controls are model-family-agnostic and should be inherited,
@@ -2788,9 +2788,9 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_env_var_overrides_params_model() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_MODEL", Some(OVERRIDE_MODEL)),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_MODEL", Some(OVERRIDE_MODEL)),
         ]);
 
         let client = SummonClient::new(create_test_context()).unwrap();
@@ -2809,7 +2809,7 @@ You review code."#;
             .expect("resolve_model_config");
         assert_eq!(
             result.model_name, OVERRIDE_MODEL,
-            "GOOSE_SUBAGENT_MODEL must take priority over params.model"
+            "ARAKAN_SUBAGENT_MODEL must take priority over params.model"
         );
     }
 
@@ -2817,16 +2817,16 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_recipe_overrides_env_var() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_MODEL", Some(OVERRIDE_MODEL)),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_MODEL", Some(OVERRIDE_MODEL)),
         ]);
 
         let client = SummonClient::new(create_test_context()).unwrap();
         let mut recipe = empty_recipe();
         recipe.settings = Some(crate::recipe::Settings {
-            goose_provider: None,
-            goose_model: Some("recipe-model".to_string()),
+            arakan_provider: None,
+            arakan_model: Some("recipe-model".to_string()),
             temperature: None,
             max_turns: None,
         });
@@ -2841,7 +2841,7 @@ You review code."#;
             .expect("resolve_model_config");
         assert_eq!(
             result.model_name, "recipe-model",
-            "recipe settings.goose_model must take priority over GOOSE_SUBAGENT_MODEL"
+            "recipe settings.arakan_model must take priority over ARAKAN_SUBAGENT_MODEL"
         );
     }
 
@@ -2849,18 +2849,18 @@ You review code."#;
     #[serial]
     async fn test_resolve_provider_config_recipe_overrides_env_var() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_PROVIDER", Some("openai")),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_PROVIDER", Some("openai")),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
             ("ANTHROPIC_API_KEY", Some("test-key")),
         ]);
 
         let client = SummonClient::new(create_test_context()).unwrap();
         let mut recipe = empty_recipe();
         recipe.settings = Some(crate::recipe::Settings {
-            goose_provider: Some(PROVIDER.to_string()),
-            goose_model: None,
+            arakan_provider: Some(PROVIDER.to_string()),
+            arakan_model: None,
             temperature: None,
             max_turns: None,
         });
@@ -2874,7 +2874,7 @@ You review code."#;
             .expect("resolve_provider_config");
         assert_eq!(
             provider_name, PROVIDER,
-            "recipe settings.goose_provider must take priority over GOOSE_SUBAGENT_PROVIDER"
+            "recipe settings.arakan_provider must take priority over ARAKAN_SUBAGENT_PROVIDER"
         );
     }
 
@@ -2882,18 +2882,18 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_recipe_provider_rejects_env_model_of_other_provider() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_PROVIDER", Some("openai")),
-            ("GOOSE_SUBAGENT_MODEL", Some("gpt-5.2")),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_PROVIDER", Some("openai")),
+            ("ARAKAN_SUBAGENT_MODEL", Some("gpt-5.2")),
             ("ANTHROPIC_API_KEY", Some("test-key")),
         ]);
 
         let client = SummonClient::new(create_test_context()).unwrap();
         let mut recipe = empty_recipe();
         recipe.settings = Some(crate::recipe::Settings {
-            goose_provider: Some(PROVIDER.to_string()),
-            goose_model: None,
+            arakan_provider: Some(PROVIDER.to_string()),
+            arakan_model: None,
             temperature: None,
             max_turns: None,
         });
@@ -2913,10 +2913,10 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_env_provider_uses_provider_default_model() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_PROVIDER", Some(PROVIDER)),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_PROVIDER", Some(PROVIDER)),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
             ("ANTHROPIC_API_KEY", Some("test-key")),
         ]);
 
@@ -2941,10 +2941,10 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_env_provider_keeps_matching_params_model() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_PROVIDER", Some(PROVIDER)),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_PROVIDER", Some(PROVIDER)),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
             ("ANTHROPIC_API_KEY", Some("test-key")),
         ]);
 
@@ -2966,9 +2966,9 @@ You review code."#;
     #[serial]
     async fn test_resolve_model_config_dynamic_provider_requires_model() {
         let _env = env_lock::lock_env([
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_SUBAGENT_MODEL", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_SUBAGENT_MODEL", None::<&str>),
         ]);
 
         let default_model = providers::get_from_registry("lmstudio")
@@ -2987,7 +2987,7 @@ You review code."#;
         };
         let session = crate::session::Session {
             provider_name: Some("openai".to_string()),
-            model_config: Some(goose_providers::model::ModelConfig::new(
+            model_config: Some(arakan_providers::model::ModelConfig::new(
                 "parent-openai-model",
             )),
             ..Default::default()

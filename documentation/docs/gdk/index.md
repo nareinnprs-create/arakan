@@ -10,7 +10,7 @@ description: Build agents with GDK.
 Build agents that run across native applications, servers, and the browser,
 resume from persisted state, and give you control over how they work.
 
-GDK is the set of reusable agent-runtime components used to build goose. It
+GDK is the set of reusable agent-runtime components used to build arakan. It
 provides model integrations, a composable state machine, tools, context
 management, and the interfaces needed to run an agent inside your application.
 
@@ -27,10 +27,10 @@ working together before choosing how to adapt them.
 ### [Demos](/docs/gdk/demos)
 
 Explore working projects that use GDK for [personal wikis](/docs/gdk/demos/lifewiki),
-[phone calls](/docs/gdk/demos/goosebusters),
+[phone calls](/docs/gdk/demos/arakanbusters),
 [screen understanding](/docs/gdk/demos/perception),
 [voice conversations](/docs/gdk/demos/huddle), and
-[custom interfaces to goose](/docs/gdk/demos/berd). Each demo links to its source
+[custom interfaces to arakan](/docs/gdk/demos/berd). Each demo links to its source
 and explains the architectural idea behind it, along with what you need to run
 it. Use them to see how the same components fit very different applications.
 
@@ -47,24 +47,24 @@ compose agent behavior and when to write your own operation or provider.
 ### [Reference](/docs/gdk/reference)
 
 Look up the generated Rust APIs for the
-[agent runtime](https://docs.rs/goose-agent/latest/goose_agent/),
-[providers](https://docs.rs/goose-providers/latest/goose_providers/), and
-[context management](https://docs.rs/goose-context-management/latest/goose_context_management/).
+[agent runtime](https://docs.rs/arakan-agent/latest/arakan_agent/),
+[providers](https://docs.rs/arakan-providers/latest/arakan_providers/), and
+[context management](https://docs.rs/arakan-context-management/latest/arakan_context_management/).
 Explore the shared provider bindings through the
 [Python API](/docs/gdk/sdk/api-reference?language=python) and
 [Kotlin API](/docs/gdk/sdk/api-reference?language=kotlin), with runnable examples in
-[Python](https://github.com/aaif-goose/goose/blob/main/crates/goose-sdk/examples/uniffi/provider.py)
-and [Kotlin](https://github.com/aaif-goose/goose/blob/main/crates/goose-sdk/examples/uniffi/kotlin/src/main/kotlin/Main.kt).
-For apps using goose as a backend, consult the [ACP reference](/docs/gdk/acp/reference).
+[Python](https://github.com/aaif-arakan/arakan/blob/main/crates/arakan-sdk/examples/uniffi/provider.py)
+and [Kotlin](https://github.com/aaif-arakan/arakan/blob/main/crates/arakan-sdk/examples/uniffi/kotlin/src/main/kotlin/Main.kt).
+For apps using arakan as a backend, consult the [ACP reference](/docs/gdk/acp/reference).
 Use the reference when you need exact types, methods, and configuration details
 while building.
 
-## GDK and goose
+## GDK and arakan
 
-[goose](/docs/quickstart) is a complete agent application and the main reference
-implementation for GDK. Use goose when you want a ready-to-run agent. Use GDK
+[arakan](/docs/quickstart) is a complete agent application and the main reference
+implementation for GDK. Use arakan when you want a ready-to-run agent. Use GDK
 when you want to build agent behavior into your own product.
 
-The pre-built goose binary can also serve as the agent behind any
-[ACP application](/docs/gdk/acp) you build. goose Desktop works this way,
-connecting to a local goose server over ACP.
+The pre-built arakan binary can also serve as the agent behind any
+[ACP application](/docs/gdk/acp) you build. arakan Desktop works this way,
+connecting to a local arakan server over ACP.

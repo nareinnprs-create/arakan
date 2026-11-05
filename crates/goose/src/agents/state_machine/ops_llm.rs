@@ -1,38 +1,38 @@
-//! Goose integration for the reusable inference operation.
+//! Arakan integration for the reusable inference operation.
 
 use std::sync::Arc;
 
 use async_trait::async_trait;
 use futures::StreamExt;
-use goose_agent::inference::InferenceEffect;
-pub use goose_agent::inference::InferenceRunner;
-use goose_providers::base::{MessageStream, ModelInfo, Provider};
-use goose_providers::conversation::message::Message;
-use goose_providers::conversation::token_usage::ProviderUsage;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan_agent::inference::InferenceEffect;
+pub use arakan_agent::inference::InferenceRunner;
+use arakan_providers::base::{MessageStream, ModelInfo, Provider};
+use arakan_providers::conversation::message::Message;
+use arakan_providers::conversation::token_usage::ProviderUsage;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 
 use crate::agents::extension_manager::{get_tool_owner, recover_mangled_tool_name};
-use crate::agents::state_machine::GooseEffect;
+use crate::agents::state_machine::ArakanEffect;
 
-pub(super) use goose_agent::inference::{chat_span, record_chat_usage};
+pub(super) use arakan_agent::inference::{chat_span, record_chat_usage};
 
 pub(super) const ADVERTISED_TOOLS_NOTE: &str = "advertised_tools";
 pub(super) const LLM_OPERATION_NAME: &str = "llm";
 
-pub struct GooseInferenceProvider {
+pub struct ArakanInferenceProvider {
     inner: Arc<dyn Provider>,
 }
 
-impl GooseInferenceProvider {
+impl ArakanInferenceProvider {
     pub fn new(inner: Arc<dyn Provider>) -> Self {
         Self { inner }
     }
 }
 
-impl InferenceEffect for GooseEffect {
+impl InferenceEffect for ArakanEffect {
     fn record_usage(usage: ProviderUsage) -> Self {
-        GooseEffect::RecordUsage(usage)
+        ArakanEffect::RecordUsage(usage)
     }
 }
 
@@ -50,7 +50,7 @@ pub(crate) fn enrich_unclaimed_tool_errors(
     let mut messages = messages.to_vec();
     for message in &mut messages {
         for content in &mut message.content {
-            let goose_providers::conversation::message::MessageContent::ToolResponse(response) =
+            let arakan_providers::conversation::message::MessageContent::ToolResponse(response) =
                 content
             else {
                 continue;
@@ -82,7 +82,7 @@ fn prepare_tool_requests(message: &mut Message, advertised_tools: &[rmcp::model:
         .collect::<Vec<_>>();
 
     for content in &mut message.content {
-        let goose_providers::conversation::message::MessageContent::ToolRequest(request) = content
+        let arakan_providers::conversation::message::MessageContent::ToolRequest(request) = content
         else {
             continue;
         };
@@ -132,7 +132,7 @@ fn prepare_tool_requests(message: &mut Message, advertised_tools: &[rmcp::model:
 }
 
 #[async_trait]
-impl Provider for GooseInferenceProvider {
+impl Provider for ArakanInferenceProvider {
     fn get_name(&self) -> &str {
         self.inner.get_name()
     }
@@ -224,7 +224,7 @@ mod canonicalization_tests {
             .with_tool_request("request", Ok(CallToolRequestParams::new(name.to_string())))
     }
 
-    fn tool_request(message: &Message) -> &goose_providers::conversation::message::ToolRequest {
+    fn tool_request(message: &Message) -> &arakan_providers::conversation::message::ToolRequest {
         message.content[0].as_tool_request().unwrap()
     }
 
@@ -259,7 +259,7 @@ mod canonicalization_tests {
             object!({ "type": "object" }),
         )
         .with_meta(rmcp::model::MetaObject(object!({
-            "goose_extension": "developer"
+            "arakan_extension": "developer"
         })))];
         let mut message = request("developer.shell");
 

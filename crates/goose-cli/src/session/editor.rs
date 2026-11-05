@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
-use goose::config::Config;
-use goose::conversation::message::Message;
-use goose::conversation::Conversation;
+use arakan::config::Config;
+use arakan::conversation::message::Message;
+use arakan::conversation::Conversation;
 use std::fs;
 use std::io::Read;
 use std::io::Write;
@@ -11,10 +11,10 @@ use tempfile::Builder;
 use tempfile::NamedTempFile;
 
 /// Resolve the editor command from config and environment variables.
-/// Checks GOOSE_PROMPT_EDITOR, then $VISUAL, then $EDITOR.
+/// Checks ARAKAN_PROMPT_EDITOR, then $VISUAL, then $EDITOR.
 pub fn resolve_editor_command() -> Option<String> {
     let config = Config::global();
-    let config_editor = config.get_goose_prompt_editor().ok().flatten();
+    let config_editor = config.get_arakan_prompt_editor().ok().flatten();
     let visual = std::env::var("VISUAL").ok();
     let editor_env = std::env::var("EDITOR").ok();
     resolve_editor_from_sources(
@@ -40,7 +40,7 @@ fn resolve_editor_from_sources(
 /// Resolve the editor command, falling back to vi (or notepad on Windows).
 pub fn resolve_editor_or_default() -> String {
     let config = Config::global();
-    let config_editor = config.get_goose_prompt_editor().ok().flatten();
+    let config_editor = config.get_arakan_prompt_editor().ok().flatten();
     let visual = std::env::var("VISUAL").ok();
     let editor_env = std::env::var("EDITOR").ok();
     resolve_editor_or_default_from_sources(
@@ -90,7 +90,7 @@ pub fn edit_conversation(conversation: &Conversation) -> Result<Conversation> {
 
 /// Build the markdown template content for the editor prompt.
 fn build_template(messages: &[&str], prefill: Option<&str>) -> String {
-    let mut content = String::from("# Goose Prompt Editor\n\n");
+    let mut content = String::from("# Arakan Prompt Editor\n\n");
 
     content.push_str("# Your prompt:\n\n");
     if let Some(text) = prefill {
@@ -114,7 +114,7 @@ fn build_template(messages: &[&str], prefill: Option<&str>) -> String {
 /// Create temporary markdown file with conversation history and optional prefill text
 fn create_temp_file(messages: &[&str], prefill: Option<&str>) -> Result<NamedTempFile> {
     let temp_file = Builder::new()
-        .prefix("goose_prompt_")
+        .prefix("arakan_prompt_")
         .suffix(".md")
         .tempfile()?;
 
@@ -235,7 +235,7 @@ mod tests {
 
     #[test]
     fn test_extract_user_input_with_editor_output() {
-        let content = r#"# Goose Prompt Editor
+        let content = r#"# Arakan Prompt Editor
 
 # Your prompt:
 This is the hardcoded prompt response
@@ -259,7 +259,7 @@ This is the hardcoded prompt response
 
     #[test]
     fn test_extract_user_input_conversation_history_heading() {
-        let content = r#"# Goose Prompt Editor
+        let content = r#"# Arakan Prompt Editor
 
 # Your prompt:
 This is the user's input
@@ -282,11 +282,11 @@ This is the user's input
         let path = temp_file.path();
 
         assert!(path.exists());
-        assert!(path.to_str().unwrap().contains("goose_prompt_"));
+        assert!(path.to_str().unwrap().contains("arakan_prompt_"));
         assert!(path.to_str().unwrap().ends_with(".md"));
 
         let content = fs::read_to_string(path).unwrap();
-        assert!(content.contains("# Goose Prompt Editor"));
+        assert!(content.contains("# Arakan Prompt Editor"));
         assert!(content.contains("## User: Hello"));
         assert!(content.contains("## Assistant: Hi there!"));
         assert!(content.contains("# Your prompt:"));
@@ -323,19 +323,19 @@ This is the user's input
     #[test]
     fn test_create_temp_file_with_prefix_suffix() {
         let temp_file = Builder::new()
-            .prefix("goose_test_")
+            .prefix("arakan_test_")
             .suffix(".md")
             .tempfile()
             .unwrap();
 
         let name = temp_file.path().file_name().unwrap().to_str().unwrap();
-        assert!(name.starts_with("goose_test_"));
+        assert!(name.starts_with("arakan_test_"));
         assert!(name.ends_with(".md"));
     }
 
     #[test]
     fn test_extract_user_input() {
-        let content = r#"# Goose Prompt Editor
+        let content = r#"# Arakan Prompt Editor
 
 # Recent conversation for context:
 
@@ -355,7 +355,7 @@ with multiple lines.
     fn test_tempfile_cleanup() {
         let path = {
             let temp_file = Builder::new()
-                .prefix("goose_cleanup_test_")
+                .prefix("arakan_cleanup_test_")
                 .tempfile()
                 .unwrap();
             let path = temp_file.path().to_path_buf();
@@ -482,7 +482,7 @@ with multiple lines.
     #[test]
     fn test_build_template_no_prefill_no_messages() {
         let content = build_template(&[], None);
-        assert_eq!(content, "# Goose Prompt Editor\n\n# Your prompt:\n\n");
+        assert_eq!(content, "# Arakan Prompt Editor\n\n# Your prompt:\n\n");
     }
 
     #[test]
@@ -541,19 +541,19 @@ with multiple lines.
     #[cfg(unix)]
     fn test_editor_uses_random_tempfile_and_preserves_cwd() {
         let script = Builder::new()
-            .prefix("goose_editor_test_")
+            .prefix("arakan_editor_test_")
             .tempfile()
             .unwrap();
         let path_report = Builder::new()
-            .prefix("goose_editor_path_")
+            .prefix("arakan_editor_path_")
             .tempfile()
             .unwrap();
         let cwd_report = Builder::new()
-            .prefix("goose_editor_cwd_")
+            .prefix("arakan_editor_cwd_")
             .tempfile()
             .unwrap();
         let secret = Builder::new()
-            .prefix("goose_editor_secret_")
+            .prefix("arakan_editor_secret_")
             .tempfile()
             .unwrap();
 
@@ -567,15 +567,15 @@ with multiple lines.
         }
         fs::write(secret.path(), "TOP_SECRET_EXFIL_abc123").unwrap();
 
-        let predictable_path = Path::new(".goose_prompt_temp.md");
+        let predictable_path = Path::new(".arakan_prompt_temp.md");
         assert!(!predictable_path.exists());
 
         fs::write(
             script.path(),
             r#"printf '%s' "$4" > "$1"
 pwd > "$2"
-printf '# Goose Prompt Editor\n\n# Your prompt:\n\nupdated prompt\n' > "$4"
-ln -sf "$3" .goose_prompt_temp.md
+printf '# Arakan Prompt Editor\n\n# Your prompt:\n\nupdated prompt\n' > "$4"
+ln -sf "$3" .arakan_prompt_temp.md
 "#,
         )
         .unwrap();
@@ -601,8 +601,8 @@ ln -sf "$3" .goose_prompt_temp.md
             .file_name()
             .unwrap()
             .to_string_lossy()
-            .starts_with("goose_prompt_"));
-        assert_ne!(edited_path, Path::new(".goose_prompt_temp.md"));
+            .starts_with("arakan_prompt_"));
+        assert_ne!(edited_path, Path::new(".arakan_prompt_temp.md"));
         assert!(!edited_path.exists());
         assert_eq!(
             Path::new(fs::read_to_string(cwd_report.path()).unwrap().trim()),

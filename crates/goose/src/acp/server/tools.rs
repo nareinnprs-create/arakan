@@ -2,7 +2,7 @@ use super::*;
 use crate::agents::extension_manager::{get_parameter_names, is_tool_owned_by_extension};
 use crate::agents::reply_parts::is_tool_visible_to_app;
 use crate::config::permission::PermissionLevel;
-use goose_sdk_types::custom_requests::{ToolListItem, ToolPermissionLevel};
+use arakan_sdk_types::custom_requests::{ToolListItem, ToolPermissionLevel};
 use rmcp::model::CallToolRequestParams;
 
 impl AcpConnection {
@@ -12,13 +12,13 @@ impl AcpConnection {
     ) -> Result<GetToolsResponse, agent_client_protocol::Error> {
         let session_id = &req.session_id;
         self.open_session(&req.session_id).await?;
-        let goose_mode = self
+        let arakan_mode = self
             .services
             .session_manager
             .get_session(session_id, false)
             .await
-            .internal_err_ctx("Failed to read goose mode")?
-            .goose_mode;
+            .internal_err_ctx("Failed to read arakan mode")?
+            .arakan_mode;
         let permission_manager = self.permission_manager();
 
         let mut tools: Vec<ToolListItem> = self
@@ -31,9 +31,9 @@ impl AcpConnection {
                 let permission = permission_manager
                     .get_user_permission(&tool.name)
                     .or_else(|| {
-                        if goose_mode == GooseMode::SmartApprove {
+                        if arakan_mode == ArakanMode::SmartApprove {
                             permission_manager.get_smart_approve_permission(&tool.name)
-                        } else if goose_mode == GooseMode::Approve {
+                        } else if arakan_mode == ArakanMode::Approve {
                             Some(PermissionLevel::AskBefore)
                         } else {
                             None
@@ -67,8 +67,8 @@ impl AcpConnection {
 
     pub(super) async fn on_call_tool(
         &self,
-        req: GooseToolCallRequest,
-    ) -> Result<GooseToolCallResponse, agent_client_protocol::Error> {
+        req: ArakanToolCallRequest,
+    ) -> Result<ArakanToolCallResponse, agent_client_protocol::Error> {
         let session_id = &req.session_id;
         self.open_session(&req.session_id).await?;
         let tools = self
@@ -114,7 +114,7 @@ impl AcpConnection {
                 agent_client_protocol::Error::resource_not_found(Some(session_id.to_string()))
                     .data(format!("Session not found: {}", session_id))
             })?;
-        if session.goose_mode != GooseMode::Auto {
+        if session.arakan_mode != ArakanMode::Auto {
             return Err(agent_client_protocol::Error::invalid_params()
                 .data("app tool calls require auto mode"));
         }
@@ -151,7 +151,7 @@ impl AcpConnection {
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| agent_client_protocol::Error::internal_error().data(e.to_string()))?;
 
-        Ok(GooseToolCallResponse {
+        Ok(ArakanToolCallResponse {
             content,
             structured_content: result.structured_content,
             is_error: result.is_error.unwrap_or(false),

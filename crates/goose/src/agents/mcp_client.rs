@@ -59,14 +59,14 @@ fn default_mcp_apps_ui_extensions() -> ExtensionCapabilities {
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct GooseMcpHostInfo {
+pub struct ArakanMcpHostInfo {
     pub explicit_extensions: bool,
     pub extensions: ExtensionCapabilities,
     pub client_name: Option<String>,
     pub client_version: Option<String>,
 }
 
-impl GooseMcpHostInfo {
+impl ArakanMcpHostInfo {
     pub fn mcpui_enabled(&self) -> bool {
         self.extensions.contains_key(MCP_APPS_UI_EXTENSION_ID)
     }
@@ -164,27 +164,27 @@ impl Drop for ActiveToolCallGuard {
     }
 }
 
-pub struct GooseClient {
+pub struct ArakanClient {
     notification_handlers: Arc<Mutex<Vec<Sender<ServerNotification>>>>,
     session_id: Mutex<Option<String>>,
     active_tool_calls: Arc<StdMutex<HashMap<String, Vec<String>>>>,
     client_name: String,
-    capabilities: GooseMcpClientCapabilities,
+    capabilities: ArakanMcpClientCapabilities,
     working_dir: PathBuf,
     action_required: Arc<ActionRequiredManager>,
     tools_version: Arc<AtomicU64>,
 }
 
-impl GooseClient {
+impl ArakanClient {
     pub(crate) fn new(
         handlers: Arc<Mutex<Vec<Sender<ServerNotification>>>>,
         client_name: String,
-        capabilities: GooseMcpClientCapabilities,
+        capabilities: ArakanMcpClientCapabilities,
         working_dir: PathBuf,
         action_required: Arc<ActionRequiredManager>,
         tools_version: Arc<AtomicU64>,
     ) -> Self {
-        GooseClient {
+        ArakanClient {
             notification_handlers: handlers,
             session_id: Mutex::new(None),
             active_tool_calls: Arc::new(StdMutex::new(HashMap::new())),
@@ -297,7 +297,7 @@ impl GooseClient {
             .as_ref()
             .and_then(|host_info| host_info.client_version.clone())
             .unwrap_or_else(|| {
-                std::env::var("GOOSE_MCP_CLIENT_VERSION")
+                std::env::var("ARAKAN_MCP_CLIENT_VERSION")
                     .unwrap_or(env!("CARGO_PKG_VERSION").to_owned())
             });
 
@@ -333,7 +333,7 @@ fn fan_out_notification(
     });
 }
 
-impl ClientHandler for GooseClient {
+impl ClientHandler for ArakanClient {
     #[expect(deprecated)]
     async fn list_roots(
         &self,
@@ -464,17 +464,17 @@ impl ClientHandler for GooseClient {
 pub type ElicitationHandler = Arc<dyn Fn(&ElicitRequestParams) -> ElicitResult + Send + Sync>;
 
 #[derive(Clone, Default)]
-pub struct GooseMcpClientCapabilities {
+pub struct ArakanMcpClientCapabilities {
     pub mcpui: bool,
-    pub host_info: Option<GooseMcpHostInfo>,
+    pub host_info: Option<ArakanMcpHostInfo>,
     pub elicitation_handler: Option<ElicitationHandler>,
     pub protocol_version: Option<ProtocolVersion>,
 }
 
-impl std::fmt::Debug for GooseMcpClientCapabilities {
+impl std::fmt::Debug for ArakanMcpClientCapabilities {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         formatter
-            .debug_struct("GooseMcpClientCapabilities")
+            .debug_struct("ArakanMcpClientCapabilities")
             .field("mcpui", &self.mcpui)
             .field("host_info", &self.host_info)
             .field("elicitation_handler", &self.elicitation_handler.is_some())
@@ -487,7 +487,7 @@ impl std::fmt::Debug for GooseMcpClientCapabilities {
 pub(crate) struct ConnectContext {
     pub timeout: Duration,
     pub client_name: String,
-    pub capabilities: GooseMcpClientCapabilities,
+    pub capabilities: ArakanMcpClientCapabilities,
     pub working_dir: PathBuf,
     pub docker_container: Option<String>,
     pub action_required: Arc<ActionRequiredManager>,
@@ -496,7 +496,7 @@ pub(crate) struct ConnectContext {
 
 /// The MCP client is the interface for MCP operations.
 pub struct McpClient {
-    client: Mutex<Arc<RunningService<RoleClient, GooseClient>>>,
+    client: Mutex<Arc<RunningService<RoleClient, ArakanClient>>>,
     notification_subscribers: Arc<Mutex<Vec<mpsc::Sender<ServerNotification>>>>,
     server_info: Option<InitializeResult>,
     timeout: std::time::Duration,
@@ -524,7 +524,7 @@ impl McpClient {
         let notification_subscribers =
             Arc::new(Mutex::new(Vec::<mpsc::Sender<ServerNotification>>::new()));
 
-        let client = GooseClient::new(
+        let client = ArakanClient::new(
             notification_subscribers.clone(),
             client_name.clone(),
             capabilities.clone(),
@@ -532,7 +532,7 @@ impl McpClient {
             action_required,
             tools_version,
         );
-        let client: rmcp::service::RunningService<rmcp::RoleClient, GooseClient> =
+        let client: rmcp::service::RunningService<rmcp::RoleClient, ArakanClient> =
             if let Some(protocol_version) = capabilities.protocol_version {
                 let lifecycle = if protocol_version >= ProtocolVersion::STANDARD_HEADERS {
                     ClientLifecycleMode::Discover {
@@ -1022,19 +1022,19 @@ fn inject_session_context_into_request(
 mod tests {
     use super::*;
 
-    use crate::agents::GoosePlatform;
+    use crate::agents::ArakanPlatform;
     use serde_json::json;
     use test_case::test_case;
 
-    fn new_client(platform: GoosePlatform) -> GooseClient {
+    fn new_client(platform: ArakanPlatform) -> ArakanClient {
         let capabilities = match platform {
-            GoosePlatform::GooseDesktop => GooseMcpClientCapabilities {
+            ArakanPlatform::ArakanDesktop => ArakanMcpClientCapabilities {
                 mcpui: true,
                 host_info: None,
                 elicitation_handler: None,
                 protocol_version: None,
             },
-            GoosePlatform::GooseCli => GooseMcpClientCapabilities {
+            ArakanPlatform::ArakanCli => ArakanMcpClientCapabilities {
                 mcpui: false,
                 host_info: None,
                 elicitation_handler: None,
@@ -1042,7 +1042,7 @@ mod tests {
             },
         };
 
-        GooseClient::new(
+        ArakanClient::new(
             Arc::new(Mutex::new(Vec::new())),
             platform.to_string(),
             capabilities,
@@ -1054,7 +1054,7 @@ mod tests {
 
     #[test]
     fn tool_list_changed_bumps_tools_version() {
-        let client = new_client(GoosePlatform::GooseCli);
+        let client = new_client(ArakanPlatform::ArakanCli);
         let before = client.tools_version.load(Ordering::SeqCst);
         client.handle_tool_list_changed();
         assert_eq!(client.tools_version.load(Ordering::SeqCst), before + 1);
@@ -1121,7 +1121,7 @@ mod tests {
         let mut extensions = Extensions::new();
         extensions.insert(
             serde_json::from_value::<MetaObject>(json!({
-                "Goose-Session-Id": "old-session-id",
+                "Arakan-Session-Id": "old-session-id",
                 "other-key": "preserve-me"
             }))
             .unwrap(),
@@ -1247,7 +1247,7 @@ mod tests {
 
     #[test]
     fn test_client_info_advertises_mcp_apps_ui_extension() {
-        let client = new_client(GoosePlatform::GooseDesktop);
+        let client = new_client(ArakanPlatform::ArakanDesktop);
         let info = ClientHandler::get_info(&client);
 
         // Verify the client advertises the MCP Apps UI extension capability
@@ -1269,7 +1269,7 @@ mod tests {
 
     #[test]
     fn test_client_capabilities_advertise_roots() {
-        let client = new_client(GoosePlatform::GooseCli);
+        let client = new_client(ArakanPlatform::ArakanCli);
         let info = ClientHandler::get_info(&client);
         assert!(
             info.capabilities.roots.is_some(),
@@ -1279,7 +1279,7 @@ mod tests {
 
     #[test]
     fn test_client_capabilities_do_not_advertise_sampling() {
-        let client = new_client(GoosePlatform::GooseCli);
+        let client = new_client(ArakanPlatform::ArakanCli);
         let info = ClientHandler::get_info(&client);
         let capabilities = serde_json::to_value(info.capabilities).unwrap();
         assert!(capabilities.get("sampling").is_none());
@@ -1287,15 +1287,15 @@ mod tests {
 
     #[test]
     fn test_explicit_host_info_passes_through_client_identity() {
-        let client = GooseClient::new(
+        let client = ArakanClient::new(
             Arc::new(Mutex::new(Vec::new())),
-            GoosePlatform::GooseDesktop.to_string(),
-            GooseMcpClientCapabilities {
+            ArakanPlatform::ArakanDesktop.to_string(),
+            ArakanMcpClientCapabilities {
                 mcpui: true,
-                host_info: Some(GooseMcpHostInfo {
+                host_info: Some(ArakanMcpHostInfo {
                     explicit_extensions: true,
                     extensions: ExtensionCapabilities::new(),
-                    client_name: Some("goose2".to_string()),
+                    client_name: Some("arakan2".to_string()),
                     client_version: Some("0.1.0".to_string()),
                 }),
                 elicitation_handler: None,
@@ -1307,7 +1307,7 @@ mod tests {
         );
 
         let info = ClientHandler::get_info(&client);
-        assert_eq!(info.client_info.name, "goose2");
+        assert_eq!(info.client_info.name, "arakan2");
         assert_eq!(info.client_info.version, "0.1.0");
         let extensions = info
             .capabilities
@@ -1321,15 +1321,15 @@ mod tests {
 
     #[test]
     fn test_explicit_host_extensions_override_platform_fallback() {
-        let client = GooseClient::new(
+        let client = ArakanClient::new(
             Arc::new(Mutex::new(Vec::new())),
-            GoosePlatform::GooseCli.to_string(),
-            GooseMcpClientCapabilities {
+            ArakanPlatform::ArakanCli.to_string(),
+            ArakanMcpClientCapabilities {
                 mcpui: false,
-                host_info: Some(GooseMcpHostInfo {
+                host_info: Some(ArakanMcpHostInfo {
                     explicit_extensions: true,
                     extensions: default_mcp_apps_ui_extensions(),
-                    client_name: Some("goose2".to_string()),
+                    client_name: Some("arakan2".to_string()),
                     client_version: Some("0.1.0".to_string()),
                 }),
                 elicitation_handler: None,
@@ -1347,20 +1347,20 @@ mod tests {
             .expect("capabilities should have explicit host extensions");
 
         assert!(extensions.contains_key(MCP_APPS_UI_EXTENSION_ID));
-        assert_eq!(info.client_info.name, "goose2");
+        assert_eq!(info.client_info.name, "arakan2");
     }
 
     #[test]
     fn test_host_identity_does_not_disable_platform_fallback_without_explicit_extensions() {
-        let client = GooseClient::new(
+        let client = ArakanClient::new(
             Arc::new(Mutex::new(Vec::new())),
-            GoosePlatform::GooseDesktop.to_string(),
-            GooseMcpClientCapabilities {
+            ArakanPlatform::ArakanDesktop.to_string(),
+            ArakanMcpClientCapabilities {
                 mcpui: true,
-                host_info: Some(GooseMcpHostInfo {
+                host_info: Some(ArakanMcpHostInfo {
                     explicit_extensions: false,
                     extensions: ExtensionCapabilities::new(),
-                    client_name: Some("goose2".to_string()),
+                    client_name: Some("arakan2".to_string()),
                     client_version: Some("0.1.0".to_string()),
                 }),
                 elicitation_handler: None,
@@ -1378,7 +1378,7 @@ mod tests {
             .expect("platform fallback should still advertise MCP Apps UI");
 
         assert!(extensions.contains_key(MCP_APPS_UI_EXTENSION_ID));
-        assert_eq!(info.client_info.name, "goose2");
+        assert_eq!(info.client_info.name, "arakan2");
     }
 
     #[tokio::test]

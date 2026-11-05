@@ -1,16 +1,16 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use futures::StreamExt;
-use goose::agents::{SessionConfig, StateMachineServices, StateMachineServicesConfig};
-use goose::config::{Config, GooseMode};
-use goose::context_mgmt::auto_compact_threshold;
-use goose::conversation::message::Message;
-use goose::conversation::Conversation;
-use goose::providers::base::{stream_from_single_message, MessageStream, Provider};
-use goose::session::SessionType;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan::agents::{SessionConfig, StateMachineServices, StateMachineServicesConfig};
+use arakan::config::{Config, ArakanMode};
+use arakan::context_mgmt::auto_compact_threshold;
+use arakan::conversation::message::Message;
+use arakan::conversation::Conversation;
+use arakan::providers::base::{stream_from_single_message, MessageStream, Provider};
+use arakan::session::SessionType;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 use rmcp::model::Tool;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -65,13 +65,13 @@ async fn effective_trigger_and_agent_execution_follow_the_current_model() -> Res
     let temp_dir = tempfile::tempdir()?;
     let root = temp_dir.path().to_str().unwrap();
     let _env = env_lock::lock_env([
-        ("GOOSE_PATH_ROOT", Some(root)),
-        ("GOOSE_DISABLE_KEYRING", Some("1")),
-        ("GOOSE_AUTO_COMPACT_THRESHOLD", None),
-        ("GOOSE_AUTO_COMPACT_TOKEN_LIMIT", None),
-        ("GOOSE_CONTEXT_LIMIT", None),
-        ("GOOSE_TOOL_PAIR_SUMMARIZATION", Some("false")),
-        ("GOOSE_DISABLE_SESSION_NAMING", Some("true")),
+        ("ARAKAN_PATH_ROOT", Some(root)),
+        ("ARAKAN_DISABLE_KEYRING", Some("1")),
+        ("ARAKAN_AUTO_COMPACT_THRESHOLD", None),
+        ("ARAKAN_AUTO_COMPACT_TOKEN_LIMIT", None),
+        ("ARAKAN_CONTEXT_LIMIT", None),
+        ("ARAKAN_TOOL_PAIR_SUMMARIZATION", Some("false")),
+        ("ARAKAN_DISABLE_SESSION_NAMING", Some("true")),
     ]);
     let config = Config::global();
     assert_eq!(auto_compact_threshold(1_000_000), 0.225);
@@ -85,7 +85,7 @@ async fn effective_trigger_and_agent_execution_follow_the_current_model() -> Res
             temp_dir.path().to_path_buf(),
             "compaction threshold".to_string(),
             SessionType::Hidden,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await?;
 
@@ -96,8 +96,8 @@ async fn effective_trigger_and_agent_execution_follow_the_current_model() -> Res
         (0.2, 225_000, 1_000_000, 200_000),
         (0.8, 900_000, 1_000_000, 800_000),
     ] {
-        config.set_param("GOOSE_AUTO_COMPACT_THRESHOLD", percentage)?;
-        config.set_param("GOOSE_AUTO_COMPACT_TOKEN_LIMIT", cap)?;
+        config.set_param("ARAKAN_AUTO_COMPACT_THRESHOLD", percentage)?;
+        config.set_param("ARAKAN_AUTO_COMPACT_TOKEN_LIMIT", cap)?;
         assert_eq!(
             auto_compact_threshold(context),
             percentage.min(cap as f64 / context as f64)
@@ -108,8 +108,8 @@ async fn effective_trigger_and_agent_execution_follow_the_current_model() -> Res
     }
 
     for disabled in [0.0, -0.1, 1.0] {
-        config.set_param("GOOSE_AUTO_COMPACT_THRESHOLD", disabled)?;
-        config.set_param("GOOSE_AUTO_COMPACT_TOKEN_LIMIT", 225_000)?;
+        config.set_param("ARAKAN_AUTO_COMPACT_THRESHOLD", disabled)?;
+        config.set_param("ARAKAN_AUTO_COMPACT_TOKEN_LIMIT", 225_000)?;
         for context in [1_000_000, 200_000] {
             assert_eq!(auto_compact_threshold(context), disabled);
             verify_reply(&services, &session.id, context, 900_000, false).await?;

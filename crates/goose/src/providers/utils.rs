@@ -1,7 +1,7 @@
 use crate::config::paths::Paths;
 use anyhow::{anyhow, Result};
 use fs_err::File;
-use goose_providers::request_log::{install_logger, RequestLogHandle, RequestLogger};
+use arakan_providers::request_log::{install_logger, RequestLogHandle, RequestLogger};
 use serde_json::Value;
 use std::error::Error;
 use std::io::{BufWriter, Write};
@@ -51,7 +51,7 @@ pub const LOGS_TO_KEEP: usize = 10;
 
 static INIT_LOGGER: OnceLock<Result<()>> = OnceLock::new();
 
-pub fn init_goose_request_log() -> Result<()> {
+pub fn init_arakan_request_log() -> Result<()> {
     INIT_LOGGER
         .get_or_init(|| Ok(install_logger(RequestLog::new(LOGS_TO_KEEP)?)?))
         .as_ref()

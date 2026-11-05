@@ -163,7 +163,7 @@ impl ExtensionManagerClient {
                 if name_to_key(&extension_name) == "extensionmanager" {
                     return Err(ErrorData::new(
                         ErrorCode::INVALID_REQUEST,
-                        "The Extension Manager cannot disable itself. Ask the user to disable it from goose settings instead.".to_string(),
+                        "The Extension Manager cannot disable itself. Ask the user to disable it from arakan settings instead.".to_string(),
                         None,
                     ));
                 }
@@ -266,7 +266,7 @@ impl ExtensionManagerClient {
             tools.push(
                 Tool::new(
                     MANAGE_EXTENSIONS_TOOL_NAME.to_string(),
-                    "Tool to manage extensions and tools in goose context.
+                    "Tool to manage extensions and tools in arakan context.
             Enable or disable extensions to help complete tasks.
             Enable or disable an extension by providing the extension name.
             "
@@ -506,7 +506,7 @@ fn search_available_extensions(enabled: &[String]) -> String {
 mod tests {
     use super::*;
     use crate::agents::extension_manager::ExtensionManager;
-    use crate::config::GooseMode;
+    use crate::config::ArakanMode;
     use std::path::PathBuf;
 
     fn client_for(manager: &Arc<ExtensionManager>) -> ExtensionManagerClient {
@@ -527,7 +527,7 @@ mod tests {
                 PathBuf::from("/tmp/extension-manager-test"),
                 "extension manager test".to_string(),
                 session_type,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap()

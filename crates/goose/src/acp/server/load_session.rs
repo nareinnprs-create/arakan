@@ -67,17 +67,17 @@ fn build_replayed_tool_call(
     let Some(chain_summary) = tool_request.generated_chain_summary() else {
         return tool_call;
     };
-    let goose_meta = tool_call
+    let arakan_meta = tool_call
         .meta
         .get_or_insert_default()
-        .entry("goose".to_string())
+        .entry("arakan".to_string())
         .or_insert_with(|| serde_json::Value::Object(serde_json::Map::new()));
-    if !goose_meta.is_object() {
-        *goose_meta = serde_json::Value::Object(serde_json::Map::new());
+    if !arakan_meta.is_object() {
+        *arakan_meta = serde_json::Value::Object(serde_json::Map::new());
     }
-    goose_meta
+    arakan_meta
         .as_object_mut()
-        .expect("goose metadata was initialized as an object")
+        .expect("arakan metadata was initialized as an object")
         .extend([tool_chain_summary(&chain_summary)]);
 
     tool_call
@@ -108,7 +108,7 @@ fn replay_tail_from_meta(meta: Option<&Meta>) -> Option<usize> {
 fn replay_conversation_to_client(
     cx: &ConnectionTo<Client>,
     session: &Session,
-    supports_goose_custom_notifications: bool,
+    supports_arakan_custom_notifications: bool,
     client_requests_tool_call_label_enrichment: bool,
     replay_tail: Option<usize>,
 ) -> Result<usize, agent_client_protocol::Error> {
@@ -200,11 +200,11 @@ fn replay_conversation_to_client(
             }
         }
 
-        if supports_goose_custom_notifications {
+        if supports_arakan_custom_notifications {
             if let Some(usage) = &message.metadata.usage {
-                cx.send_notification(GooseSessionNotification {
+                cx.send_notification(ArakanSessionNotification {
                     session_id: session.id.clone(),
-                    update: GooseSessionUpdate::MessageUsage(message_usage_update(
+                    update: ArakanSessionUpdate::MessageUsage(message_usage_update(
                         message.id.clone(),
                         usage,
                     )),
@@ -394,7 +394,7 @@ impl AcpConnection {
         let replayed_from = replay_conversation_to_client(
             cx,
             &session,
-            self.supports_goose_custom_notifications(),
+            self.supports_arakan_custom_notifications(),
             self.requests_tool_call_label_enrichment(),
             replay_tail_from_meta(args.meta.as_ref()),
         )?;
@@ -460,7 +460,7 @@ impl AcpConnection {
 mod tests {
     use super::*;
     use crate::conversation::message::InferenceMetadata;
-    use goose_providers::thinking::{
+    use arakan_providers::thinking::{
         ThinkingEffortCapability, ThinkingEffortOption, ThinkingEffortSupport,
     };
     use rmcp::model::CallToolRequestParams;
@@ -501,7 +501,7 @@ mod tests {
 
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system: &str,
             _messages: &[Message],
             _tools: &[rmcp::model::Tool],
@@ -658,8 +658,8 @@ mod tests {
             chunk
                 .meta
                 .as_ref()
-                .and_then(|meta| meta.get("goose"))
-                .and_then(|goose| goose.get("inference")),
+                .and_then(|meta| meta.get("arakan"))
+                .and_then(|arakan| arakan.get("inference")),
             Some(&serde_json::json!({
                 "provider": "anthropic",
                 "requestedModel": "claude-sonnet-4-5",
@@ -689,15 +689,15 @@ mod tests {
         message.metadata.output_token_limit_reached = true;
         let tool_call =
             build_replayed_tool_call(&persisted_enriched_tool_request(), &message, true);
-        let goose = tool_call
+        let arakan = tool_call
             .meta
             .as_ref()
-            .and_then(|meta| meta.get("goose"))
-            .expect("valid initial tool call should contain goose metadata");
+            .and_then(|meta| meta.get("arakan"))
+            .expect("valid initial tool call should contain arakan metadata");
 
         assert_eq!(tool_call.title, "applied dark mode polish");
         assert_eq!(
-            goose,
+            arakan,
             &serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_replay",
@@ -719,15 +719,15 @@ mod tests {
         let message = Message::new(Role::Assistant, 1_700_000_000, vec![]).with_id("msg_replay");
         let tool_call =
             build_replayed_tool_call(&persisted_enriched_tool_request(), &message, false);
-        let goose = tool_call
+        let arakan = tool_call
             .meta
             .as_ref()
-            .and_then(|meta| meta.get("goose"))
-            .expect("valid initial tool call should contain goose metadata");
+            .and_then(|meta| meta.get("arakan"))
+            .expect("valid initial tool call should contain arakan metadata");
 
         assert_eq!(tool_call.title, "developer: shell");
         assert_eq!(
-            goose,
+            arakan,
             &serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_replay",

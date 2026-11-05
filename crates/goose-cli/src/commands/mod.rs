@@ -18,5 +18,3 @@ pub mod schedule;
 pub mod session;
 pub mod skills;
 pub mod term;
-#[cfg(feature = "update")]
-pub mod update;

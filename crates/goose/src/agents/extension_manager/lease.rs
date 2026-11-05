@@ -25,7 +25,7 @@ use super::{
     get_tool_meta_value, get_tool_owner, get_tool_resource_uri, insert_trusted_tool_update_meta,
     recover_mangled_tool_name, remove_subagent_session_meta, remove_untrusted_mcp_app_meta,
     ActionRequiredStream, Extension, ExtensionLoadResult, ExtensionMutation, ExtensionSlot,
-    GooseMcpAppToolAttachment, TOOL_CALL_NOTIFICATION_CHANNEL_CAPACITY,
+    ArakanMcpAppToolAttachment, TOOL_CALL_NOTIFICATION_CHANNEL_CAPACITY,
 };
 use crate::action_required_manager::ActionRequiredManager;
 use crate::agents::container::Container;
@@ -856,7 +856,7 @@ impl McpAppCall {
         if result.is_error == Some(true) {
             return;
         }
-        let mut attachment = GooseMcpAppToolAttachment {
+        let mut attachment = ArakanMcpAppToolAttachment {
             tool_name: self.server_tool_name,
             tool_name_is_actual: true,
             extension_name: self.extension_key,

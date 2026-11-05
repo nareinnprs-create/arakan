@@ -4,7 +4,7 @@ import type {
   ToolCallUpdate,
 } from '@agentclientprotocol/sdk';
 import type { Message } from '../../types/message';
-import type { ContentBlock as GooseContentBlock } from '../../types/message';
+import type { ContentBlock as ArakanContentBlock } from '../../types/message';
 import { findMessageForChunk } from './messages';
 import { toolNotificationChange } from './toolNotifications';
 import {
@@ -12,8 +12,8 @@ import {
   type AdapterState,
   applyInferenceMeta,
   DEFAULT_VISIBLE_MESSAGE_METADATA,
-  type GooseMessageMeta,
-  getGooseMessageMeta,
+  type ArakanMessageMeta,
+  getArakanMessageMeta,
   isRecord,
   messagesChange,
   rawInputToArguments,
@@ -25,9 +25,9 @@ import {
 export function applyToolCall(state: AdapterState, update: ToolCall): AcpChatStateChange[] {
   updateToolCallState(state, update);
 
-  const gooseMeta = getGooseMessageMeta(update);
-  const message = getOrCreateAssistantMessageForUpdate(state, gooseMeta);
-  applyInferenceMeta(message, gooseMeta);
+  const arakanMeta = getArakanMessageMeta(update);
+  const message = getOrCreateAssistantMessageForUpdate(state, arakanMeta);
+  applyInferenceMeta(message, arakanMeta);
 
   if (
     message.content.some(
@@ -74,8 +74,8 @@ export function applyToolCallUpdate(
     return messagesChange(state);
   }
 
-  const gooseMeta = getGooseMessageMeta(update);
-  const message = getOrCreateToolResponseMessageForUpdate(state, gooseMeta);
+  const arakanMeta = getArakanMessageMeta(update);
+  const message = getOrCreateToolResponseMessageForUpdate(state, arakanMeta);
   const identity = toolIdentity(update);
   const metadata = toolResponseMetadata(toolCallState, identity);
 
@@ -116,24 +116,24 @@ function mergeToolCallState(
 
 function getOrCreateAssistantMessageForUpdate(
   state: AdapterState,
-  gooseMeta: GooseMessageMeta
+  arakanMeta: ArakanMessageMeta
 ): Message {
-  const existing = findMessageForChunk(state, 'assistant', gooseMeta.messageId, gooseMeta.created);
+  const existing = findMessageForChunk(state, 'assistant', arakanMeta.messageId, arakanMeta.created);
   if (existing) {
-    if (gooseMeta.operationLogs) {
-      existing.metadata.operationLogs = gooseMeta.operationLogs;
+    if (arakanMeta.operationLogs) {
+      existing.metadata.operationLogs = arakanMeta.operationLogs;
     }
     return existing;
   }
 
   const message: Message = {
-    ...(gooseMeta.messageId ? { id: gooseMeta.messageId } : {}),
+    ...(arakanMeta.messageId ? { id: arakanMeta.messageId } : {}),
     role: 'assistant',
-    created: gooseMeta.created ?? Math.floor(Date.now() / 1000),
+    created: arakanMeta.created ?? Math.floor(Date.now() / 1000),
     content: [],
     metadata: {
       ...DEFAULT_VISIBLE_MESSAGE_METADATA,
-      ...(gooseMeta.operationLogs ? { operationLogs: gooseMeta.operationLogs } : {}),
+      ...(arakanMeta.operationLogs ? { operationLogs: arakanMeta.operationLogs } : {}),
     },
   };
   state.messages.push(message);
@@ -142,11 +142,11 @@ function getOrCreateAssistantMessageForUpdate(
 
 function getOrCreateToolResponseMessageForUpdate(
   state: AdapterState,
-  gooseMeta: GooseMessageMeta
+  arakanMeta: ArakanMessageMeta
 ): Message {
-  if (gooseMeta.messageId) {
+  if (arakanMeta.messageId) {
     const existing = state.messages.find(
-      (message) => message.id === gooseMeta.messageId && message.role === 'user'
+      (message) => message.id === arakanMeta.messageId && message.role === 'user'
     );
     if (existing) {
       return existing;
@@ -154,9 +154,9 @@ function getOrCreateToolResponseMessageForUpdate(
   }
 
   const message: Message = {
-    ...(gooseMeta.messageId ? { id: gooseMeta.messageId } : {}),
+    ...(arakanMeta.messageId ? { id: arakanMeta.messageId } : {}),
     role: 'user',
-    created: gooseMeta.created ?? Math.floor(Date.now() / 1000),
+    created: arakanMeta.created ?? Math.floor(Date.now() / 1000),
     content: [],
     metadata: { ...DEFAULT_VISIBLE_MESSAGE_METADATA },
   };
@@ -244,8 +244,8 @@ function toolResultValue(
   return toolResult;
 }
 
-function toolResultContent(update: ToolCallUpdate): GooseContentBlock[] {
-  const content: GooseContentBlock[] = [];
+function toolResultContent(update: ToolCallUpdate): ArakanContentBlock[] {
+  const content: ArakanContentBlock[] = [];
 
   for (const item of update.content ?? []) {
     if (item.type !== 'content') {
@@ -271,7 +271,7 @@ function toolResultContent(update: ToolCallUpdate): GooseContentBlock[] {
 
 function apiContentBlockFromAcpContentBlock(
   content: AcpContentBlock
-): GooseContentBlock | undefined {
+): ArakanContentBlock | undefined {
   switch (content.type) {
     case 'text':
       return {
@@ -316,7 +316,7 @@ function apiContentBlockFromAcpContentBlock(
 
 function apiResourceContentsFromAcpResource(
   resource: Extract<AcpContentBlock, { type: 'resource' }>['resource']
-): Extract<GooseContentBlock, { type: 'resource' }>['resource'] {
+): Extract<ArakanContentBlock, { type: 'resource' }>['resource'] {
   if ('text' in resource) {
     return {
       uri: resource.uri,
@@ -345,7 +345,7 @@ interface DesktopToolResultMeta extends Record<string, unknown> {
 }
 
 type ToolResultValue = {
-  content: GooseContentBlock[];
+  content: ArakanContentBlock[];
   structuredContent?: unknown;
   isError: boolean;
   _meta?: DesktopToolResultMeta;
@@ -356,24 +356,24 @@ function toolResultMetadata(update: ToolCallUpdate): DesktopToolResultMeta | und
     return undefined;
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose)) {
+  const arakan = update._meta.arakan;
+  if (!isRecord(arakan)) {
     return undefined;
   }
 
   const meta: DesktopToolResultMeta = {};
-  if (typeof goose.subagentSessionId === 'string') {
-    meta.subagent_session_id = goose.subagentSessionId;
+  if (typeof arakan.subagentSessionId === 'string') {
+    meta.subagent_session_id = arakan.subagentSessionId;
   }
 
-  if (isRecord(goose.mcpApp) && typeof goose.mcpApp.resourceUri === 'string') {
-    meta.ui = { resourceUri: goose.mcpApp.resourceUri };
+  if (isRecord(arakan.mcpApp) && typeof arakan.mcpApp.resourceUri === 'string') {
+    meta.ui = { resourceUri: arakan.mcpApp.resourceUri };
     meta.extensionName =
-      typeof goose.mcpApp.extensionName === 'string' ? goose.mcpApp.extensionName : undefined;
-    meta.toolName = typeof goose.mcpApp.toolName === 'string' ? goose.mcpApp.toolName : undefined;
+      typeof arakan.mcpApp.extensionName === 'string' ? arakan.mcpApp.extensionName : undefined;
+    meta.toolName = typeof arakan.mcpApp.toolName === 'string' ? arakan.mcpApp.toolName : undefined;
     meta.toolNameIsActual =
-      typeof goose.mcpApp.toolNameIsActual === 'boolean'
-        ? goose.mcpApp.toolNameIsActual
+      typeof arakan.mcpApp.toolNameIsActual === 'boolean'
+        ? arakan.mcpApp.toolNameIsActual
         : undefined;
   }
 

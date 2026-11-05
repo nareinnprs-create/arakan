@@ -1,4 +1,4 @@
-//! Goose-custom **agent → client** requests: server-initiated JSON-RPC requests
+//! Arakan-custom **agent → client** requests: server-initiated JSON-RPC requests
 //! that expect a response from the client (unlike notifications, which are
 //! fire-and-forget). This module aggregates their JSON schemas for the ACP
 //! schema generator, parallel to `custom_notification_schemas`.
@@ -7,7 +7,7 @@
 //! params/response types (deriving `JsonSchema`) next to the feature that sends
 //! it, then add one line to [`agent_request_schemas`].
 
-use goose_sdk_types::custom_requests::{
+use arakan_sdk_types::custom_requests::{
     RecipeParamsResponse, RequestRecipeParams, REQUEST_RECIPE_PARAMS_METHOD,
 };
 use schemars::{JsonSchema, SchemaGenerator};
@@ -38,7 +38,7 @@ where
     }
 }
 
-/// Schemas for every goose-custom agent → client request. Collected by the ACP
+/// Schemas for every arakan-custom agent → client request. Collected by the ACP
 /// schema generator binary.
 pub fn agent_request_schemas(generator: &mut SchemaGenerator) -> Vec<CustomMethodSchema> {
     vec![agent_request_schema::<

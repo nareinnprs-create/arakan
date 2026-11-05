@@ -3,7 +3,7 @@ use crate::providers::inventory::ensure_refresh_identity_current;
 
 impl HandleDispatchFrom<Client> for AcpConnectionHandler {
     fn describe_chain(&self) -> impl std::fmt::Debug {
-        "goose-acp"
+        "arakan-acp"
     }
 
     fn handle_dispatch_from(
@@ -57,7 +57,7 @@ impl HandleDispatchFrom<Client> for AcpConnectionHandler {
                                             &session,
                                             &totals,
                                             context_limit,
-                                            connection.supports_goose_custom_notifications(),
+                                            connection.supports_arakan_custom_notifications(),
                                         )
                                     }) {
                                         tracing::warn!(
@@ -95,7 +95,7 @@ impl HandleDispatchFrom<Client> for AcpConnectionHandler {
                                                 &session,
                                                 &totals,
                                                 context_limit,
-                                                connection.supports_goose_custom_notifications(),
+                                                connection.supports_arakan_custom_notifications(),
                                             )
                                         },
                                     ) {
@@ -146,7 +146,7 @@ impl HandleDispatchFrom<Client> for AcpConnectionHandler {
                     Ok(())
                 })
                 .await
-                // set_config_option (SACP 11) and set_mode; custom _goose/* in otherwise.
+                // set_config_option (SACP 11) and set_mode; custom _arakan/* in otherwise.
                 .if_request({
                     let connection = connection.clone();
                     let cx = cx.clone();
@@ -449,7 +449,7 @@ impl HandleDispatchFrom<Client> for AcpConnectionHandler {
                                             &session,
                                             &totals,
                                             context_limit,
-                                            connection.supports_goose_custom_notifications(),
+                                            connection.supports_arakan_custom_notifications(),
                                         )
                                     }) {
                                         tracing::warn!(

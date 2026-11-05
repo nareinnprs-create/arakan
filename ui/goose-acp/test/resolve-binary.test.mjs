@@ -5,24 +5,24 @@ import test from "node:test";
 import { isAbsolute, join, relative, resolve } from "node:path";
 
 import * as publicApi from "../dist/index.js";
-import { resolveGooseBinaryForRuntime } from "../dist/resolve-binary.js";
+import { resolveArakanBinaryForRuntime } from "../dist/resolve-binary.js";
 
 const supportedPlatforms = [
-  ["darwin", "arm64", "@aaif/goose-binary-darwin-arm64", "goose"],
-  ["darwin", "x64", "@aaif/goose-binary-darwin-x64", "goose"],
-  ["linux", "arm64", "@aaif/goose-binary-linux-arm64", "goose"],
-  ["linux", "x64", "@aaif/goose-binary-linux-x64", "goose"],
-  ["win32", "x64", "@aaif/goose-binary-win32-x64", "goose.exe"],
+  ["darwin", "arm64", "@aaif/arakan-binary-darwin-arm64", "arakan"],
+  ["darwin", "x64", "@aaif/arakan-binary-darwin-x64", "arakan"],
+  ["linux", "arm64", "@aaif/arakan-binary-linux-arm64", "arakan"],
+  ["linux", "x64", "@aaif/arakan-binary-linux-x64", "arakan"],
+  ["win32", "x64", "@aaif/arakan-binary-win32-x64", "arakan.exe"],
 ];
 
-function setGooseBinary(t, value) {
-  const original = process.env.GOOSE_BINARY;
-  process.env.GOOSE_BINARY = value;
+function setArakanBinary(t, value) {
+  const original = process.env.ARAKAN_BINARY;
+  process.env.ARAKAN_BINARY = value;
   t.after(() => {
     if (original === undefined) {
-      delete process.env.GOOSE_BINARY;
+      delete process.env.ARAKAN_BINARY;
     } else {
-      process.env.GOOSE_BINARY = original;
+      process.env.ARAKAN_BINARY = original;
     }
   });
 }
@@ -38,7 +38,7 @@ for (const [
     let checkedPath;
     const fixturePackageRoot = join("/fixtures", packageName);
 
-    const result = resolveGooseBinaryForRuntime(platform, arch, {
+    const result = resolveArakanBinaryForRuntime(platform, arch, {
       resolvePackageJson(specifier) {
         resolvedSpecifier = specifier;
         return join(fixturePackageRoot, "package.json");
@@ -57,35 +57,35 @@ for (const [
 }
 
 test("exports only the public resolver from the package root", () => {
-  assert.deepEqual(Object.keys(publicApi), ["resolveGooseBinary"]);
+  assert.deepEqual(Object.keys(publicApi), ["resolveArakanBinary"]);
 });
 
-test("uses GOOSE_BINARY as an explicit override", (t) => {
-  const directory = mkdtempSync(join(tmpdir(), "goose-acp-override-"));
-  const binaryPath = join(directory, "goose");
+test("uses ARAKAN_BINARY as an explicit override", (t) => {
+  const directory = mkdtempSync(join(tmpdir(), "arakan-acp-override-"));
+  const binaryPath = join(directory, "arakan");
   writeFileSync(binaryPath, "");
-  setGooseBinary(t, relative(process.cwd(), binaryPath));
+  setArakanBinary(t, relative(process.cwd(), binaryPath));
 
   t.after(() => {
     rmSync(directory, { recursive: true, force: true });
   });
 
-  assert.equal(publicApi.resolveGooseBinary(), binaryPath);
+  assert.equal(publicApi.resolveArakanBinary(), binaryPath);
 });
 
-test("rejects an invalid GOOSE_BINARY override", (t) => {
-  setGooseBinary(t, "missing-goose-binary");
+test("rejects an invalid ARAKAN_BINARY override", (t) => {
+  setArakanBinary(t, "missing-arakan-binary");
 
   assert.throws(
-    () => publicApi.resolveGooseBinary(),
-    /GOOSE_BINARY does not point to a file/,
+    () => publicApi.resolveArakanBinary(),
+    /ARAKAN_BINARY does not point to a file/,
   );
 });
 
 test("reports unsupported platform and architecture combinations", () => {
   assert.throws(
     () =>
-      resolveGooseBinaryForRuntime("freebsd", "x64", {
+      resolveArakanBinaryForRuntime("freebsd", "x64", {
         resolvePackageJson() {
           throw new Error("should not resolve a package");
         },
@@ -93,14 +93,14 @@ test("reports unsupported platform and architecture combinations", () => {
           return false;
         },
       }),
-    /No Goose npm binary is available for freebsd-x64/,
+    /No Arakan npm binary is available for freebsd-x64/,
   );
 });
 
 test("reports a missing optional platform package", () => {
   assert.throws(
     () =>
-      resolveGooseBinaryForRuntime("linux", "x64", {
+      resolveArakanBinaryForRuntime("linux", "x64", {
         resolvePackageJson() {
           throw new Error("module not found");
         },
@@ -108,24 +108,24 @@ test("reports a missing optional platform package", () => {
           return false;
         },
       }),
-    /Goose binary package @aaif\/goose-binary-linux-x64 is not installed/,
+    /Arakan binary package @aaif\/arakan-binary-linux-x64 is not installed/,
   );
 });
 
 test("reports a missing executable in an installed platform package", () => {
   assert.throws(
     () =>
-      resolveGooseBinaryForRuntime("darwin", "arm64", {
+      resolveArakanBinaryForRuntime("darwin", "arm64", {
         resolvePackageJson() {
           return join(
             "/fixtures",
-            "@aaif/goose-binary-darwin-arm64/package.json",
+            "@aaif/arakan-binary-darwin-arm64/package.json",
           );
         },
         isFile() {
           return false;
         },
       }),
-    /Goose executable from @aaif\/goose-binary-darwin-arm64 was not found/,
+    /Arakan executable from @aaif\/arakan-binary-darwin-arm64 was not found/,
   );
 });

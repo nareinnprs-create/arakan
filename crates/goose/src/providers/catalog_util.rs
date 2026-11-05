@@ -1,4 +1,4 @@
-pub use goose_providers::canonical::catalog::{
+pub use arakan_providers::canonical::catalog::{
     ModelCapabilities, ModelTemplate, ProviderCatalogEntry, ProviderFormat,
     ProviderSetupCapabilities, ProviderSetupCatalogEntry, ProviderSetupCategory,
     ProviderSetupField, ProviderSetupFieldOverride, ProviderSetupGroup, ProviderSetupMetadata,
@@ -13,11 +13,11 @@ pub async fn get_providers_by_format(format: ProviderFormat) -> Vec<ProviderCata
         .map(|(metadata, _)| metadata.name)
         .collect::<HashSet<_>>();
 
-    goose_providers::canonical::catalog::get_providers_by_format(format, &native_provider_ids)
+    arakan_providers::canonical::catalog::get_providers_by_format(format, &native_provider_ids)
 }
 
 pub async fn get_setup_catalog_entries() -> Vec<ProviderSetupCatalogEntry> {
-    goose_providers::canonical::catalog::get_setup_catalog_entries(
+    arakan_providers::canonical::catalog::get_setup_catalog_entries(
         super::providers()
             .await
             .into_iter()
@@ -26,7 +26,7 @@ pub async fn get_setup_catalog_entries() -> Vec<ProviderSetupCatalogEntry> {
 }
 
 pub fn get_provider_template(provider_id: &str) -> Option<ProviderTemplate> {
-    goose_providers::canonical::catalog::get_provider_template(provider_id)
+    arakan_providers::canonical::catalog::get_provider_template(provider_id)
 }
 
 #[cfg(test)]
@@ -87,17 +87,17 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn setup_catalog_includes_goose_and_curated_fields() {
+    async fn setup_catalog_includes_arakan_and_curated_fields() {
         let entries = get_setup_catalog_entries().await;
 
-        let goose = entries
+        let arakan = entries
             .iter()
-            .find(|entry| entry.provider_id == "goose")
-            .expect("setup catalog should include synthetic goose");
-        assert_eq!(goose.category, ProviderSetupCategory::Agent);
-        assert!(!goose.acp);
-        assert_eq!(goose.setup_method, ProviderSetupMethod::None);
-        assert!(goose.fields.is_empty());
+            .find(|entry| entry.provider_id == "arakan")
+            .expect("setup catalog should include synthetic arakan");
+        assert_eq!(arakan.category, ProviderSetupCategory::Agent);
+        assert!(!arakan.acp);
+        assert_eq!(arakan.setup_method, ProviderSetupMethod::None);
+        assert!(arakan.fields.is_empty());
 
         let cursor = entries
             .iter()
@@ -182,7 +182,7 @@ mod tests {
             .map(|entry| entry.provider_id)
             .collect::<std::collections::HashSet<_>>();
 
-        for provider_id in ["goose", "claude-acp", "openai"] {
+        for provider_id in ["arakan", "claude-acp", "openai"] {
             assert!(provider_ids.contains(provider_id), "missing {provider_id}");
         }
 

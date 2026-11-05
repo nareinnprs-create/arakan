@@ -1,6 +1,6 @@
 ---
-title: "Community-Inspired Benchmarking: The Goose Vibe Check"
-description: "See how open source AI models measure up in our first Goose agent benchmark tests"
+title: "Community-Inspired Benchmarking: The Arakan Vibe Check"
+description: "See how open source AI models measure up in our first Arakan agent benchmark tests"
 authors: 
     - alice
 ---
@@ -8,11 +8,11 @@ authors:
 import ImageCarousel from '@site/src/components/ImageCarousel';
 
 
-![blog cover](goose-benchmark.png)
+![blog cover](arakan-benchmark.png)
 
-We've been measuring Goose's performance with various AI models, including a variety of popular open-source models that can run locally on consumer hardware (RTX 4080, Mac M-series). We understand that many in our community value a fully open-source, local experience without relying on cloud services.
+We've been measuring Arakan's performance with various AI models, including a variety of popular open-source models that can run locally on consumer hardware (RTX 4080, Mac M-series). We understand that many in our community value a fully open-source, local experience without relying on cloud services.
 
-This blog shares our findings comparing open-source models against their closed counterparts, highlighting both current performance gaps and paths for future improvement. Our benchmark is still in its early stages, but we wanted to release it as a starting point for distinguishing models that exhibit stronger agentic capabilities by their ability to pilot Goose (distinct from reasoning or other capabilities often captured in other popular benchmarks).
+This blog shares our findings comparing open-source models against their closed counterparts, highlighting both current performance gaps and paths for future improvement. Our benchmark is still in its early stages, but we wanted to release it as a starting point for distinguishing models that exhibit stronger agentic capabilities by their ability to pilot Arakan (distinct from reasoning or other capabilities often captured in other popular benchmarks).
 
 
 <!--truncate-->
@@ -21,9 +21,9 @@ Our evaluations are inspired by grassroots efforts we've seen in communities lik
 
 These community evals aren't the rigorous, peer-reviewed benchmarks that research labs publish in academic papers. However, they help provide quick, intuitive assessments of capabilities across different models and versions. 
 
-In this spirit, we're introducing our **Goose Vibe Check** leaderboard. 
+In this spirit, we're introducing our **Arakan Vibe Check** leaderboard. 
 
-Thank you to the Ollama team for their help and support in our experimentation contributing to this blog! We used Ollama’s [structured outputs](https://ollama.com/blog/structured-outputs) feature to enable our [toolshim implementation](https://goose-docs.ai/docs/experimental/ollama) (more below) and their recently released [context length parameter override](https://github.com/ollama/ollama/blob/main/docs/faq.mdx#how-can-i-specify-the-context-window-size) to enable testing on longer contexts.
+Thank you to the Ollama team for their help and support in our experimentation contributing to this blog! We used Ollama’s [structured outputs](https://ollama.com/blog/structured-outputs) feature to enable our [toolshim implementation](https://arakan-docs.ai/docs/experimental/ollama) (more below) and their recently released [context length parameter override](https://github.com/ollama/ollama/blob/main/docs/faq.mdx#how-can-i-specify-the-context-window-size) to enable testing on longer contexts.
 
 ## Leaderboard
 
@@ -62,7 +62,7 @@ Thank you to the Ollama team for their help and support in our experimentation c
 | 31 | mistral | 0.17 | ollama |
 | 32 | gemma3:12b-toolshim-mistral-nemo* | 0.15 | ollama |
 
-> _Models with 'toolshim' in their name indicate a Goose configuration using both a primary model and a secondary local Ollama model to interpret the primary model's response into appropriate tools for Goose to invoke. Low performance may be indicative of the shim performance rather than the base model itself. We use toolshims for select models because all evaluations in this experiment require tool use capabilities, but not all models in our experiment natively support tool calling._
+> _Models with 'toolshim' in their name indicate a Arakan configuration using both a primary model and a secondary local Ollama model to interpret the primary model's response into appropriate tools for Arakan to invoke. Low performance may be indicative of the shim performance rather than the base model itself. We use toolshims for select models because all evaluations in this experiment require tool use capabilities, but not all models in our experiment natively support tool calling._
 
 ## Open Source Model Details
 
@@ -130,13 +130,13 @@ Thank you to the Ollama team for their help and support in our experimentation c
 
 ## Approach and Methodology
 
-We developed a compact suite of well-scoped evaluations to establish current performance baselines. While the tasks are relatively simple, they already meaningfully stratify model performance. Unlike benchmarks that focus primarily on text generation (e.g., question answering, code generation), our evaluations emphasize **tool calling capabilities** — a core component of what makes Goose a powerful agent.
+We developed a compact suite of well-scoped evaluations to establish current performance baselines. While the tasks are relatively simple, they already meaningfully stratify model performance. Unlike benchmarks that focus primarily on text generation (e.g., question answering, code generation), our evaluations emphasize **tool calling capabilities** — a core component of what makes Arakan a powerful agent.
 
-Tool calling enables models to interact with [MCP extensions](https://github.com/modelcontextprotocol/servers) and make API calls, expanding Goose's functionality beyond the base models. In many cases, tasks required multiple chained tool calls to reach completion. For instance, modifying a file involves finding it in your filesystem, viewing its contents, and then updating it. Each step must be executed correctly to complete the task effectively.
+Tool calling enables models to interact with [MCP extensions](https://github.com/modelcontextprotocol/servers) and make API calls, expanding Arakan's functionality beyond the base models. In many cases, tasks required multiple chained tool calls to reach completion. For instance, modifying a file involves finding it in your filesystem, viewing its contents, and then updating it. Each step must be executed correctly to complete the task effectively.
 
 ### Evaluation Suites
 
-Our evaluations are defined in the [Goose repository](https://github.com/aaif-goose/goose/tree/main/crates/goose-bench/src/eval_suites) (PRs welcome to add additional evals!) and are grouped into two categories:
+Our evaluations are defined in the [Arakan repository](https://github.com/aaif-arakan/arakan/tree/main/crates/arakan-bench/src/eval_suites) (PRs welcome to add additional evals!) and are grouped into two categories:
 
 #### Core Suite
 These evals focus on certain tasks fundamental to developer workflows:
@@ -145,23 +145,23 @@ These evals focus on certain tasks fundamental to developer workflows:
 - **Developer Search/Replace**: Search through a large file and make several replacements
 
 #### Vibes Suite 
-Designed as a "vibe check", these tasks quickly reveal how well models perform with Goose on a broad variety of tasks. Some, like the Flappy Bird and Goose Wiki tasks are straightforwardly visually inspectable, making it easy to eyeball outputs across models:
+Designed as a "vibe check", these tasks quickly reveal how well models perform with Arakan on a broad variety of tasks. Some, like the Flappy Bird and Arakan Wiki tasks are straightforwardly visually inspectable, making it easy to eyeball outputs across models:
 
 - **Blog summary**: Fetch a blog post and summarize key points
 - **Flappy Bird**: Implement the game in Python 2D
-- **Goose Wiki**: Create a Wikipedia-style webpage about Goose
+- **Arakan Wiki**: Create a Wikipedia-style webpage about Arakan
 - **Restaurant research**: Search for the best Sichuanese restaurants in NYC's East Village
 - **Squirrel census**: Perform data analysis on a CSV file
 
-This initial set of evaluations represents a carefully curated selection of manually designed tasks, chosen to highlight key strengths and weaknesses of models when integrated with Goose. However, this is just the beginning! Our goal is to continuously expand the Goosebench evaluation suite with high-quality, targeted tasks that provide deeper insights into model performance with Goose.
+This initial set of evaluations represents a carefully curated selection of manually designed tasks, chosen to highlight key strengths and weaknesses of models when integrated with Arakan. However, this is just the beginning! Our goal is to continuously expand the Arakanbench evaluation suite with high-quality, targeted tasks that provide deeper insights into model performance with Arakan.
 
 ### Evaluation Methodology
 
 Each model was tested on the above **8 tasks, with 3 runs per task**, (totaling **24 runs per model**):
 
-- Each evaluation consisted of a single turn prompt to Goose. While this benchmark focuses on single turn execution, future evaluations may assess multi-turn interactions and iterative improvement
-- Goose was required to autonomously complete the task using tool execution loops without user intervention
-- If Goose halted execution and asked the user for more guidance (e.g., "I am going to write the following contents to the file. Should I continue?"), this was considered the end of task completion. In such cases, Goose may not have successfully completed the task as measured by our evaluation framework, even if it was on the right track.
+- Each evaluation consisted of a single turn prompt to Arakan. While this benchmark focuses on single turn execution, future evaluations may assess multi-turn interactions and iterative improvement
+- Arakan was required to autonomously complete the task using tool execution loops without user intervention
+- If Arakan halted execution and asked the user for more guidance (e.g., "I am going to write the following contents to the file. Should I continue?"), this was considered the end of task completion. In such cases, Arakan may not have successfully completed the task as measured by our evaluation framework, even if it was on the right track.
 - To account for output variability, each evaluation was run three times per model, allowing multiple chances for success.
 
 ### Scoring and Evaluation Criteria
@@ -228,7 +228,7 @@ This approach enables models like DeepSeek and Gemma to perform basic tool actio
 
 ### “Toolshims” to bridge the gap?
 
-We developed a "toolshim" as an experimental feature to enable models lacking native tool calling support (e.g., DeepSeek, Gemma3, Phi4) to interact with external tools. The toolshim pairs these models with a smaller, local model (e.g., mistral-nemo, qwen2.5-coder 7b), which is tasked with translating the primary model’s natural language responses into the appropriate tool calls for Goose to invoke. The local model is guided by Ollama’s structured outputs feature to enforce proper formatting for tool call generations.
+We developed a "toolshim" as an experimental feature to enable models lacking native tool calling support (e.g., DeepSeek, Gemma3, Phi4) to interact with external tools. The toolshim pairs these models with a smaller, local model (e.g., mistral-nemo, qwen2.5-coder 7b), which is tasked with translating the primary model’s natural language responses into the appropriate tool calls for Arakan to invoke. The local model is guided by Ollama’s structured outputs feature to enforce proper formatting for tool call generations.
 
 However, this solution has limited performance due to:
 
@@ -237,11 +237,11 @@ However, this solution has limited performance due to:
 - **Structured output interference:** Ollama’s structured output feature influences the model’s token sampling process, where the output is impacted by the model’s fundamental ability to extract information and generate JSON appropriately.
 
 Despite these challenges, there could be potential in fine-tuning these toolshim models to specifically optimize them for tool call generation. 
-If you’d like to try out the toolshim, check out our [documentation](https://goose-docs.ai/docs/experimental/ollama)
+If you’d like to try out the toolshim, check out our [documentation](https://arakan-docs.ai/docs/experimental/ollama)
 
 ## Practical Advice for Local Model Users
 
-For those running a local, open-source AI experience with Goose, here are some key recommendations based on our testing:
+For those running a local, open-source AI experience with Arakan, here are some key recommendations based on our testing:
 
 ### Optimize Context Length
 
@@ -306,20 +306,20 @@ We recommend experimenting with different hosted inference providers to see whic
 
 ## Run Your Own Benchmarks
 
-We encourage the community to conduct their own benchmarks with various hardware setups and configurations to help deepen our understanding of how Goose performs across different setups. We also welcome contributions of additional evals to GooseBench to broaden our coverage. 
+We encourage the community to conduct their own benchmarks with various hardware setups and configurations to help deepen our understanding of how Arakan performs across different setups. We also welcome contributions of additional evals to ArakanBench to broaden our coverage. 
 
 We are currently cleaning up our code and  working on some quality of life improvements to make the process of running evals and reproducing these results more streamlined, and will share those when ready (next few weeks)! 
 
-Special thanks to our contributors, Zaki and Marcelle, for their work on GooseBench, which enabled this experimentation.
+Special thanks to our contributors, Zaki and Marcelle, for their work on ArakanBench, which enabled this experimentation.
 
 
 ## Future Work
 
 As AI capabilities continue to evolve, we aim to systematically expand our evaluation framework to capture a broader range of use cases. We hope to benchmark models on a wider swath of consumer-grade hardware to better understand system requirements, execution times, and the impact of different quantization levels on performance.
 
-We also plan to introduce vision-oriented evaluations, particularly for multimodal models with Goose. These will assess image processing, multimodal reasoning, and visual tool interactions, helping us measure how well models integrate and perform across different modalities.
+We also plan to introduce vision-oriented evaluations, particularly for multimodal models with Arakan. These will assess image processing, multimodal reasoning, and visual tool interactions, helping us measure how well models integrate and perform across different modalities.
 
-In addition, we seek to develop evaluations tailored to non-developer workflows and tasks. This will provide insights into how Goose and AI models can serve a wider range of users beyond technical audiences.
+In addition, we seek to develop evaluations tailored to non-developer workflows and tasks. This will provide insights into how Arakan and AI models can serve a wider range of users beyond technical audiences.
 
 Finally, we see value in testing long-context retention and multi-turn interactions to evaluate model performance in complex, sustained conversations.
 
@@ -420,15 +420,15 @@ For runs that successfully created an index.html for the Wiki page task, here’
 
 
 <head>
-  <meta property="og:title" content="Community-Inspired Benchmarking: The Goose Vibe Check" />
+  <meta property="og:title" content="Community-Inspired Benchmarking: The Arakan Vibe Check" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/03/31/goose-benchmark" />
-  <meta property="og:description" content="See how open source AI models measure up in our first Goose agent benchmark tests" />
-  <meta property="og:image" content="http://goose-docs.ai/assets/images/goose-benchmark-d9726c203290ef892fe3fe3adc7d898f.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/03/31/arakan-benchmark" />
+  <meta property="og:description" content="See how open source AI models measure up in our first Arakan agent benchmark tests" />
+  <meta property="og:image" content="http://arakan-docs.ai/assets/images/arakan-benchmark-d9726c203290ef892fe3fe3adc7d898f.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Community-Inspired Benchmarking: The Goose Vibe Check" />
-  <meta name="twitter:description" content="See how open source AI models measure up in our first Goose agent benchmark tests" />
-  <meta name="twitter:image" content="http://goose-docs.ai/assets/images/goose-benchmark-d9726c203290ef892fe3fe3adc7d898f.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Community-Inspired Benchmarking: The Arakan Vibe Check" />
+  <meta name="twitter:description" content="See how open source AI models measure up in our first Arakan agent benchmark tests" />
+  <meta name="twitter:image" content="http://arakan-docs.ai/assets/images/arakan-benchmark-d9726c203290ef892fe3fe3adc7d898f.png" />
 </head>
 

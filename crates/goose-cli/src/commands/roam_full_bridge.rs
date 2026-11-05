@@ -1,8 +1,8 @@
-//! The roaming host adapter: serve goose's **full** ACP surface to each
+//! The roaming host adapter: serve arakan's **full** ACP surface to each
 //! connecting peer.
 //!
 //! Roaming is just an authenticated p2p ACP transport. This adapter is the thin
-//! seam that hands an authorized iroh stream straight to goose's real
+//! seam that hands an authorized iroh stream straight to arakan's real
 //! `acp::server::serve`, so a connected client gets the entire ACP surface —
 //! `session/new`, `session/list`, `session/load`, `session/prompt` — backed by
 //! the host's own `SessionManager`. Anything "session-shaped" is therefore plain
@@ -17,11 +17,11 @@ use std::sync::Arc;
 use futures::future::BoxFuture;
 use futures::io::{AsyncRead, AsyncWrite};
 
-use goose::acp::server::serve;
-use goose::acp::server_factory::AcpServer;
-use goose_roaming::{AcpStreamServer, EndpointId};
+use arakan::acp::server::serve;
+use arakan::acp::server_factory::AcpServer;
+use arakan_roaming::{AcpStreamServer, EndpointId};
 
-/// An [`AcpStreamServer`] that serves goose's full ACP surface, a fresh agent
+/// An [`AcpStreamServer`] that serves arakan's full ACP surface, a fresh agent
 /// per connection.
 pub struct FullAcpBridge {
     server: Arc<AcpServer>,
@@ -29,7 +29,7 @@ pub struct FullAcpBridge {
     /// Host-controlled working directory for sessions created over roaming.
     /// The connector's machine-local absolute path is meaningless on this
     /// host, so every roaming agent gets this instead — even when the shared
-    /// `AcpServer` (e.g. `goose serve`) leaves `session_cwd` unset for its
+    /// `AcpServer` (e.g. `arakan serve`) leaves `session_cwd` unset for its
     /// local clients.
     session_cwd: std::path::PathBuf,
 }

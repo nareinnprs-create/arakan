@@ -1,7 +1,7 @@
-use goose::config::GooseMode;
-use goose::conversation::message::{Message, MessageContent, ToolRequest};
-use goose::security::adversary_inspector::AdversaryInspector;
-use goose::tool_inspection::ToolInspector;
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageContent, ToolRequest};
+use arakan::security::adversary_inspector::AdversaryInspector;
+use arakan::tool_inspection::ToolInspector;
 use rmcp::model::CallToolRequestParams;
 use rmcp::object;
 use std::sync::Arc;
@@ -30,7 +30,7 @@ async fn test_adversary_disabled_without_config_file() {
 
     let inspector = AdversaryInspector::with_config_dir(
         Default::default(),
-        Arc::new(goose::session::SessionManager::new(
+        Arc::new(arakan::session::SessionManager::new(
             tmp.path().to_path_buf(),
         )),
         tmp.path().to_path_buf(),
@@ -48,7 +48,7 @@ async fn test_adversary_disabled_without_config_file() {
                 object!({"command": "rm -rf /"}),
             )],
             &[],
-            GooseMode::SmartApprove,
+            ArakanMode::SmartApprove,
         )
         .await
         .unwrap();
@@ -63,7 +63,7 @@ async fn test_adversary_enabled_default_tools() {
 
     let inspector = AdversaryInspector::with_config_dir(
         Default::default(),
-        Arc::new(goose::session::SessionManager::new(
+        Arc::new(arakan::session::SessionManager::new(
             tmp.path().to_path_buf(),
         )),
         tmp.path().to_path_buf(),
@@ -87,7 +87,7 @@ async fn test_adversary_enabled_default_tools() {
                 object!({"command": "cargo build"}),
             )],
             &messages,
-            GooseMode::SmartApprove,
+            ArakanMode::SmartApprove,
         )
         .await
         .unwrap();
@@ -95,7 +95,7 @@ async fn test_adversary_enabled_default_tools() {
     assert_eq!(results.len(), 1);
     assert!(matches!(
         results[0].action,
-        goose::tool_inspection::InspectionAction::Allow
+        arakan::tool_inspection::InspectionAction::Allow
     ));
 
     // write is NOT reviewed by default — skipped entirely
@@ -108,7 +108,7 @@ async fn test_adversary_enabled_default_tools() {
                 object!({"path": "foo.txt", "content": "hi"}),
             )],
             &messages,
-            GooseMode::SmartApprove,
+            ArakanMode::SmartApprove,
         )
         .await
         .unwrap();
@@ -126,7 +126,7 @@ async fn test_adversary_custom_tool_filter() {
 
     let inspector = AdversaryInspector::with_config_dir(
         Default::default(),
-        Arc::new(goose::session::SessionManager::new(
+        Arc::new(arakan::session::SessionManager::new(
             tmp.path().to_path_buf(),
         )),
         tmp.path().to_path_buf(),
@@ -146,7 +146,7 @@ async fn test_adversary_custom_tool_filter() {
             "test",
             &[make_request("r1", "shell", object!({"command": "ls"}))],
             &messages,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await
         .unwrap();
@@ -162,7 +162,7 @@ async fn test_adversary_custom_tool_filter() {
                 object!({"script": "echo hi", "language": "shell"}),
             )],
             &messages,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await
         .unwrap();
@@ -178,7 +178,7 @@ async fn test_adversary_custom_tool_filter() {
                 object!({"path": "x.txt", "content": "y"}),
             )],
             &messages,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await
         .unwrap();

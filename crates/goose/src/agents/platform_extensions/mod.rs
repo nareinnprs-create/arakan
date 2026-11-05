@@ -24,7 +24,7 @@ use once_cell::sync::Lazy;
 
 pub use ext_manager::MANAGE_EXTENSIONS_TOOL_NAME_COMPLETE;
 
-// These are used by integration tests in crates/goose/tests/
+// These are used by integration tests in crates/arakan/tests/
 #[allow(unused_imports)]
 pub use ext_manager::MANAGE_EXTENSIONS_TOOL_NAME;
 #[allow(unused_imports)]
@@ -55,7 +55,7 @@ pub static PLATFORM_EXTENSIONS: Lazy<HashMap<&'static str, PlatformExtensionDef>
                 name: todo::EXTENSION_NAME,
                 display_name: "Todo",
                 description:
-                    "Enable a todo list for goose so it can keep track of what it is doing",
+                    "Enable a todo list for arakan so it can keep track of what it is doing",
                 default_enabled: false,
                 unprefixed_tools: false,
                 hidden: false,
@@ -70,7 +70,7 @@ pub static PLATFORM_EXTENSIONS: Lazy<HashMap<&'static str, PlatformExtensionDef>
                 name: apps::EXTENSION_NAME,
                 display_name: "Apps",
                 description:
-                    "Create and manage custom Goose apps through chat. Apps are HTML/CSS/JavaScript and run in sandboxed windows.",
+                    "Create and manage custom Arakan apps through chat. Apps are HTML/CSS/JavaScript and run in sandboxed windows.",
                 default_enabled: true,
                 unprefixed_tools: false,
                 hidden: false,
@@ -158,7 +158,7 @@ pub static PLATFORM_EXTENSIONS: Lazy<HashMap<&'static str, PlatformExtensionDef>
                 name: code_execution::EXTENSION_NAME,
                 display_name: "Code Mode",
                 description:
-                    "Goose will make extension calls through code execution, saving tokens",
+                    "Arakan will make extension calls through code execution, saving tokens",
                 default_enabled: false,
                 unprefixed_tools: true,
                 hidden: false,
@@ -189,7 +189,7 @@ pub static PLATFORM_EXTENSIONS: Lazy<HashMap<&'static str, PlatformExtensionDef>
                 name: tom::EXTENSION_NAME,
                 display_name: "Top Of Mind",
                 description:
-                    "Inject custom context into every turn via GOOSE_MOIM_MESSAGE_TEXT and GOOSE_MOIM_MESSAGE_FILE environment variables",
+                    "Inject custom context into every turn via ARAKAN_MOIM_MESSAGE_TEXT and ARAKAN_MOIM_MESSAGE_FILE environment variables",
                 default_enabled: true,
                 unprefixed_tools: false,
                 hidden: false,
@@ -245,7 +245,7 @@ impl PlatformExtensionContext {
     pub async fn model_config_for_session(
         &self,
         session_id: &str,
-    ) -> Result<goose_providers::model::ModelConfig, String> {
+    ) -> Result<arakan_providers::model::ModelConfig, String> {
         if let Ok(session) = self.session_manager.get_session(session_id, false).await {
             if let Some(model_config) = session.model_config {
                 return Ok(model_config);
@@ -254,10 +254,10 @@ impl PlatformExtensionContext {
 
         let config = crate::config::Config::global();
         let provider_name = config
-            .get_goose_provider()
+            .get_arakan_provider()
             .map_err(|_| "Could not resolve model config: missing provider".to_string())?;
         let model_name = config
-            .get_goose_model()
+            .get_arakan_model()
             .map_err(|_| "Could not resolve model config: missing model".to_string())?;
         crate::model_config::model_config_from_user_config(&provider_name, &model_name)
             .map_err(|e| format!("Could not resolve model config: {e}"))

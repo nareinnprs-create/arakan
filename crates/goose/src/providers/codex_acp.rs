@@ -7,7 +7,7 @@ use crate::acp::{
     extension_configs_to_mcp_servers, AcpProvider, AcpProviderConfig, ACP_CURRENT_MODEL,
 };
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::providers::base::{
     current_working_dir, ProviderDef, ProviderDescriptor, ProviderMetadata,
 };
@@ -18,12 +18,12 @@ const CODEX_ACP_DOC_URL: &str = "https://github.com/agentclientprotocol/codex-ac
 
 pub struct CodexAcpProvider;
 
-impl goose_providers::base::ProviderDescriptor for CodexAcpProvider {
+impl arakan_providers::base::ProviderDescriptor for CodexAcpProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             CODEX_ACP_PROVIDER_NAME,
             "Codex ACP",
-            "Use goose with ChatGPT Plus/Pro or OpenAI API credits via the codex-acp adapter.",
+            "Use arakan with ChatGPT Plus/Pro or OpenAI API credits via the codex-acp adapter.",
             ACP_CURRENT_MODEL,
             vec![],
             CODEX_ACP_DOC_URL,
@@ -67,14 +67,14 @@ impl ProviderDef for CodexAcpProvider {
             let resolved_command = SearchPaths::builder()
                 .with_npm()
                 .resolve(CODEX_ACP_PROVIDER_NAME)?;
-            let goose_mode = config.resolve_goose_mode()?;
+            let arakan_mode = config.resolve_arakan_mode()?;
             let mcp_servers = extension_configs_to_mcp_servers(&extensions);
 
             let mode_mapping = HashMap::from([
-                (GooseMode::Auto, vec!["agent-full-access".to_string()]),
-                (GooseMode::SmartApprove, vec!["agent".to_string()]),
-                (GooseMode::Approve, vec!["read-only".to_string()]),
-                (GooseMode::Chat, vec!["read-only".to_string()]),
+                (ArakanMode::Auto, vec!["agent-full-access".to_string()]),
+                (ArakanMode::SmartApprove, vec!["agent".to_string()]),
+                (ArakanMode::Approve, vec!["read-only".to_string()]),
+                (ArakanMode::Chat, vec!["read-only".to_string()]),
             ]);
 
             let provider_config = AcpProviderConfig {
@@ -92,7 +92,7 @@ impl ProviderDef for CodexAcpProvider {
             };
 
             let metadata = Self::metadata();
-            AcpProvider::connect(metadata.name, goose_mode, provider_config).await
+            AcpProvider::connect(metadata.name, arakan_mode, provider_config).await
         })
     }
 }
@@ -109,9 +109,9 @@ mod tests {
     use std::process::Command;
 
     #[cfg(unix)]
-    const CHILD_ENV: &str = "GOOSE_CODEX_ACP_MODE_TEST_CHILD";
+    const CHILD_ENV: &str = "ARAKAN_CODEX_ACP_MODE_TEST_CHILD";
     #[cfg(unix)]
-    const EXPECT_CONFIG_ERROR_ENV: &str = "GOOSE_CODEX_ACP_EXPECT_CONFIG_ERROR";
+    const EXPECT_CONFIG_ERROR_ENV: &str = "ARAKAN_CODEX_ACP_EXPECT_CONFIG_ERROR";
 
     #[cfg(unix)]
     #[derive(Clone, Copy)]
@@ -125,7 +125,7 @@ mod tests {
 
     #[cfg(unix)]
     #[tokio::test]
-    async fn goose_mode_validation_precedes_codex_acp_launch() {
+    async fn arakan_mode_validation_precedes_codex_acp_launch() {
         if std::env::var_os(CHILD_ENV).is_some() {
             let error = CodexAcpProvider::from_env(vec![], None)
                 .await
@@ -146,7 +146,7 @@ mod tests {
         let executable = fixture.path().join(CODEX_ACP_PROVIDER_NAME);
         fs::write(
             &executable,
-            "#!/bin/sh\n: > \"$GOOSE_CODEX_ACP_MARKER\"\nexit 1\n",
+            "#!/bin/sh\n: > \"$ARAKAN_CODEX_ACP_MARKER\"\nexit 1\n",
         )
         .unwrap();
         fs::set_permissions(&executable, fs::Permissions::from_mode(0o700)).unwrap();
@@ -167,13 +167,13 @@ mod tests {
             (
                 "configured_file",
                 None,
-                ConfigFixture::File("GOOSE_MODE: approve\n"),
+                ConfigFixture::File("ARAKAN_MODE: approve\n"),
                 true,
             ),
             (
                 "malformed_file",
                 None,
-                ConfigFixture::File("GOOSE_MODE: ["),
+                ConfigFixture::File("ARAKAN_MODE: ["),
                 false,
             ),
             ("unreadable_file", None, ConfigFixture::Directory, false),
@@ -210,18 +210,18 @@ mod tests {
             let mut command = Command::new(std::env::current_exe().unwrap());
             command
                 .arg("--exact")
-                .arg("providers::codex_acp::tests::goose_mode_validation_precedes_codex_acp_launch")
+                .arg("providers::codex_acp::tests::arakan_mode_validation_precedes_codex_acp_launch")
                 .arg("--nocapture")
                 .env(CHILD_ENV, "1")
-                .env("GOOSE_SEARCH_PATHS", &search_paths)
-                .env("GOOSE_CODEX_ACP_MARKER", &marker)
-                .env("GOOSE_PATH_ROOT", &path_root)
+                .env("ARAKAN_SEARCH_PATHS", &search_paths)
+                .env("ARAKAN_CODEX_ACP_MARKER", &marker)
+                .env("ARAKAN_PATH_ROOT", &path_root)
                 .env(
                     crate::config::base::TEST_SYSTEM_CONFIG_PATH_ENV,
                     path_root.join("system-config.yaml"),
                 )
-                .env_remove("GOOSE_ADDITIONAL_CONFIG_FILES")
-                .env("GOOSE_DISABLE_KEYRING", "1");
+                .env_remove("ARAKAN_ADDITIONAL_CONFIG_FILES")
+                .env("ARAKAN_DISABLE_KEYRING", "1");
             if should_launch {
                 command.env_remove(EXPECT_CONFIG_ERROR_ENV);
             } else {
@@ -229,10 +229,10 @@ mod tests {
             }
             match mode {
                 Some(mode) => {
-                    command.env("GOOSE_MODE", mode);
+                    command.env("ARAKAN_MODE", mode);
                 }
                 None => {
-                    command.env_remove("GOOSE_MODE");
+                    command.env_remove("ARAKAN_MODE");
                 }
             }
             let output = command.output().unwrap();
@@ -246,7 +246,7 @@ mod tests {
             assert_eq!(
                 marker.exists(),
                 should_launch,
-                "unexpected codex-acp launch result for {name} GOOSE_MODE"
+                "unexpected codex-acp launch result for {name} ARAKAN_MODE"
             );
         }
     }

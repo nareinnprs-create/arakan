@@ -1,19 +1,19 @@
 ---
 title: Todo Extension
-description: Breaks complex work into trackable steps to help goose stay organized
+description: Breaks complex work into trackable steps to help arakan stay organized
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import { PlatformExtensionNote } from '@site/src/components/PlatformExtensionNote';
-import GooseBuiltinInstaller from '@site/src/components/GooseBuiltinInstaller';
+import ArakanBuiltinInstaller from '@site/src/components/ArakanBuiltinInstaller';
 
-The Todo extension helps goose stay organized by breaking complex work into a series of steps and keeping you updated as it completes each step.
+The Todo extension helps arakan stay organized by breaking complex work into a series of steps and keeping you updated as it completes each step.
 
-The Todo extension is not enabled by default. Once enabled, goose can jot down a short plan for multi-step tasks and update it if the plan changes. The notes are shown to goose every turn and survive context compaction, but goose is not asked to check items off or re-verify finished work.
+The Todo extension is not enabled by default. Once enabled, arakan can jot down a short plan for multi-step tasks and update it if the plan changes. The notes are shown to arakan every turn and survive context compaction, but arakan is not asked to check items off or re-verify finished work.
 
 :::tip
-You can ask goose to "show me the current todo list" at any time to see what's being tracked.
+You can ask arakan to "show me the current todo list" at any time to see what's being tracked.
 :::
 
 This tutorial will cover enabling and using the Todo extension.
@@ -23,22 +23,22 @@ This tutorial will cover enabling and using the Todo extension.
 <PlatformExtensionNote defaultEnabled={false}/>
 
 <Tabs groupId="interface">
-  <TabItem value="ui" label="goose Desktop" default>
-  <GooseBuiltinInstaller
+  <TabItem value="ui" label="arakan Desktop" default>
+  <ArakanBuiltinInstaller
     extensionName="Todo"
     description="Manage complex tasks with structured checklists and progress tracking"
   />
   </TabItem>
-  <TabItem value="cli" label="goose CLI">
+  <TabItem value="cli" label="arakan CLI">
 
   1. Run the `configure` command:
   ```sh
-  goose configure
+  arakan configure
   ```
 
   2. Choose to `Toggle Extensions`
   ```sh
-  ┌   goose-configure 
+  ┌   arakan-configure 
   │
   ◇  What would you like to configure?
   │  Toggle Extensions 
@@ -54,15 +54,15 @@ This tutorial will cover enabling and using the Todo extension.
 
 ## Example Usage
 
-In this example, I'm going to have goose help me fix formatting inconsistencies in documentation files. This demonstrates how the Todo extension helps goose stay organized when working through systematic improvements.
+In this example, I'm going to have arakan help me fix formatting inconsistencies in documentation files. This demonstrates how the Todo extension helps arakan stay organized when working through systematic improvements.
 
-### goose Prompt
+### arakan Prompt
 
 ```
 I need to update our documentation to fix formatting inconsistencies between two tutorial files. There are several sections that don't match the expected pattern. Can you help me systematically work through these issues and track our progress?
 ```
 
-### goose Output
+### arakan Output
 
 ```md
 I'll help you fix the documentation inconsistencies systematically. Let me break this down into organized tasks and track our progress.

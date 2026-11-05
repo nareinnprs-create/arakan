@@ -8,7 +8,7 @@ use crate::agents::final_output_tool::{FINAL_OUTPUT_NOT_ALONE_MESSAGE, FINAL_OUT
 use crate::agents::state_machine::ops_remaining_tool_calls::UNCLAIMED_TOOL_ERROR;
 use crate::agents::tool_execution::{CHAT_MODE_TOOL_SKIPPED_RESPONSE, DECLINED_RESPONSE};
 use crate::config::permission::PermissionLevel;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, MessageContent, SystemNotificationType};
 
 struct HookTestEnv {
@@ -136,7 +136,7 @@ async fn stop_hooks_allow_block_and_skip_non_stop_exits() -> Result<()> {
                 content,
                 MessageContent::SystemNotification(notification)
                     if notification.notification_type == SystemNotificationType::InlineMessage
-                        && notification.msg.contains("GOOSE_STOP_HOOK_BLOCK_CAP")
+                        && notification.msg.contains("ARAKAN_STOP_HOOK_BLOCK_CAP")
             )
         })
     }));
@@ -273,7 +273,7 @@ async fn stop_hook_distinct_id_denials_retry_once_then_respect_block_cap() -> Re
                 content,
                 MessageContent::SystemNotification(notification)
                     if notification.notification_type == SystemNotificationType::InlineMessage
-                        && notification.msg.contains("GOOSE_STOP_HOOK_BLOCK_CAP")
+                        && notification.msg.contains("ARAKAN_STOP_HOOK_BLOCK_CAP")
             )
         })
     }));
@@ -1126,7 +1126,7 @@ async fn chat_mode_does_not_collect_skipped_recipe_final_output_or_run_hooks() -
     let (pipeline, api) = test_pipeline().await?;
     let pipeline = pipeline
         .with_hook_manager(env.hook_manager())
-        .with_goose_mode(GooseMode::Chat)
+        .with_arakan_mode(ArakanMode::Chat)
         .await
         .with_max_turns(2);
     pipeline.set_recipe(final_output_recipe()).await?;
@@ -1185,7 +1185,7 @@ async fn chat_mode_rejects_unadvertised_unknown_tool_without_hooks() -> Result<(
     let (pipeline, api) = test_pipeline().await?;
     let pipeline = pipeline
         .with_hook_manager(env.hook_manager())
-        .with_goose_mode(GooseMode::Chat)
+        .with_arakan_mode(ArakanMode::Chat)
         .await;
     api.on("try the missing tool")
         .unadvertised_call("missing__tool", serde_json::json!({}));
@@ -1218,7 +1218,7 @@ async fn unadvertised_unknown_tool_skips_permission_and_tool_hooks() -> Result<(
     let (pipeline, api) = test_pipeline().await?;
     let pipeline = pipeline
         .with_hook_manager(env.hook_manager())
-        .with_goose_mode(GooseMode::Approve)
+        .with_arakan_mode(ArakanMode::Approve)
         .await;
     pipeline.set_permission("missing__tool", PermissionLevel::NeverAllow);
     api.on("try the missing tool")
@@ -1295,7 +1295,7 @@ async fn recipe_final_output_denied_by_permission_receives_declined_response() -
     let (pipeline, api) = test_pipeline().await?;
     let pipeline = pipeline
         .with_hook_manager(env.hook_manager())
-        .with_goose_mode(GooseMode::Approve)
+        .with_arakan_mode(ArakanMode::Approve)
         .await;
     pipeline.set_permission(FINAL_OUTPUT_TOOL_NAME, PermissionLevel::NeverAllow);
     pipeline.set_recipe(final_output_recipe()).await?;

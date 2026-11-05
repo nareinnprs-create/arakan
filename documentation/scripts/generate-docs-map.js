@@ -3,7 +3,7 @@ const path = require('path');
 const matter = require('gray-matter');
 
 const DOCS_DIR = path.join(__dirname, '..', 'docs');
-const OUTPUT_FILE = path.join(__dirname, '..', 'static', 'goose-docs-map.md');
+const OUTPUT_FILE = path.join(__dirname, '..', 'static', 'arakan-docs-map.md');
 
 function getTitle(frontmatter, content) {
   if (frontmatter.title) {
@@ -49,7 +49,7 @@ async function main() {
     { name: 'GDK', pattern: 'gdk/**/*.{md,mdx}' },
   ];
 
-  let output = `# goose Documentation Map
+  let output = `# arakan Documentation Map
 
 > Auto-generated. Last updated: ${new Date().toISOString().split('T')[0]}
 
@@ -80,7 +80,7 @@ async function main() {
     }
   }
 
-  output += `---\n\n> Full docs: https://goose-docs.ai/\n`;
+  output += `---\n\n> Full docs: https://arakan-docs.ai/\n`;
 
   fs.writeFileSync(OUTPUT_FILE, output);
   console.log(`[generate-docs-map] Generated: ${OUTPUT_FILE}`);

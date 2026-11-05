@@ -468,7 +468,7 @@ mod tests {
 
     fn new_test_config() -> Config {
         let unique = format!(
-            "goose-provider-secrets-test-{}-{}",
+            "arakan-provider-secrets-test-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

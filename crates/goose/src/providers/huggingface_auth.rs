@@ -22,7 +22,7 @@ const AUTHORIZE_URL: &str = "https://huggingface.co/oauth/authorize";
 const TOKEN_URL: &str = "https://huggingface.co/oauth/token";
 const OAUTH_SCOPES: &str = "read-repos gated-repos inference-api";
 const HUGGINGFACE_OAUTH_CLIENT_METADATA_URL: &str =
-    "https://goose-docs.ai/oauth/huggingface-client-metadata.json";
+    "https://arakan-docs.ai/oauth/huggingface-client-metadata.json";
 // This URI must match the redirect URI in the Hugging Face CIMD metadata.
 const OAUTH_HOST: [u8; 4] = [127, 0, 0, 1];
 const OAUTH_PORT: u16 = 17863;
@@ -49,7 +49,7 @@ impl HuggingFaceTokenData {
 }
 
 pub fn oauth_client_id() -> &'static str {
-    option_env!("GOOSE_HUGGINGFACE_OAUTH_CLIENT_ID")
+    option_env!("ARAKAN_HUGGINGFACE_OAUTH_CLIENT_ID")
         .filter(|client_id| !client_id.trim().is_empty())
         .unwrap_or(HUGGINGFACE_OAUTH_CLIENT_METADATA_URL)
 }
@@ -388,7 +388,7 @@ async fn refreshed_or_usable_oauth_token_from_path(
 const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
 <html>
   <head>
-    <title>goose - Hugging Face Authorization Successful</title>
+    <title>arakan - Hugging Face Authorization Successful</title>
     <script>setTimeout(() => window.close(), {timeout_ms});</script>
     <style>
       body {{
@@ -404,7 +404,7 @@ const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
   <body>
     <div class="container">
       <h1>Authorization Successful</h1>
-      <p>You can close this window and return to goose.</p>
+      <p>You can close this window and return to arakan.</p>
     </div>
   </body>
 </html>"#;
@@ -419,7 +419,7 @@ fn html_error(error: &str) -> String {
         r#"<!doctype html>
 <html>
   <head>
-    <title>goose - Hugging Face Authorization Failed</title>
+    <title>arakan - Hugging Face Authorization Failed</title>
     <style>
       body {{
         font-family: system-ui, -apple-system, sans-serif;
@@ -569,7 +569,7 @@ async fn perform_loopback_oauth_flow(client_id: &str) -> Result<HuggingFaceToken
 
     if webbrowser::open(&auth_url).is_err() {
         tracing::info!(
-            "Please open this URL in your browser to authorize goose with Hugging Face:\n{}",
+            "Please open this URL in your browser to authorize arakan with Hugging Face:\n{}",
             auth_url
         );
     }
@@ -627,7 +627,7 @@ mod tests {
 
     #[test]
     fn oauth_client_id_defaults_to_cimd_metadata_url() {
-        if option_env!("GOOSE_HUGGINGFACE_OAUTH_CLIENT_ID").is_none() {
+        if option_env!("ARAKAN_HUGGINGFACE_OAUTH_CLIENT_ID").is_none() {
             assert_eq!(oauth_client_id(), HUGGINGFACE_OAUTH_CLIENT_METADATA_URL);
         }
     }

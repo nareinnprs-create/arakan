@@ -9,7 +9,7 @@ export function getCodebaseDir(): string {
 
 export function sourceUrl(filePath: string, line?: number): string {
   const revision = process.env.SOURCE_REVISION || "main";
-  return `https://github.com/aaif-goose/goose/blob/${revision}/${filePath}${line ? `#L${line}` : ""}`;
+  return `https://github.com/aaif-arakan/arakan/blob/${revision}/${filePath}${line ? `#L${line}` : ""}`;
 }
 
 export function sourceContext(): string {

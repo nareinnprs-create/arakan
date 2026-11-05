@@ -20,12 +20,12 @@ pub(crate) const PI_ACP_BINARY: &str = "pi-acp";
 
 pub struct PiAcpProvider;
 
-impl goose_providers::base::ProviderDescriptor for PiAcpProvider {
+impl arakan_providers::base::ProviderDescriptor for PiAcpProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             PI_ACP_PROVIDER_NAME,
             "Pi",
-            "Use goose with Pi via the pi-acp adapter.",
+            "Use arakan with Pi via the pi-acp adapter.",
             ACP_CURRENT_MODEL,
             vec![],
             PI_ACP_DOC_URL,
@@ -53,7 +53,7 @@ impl PiAcpProvider {
         Box::pin(async move {
             let config = Config::global();
             let resolved_command = SearchPaths::builder().with_npm().resolve(PI_ACP_BINARY)?;
-            let goose_mode = config.resolve_goose_mode()?;
+            let arakan_mode = config.resolve_arakan_mode()?;
             let model = if use_default_model {
                 ACP_CURRENT_MODEL.to_string()
             } else {
@@ -81,7 +81,7 @@ impl PiAcpProvider {
             };
 
             let metadata = Self::metadata();
-            AcpProvider::connect(metadata.name, goose_mode, provider_config).await
+            AcpProvider::connect(metadata.name, arakan_mode, provider_config).await
         })
     }
 }

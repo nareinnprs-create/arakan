@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::tool_approval::{ApprovalDecision, ToolApproval};
+use arakan_agent::tool_approval::{ApprovalDecision, ToolApproval};
 
 use crate::agents::state_machine::ops_toolcalling::call_will_not_run;
 use crate::agents::tool_execution::DECLINED_RESPONSE;
@@ -15,11 +15,11 @@ use crate::tool_inspection::{
     get_security_finding_id_from_results, InspectionAction, ToolInspectionManager,
 };
 
-pub struct GooseToolApproval<'a> {
+pub struct ArakanToolApproval<'a> {
     tool_inspection_manager: &'a ToolInspectionManager,
 }
 
-impl<'a> GooseToolApproval<'a> {
+impl<'a> ArakanToolApproval<'a> {
     pub fn new(tool_inspection_manager: &'a ToolInspectionManager) -> Self {
         Self {
             tool_inspection_manager,
@@ -28,7 +28,7 @@ impl<'a> GooseToolApproval<'a> {
 }
 
 #[async_trait]
-impl ToolApproval<Session> for GooseToolApproval<'_> {
+impl ToolApproval<Session> for ArakanToolApproval<'_> {
     async fn check(
         &self,
         session: &Session,
@@ -51,7 +51,7 @@ impl ToolApproval<Session> for GooseToolApproval<'_> {
                 &session.id,
                 &to_inspect,
                 conversation.messages(),
-                session.goose_mode,
+                session.arakan_mode,
             )
             .await?;
         let Some(check) = self
@@ -93,7 +93,7 @@ impl ToolApproval<Session> for GooseToolApproval<'_> {
                     get_security_finding_id_from_results(&request.id, &inspection_results)
                 {
                     tracing::info!(
-                        monotonic_counter.goose.prompt_injection_user_decisions = 1,
+                        monotonic_counter.arakan.prompt_injection_user_decisions = 1,
                         security.event_type = "approval_request",
                         security.finding_id = %finding_id,
                         tool.request_id = %request.id,

@@ -7,7 +7,7 @@ const OUTPUT_TOKEN_LIMIT_TEXT: &str =
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct GooseMessageMeta<'a> {
+struct ArakanMessageMeta<'a> {
     created: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     message_id: Option<&'a str>,
@@ -18,7 +18,7 @@ struct GooseMessageMeta<'a> {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     fallback_content: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    inference: Option<GooseInferenceMeta<'a>>,
+    inference: Option<ArakanInferenceMeta<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     operation_logs: Option<&'a [String]>,
 }
@@ -26,18 +26,18 @@ struct GooseMessageMeta<'a> {
 // The provider session id stays on the server: clients only need to know which model answered.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct GooseInferenceMeta<'a> {
+struct ArakanInferenceMeta<'a> {
     provider: &'a str,
     requested_model: &'a str,
     #[serde(skip_serializing_if = "Option::is_none")]
     resolved_model: Option<&'a str>,
 }
 
-fn goose_message_meta(
+fn arakan_message_meta(
     message: &Message,
     steer: bool,
 ) -> serde_json::Map<String, serde_json::Value> {
-    let message_meta = GooseMessageMeta {
+    let message_meta = ArakanMessageMeta {
         created: message.created,
         message_id: message.id.as_deref(),
         steer,
@@ -47,7 +47,7 @@ fn goose_message_meta(
             .metadata
             .inference
             .as_ref()
-            .map(|inference| GooseInferenceMeta {
+            .map(|inference| ArakanInferenceMeta {
                 provider: &inference.provider,
                 requested_model: &inference.requested_model,
                 resolved_model: inference.resolved_model.as_deref(),
@@ -63,15 +63,15 @@ fn goose_message_meta(
 }
 
 fn extend_message_meta(meta: &mut Meta, message: &Message, steer: bool) {
-    let message_goose = goose_message_meta(message, steer);
-    let goose_value = meta
-        .entry("goose".to_string())
+    let message_arakan = arakan_message_meta(message, steer);
+    let arakan_value = meta
+        .entry("arakan".to_string())
         .or_insert_with(|| serde_json::Value::Object(serde_json::Map::new()));
 
-    if let serde_json::Value::Object(goose) = goose_value {
-        goose.extend(message_goose);
+    if let serde_json::Value::Object(arakan) = arakan_value {
+        arakan.extend(message_arakan);
     } else {
-        *goose_value = serde_json::Value::Object(message_goose);
+        *arakan_value = serde_json::Value::Object(message_arakan);
     }
 }
 
@@ -135,7 +135,7 @@ mod tests {
     fn message_meta_serializes_message_fields() {
         let message = Message::new(Role::Assistant, 1_700_000_000, vec![]).with_id("msg_live");
         assert_eq!(
-            message_meta(&message).get("goose"),
+            message_meta(&message).get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -144,7 +144,7 @@ mod tests {
 
         let steer_message = message.clone().with_steer();
         assert_eq!(
-            message_meta(&steer_message).get("goose"),
+            message_meta(&steer_message).get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -152,7 +152,7 @@ mod tests {
             })),
         );
         assert_eq!(
-            message_meta_without_steer(&steer_message).get("goose"),
+            message_meta_without_steer(&steer_message).get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -161,7 +161,7 @@ mod tests {
 
         let message_without_id = Message::new(Role::Assistant, 1_700_000_000, vec![]);
         assert_eq!(
-            message_meta(&message_without_id).get("goose"),
+            message_meta(&message_without_id).get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
             })),
@@ -170,7 +170,7 @@ mod tests {
         let mut limited_message = message.clone();
         limited_message.metadata.output_token_limit_reached = true;
         assert_eq!(
-            message_meta(&limited_message).get("goose"),
+            message_meta(&limited_message).get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -180,7 +180,7 @@ mod tests {
 
         populate_output_token_limit_content(&mut limited_message);
         assert_eq!(
-            message_meta(&limited_message).get("goose"),
+            message_meta(&limited_message).get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -204,7 +204,7 @@ mod tests {
 
         assert_eq!(chunk.message_id, Some(MessageId::new("msg_live")));
         assert_eq!(
-            chunk.meta.as_ref().and_then(|meta| meta.get("goose")),
+            chunk.meta.as_ref().and_then(|meta| meta.get("arakan")),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -229,7 +229,7 @@ mod tests {
         let chunk = content_chunk_for_message(&message, ContentBlock::Text(TextContent::new("hi")));
 
         assert_eq!(
-            chunk.meta.as_ref().and_then(|meta| meta.get("goose")),
+            chunk.meta.as_ref().and_then(|meta| meta.get("arakan")),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_live",
@@ -246,8 +246,8 @@ mod tests {
         });
         assert_eq!(
             message_meta(&resolved_message)
-                .get("goose")
-                .and_then(|goose| goose.get("inference")),
+                .get("arakan")
+                .and_then(|arakan| arakan.get("inference")),
             Some(&serde_json::json!({
                 "provider": "openai",
                 "requestedModel": "gpt-4o",
@@ -304,7 +304,7 @@ mod tests {
         let mut message = Message::new(Role::Assistant, 1_700_000_000, vec![]).with_id("msg_1");
         message.metadata.output_token_limit_reached = true;
         let existing = serde_json::from_value(serde_json::json!({
-            "goose": {
+            "arakan": {
                 "created": 1,
                 "messageId": "old",
                 "toolCall": {
@@ -326,7 +326,7 @@ mod tests {
         let merged = merge_message_meta(existing, &message);
 
         assert_eq!(
-            merged.get("goose"),
+            merged.get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_1",
@@ -351,10 +351,10 @@ mod tests {
     }
 
     #[test]
-    fn merge_message_meta_replaces_non_object_goose_metadata() {
+    fn merge_message_meta_replaces_non_object_arakan_metadata() {
         let message = Message::new(Role::Assistant, 1_700_000_000, vec![]).with_id("msg_1");
         let existing = serde_json::from_value(serde_json::json!({
-            "goose": "invalid",
+            "arakan": "invalid",
             "otherNamespace": {
                 "preserve": true,
             },
@@ -364,7 +364,7 @@ mod tests {
         let merged = merge_message_meta(existing, &message);
 
         assert_eq!(
-            merged.get("goose"),
+            merged.get("arakan"),
             Some(&serde_json::json!({
                 "created": 1_700_000_000,
                 "messageId": "msg_1",

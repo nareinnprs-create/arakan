@@ -9,11 +9,11 @@ import styles from '@site/src/components/Card/styles.module.css';
 
 <h1 className={styles.pageTitle}>Experimental</h1>
 <p className={styles.pageDescription}>
-  goose is an open source project that is constantly being improved and expanded upon. These experimental features and projects are still in development and may not be fully stable or ready for production use, but they showcase exciting possibilities for the future of AI automation.
+  arakan is an open source project that is constantly being improved and expanded upon. These experimental features and projects are still in development and may not be fully stable or ready for production use, but they showcase exciting possibilities for the future of AI automation.
 </p>
 
 :::note
-The list of experimental features may change as goose development progresses. Some features may be promoted to stable features, while others might be modified or removed. This section will be updated with specific experimental features as they become available.
+The list of experimental features may change as arakan development progresses. Some features may be promoted to stable features, while others might be modified or removed. This section will be updated with specific experimental features as they become available.
 :::
 
 <div className={styles.categorySection}>
@@ -26,12 +26,12 @@ The list of experimental features may change as goose development progresses. So
     />
     <Card 
       title="Remote Access"
-      description="Access goose remotely via the goose AI mobile app or messaging platforms like Telegram."
+      description="Access arakan remotely via the arakan AI mobile app or messaging platforms like Telegram."
       link="/docs/experimental/remote-access"
     />
     <Card 
-      title="goose for VS Code Extension"
-      description="Interact with goose directly from VS Code via ACP."
+      title="arakan for VS Code Extension"
+      description="Interact with arakan directly from VS Code via ACP."
       link="/docs/experimental/vs-code-extension"
     />
   </div>
@@ -46,14 +46,14 @@ The list of experimental features may change as goose development progresses. So
       link="/blog/2025/04/11/finetuning-toolshim"
     />
     <Card 
-      title="AI, But Make It Local With goose and Ollama"
-      description="Learn how to integrate goose with Ollama for a fully local AI experience, including structured outputs and tool calling capabilities."
-      link="/blog/2025/03/14/goose-ollama"
+      title="AI, But Make It Local With arakan and Ollama"
+      description="Learn how to integrate arakan with Ollama for a fully local AI experience, including structured outputs and tool calling capabilities."
+      link="/blog/2025/03/14/arakan-ollama"
     />
     <Card 
-      title="Community-Inspired Benchmarking: The goose Vibe Check"
-      description="See how open source AI models measure up in our first goose agent benchmark tests, including toolshim performance analysis."
-      link="/blog/2025/03/31/goose-benchmark"
+      title="Community-Inspired Benchmarking: The arakan Vibe Check"
+      description="See how open source AI models measure up in our first arakan agent benchmark tests, including toolshim performance analysis."
+      link="/blog/2025/03/31/arakan-benchmark"
     />
   </div>
 </div>
@@ -64,7 +64,7 @@ The list of experimental features may change as goose development progresses. So
     <Card 
       title="GitHub Issues"
       description="Report bugs, request features, or contribute to the development of experimental features."
-      link="https://github.com/aaif-goose/goose/issues"
+      link="https://github.com/aaif-arakan/arakan/issues"
     />
     <Card 
       title="Discord Community"

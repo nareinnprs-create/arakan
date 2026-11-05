@@ -7,7 +7,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use tokio::sync::Mutex;
 
-use crate::agents::state_machine::effects::GooseEffect;
+use crate::agents::state_machine::effects::ArakanEffect;
 use crate::agents::state_machine::{
     applied, ends_turn, last_effective_role, messages_since_kickoff, not_applicable, Emitter,
     Operation, OperationResult,
@@ -34,16 +34,16 @@ impl SteerOperation {
         }
     }
 
-    fn take_drained(&self) -> Vec<GooseEffect> {
+    fn take_drained(&self) -> Vec<ArakanEffect> {
         std::mem::take(&mut *self.drained.lock().unwrap())
             .into_iter()
-            .map(GooseEffect::from)
+            .map(ArakanEffect::from)
             .collect()
     }
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for SteerOperation {
+impl Operation<Session, ArakanEffect> for SteerOperation {
     fn name(&self) -> &'static str {
         "steer"
     }
@@ -53,7 +53,7 @@ impl Operation<Session, GooseEffect> for SteerOperation {
         _session: &Session,
         _conversation: &Conversation,
         _emit: &Emitter,
-    ) -> Vec<GooseEffect> {
+    ) -> Vec<ArakanEffect> {
         self.take_drained()
     }
 
@@ -62,7 +62,7 @@ impl Operation<Session, GooseEffect> for SteerOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let messages = messages_since_kickoff(conversation)?;
         let between_turns =
             ends_turn(messages) || last_effective_role(messages)? == EffectiveRole::Tool;

@@ -2,8 +2,8 @@ use anyhow::Result;
 use async_stream::try_stream;
 use async_trait::async_trait;
 use futures::future::BoxFuture;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::errors::ProviderError;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::errors::ProviderError;
 use rmcp::model::{Role, Tool};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -23,12 +23,12 @@ use super::base::{
 use super::utils::filter_extensions_from_system_prompt;
 use crate::config::paths::Paths;
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, ExtensionConfig, GooseMode};
+use crate::config::{Config, ExtensionConfig, ArakanMode};
 use crate::conversation::message::{Message, MessageContent};
 use crate::permission::permission_confirmation::PrincipalType;
 use crate::permission::{Permission, PermissionConfirmation};
 use crate::subprocess::configure_subprocess;
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 
 use super::cli_common::{error_from_event, extract_usage_tokens};
 use super::private_file::create_private_named_temp_file;
@@ -271,7 +271,7 @@ pub struct ClaudeCodeProvider {
     pending_confirmations:
         Arc<tokio::sync::Mutex<HashMap<String, oneshot::Sender<PermissionConfirmation>>>>,
     #[serde(skip)]
-    initial_mode: tokio::sync::Mutex<Option<GooseMode>>,
+    initial_mode: tokio::sync::Mutex<Option<ArakanMode>>,
 }
 
 impl ClaudeCodeProvider {
@@ -333,7 +333,7 @@ impl ClaudeCodeProvider {
     fn build_stream_json_command(&self) -> Command {
         let mut cmd = Command::new(&self.command);
         configure_subprocess(&mut cmd);
-        // Allow goose to run inside a Claude Code session.
+        // Allow arakan to run inside a Claude Code session.
         cmd.env_remove("CLAUDECODE");
         cmd.arg("--input-format")
             .arg("stream-json")
@@ -349,20 +349,20 @@ impl ClaudeCodeProvider {
     /// Returns true when the control protocol is enabled.
     fn apply_permission_flags(cmd: &mut Command) -> Result<bool, ProviderError> {
         let config = Config::global();
-        let goose_mode = config
-            .resolve_goose_mode()
+        let arakan_mode = config
+            .resolve_arakan_mode()
             .map_err(|error| ProviderError::RequestFailed(error.to_string()))?;
 
-        match goose_mode {
-            GooseMode::Auto => {
+        match arakan_mode {
+            ArakanMode::Auto => {
                 cmd.arg("--dangerously-skip-permissions");
                 Ok(false)
             }
-            GooseMode::SmartApprove | GooseMode::Approve => {
+            ArakanMode::SmartApprove | ArakanMode::Approve => {
                 cmd.arg("--permission-prompt-tool").arg("stdio");
                 Ok(true)
             }
-            GooseMode::Chat => Ok(false),
+            ArakanMode::Chat => Ok(false),
         }
     }
 
@@ -618,7 +618,7 @@ fn write_system_prompt_file(
     write_claude_temp_file(state_dir, &prefix, ".txt", system_prompt)
 }
 
-impl goose_providers::base::ProviderDescriptor for ClaudeCodeProvider {
+impl arakan_providers::base::ProviderDescriptor for ClaudeCodeProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             CLAUDE_CODE_PROVIDER_NAME,
@@ -716,7 +716,7 @@ impl Provider for ClaudeCodeProvider {
         Ok(extract_model_aliases(response.ok().flatten().as_ref()))
     }
 
-    async fn update_mode(&self, _session_id: &str, mode: GooseMode) -> Result<(), ProviderError> {
+    async fn update_mode(&self, _session_id: &str, mode: ArakanMode) -> Result<(), ProviderError> {
         // Mode is baked into the subprocess at spawn; claude-acp replaces
         // this provider (#7801).
         let mut guard = self.initial_mode.lock().await;
@@ -1041,7 +1041,7 @@ mod tests {
     use super::*;
     use crate::agents::extension::Envs;
     use chrono::Utc;
-    use goose_test_support::session::TEST_SESSION_ID;
+    use arakan_test_support::session::TEST_SESSION_ID;
     use serde_json::json;
     use std::collections::HashMap;
     use std::fs;

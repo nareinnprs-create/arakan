@@ -7,7 +7,7 @@ use crate::acp::{
     extension_configs_to_mcp_servers, AcpProvider, AcpProviderConfig, ACP_CURRENT_MODEL,
 };
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::providers::base::{
     current_working_dir, ProviderDef, ProviderDescriptor, ProviderMetadata,
 };
@@ -19,12 +19,12 @@ pub(crate) const AMP_ACP_BINARY: &str = "amp-acp";
 
 pub struct AmpAcpProvider;
 
-impl goose_providers::base::ProviderDescriptor for AmpAcpProvider {
+impl arakan_providers::base::ProviderDescriptor for AmpAcpProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             AMP_ACP_PROVIDER_NAME,
             "Amp",
-            "Use goose with your Amp subscription via the amp-acp adapter.",
+            "Use arakan with your Amp subscription via the amp-acp adapter.",
             ACP_CURRENT_MODEL,
             vec![],
             AMP_ACP_DOC_URL,
@@ -64,15 +64,15 @@ impl ProviderDef for AmpAcpProvider {
         Box::pin(async move {
             let config = Config::global();
             let resolved_command = SearchPaths::builder().with_npm().resolve(AMP_ACP_BINARY)?;
-            let goose_mode = config.resolve_goose_mode()?;
+            let arakan_mode = config.resolve_arakan_mode()?;
 
             let mode_mapping = HashMap::from([
                 // "bypass" skips confirmations, closest to autonomous mode.
-                (GooseMode::Auto, vec!["bypass".to_string()]),
+                (ArakanMode::Auto, vec!["bypass".to_string()]),
                 // "default" prompts before risky actions.
-                (GooseMode::Approve, vec!["default".to_string()]),
-                (GooseMode::SmartApprove, vec!["default".to_string()]),
-                (GooseMode::Chat, vec!["default".to_string()]),
+                (ArakanMode::Approve, vec!["default".to_string()]),
+                (ArakanMode::SmartApprove, vec!["default".to_string()]),
+                (ArakanMode::Chat, vec!["default".to_string()]),
             ]);
 
             let provider_config = AcpProviderConfig {
@@ -82,7 +82,7 @@ impl ProviderDef for AmpAcpProvider {
                 env_remove: vec![],
                 work_dir: working_dir,
                 mcp_servers: extension_configs_to_mcp_servers(&extensions),
-                session_mode_id: mode_mapping[&goose_mode].first().cloned(),
+                session_mode_id: mode_mapping[&arakan_mode].first().cloned(),
                 session_config_options: vec![],
                 model_config_option_id: None,
                 mode_mapping,
@@ -90,7 +90,7 @@ impl ProviderDef for AmpAcpProvider {
             };
 
             let metadata = Self::metadata();
-            AcpProvider::connect(metadata.name, goose_mode, provider_config).await
+            AcpProvider::connect(metadata.name, arakan_mode, provider_config).await
         })
     }
 }

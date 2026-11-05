@@ -1,5 +1,5 @@
 [package]
-name = "goose-cli"
+name = "arakan-cli"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -12,7 +12,7 @@ description.workspace = true
 workspace = true
 
 [[bin]]
-name = "goose"
+name = "arakan"
 path = "src/main.rs"
 
 [[bin]]
@@ -25,11 +25,11 @@ path = "src/bin/mcp_conformance_driver.rs"
 
 [dependencies]
 clap_mangen = { version = "0.3", default-features = false }
-goose = { path = "../goose", default-features = false }
+arakan = { path = "../arakan", default-features = false }
 agent-client-protocol = { workspace = true, features = ["unstable"], optional = true }
-goose-mcp = { path = "../goose-mcp", default-features = false, optional = true }
-goose-providers = { path = "../goose-providers", default-features = false }
-goose-roaming = { path = "../goose-roaming", optional = true }
+arakan-mcp = { path = "../arakan-mcp", default-features = false, optional = true }
+arakan-providers = { path = "../arakan-providers", default-features = false }
+arakan-roaming = { path = "../arakan-roaming", optional = true }
 rmcp = { workspace = true }
 clap = { workspace = true }
 cliclack = { version = "0.5", default-features = false }
@@ -69,8 +69,6 @@ urlencoding = { workspace = true }
 clap_complete = { version = "4", default-features = false }
 comfy-table = { version = "8", default-features = false }
 sha2 = { workspace = true }
-sigstore-verify = { version = "0.11", default-features = false, optional = true }
-snap = { workspace = true, optional = true }
 axum.workspace = true
 axum-server = { workspace = true, optional = true }
 clap_complete_nushell = { version = "4", default-features = false }
@@ -96,12 +94,10 @@ default = [
     "tree-sitter",
     "local-inference",
     "aws-providers",
-    "telemetry",
     "otel",
     "rustls-tls",
     "live-voice",
     "system-keyring",
-    "update",
     "bundled-mcp",
     "scheduler",
     "platform-apps",
@@ -109,31 +105,27 @@ default = [
     "acp-http",
     "online-model-meta",
 ]
-online-model-meta = ["goose/online-model-meta"]
-roaming = ["dep:goose-roaming", "dep:qrcode", "dep:fs2", "dep:agent-client-protocol"]
-code-mode = ["goose/code-mode"]
-tree-sitter = ["goose/tree-sitter"]
-live-voice = ["goose/live-voice"]
-local-inference = ["goose/local-inference"]
-aws-providers = ["goose/aws-providers"]
-cuda = ["goose/cuda", "local-inference"]
-vulkan = ["goose/vulkan", "local-inference"]
-mlx = ["goose/mlx", "local-inference"]
-telemetry = ["goose/telemetry"]
-otel = ["goose/otel"]
-system-keyring = ["goose/system-keyring"]
-update = ["dep:sigstore-verify", "dep:snap"]
-bundled-mcp = ["dep:goose-mcp", "goose-mcp/bundled-mcp"]
-scheduler = ["goose/scheduler"]
-platform-apps = ["goose/platform-apps"]
-chat-recall = ["goose/chat-recall"]
-acp-http = ["goose/acp-http"]
+online-model-meta = ["arakan/online-model-meta"]
+roaming = ["dep:arakan-roaming", "dep:qrcode", "dep:fs2", "dep:agent-client-protocol"]
+code-mode = ["arakan/code-mode"]
+tree-sitter = ["arakan/tree-sitter"]
+live-voice = ["arakan/live-voice"]
+local-inference = ["arakan/local-inference"]
+aws-providers = ["arakan/aws-providers"]
+cuda = ["arakan/cuda", "local-inference"]
+vulkan = ["arakan/vulkan", "local-inference"]
+mlx = ["arakan/mlx", "local-inference"]
+otel = ["arakan/otel"]
+bundled-mcp = ["dep:arakan-mcp", "arakan-mcp/bundled-mcp"]
+scheduler = ["arakan/scheduler"]
+platform-apps = ["arakan/platform-apps"]
+chat-recall = ["arakan/chat-recall"]
+acp-http = ["arakan/acp-http"]
 portable-default = [
     "rustls-tls",
     "tree-sitter",
     "live-voice",
     "aws-providers",
-    "telemetry",
     "otel",
     "bundled-mcp",
     "scheduler",
@@ -141,25 +133,21 @@ portable-default = [
     "chat-recall",
     "acp-http",
 ]
-# disables the update command
-disable-update = []
 rustls-tls = [
     "dep:axum-server",
     "reqwest/rustls",
     "axum-server/tls-rustls",
-    "sigstore-verify?/rustls",
-    "goose/rustls-tls",
-    "goose-mcp?/rustls-tls",
-    "goose-providers/rustls-tls",
+    "arakan/rustls-tls",
+    "arakan-mcp?/rustls-tls",
+    "arakan-providers/rustls-tls",
 ]
 native-tls = [
     "dep:axum-server",
     "reqwest/native-tls",
     "axum-server/tls-openssl",
-    "sigstore-verify?/native-tls",
-    "goose/native-tls",
-    "goose-mcp?/native-tls",
-    "goose-providers/native-tls",
+    "arakan/native-tls",
+    "arakan-mcp?/native-tls",
+    "arakan-providers/native-tls",
 ]
 [dev-dependencies]
 env-lock.workspace = true

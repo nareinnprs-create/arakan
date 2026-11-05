@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { defineMessages, useIntl } from '../i18n';
 import { useLocation, useNavigate } from 'react-router';
 import { SearchView } from './conversation/SearchView';
-import LoadingGoose from './LoadingGoose';
+import LoadingArakan from './LoadingArakan';
 import MessageList from './MessageList';
 import { MainPanelLayout } from './Layout/MainPanelLayout';
 import ChatInput from './ChatInput';
@@ -30,11 +30,11 @@ import {
   type UserInput,
 } from '../types/message';
 import { useAutoSubmit } from '../hooks/useAutoSubmit';
-import { Goose } from './icons';
-import EnvironmentBadge from './GooseSidebar/EnvironmentBadge';
+import { Arakan } from './icons';
+import EnvironmentBadge from './ArakanSidebar/EnvironmentBadge';
 import SessionActionsHeader from './SessionActionsHeader';
 import { isAcpRecovering, subscribeToAcpRecovery } from '../acp/acpConnection';
-import type { LiveVoiceAvailabilityResponse_unstable } from '@aaif/goose-acp-client';
+import type { LiveVoiceAvailabilityResponse_unstable } from '@aaif/arakan-acp-client';
 import { acpGetLiveVoiceAvailability } from '../acp/liveVoice';
 import type { LiveVoiceController } from '../liveVoice/useLiveVoice';
 
@@ -226,7 +226,7 @@ export default function BaseChat({
     liveVoice.phase,
     liveVoiceActiveInAnotherSession,
     liveVoiceChatBusy,
-    session?.goose_mode,
+    session?.arakan_mode,
     sessionId,
     sessionLoaded,
   ]);
@@ -245,7 +245,7 @@ export default function BaseChat({
   const recipe = session?.recipe as Recipe | null | undefined;
 
   // noAutoSubmit only suppresses auto-submitting the initial prompt of a fresh session
-  // (goose://new-session?prompt=...). Once the conversation has messages, later flows
+  // (arakan://new-session?prompt=...). Once the conversation has messages, later flows
   // such as forks or resumes should auto-submit normally.
   const suppressInitialAutoSubmit = noAutoSubmit && messages.length === 0;
   const canAutoSubmit = !acpRecovering && !suppressInitialAutoSubmit;
@@ -461,17 +461,17 @@ export default function BaseChat({
       <MainPanelLayout backgroundColor={'bg-background-primary'} removeTopPadding={true}>
         {/* Chat container with sticky recipe header */}
         <div className="flex flex-col flex-1 min-h-0 relative">
-          {/* Goose watermark - top right */}
+          {/* Arakan watermark - top right */}
           <div className="absolute top-[14px] right-4 z-[60] flex flex-row items-center gap-1">
             <a
-              href="https://goose-docs.ai"
+              href="https://arakan-docs.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="no-drag flex flex-row items-center gap-1 hover:opacity-80 transition-opacity"
             >
-              <Goose className="size-5 goose-icon-animation" />
+              <Arakan className="size-5 arakan-icon-animation" />
               <span className="text-sm leading-none text-text-secondary -translate-y-px">
-                goose
+                arakan
               </span>
             </a>
             <EnvironmentBadge className="translate-y-px" />
@@ -529,7 +529,7 @@ export default function BaseChat({
 
           {chatState !== ChatState.Idle && (
             <div className="absolute bottom-1 left-4 z-20 pointer-events-none">
-              <LoadingGoose chatState={chatState} message={progressMessage} />
+              <LoadingArakan chatState={chatState} message={progressMessage} />
             </div>
           )}
         </div>

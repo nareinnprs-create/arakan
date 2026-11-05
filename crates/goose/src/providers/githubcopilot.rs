@@ -9,9 +9,9 @@ use anyhow::Result;
 use async_trait::async_trait;
 use axum::http;
 use chrono::{DateTime, Utc};
-use goose_providers::errors::ProviderError;
-use goose_providers::formats::openai::is_openai_responses_model;
-use goose_providers::images::ImageFormat;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::formats::openai::is_openai_responses_model;
+use arakan_providers::images::ImageFormat;
 use reqwest::{Client, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -33,17 +33,17 @@ use super::base::{
 use super::openai_compatible::handle_response_openai_compat;
 use super::retry::ProviderRetry;
 use super::utils::get_model;
-use goose_providers::formats::openai::{create_request, get_usage, response_to_message};
-use goose_providers::formats::openai_responses::create_responses_request;
+use arakan_providers::formats::openai::{create_request, get_usage, response_to_message};
+use arakan_providers::formats::openai_responses::create_responses_request;
 
 use crate::config::{Config, ConfigError};
 use crate::conversation::message::{Message, MessageContent};
 
 use crate::providers::base::{ConfigKey, MessageStream};
 use futures::future::BoxFuture;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::{ContentBlock, Tool};
 
 const GITHUB_COPILOT_PROVIDER_NAME: &str = "github_copilot";
@@ -618,12 +618,12 @@ impl GithubCopilotProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for GithubCopilotProvider {
+impl arakan_providers::base::ProviderDescriptor for GithubCopilotProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             GITHUB_COPILOT_PROVIDER_NAME,
             "GitHub Copilot",
-            "GitHub Copilot. Run `goose configure` and select copilot to set up.",
+            "GitHub Copilot. Run `arakan configure` and select copilot to set up.",
             GITHUB_COPILOT_DEFAULT_MODEL,
             GITHUB_COPILOT_KNOWN_MODELS.to_vec(),
             GITHUB_COPILOT_DOC_URL,

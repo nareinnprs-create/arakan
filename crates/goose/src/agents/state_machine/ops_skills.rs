@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex as StdMutex};
 
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use goose_agent::post_tool_call_hook::PostToolCallHook;
-use goose_sdk_types::custom_requests::{SourceEntry, SourceType};
+use arakan_agent::post_tool_call_hook::PostToolCallHook;
+use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
 use rmcp::model::{CallToolResult, ContentBlock, ErrorData, JsonObject, Tool};
 use schemars::{schema_for, JsonSchema};
 use serde::Deserialize;
@@ -20,10 +20,10 @@ use crate::agents::state_machine::ops_toolcalling::{
 use crate::agents::state_machine::post_tool_hook::run_post_tool_call_hook;
 use crate::agents::state_machine::{
     applied, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter,
-    GooseEffect, Operation, OperationResult, SlashCommand,
+    ArakanEffect, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, ToolResponse};
 use crate::conversation::Conversation;
 use crate::session::Session;
@@ -223,7 +223,7 @@ impl SkillOperation {
         conversation: &Conversation,
         message: String,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let command = messages_since_kickoff(conversation)?
             .first()
             .cloned()
@@ -251,7 +251,7 @@ impl SkillOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for SkillOperation {
+impl Operation<Session, ArakanEffect> for SkillOperation {
     fn name(&self) -> &'static str {
         "skills"
     }
@@ -262,7 +262,7 @@ impl Operation<Session, GooseEffect> for SkillOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         if command.command == "skills" {
             return Self::command_response(
                 conversation,
@@ -323,7 +323,7 @@ impl Operation<Session, GooseEffect> for SkillOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let messages = messages_since_kickoff(conversation)?;
         let pending: Vec<_> = pending_advertised_tool_requests(messages)
             .into_iter()
@@ -342,7 +342,7 @@ impl Operation<Session, GooseEffect> for SkillOperation {
         let mut response = Message::user();
         for (request, disposition) in pending {
             let result: std::result::Result<CallToolResult, ErrorData> = match disposition {
-                ToolDisposition::Execute if session.goose_mode == GooseMode::Chat => {
+                ToolDisposition::Execute if session.arakan_mode == ArakanMode::Chat => {
                     Ok(CallToolResult::success(vec![ContentBlock::text(
                         CHAT_MODE_TOOL_SKIPPED_RESPONSE,
                     )]))

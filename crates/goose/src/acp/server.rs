@@ -10,19 +10,19 @@ use crate::acp::tool_call_notifier::ToolCallNotifier;
 use crate::acp::{PermissionDecision, ACP_CURRENT_MODEL};
 use crate::agents::extension::{Envs, PLATFORM_EXTENSIONS};
 use crate::agents::extension_manager::ClientContext;
-use crate::agents::mcp_client::GooseMcpHostInfo;
+use crate::agents::mcp_client::ArakanMcpHostInfo;
 use crate::agents::state_machine::{
     has_unapplied_tool_confirmation_response, pending_tool_confirmations, turn_failure,
 };
 use crate::agents::{
-    Attachment, ExtensionConfig, ExtensionLoadResult, GoosePlatform, SessionConfig,
+    Attachment, ExtensionConfig, ExtensionLoadResult, ArakanPlatform, SessionConfig,
     StateMachineServices, StateMachineServicesConfig,
 };
 use crate::config::base::CONFIG_YAML_NAME;
 use crate::config::extensions::{configured_enabled_state, get_enabled_extensions_with_config};
 use crate::config::paths::Paths;
 use crate::config::permission::PermissionManager;
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::conversation::message::{
     ActionRequiredData, Message, MessageContent, SystemNotificationContent, SystemNotificationType,
     ToolConfirmationRequest, ToolRequest, ToolResponse,
@@ -66,7 +66,7 @@ use anyhow::Result;
 use fs_err as fs;
 use futures::future::{BoxFuture, FutureExt};
 use futures::stream::{self, BoxStream, StreamExt};
-use goose_providers::errors::ProviderError;
+use arakan_providers::errors::ProviderError;
 use rmcp::model::{
     Annotations as RmcpAnnotations, ImageContent as RmcpImageContent, Role,
     TextContent as RmcpTextContent,
@@ -204,8 +204,8 @@ async fn resume_saved_provider_session(
     }
 }
 
-pub(super) const DEFAULT_PROVIDER_ID: &str = "goose";
-pub(super) const DEFAULT_PROVIDER_LABEL: &str = "Goose (Default)";
+pub(super) const DEFAULT_PROVIDER_ID: &str = "arakan";
+pub(super) const DEFAULT_PROVIDER_LABEL: &str = "Arakan (Default)";
 const PROVIDER_CONFIG_STATUS_CHECK_CONCURRENCY: usize = 16;
 
 /// In-memory state for an active ACP session.
@@ -213,7 +213,7 @@ const PROVIDER_CONFIG_STATUS_CHECK_CONCURRENCY: usize = 16;
 /// ## Terminology (temporary, until all clients migrate to ACP)
 ///
 /// The ACP protocol uses "session" to mean the conversation as the human sees it —
-/// a durable, append-only exchange of messages. Internally, goose also has a concept
+/// a durable, append-only exchange of messages. Internally, arakan also has a concept
 /// called "Session" (the `sessions` DB table) which represents the agent's working
 /// state: the message list the LLM sees, compaction state, provider binding, etc.
 ///
@@ -284,12 +284,12 @@ pub struct AcpConnectionOptions {
     pub live_voice: Arc<LiveVoiceService>,
 }
 
-/// What a `goose serve` process's services run with; one is shared by every connection.
+/// What a `arakan serve` process's services run with; one is shared by every connection.
 pub fn acp_services_config(
     session_manager: Arc<SessionManager>,
     config_dir: std::path::PathBuf,
     disable_session_naming: bool,
-    goose_platform: GoosePlatform,
+    arakan_platform: ArakanPlatform,
 ) -> StateMachineServicesConfig {
     // Eagerly initialize the SQLite pool so it's ready when providers/sessions need it.
     let storage = session_manager.storage().clone();
@@ -301,7 +301,7 @@ pub fn acp_services_config(
         Arc::new(PermissionManager::new(config_dir)),
         None,
         disable_session_naming,
-        goose_platform,
+        arakan_platform,
     )
 }
 
@@ -313,10 +313,10 @@ pub struct AcpConnection {
     services: Arc<StateMachineServices>,
     provider_factory: AcpProviderFactory,
     builtin_selection: AcpBuiltinSelection,
-    client_mcp_host_info: OnceCell<GooseMcpHostInfo>,
+    client_mcp_host_info: OnceCell<ArakanMcpHostInfo>,
     connection_id: u64,
     client_supports_acp_elicitation: OnceCell<bool>,
-    client_supports_goose_custom_notifications: OnceCell<bool>,
+    client_supports_arakan_custom_notifications: OnceCell<bool>,
     client_supports_recipe_param_requests: OnceCell<bool>,
     client_requests_tool_call_label_enrichment: OnceCell<bool>,
     client_cx: OnceCell<ConnectionTo<Client>>,
@@ -360,14 +360,14 @@ fn meta_string(
 }
 
 fn agent_capabilities_meta() -> Option<Meta> {
-    let mut goose = serde_json::Map::new();
-    goose.insert("recipeParameterScopes".to_string(), serde_json::json!({}));
+    let mut arakan = serde_json::Map::new();
+    arakan.insert("recipeParameterScopes".to_string(), serde_json::json!({}));
     if cfg!(feature = "local-inference") {
-        goose.insert("localInference".to_string(), serde_json::json!({}));
+        arakan.insert("localInference".to_string(), serde_json::json!({}));
     }
 
     let mut meta = serde_json::Map::new();
-    meta.insert("goose".to_string(), serde_json::Value::Object(goose));
+    meta.insert("arakan".to_string(), serde_json::Value::Object(arakan));
     Some(meta)
 }
 
@@ -416,13 +416,13 @@ fn extract_timeout_from_meta(meta: &Option<Meta>) -> Option<u64> {
 #[derive(Debug, Default, Deserialize)]
 struct ClientCapabilitiesMeta {
     #[serde(default)]
-    goose: Option<GooseClientCapabilities>,
+    arakan: Option<ArakanClientCapabilities>,
 }
 
 #[derive(Debug, Default, Deserialize)]
-struct GooseClientCapabilities {
+struct ArakanClientCapabilities {
     #[serde(rename = "mcpHostCapabilities", default)]
-    mcp_host_capabilities: Option<GooseMcpHostCapabilities>,
+    mcp_host_capabilities: Option<ArakanMcpHostCapabilities>,
     #[serde(rename = "customNotifications", default)]
     custom_notifications: Option<bool>,
     #[serde(rename = "recipeParameterRequests", default)]
@@ -432,7 +432,7 @@ struct GooseClientCapabilities {
 }
 
 #[derive(Debug, Default, Deserialize)]
-struct GooseMcpHostCapabilities {
+struct ArakanMcpHostCapabilities {
     #[serde(default)]
     extensions: Option<rmcp::model::ExtensionCapabilities>,
 }
@@ -446,10 +446,10 @@ fn extract_client_capabilities_meta(args: &InitializeRequest) -> Option<ClientCa
 
 fn extract_client_mcp_host_info(
     args: &InitializeRequest,
-    goose_client_capabilities: Option<&GooseClientCapabilities>,
-) -> GooseMcpHostInfo {
+    arakan_client_capabilities: Option<&ArakanClientCapabilities>,
+) -> ArakanMcpHostInfo {
     let host_capabilities =
-        goose_client_capabilities.and_then(|goose| goose.mcp_host_capabilities.as_ref());
+        arakan_client_capabilities.and_then(|arakan| arakan.mcp_host_capabilities.as_ref());
     let explicit_extensions = host_capabilities
         .as_ref()
         .and_then(|capabilities| capabilities.extensions.as_ref())
@@ -458,7 +458,7 @@ fn extract_client_mcp_host_info(
         .and_then(|capabilities| capabilities.extensions.clone())
         .unwrap_or_default();
 
-    GooseMcpHostInfo {
+    ArakanMcpHostInfo {
         explicit_extensions,
         extensions,
         client_name: args.client_info.as_ref().map(|info| info.name.clone()),
@@ -565,14 +565,14 @@ fn initial_session_extensions(
     builtin_selection: &AcpBuiltinSelection,
     project_root: &Path,
     mcp_servers: Vec<McpServer>,
-    goose_extensions: Option<Vec<GooseExtension>>,
+    arakan_extensions: Option<Vec<ArakanExtension>>,
     recipe_extensions: Option<&[ExtensionConfig]>,
 ) -> Result<Vec<ExtensionConfig>, agent_client_protocol::Error> {
     // A selection the client sends is the whole session: an empty list starts no
     // extensions, and `[memory]` starts Memory without the default built-ins.
-    if let (None, Some(goose_extensions)) = (recipe_extensions, goose_extensions) {
+    if let (None, Some(arakan_extensions)) = (recipe_extensions, arakan_extensions) {
         let mut selected = Vec::new();
-        for extension in extensions::goose_extensions_to_configs(goose_extensions)? {
+        for extension in extensions::arakan_extensions_to_configs(arakan_extensions)? {
             push_or_replace_extension(&mut selected, extension);
         }
         return Ok(selected);
@@ -611,12 +611,12 @@ fn push_or_replace_extension(extensions: &mut Vec<ExtensionConfig>, extension: E
 
 fn resolve_default_provider_model_config(
     config: &Config,
-) -> Result<(String, goose_providers::model::ModelConfig), agent_client_protocol::Error> {
-    let resolved_provider = config.get_goose_provider().map_err(|error| {
+) -> Result<(String, arakan_providers::model::ModelConfig), agent_client_protocol::Error> {
+    let resolved_provider = config.get_arakan_provider().map_err(|error| {
         agent_client_protocol::Error::internal_error()
             .data(format!("Failed to resolve provider: {}", error))
     })?;
-    let resolved_model = config.get_goose_model().map_err(|error| {
+    let resolved_model = config.get_arakan_model().map_err(|error| {
         agent_client_protocol::Error::internal_error()
             .data(format!("Failed to resolve model: {}", error))
     })?;
@@ -737,7 +737,7 @@ fn update_output_token_limit_reached(output_token_limit_reached: &mut bool, mess
 }
 
 pub(super) struct UsageUpdates {
-    pub(super) custom: GooseSessionNotification,
+    pub(super) custom: ArakanSessionNotification,
     pub(super) standard: UsageUpdate,
 }
 
@@ -753,9 +753,9 @@ pub(super) fn build_usage_updates(
     let accumulated_output_tokens =
         to_nonnegative_u64(totals.accumulated_usage.output_tokens).unwrap_or(0);
     UsageUpdates {
-        custom: GooseSessionNotification {
+        custom: ArakanSessionNotification {
             session_id: session.id.clone(),
-            update: GooseSessionUpdate::UsageUpdate(SessionUsageUpdate {
+            update: ArakanSessionUpdate::UsageUpdate(SessionUsageUpdate {
                 used,
                 context_limit: ctx_limit,
                 accumulated_input_tokens,
@@ -815,7 +815,7 @@ impl AcpConnection {
                 session_id,
                 self.connection_id,
                 Attachment {
-                    client: ClientContext::new(&self.services.goose_platform, None),
+                    client: ClientContext::new(&self.services.arakan_platform, None),
                     session_names: None,
                 },
                 run_id,
@@ -848,8 +848,8 @@ impl AcpConnection {
         Arc::clone(&self.services.permission_manager)
     }
 
-    pub(super) fn supports_goose_custom_notifications(&self) -> bool {
-        self.client_supports_goose_custom_notifications
+    pub(super) fn supports_arakan_custom_notifications(&self) -> bool {
+        self.client_supports_arakan_custom_notifications
             .get()
             .copied()
             .unwrap_or(false)
@@ -952,7 +952,7 @@ impl AcpConnection {
             client_mcp_host_info: OnceCell::new(),
             connection_id: NEXT_CONNECTION_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
             client_supports_acp_elicitation: OnceCell::new(),
-            client_supports_goose_custom_notifications: OnceCell::new(),
+            client_supports_arakan_custom_notifications: OnceCell::new(),
             client_supports_recipe_param_requests: OnceCell::new(),
             client_requests_tool_call_label_enrichment: OnceCell::new(),
             client_cx: OnceCell::new(),
@@ -982,13 +982,13 @@ impl AcpConnection {
     /// `session/new` critical path avoids stalling session creation on slow or
     /// blocking work such as a synchronous keychain read while resolving the
     /// provider's inventory identity.
-    fn spawn_provider_inventory_refresh(&self, goose_session: &Session) {
-        let Some(provider_name) = goose_session.provider_name.clone() else {
+    fn spawn_provider_inventory_refresh(&self, arakan_session: &Session) {
+        let Some(provider_name) = arakan_session.provider_name.clone() else {
             return;
         };
         let inventory_service = self.provider_inventory.clone();
         let services = self.services.clone();
-        let session_id = goose_session.id.clone();
+        let session_id = arakan_session.id.clone();
         tokio::spawn(async move {
             let Some(mut inventory) = inventory_service
                 .find_entry_for_provider(&provider_name)
@@ -1024,7 +1024,7 @@ impl AcpConnection {
                 .clone()
         });
         let client = ClientContext::new(
-            &self.services.goose_platform,
+            &self.services.arakan_platform,
             self.client_mcp_host_info.get().cloned(),
         );
         Attachment {
@@ -1136,7 +1136,7 @@ impl AcpConnection {
         config: &Config,
         session: &Session,
         mcp_servers: Vec<McpServer>,
-        goose_extensions: Option<Vec<GooseExtension>>,
+        arakan_extensions: Option<Vec<ArakanExtension>>,
         recipe_extensions: Option<&[ExtensionConfig]>,
     ) -> Result<ExtensionData, agent_client_protocol::Error> {
         let extensions = initial_session_extensions(
@@ -1144,7 +1144,7 @@ impl AcpConnection {
             &self.builtin_selection,
             &session.working_dir,
             mcp_servers,
-            goose_extensions,
+            arakan_extensions,
             recipe_extensions,
         )?;
         enabled_extensions_data(session, extensions)
@@ -1382,7 +1382,7 @@ impl AcpConnection {
             MessageContent::SystemNotification(notification) => {
                 send_status_message_update(
                     cx,
-                    self.supports_goose_custom_notifications(),
+                    self.supports_arakan_custom_notifications(),
                     session_id.0.as_ref(),
                     notification,
                 )?;
@@ -1540,19 +1540,19 @@ impl AcpConnection {
     }
 }
 
-fn extract_client_supports_goose_custom_notifications(
-    goose_client_capabilities: Option<&GooseClientCapabilities>,
+fn extract_client_supports_arakan_custom_notifications(
+    arakan_client_capabilities: Option<&ArakanClientCapabilities>,
 ) -> bool {
-    goose_client_capabilities
-        .and_then(|goose| goose.custom_notifications)
+    arakan_client_capabilities
+        .and_then(|arakan| arakan.custom_notifications)
         .unwrap_or(false)
 }
 
 fn extract_client_supports_recipe_param_requests(
-    goose_client_capabilities: Option<&GooseClientCapabilities>,
+    arakan_client_capabilities: Option<&ArakanClientCapabilities>,
 ) -> bool {
-    goose_client_capabilities
-        .and_then(|goose| goose.recipe_parameter_requests)
+    arakan_client_capabilities
+        .and_then(|arakan| arakan.recipe_parameter_requests)
         .unwrap_or(false)
 }
 
@@ -1629,15 +1629,15 @@ fn credits_exhausted_prompt_error(
 
 fn send_status_message_update(
     cx: &ConnectionTo<Client>,
-    supports_goose_custom_notifications: bool,
+    supports_arakan_custom_notifications: bool,
     session_id: &str,
     notification: &SystemNotificationContent,
 ) -> Result<(), agent_client_protocol::Error> {
     if let Some(status) = status_message_from_system_notification(notification) {
-        if supports_goose_custom_notifications {
-            cx.send_notification(GooseSessionNotification {
+        if supports_arakan_custom_notifications {
+            cx.send_notification(ArakanSessionNotification {
                 session_id: session_id.to_string(),
-                update: GooseSessionUpdate::StatusMessage(StatusMessageUpdate { status }),
+                update: ArakanSessionUpdate::StatusMessage(StatusMessageUpdate { status }),
             })?;
         }
     }
@@ -1646,14 +1646,14 @@ fn send_status_message_update(
 
 fn send_progress_message_update(
     cx: &ConnectionTo<Client>,
-    supports_goose_custom_notifications: bool,
+    supports_arakan_custom_notifications: bool,
     session_id: &str,
     message: String,
 ) -> Result<(), agent_client_protocol::Error> {
-    if supports_goose_custom_notifications {
-        cx.send_notification(GooseSessionNotification {
+    if supports_arakan_custom_notifications {
+        cx.send_notification(ArakanSessionNotification {
             session_id: session_id.to_string(),
-            update: GooseSessionUpdate::StatusMessage(StatusMessageUpdate {
+            update: ArakanSessionUpdate::StatusMessage(StatusMessageUpdate {
                 status: StatusMessage::Progress { message },
             }),
         })?;
@@ -1711,21 +1711,21 @@ impl AcpConnection {
     ) -> Result<InitializeResponse, agent_client_protocol::Error> {
         debug!(?args, "initialize request");
 
-        let goose_client_capabilities =
-            extract_client_capabilities_meta(&args).and_then(|meta| meta.goose);
+        let arakan_client_capabilities =
+            extract_client_capabilities_meta(&args).and_then(|meta| meta.arakan);
         let _ = self.client_mcp_host_info.set(extract_client_mcp_host_info(
             &args,
-            goose_client_capabilities.as_ref(),
+            arakan_client_capabilities.as_ref(),
         ));
-        let _ = self.client_supports_goose_custom_notifications.set(
-            extract_client_supports_goose_custom_notifications(goose_client_capabilities.as_ref()),
+        let _ = self.client_supports_arakan_custom_notifications.set(
+            extract_client_supports_arakan_custom_notifications(arakan_client_capabilities.as_ref()),
         );
         let _ = self.client_supports_recipe_param_requests.set(
-            extract_client_supports_recipe_param_requests(goose_client_capabilities.as_ref()),
+            extract_client_supports_recipe_param_requests(arakan_client_capabilities.as_ref()),
         );
-        let client_requests_tool_call_label_enrichment = goose_client_capabilities
+        let client_requests_tool_call_label_enrichment = arakan_client_capabilities
             .as_ref()
-            .and_then(|goose| goose.tool_call_label_enrichment)
+            .and_then(|arakan| arakan.tool_call_label_enrichment)
             .unwrap_or(false);
         let _ = self
             .client_requests_tool_call_label_enrichment
@@ -1751,11 +1751,11 @@ impl AcpConnection {
             .mcp_capabilities(McpCapabilities::new().http(true))
             .meta(agent_capabilities_meta());
         Ok(InitializeResponse::new(ProtocolVersion::LATEST)
-            .agent_info(Implementation::new("goose", env!("CARGO_PKG_VERSION")))
+            .agent_info(Implementation::new("arakan", env!("CARGO_PKG_VERSION")))
             .agent_capabilities(capabilities)
             .auth_methods(vec![AuthMethod::Agent(
-                AuthMethodAgent::new("goose-provider", "Configure Provider")
-                    .description("Run `goose configure` to set up your AI provider and API key"),
+                AuthMethodAgent::new("arakan-provider", "Configure Provider")
+                    .description("Run `arakan configure` to set up your AI provider and API key"),
             )]))
     }
 
@@ -1826,7 +1826,7 @@ impl AcpConnection {
             .map_err(|error| match error {
                 StartRunError::AgentRunExists { run_id } => {
                     let message = format!(
-                        "session already has active run `{run_id}`; use _goose/unstable/session/steer"
+                        "session already has active run `{run_id}`; use _arakan/unstable/session/steer"
                     );
                     agent_client_protocol::Error::invalid_params().data(message)
                 }
@@ -1876,8 +1876,8 @@ impl AcpConnection {
     }
 
     fn active_run_meta(active_run_id: Option<&str>) -> Meta {
-        let mut goose = serde_json::Map::new();
-        goose.insert(
+        let mut arakan = serde_json::Map::new();
+        arakan.insert(
             "activeRunId".to_string(),
             active_run_id
                 .map(|run_id| serde_json::Value::String(run_id.to_string()))
@@ -1885,7 +1885,7 @@ impl AcpConnection {
         );
 
         let mut meta = serde_json::Map::new();
-        meta.insert("goose".to_string(), serde_json::Value::Object(goose));
+        meta.insert("arakan".to_string(), serde_json::Value::Object(arakan));
         meta
     }
 
@@ -1908,8 +1908,8 @@ impl AcpConnection {
         message_id: &str,
         run_id: &str,
     ) -> Result<(), agent_client_protocol::Error> {
-        let mut goose = serde_json::Map::new();
-        goose.insert(
+        let mut arakan = serde_json::Map::new();
+        arakan.insert(
             "queuedSteer".to_string(),
             serde_json::json!({
                 "messageId": message_id,
@@ -1917,7 +1917,7 @@ impl AcpConnection {
             }),
         );
         let mut meta = serde_json::Map::new();
-        meta.insert("goose".to_string(), serde_json::Value::Object(goose));
+        meta.insert("arakan".to_string(), serde_json::Value::Object(arakan));
 
         cx.send_notification(SessionNotification::new(
             session_id.clone(),
@@ -1960,7 +1960,7 @@ impl AcpConnection {
 
         send_progress_message_update(
             cx,
-            self.supports_goose_custom_notifications(),
+            self.supports_arakan_custom_notifications(),
             acp_session_id.0.as_ref(),
             format!("Loading local model {model_name}..."),
         )
@@ -2012,7 +2012,7 @@ impl AcpConnection {
             }
         };
         let updates = build_usage_updates(&session, &totals, context_limit);
-        if self.supports_goose_custom_notifications() {
+        if self.supports_arakan_custom_notifications() {
             cx.send_notification(updates.custom)?;
         }
         cx.send_notification(SessionNotification::new(
@@ -2100,10 +2100,10 @@ impl AcpConnection {
                     }
                 }
                 Ok(crate::agents::AgentEvent::MessageUsage { message_id, usage }) => {
-                    if self.supports_goose_custom_notifications() {
-                        cx.send_notification(GooseSessionNotification {
+                    if self.supports_arakan_custom_notifications() {
+                        cx.send_notification(ArakanSessionNotification {
                             session_id: session_id.to_string(),
-                            update: GooseSessionUpdate::MessageUsage(message_usage_update(
+                            update: ArakanSessionUpdate::MessageUsage(message_usage_update(
                                 message_id, &usage,
                             )),
                         })?;
@@ -2126,10 +2126,10 @@ impl AcpConnection {
                     }
                 }
                 Ok(crate::agents::AgentEvent::HistoryReplaced(_)) => {
-                    if self.supports_goose_custom_notifications() {
-                        cx.send_notification(GooseSessionNotification {
+                    if self.supports_arakan_custom_notifications() {
+                        cx.send_notification(ArakanSessionNotification {
                             session_id: session_id.to_string(),
-                            update: GooseSessionUpdate::StatusMessage(StatusMessageUpdate {
+                            update: ArakanSessionUpdate::StatusMessage(StatusMessageUpdate {
                                 status: StatusMessage::Notice {
                                     message: "Context compacted — earlier messages archived"
                                         .to_string(),
@@ -2394,13 +2394,13 @@ impl AcpConnection {
             .await
             .internal_err_ctx("Failed to resolve model config")?;
         let current_model = current_model_config.model_name.clone();
-        let goose_mode = self
+        let arakan_mode = self
             .services
             .session_manager
             .get_session(&session_id.0, false)
             .await
-            .internal_err_ctx("Failed to read goose mode")?
-            .goose_mode;
+            .internal_err_ctx("Failed to read arakan mode")?
+            .arakan_mode;
         let inventory = self
             .provider_inventory
             .entry_for_provider(&provider_name)
@@ -2411,7 +2411,7 @@ impl AcpConnection {
                 .data(format!("Unknown provider inventory: {}", provider_name)));
         };
         let model_state = build_model_state(current_model.as_str(), &inventory);
-        let mode_state = build_mode_state(goose_mode)?;
+        let mode_state = build_mode_state(arakan_mode)?;
         let provider_options = build_provider_options(Some(&provider_name)).await;
         let config_options = build_config_options(
             &mode_state,
@@ -2433,18 +2433,18 @@ impl AcpConnection {
         session_id: &str,
         mode_id: &str,
     ) -> Result<SetSessionModeResponse, agent_client_protocol::Error> {
-        let mode = mode_id.parse::<GooseMode>().map_err(|_| {
+        let mode = mode_id.parse::<ArakanMode>().map_err(|_| {
             agent_client_protocol::Error::invalid_params()
                 .data(format!("Invalid mode: {}", mode_id))
         })?;
 
         self.open_session(session_id).await?;
         self.services
-            .update_goose_mode(mode, session_id)
+            .update_arakan_mode(mode, session_id)
             .await
             .internal_err_ctx("Failed to update mode")?;
 
-        // goose_mode is already updated on the session above.
+        // arakan_mode is already updated on the session above.
 
         Ok(SetSessionModeResponse::new())
     }
@@ -2488,7 +2488,7 @@ impl AcpConnection {
         let use_default_provider = provider_name == DEFAULT_PROVIDER_ID;
         let resolved_provider_name = if use_default_provider {
             config
-                .get_goose_provider()
+                .get_arakan_provider()
                 .internal_err_ctx("Failed to resolve default provider from config")?
         } else {
             provider_name.to_string()
@@ -2498,7 +2498,7 @@ impl AcpConnection {
             model_name.to_string()
         } else if use_default_provider {
             config
-                .get_goose_model()
+                .get_arakan_model()
                 .internal_err_ctx("Failed to resolve default model from config")?
         } else if is_changing_provider {
             crate::providers::get_from_registry(&resolved_provider_name)
@@ -2577,7 +2577,7 @@ where
 
         SacpAgent
             .builder()
-            .name("goose-acp")
+            .name("arakan-acp")
             .with_handler(handler)
             .connect_to(ByteStreams::new(write, read))
             .await?;
@@ -2609,7 +2609,7 @@ impl agent_client_protocol::ConnectTo<Client> for LazyAcpConnection {
         let handler = AcpConnectionHandler { connection };
         SacpAgent
             .builder()
-            .name("goose-acp")
+            .name("arakan-acp")
             .with_handler(handler)
             .connect_to(client)
             .await
@@ -2626,7 +2626,7 @@ pub async fn run(builtins: Vec<String>, enable_scheduler: bool) -> Result<()> {
         crate::acp::server_factory::AcpServerFactoryConfig {
             builtins: AcpBuiltinSelection::from_requested(builtins),
             config_dir: Paths::config_dir(),
-            goose_platform: GoosePlatform::GooseCli,
+            arakan_platform: ArakanPlatform::ArakanCli,
             additional_source_roots: Vec::new(),
             session_cwd: None,
             enable_scheduler,
@@ -2645,8 +2645,8 @@ mod tests {
         McpServerStdio, PermissionOptionId, ResourceLink, Role as AcpRole,
         SelectedPermissionOutcome, TextResourceContents,
     };
-    use goose_providers::conversation::token_usage::Usage as TokenUsage;
-    use goose_providers::thinking::{
+    use arakan_providers::conversation::token_usage::Usage as TokenUsage;
+    use arakan_providers::thinking::{
         ThinkingEffortCapability, ThinkingEffortOption, ThinkingEffortSupport,
     };
     use std::io::Write;
@@ -2702,7 +2702,7 @@ mod tests {
 
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system: &str,
             _messages: &[Message],
             _tools: &[rmcp::model::Tool],
@@ -2845,8 +2845,8 @@ extensions:
             .any(|extension| extension.name() == "zed-mcp"));
     }
 
-    fn requested_builtin(name: &str) -> GooseExtension {
-        GooseExtension::Builtin {
+    fn requested_builtin(name: &str) -> ArakanExtension {
+        ArakanExtension::Builtin {
             name: name.to_string(),
             description: None,
             display_name: None,
@@ -3514,7 +3514,7 @@ print(\"hello, world\")
             TokenUsage::default(),
         );
         session.model_config = Some(
-            goose_providers::model::ModelConfig::new("test-model")
+            arakan_providers::model::ModelConfig::new("test-model")
                 .with_context_limit(Some(258_000)),
         );
         let totals = SessionUsageTotals {
@@ -3524,7 +3524,7 @@ print(\"hello, world\")
         let updates = build_usage_updates(&session, &totals, 258_000);
         assert_eq!(updates.custom.session_id, "session-1");
         let usage = match updates.custom.update {
-            GooseSessionUpdate::UsageUpdate(usage) => usage,
+            ArakanSessionUpdate::UsageUpdate(usage) => usage,
             other => panic!("expected usage update, got {other:?}"),
         };
         assert_eq!(usage.used, 0);
@@ -3534,13 +3534,13 @@ print(\"hello, world\")
     }
 
     #[test]
-    fn test_goose_custom_notifications_capability_defaults_to_false() {
+    fn test_arakan_custom_notifications_capability_defaults_to_false() {
         let request = InitializeRequest::new(agent_client_protocol::schema::ProtocolVersion::V1);
-        let goose_client_capabilities =
-            extract_client_capabilities_meta(&request).and_then(|meta| meta.goose);
+        let arakan_client_capabilities =
+            extract_client_capabilities_meta(&request).and_then(|meta| meta.arakan);
 
-        assert!(!extract_client_supports_goose_custom_notifications(
-            goose_client_capabilities.as_ref()
+        assert!(!extract_client_supports_arakan_custom_notifications(
+            arakan_client_capabilities.as_ref()
         ));
     }
 
@@ -3548,20 +3548,20 @@ print(\"hello, world\")
     fn test_agent_capabilities_advertise_recipe_parameter_scopes() {
         assert_eq!(
             agent_capabilities_meta()
-                .and_then(|meta| meta.get("goose").cloned())
-                .and_then(|goose| goose.get("recipeParameterScopes").cloned()),
+                .and_then(|meta| meta.get("arakan").cloned())
+                .and_then(|arakan| arakan.get("recipeParameterScopes").cloned()),
             Some(serde_json::json!({}))
         );
     }
 
     #[tokio::test]
-    async fn initialize_stamps_the_protocol_version_goose_implements() {
+    async fn initialize_stamps_the_protocol_version_arakan_implements() {
         let root = tempfile::tempdir().unwrap();
         let services = StateMachineServices::with_config(acp_services_config(
             Arc::new(SessionManager::new(root.path().to_path_buf())),
             root.path().to_path_buf(),
             true,
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         ));
         let live_voice = Arc::new(LiveVoiceService::from_config(services.runtime.runs.clone()));
         let provider_factory: AcpProviderFactory = Arc::new(|_provider_name| {
@@ -3587,7 +3587,7 @@ print(\"hello, world\")
         assert_eq!(
             response.protocol_version,
             agent_client_protocol::schema::ProtocolVersion::V1,
-            "goose implements ACP v1 and must stamp v1 even when the client offers v2"
+            "arakan implements ACP v1 and must stamp v1 even when the client offers v2"
         );
 
         let response = connection
@@ -3603,51 +3603,51 @@ print(\"hello, world\")
     }
 
     #[test]
-    fn test_goose_custom_notifications_capability_reads_client_meta() {
-        let mut goose_meta = serde_json::Map::new();
-        goose_meta.insert(
+    fn test_arakan_custom_notifications_capability_reads_client_meta() {
+        let mut arakan_meta = serde_json::Map::new();
+        arakan_meta.insert(
             "customNotifications".to_string(),
             serde_json::Value::Bool(true),
         );
         let mut meta = serde_json::Map::new();
-        meta.insert("goose".to_string(), serde_json::Value::Object(goose_meta));
+        meta.insert("arakan".to_string(), serde_json::Value::Object(arakan_meta));
 
         let request = InitializeRequest::new(agent_client_protocol::schema::ProtocolVersion::V1)
             .client_capabilities(
                 agent_client_protocol::schema::v1::ClientCapabilities::new().meta(meta),
             );
-        let goose_client_capabilities =
-            extract_client_capabilities_meta(&request).and_then(|meta| meta.goose);
+        let arakan_client_capabilities =
+            extract_client_capabilities_meta(&request).and_then(|meta| meta.arakan);
 
-        assert!(extract_client_supports_goose_custom_notifications(
-            goose_client_capabilities.as_ref()
+        assert!(extract_client_supports_arakan_custom_notifications(
+            arakan_client_capabilities.as_ref()
         ));
     }
 
     #[test]
     fn test_tool_call_label_enrichment_capability() {
         let request = InitializeRequest::new(agent_client_protocol::schema::ProtocolVersion::V1);
-        let goose_client_capabilities =
-            extract_client_capabilities_meta(&request).and_then(|meta| meta.goose);
-        assert!(!goose_client_capabilities
-            .and_then(|goose| goose.tool_call_label_enrichment)
+        let arakan_client_capabilities =
+            extract_client_capabilities_meta(&request).and_then(|meta| meta.arakan);
+        assert!(!arakan_client_capabilities
+            .and_then(|arakan| arakan.tool_call_label_enrichment)
             .unwrap_or(false));
 
-        let mut goose_meta = serde_json::Map::new();
-        goose_meta.insert(
+        let mut arakan_meta = serde_json::Map::new();
+        arakan_meta.insert(
             "toolCallLabelEnrichment".to_string(),
             serde_json::Value::Bool(true),
         );
         let mut meta = serde_json::Map::new();
-        meta.insert("goose".to_string(), serde_json::Value::Object(goose_meta));
+        meta.insert("arakan".to_string(), serde_json::Value::Object(arakan_meta));
         let request = InitializeRequest::new(agent_client_protocol::schema::ProtocolVersion::V1)
             .client_capabilities(
                 agent_client_protocol::schema::v1::ClientCapabilities::new().meta(meta),
             );
-        let goose_client_capabilities =
-            extract_client_capabilities_meta(&request).and_then(|meta| meta.goose);
-        assert!(goose_client_capabilities
-            .and_then(|goose| goose.tool_call_label_enrichment)
+        let arakan_client_capabilities =
+            extract_client_capabilities_meta(&request).and_then(|meta| meta.arakan);
+        assert!(arakan_client_capabilities
+            .and_then(|arakan| arakan.tool_call_label_enrichment)
             .unwrap_or(false));
     }
 
@@ -3693,7 +3693,7 @@ print(\"hello, world\")
             Arc::new(SessionManager::new(root.path().to_path_buf())),
             root.path().to_path_buf(),
             true,
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         ));
         let live_voice = Arc::new(LiveVoiceService::from_config(services.runtime.runs.clone()));
         let provider_factory: AcpProviderFactory = Arc::new(|_provider_name| {
@@ -3719,7 +3719,7 @@ print(\"hello, world\")
                 root.path().to_path_buf(),
                 "Effort update test".to_string(),
                 SessionType::Acp,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await
             .unwrap();
@@ -3728,7 +3728,7 @@ print(\"hello, world\")
             .services
             .update_provider(
                 provider.clone(),
-                goose_providers::model::ModelConfig::new("gpt-4o").with_merged_request_params(
+                arakan_providers::model::ModelConfig::new("gpt-4o").with_merged_request_params(
                     HashMap::from([("thinking_effort".to_string(), serde_json::json!("xhigh"))]),
                 ),
                 &session.id,
@@ -3741,7 +3741,7 @@ print(\"hello, world\")
                 &session.id,
                 server.connection_id,
                 Attachment {
-                    client: ClientContext::new(&GoosePlatform::GooseCli, None),
+                    client: ClientContext::new(&ArakanPlatform::ArakanCli, None),
                     session_names: None,
                 },
             )

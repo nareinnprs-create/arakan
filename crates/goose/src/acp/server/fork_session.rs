@@ -51,30 +51,30 @@ impl AcpConnection {
             .await
             .internal_err()?;
 
-        let mut goose_session = self
+        let mut arakan_session = self
             .prepare_session_for_activation(new_session.clone(), cwd, args.mcp_servers, true)
             .await?;
-        self.render_stored_recipe_template(&mut goose_session)
+        self.render_stored_recipe_template(&mut arakan_session)
             .await?;
 
-        let extension_results = self.prepare_acp_session(cx, &goose_session).await?;
-        self.register_acp_session(goose_session.id.clone()).await;
+        let extension_results = self.prepare_acp_session(cx, &arakan_session).await?;
+        self.register_acp_session(arakan_session.id.clone()).await;
         let provider = self
             .services
-            .provider(&goose_session.id)
+            .provider(&arakan_session.id)
             .await
             .internal_err_ctx("Failed to get provider while forking ACP session")?;
-        resume_saved_provider_session(&provider, goose_session.conversation.as_ref()).await;
-        let effort_support = agent_thinking_effort_support(&self.services, &goose_session.id).await;
+        resume_saved_provider_session(&provider, arakan_session.conversation.as_ref()).await;
+        let effort_support = agent_thinking_effort_support(&self.services, &arakan_session.id).await;
 
         let acp_session_id = SessionId::new(new_session_id.clone());
-        let mut meta = session_meta(&goose_session);
+        let mut meta = session_meta(&arakan_session);
         if let Ok(v) = serde_json::to_value(&extension_results) {
             meta.insert("extensionResults".to_string(), v);
         }
 
         let (mode_state, config_options) =
-            build_session_setup_config(&self.provider_inventory, &goose_session, &effort_support)
+            build_session_setup_config(&self.provider_inventory, &arakan_session, &effort_support)
                 .await?;
 
         let mut response = ForkSessionResponse::new(acp_session_id.clone())

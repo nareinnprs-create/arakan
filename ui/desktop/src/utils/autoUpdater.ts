@@ -352,8 +352,8 @@ export function setupAutoUpdater() {
   // Set the feed URL for GitHub releases
   const feedConfig = {
     provider: 'github' as const,
-    owner: 'aaif-goose',
-    repo: 'goose',
+    owner: 'aaif-arakan',
+    repo: 'arakan',
     releaseType: 'release' as const,
     // The installer manifest has its own name (scripts/generate-windows-update-manifest.js) so
     // ZIP copies, which request latest.yml, are never moved onto the installer.
@@ -371,13 +371,13 @@ export function setupAutoUpdater() {
     log.error('Error getting feed URL:', e);
   }
 
-  // Respect GOOSE_DISABLE_AUTO_DOWNLOAD env var (takes precedence over user setting)
+  // Respect ARAKAN_DISABLE_AUTO_DOWNLOAD env var (takes precedence over user setting)
   const envDisabled =
-    process.env.GOOSE_DISABLE_AUTO_DOWNLOAD === '1' ||
-    process.env.GOOSE_DISABLE_AUTO_DOWNLOAD === 'true';
+    process.env.ARAKAN_DISABLE_AUTO_DOWNLOAD === '1' ||
+    process.env.ARAKAN_DISABLE_AUTO_DOWNLOAD === 'true';
   if (envDisabled) {
     autoDownloadDisabled = true;
-    log.info('Auto-download disabled via GOOSE_DISABLE_AUTO_DOWNLOAD environment variable');
+    log.info('Auto-download disabled via ARAKAN_DISABLE_AUTO_DOWNLOAD environment variable');
   }
 
   // Configure auto-updater settings
@@ -653,7 +653,7 @@ export function setupAutoUpdater() {
     // Show native notification
     const notification = new Notification({
       title: 'Update Ready',
-      body: `Version ${info.version} will be installed when you quit Goose. Click to install now.`,
+      body: `Version ${info.version} will be installed when you quit Arakan. Click to install now.`,
     });
     notification.show();
 
@@ -730,7 +730,7 @@ async function githubAutoDownload(
 function updateTrayIcon(hasUpdate: boolean) {
   if (!trayRef) return;
 
-  if (process.env.GOOSE_VERSION) {
+  if (process.env.ARAKAN_VERSION) {
     hasUpdate = false;
   }
 
@@ -744,7 +744,7 @@ function updateTrayIcon(hasUpdate: boolean) {
     } else {
       iconPath = path.join(process.resourcesPath, 'images', 'iconTemplateUpdate.png');
     }
-    trayRef.setToolTip('Goose - Update Available');
+    trayRef.setToolTip('Arakan - Update Available');
   } else {
     // Use normal icon
     if (isDev) {
@@ -752,7 +752,7 @@ function updateTrayIcon(hasUpdate: boolean) {
     } else {
       iconPath = path.join(process.resourcesPath, 'images', 'iconTemplate.png');
     }
-    trayRef.setToolTip('Goose');
+    trayRef.setToolTip('Arakan');
   }
 
   const icon = nativeImage.createFromPath(iconPath);

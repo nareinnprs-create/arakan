@@ -10,11 +10,11 @@ const CREDITS_EXHAUSTED_REASON = 'credits_exhausted';
 const TURN_FAILED_REASON = 'turn_failed';
 const AUTH_REQUIRED_CODE = -32000;
 
-// Kept in sync with RECIPE_PARAMS_CANCELLED_REASON in crates/goose/src/acp/server/recipe.rs.
+// Kept in sync with RECIPE_PARAMS_CANCELLED_REASON in crates/arakan/src/acp/server/recipe.rs.
 const RECIPE_PARAMS_CANCELLED_REASON = 'recipe_params_cancelled';
 
 export const RECIPE_PARAMETER_SCOPES_UNSUPPORTED_MESSAGE =
-  'The connected Goose server does not support securely scoped deeplink recipe parameters. Update the server and try again.';
+  'The connected Arakan server does not support securely scoped deeplink recipe parameters. Update the server and try again.';
 
 export class RecipeParameterScopesUnsupportedError extends Error {
   constructor() {

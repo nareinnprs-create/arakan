@@ -1,6 +1,6 @@
 use super::*;
 use crate::config::paths::Paths;
-use crate::goose_apps::{fetch_mcp_apps, mark_deletable_apps, GooseApp, McpAppCache};
+use crate::arakan_apps::{fetch_mcp_apps, mark_deletable_apps, ArakanApp, McpAppCache};
 
 const APPS_EXTENSION_NAME: &str = "apps";
 
@@ -89,7 +89,7 @@ impl AcpConnection {
         req: AppsImportRequest,
     ) -> Result<AppsImportResponse, agent_client_protocol::Error> {
         let cache = McpAppCache::new().internal_err_ctx("Failed to access app cache")?;
-        let mut app = GooseApp::from_html(&req.html)
+        let mut app = ArakanApp::from_html(&req.html)
             .map_err(|error| agent_client_protocol::Error::invalid_params().data(error))?;
 
         let original_name = app.resource.name.clone();
@@ -241,7 +241,7 @@ fn delete_app_html_file(app_name: &str) -> Result<(), agent_client_protocol::Err
 }
 
 fn apps_to_values(
-    apps: Vec<GooseApp>,
+    apps: Vec<ArakanApp>,
 ) -> Result<Vec<serde_json::Value>, agent_client_protocol::Error> {
     apps.into_iter()
         .map(serde_json::to_value)
@@ -260,9 +260,9 @@ mod tests {
         F: FnOnce(),
     {
         let root = TempDir::new().unwrap();
-        std::env::set_var("GOOSE_PATH_ROOT", root.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", root.path());
         test();
-        std::env::remove_var("GOOSE_PATH_ROOT");
+        std::env::remove_var("ARAKAN_PATH_ROOT");
     }
 
     #[test]

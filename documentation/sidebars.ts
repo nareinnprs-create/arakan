@@ -11,10 +11,10 @@ const sidebars: SidebarsConfig = {
       link: { type: "doc", id: "gdk/demos/index" },
       items: [
         "gdk/demos/lifewiki",
-        "gdk/demos/goosebusters",
+        "gdk/demos/arakanbusters",
         "gdk/demos/huddle",
         "gdk/demos/perception",
-        "gdk/demos/top-goose",
+        "gdk/demos/top-arakan",
         "gdk/demos/berd",
       ],
     },

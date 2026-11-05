@@ -2,7 +2,7 @@ use super::StateMachineServices;
 
 pub fn slash_commands_enabled() -> bool {
     crate::config::Config::global()
-        .get_param::<bool>("GOOSE_SLASH_COMMANDS_ENABLED")
+        .get_param::<bool>("ARAKAN_SLASH_COMMANDS_ENABLED")
         .unwrap_or(true)
 }
 
@@ -37,7 +37,7 @@ static COMMANDS: &[CommandDef] = &[
     },
     CommandDef {
         name: "doctor",
-        description: "Check that your Goose setup is working",
+        description: "Check that your Arakan setup is working",
     },
     CommandDef {
         name: "goal",

@@ -4,7 +4,7 @@ vi.mock('./logger', () => ({ default: { info: vi.fn(), error: vi.fn() } }));
 
 import { appendToWindowsPath } from './winShims';
 
-const shims = 'C:\\Users\\me\\AppData\\Local\\Goose\\bin';
+const shims = 'C:\\Users\\me\\AppData\\Local\\Arakan\\bin';
 
 describe('appendToWindowsPath', () => {
   it.each([

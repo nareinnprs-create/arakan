@@ -1,15 +1,15 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::agents::state_machine::effects::GooseEffect;
+use crate::agents::state_machine::effects::ArakanEffect;
 use crate::agents::state_machine::usage;
 use crate::agents::AgentEvent;
 use crate::conversation::message::{ActionRequiredData, Message, MessageContent};
 use crate::conversation::Conversation;
 use crate::hooks::{HookContext, HookEvent, HookManager};
 use crate::session::{Session, SessionManager};
-use goose_agent::machine::{EffectHandler, EffectUsage, MachineSession, SessionLoader};
-use goose_agent::operation::{ConversationEffect, Emitter, MachineEffect};
+use arakan_agent::machine::{EffectHandler, EffectUsage, MachineSession, SessionLoader};
+use arakan_agent::operation::{ConversationEffect, Emitter, MachineEffect};
 
 use super::ops_auto_effort::current_turn_effort;
 
@@ -29,7 +29,7 @@ impl MachineSession for Session {
     fn conversation(&self) -> Option<&Conversation> {
         self.conversation.as_ref()
     }
-    fn thinking_effort(&self) -> Option<goose_providers::thinking::ThinkingEffort> {
+    fn thinking_effort(&self) -> Option<arakan_providers::thinking::ThinkingEffort> {
         self.conversation
             .as_ref()
             .and_then(current_turn_effort)
@@ -49,11 +49,11 @@ impl SessionLoader<Session> for SessionManager {
 }
 
 #[async_trait]
-impl EffectHandler<Session, GooseEffect> for SessionManager {
+impl EffectHandler<Session, ArakanEffect> for SessionManager {
     async fn apply_effects(
         &self,
         session: &Session,
-        effects: &mut [GooseEffect],
+        effects: &mut [ArakanEffect],
         emit: &Emitter,
     ) -> Result<()> {
         for effect in effects.iter_mut() {
@@ -63,10 +63,10 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
 
         for effect in effects.iter_mut() {
             match effect {
-                GooseEffect::Conversation(ConversationEffect::AppendMessage(message)) => {
+                ArakanEffect::Conversation(ConversationEffect::AppendMessage(message)) => {
                     self.add_message(&session.id, message).await?;
                 }
-                GooseEffect::Conversation(ConversationEffect::ReplaceConversation(
+                ArakanEffect::Conversation(ConversationEffect::ReplaceConversation(
                     conversation,
                 )) => {
                     self.replace_conversation(&session.id, conversation).await?;
@@ -75,7 +75,7 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
                         .apply()
                         .await?;
                 }
-                GooseEffect::CompactConversation {
+                ArakanEffect::CompactConversation {
                     conversation,
                     usage: replacement_usage,
                 } => {
@@ -89,14 +89,14 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
                         .apply()
                         .await?;
                 }
-                GooseEffect::Conversation(ConversationEffect::PatchToolRequestMeta {
+                ArakanEffect::Conversation(ConversationEffect::PatchToolRequestMeta {
                     tool_call_id,
                     patch,
                 }) => {
                     self.update_tool_request_meta(&session.id, tool_call_id, patch.clone())
                         .await?;
                 }
-                GooseEffect::Conversation(ConversationEffect::SetMessageOperationNote {
+                ArakanEffect::Conversation(ConversationEffect::SetMessageOperationNote {
                     message_id,
                     operation,
                     key,
@@ -108,7 +108,7 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
                     })
                     .await?;
                 }
-                GooseEffect::Conversation(ConversationEffect::SetMessageVisibility {
+                ArakanEffect::Conversation(ConversationEffect::SetMessageVisibility {
                     message_id,
                     user_visible,
                     agent_visible,
@@ -120,13 +120,13 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
                     })
                     .await?;
                 }
-                GooseEffect::SetRecipe(recipe) => {
+                ArakanEffect::SetRecipe(recipe) => {
                     self.update(&session.id)
                         .recipe(recipe.as_ref().clone())
                         .apply()
                         .await?;
                 }
-                GooseEffect::SetExtensionState {
+                ArakanEffect::SetExtensionState {
                     extension_name,
                     version,
                     value,
@@ -134,7 +134,7 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
                     self.set_extension_value(&session.id, extension_name, version, value.clone())
                         .await?;
                 }
-                GooseEffect::RecordUsage(provider_usage) => {
+                ArakanEffect::RecordUsage(provider_usage) => {
                     usage::record(self, session, provider_usage, false).await?;
                 }
             }
@@ -142,7 +142,7 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
 
         for (index, effect) in effects.iter().enumerate() {
             match effect {
-                GooseEffect::Conversation(ConversationEffect::AppendMessage(message)) => {
+                ArakanEffect::Conversation(ConversationEffect::AppendMessage(message)) => {
                     if contains_tool_confirmation_request(message) {
                         // Responses can arrive immediately, so publish only after the persistence pass.
                         emit.emit(AgentEvent::Message(message.clone()));
@@ -160,16 +160,16 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
                         });
                     }
                 }
-                GooseEffect::Conversation(ConversationEffect::ReplaceConversation(
+                ArakanEffect::Conversation(ConversationEffect::ReplaceConversation(
                     conversation,
                 ))
-                | GooseEffect::CompactConversation { conversation, .. } => {
+                | ArakanEffect::CompactConversation { conversation, .. } => {
                     emit.emit(AgentEvent::HistoryReplaced(replaced_history(
                         conversation,
                         &effects[index + 1..],
                     )));
                 }
-                GooseEffect::RecordUsage(usage) => emit.emit(AgentEvent::Usage(usage.clone())),
+                ArakanEffect::RecordUsage(usage) => emit.emit(AgentEvent::Usage(usage.clone())),
                 _ => {}
             }
         }
@@ -179,7 +179,7 @@ impl EffectHandler<Session, GooseEffect> for SessionManager {
 
 struct TurnRuntime<'a> {
     session_manager: &'a SessionManager,
-    usage: std::sync::Mutex<goose_providers::conversation::token_usage::Usage>,
+    usage: std::sync::Mutex<arakan_providers::conversation::token_usage::Usage>,
 }
 
 #[async_trait]
@@ -190,11 +190,11 @@ impl SessionLoader<Session> for TurnRuntime<'_> {
 }
 
 #[async_trait]
-impl EffectHandler<Session, GooseEffect> for TurnRuntime<'_> {
+impl EffectHandler<Session, ArakanEffect> for TurnRuntime<'_> {
     async fn apply_effects(
         &self,
         session: &Session,
-        effects: &mut [GooseEffect],
+        effects: &mut [ArakanEffect],
         emit: &Emitter,
     ) -> Result<()> {
         self.session_manager
@@ -213,7 +213,7 @@ impl EffectHandler<Session, GooseEffect> for TurnRuntime<'_> {
 /// Clients swap in the replaced history, so it includes what the same batch appends
 /// after the replacement; those messages were already shown live and would otherwise
 /// vanish (a `/clear` would leave nothing).
-fn replaced_history(replacement: &Conversation, later_effects: &[GooseEffect]) -> Conversation {
+fn replaced_history(replacement: &Conversation, later_effects: &[ArakanEffect]) -> Conversation {
     let mut messages = replacement.messages().clone();
     messages.extend(
         later_effects
@@ -221,12 +221,12 @@ fn replaced_history(replacement: &Conversation, later_effects: &[GooseEffect]) -
             .take_while(|effect| {
                 !matches!(
                     effect,
-                    GooseEffect::Conversation(ConversationEffect::ReplaceConversation(_))
-                        | GooseEffect::CompactConversation { .. }
+                    ArakanEffect::Conversation(ConversationEffect::ReplaceConversation(_))
+                        | ArakanEffect::CompactConversation { .. }
                 )
             })
             .filter_map(|effect| match effect {
-                GooseEffect::Conversation(ConversationEffect::AppendMessage(message)) => {
+                ArakanEffect::Conversation(ConversationEffect::AppendMessage(message)) => {
                     Some(message.clone())
                 }
                 _ => None,
@@ -235,14 +235,14 @@ fn replaced_history(replacement: &Conversation, later_effects: &[GooseEffect]) -
     Conversation::new_unvalidated(messages)
 }
 
-impl EffectUsage<GooseEffect> for SessionManager {
+impl EffectUsage<ArakanEffect> for SessionManager {
     fn usage(
         &self,
-        effect: &GooseEffect,
-    ) -> Option<goose_providers::conversation::token_usage::Usage> {
+        effect: &ArakanEffect,
+    ) -> Option<arakan_providers::conversation::token_usage::Usage> {
         match effect {
-            GooseEffect::RecordUsage(usage)
-            | GooseEffect::CompactConversation {
+            ArakanEffect::RecordUsage(usage)
+            | ArakanEffect::CompactConversation {
                 usage: Some(usage), ..
             } => Some(usage.usage),
             _ => None,
@@ -325,7 +325,7 @@ pub(crate) async fn run_turn_start_hooks(
 }
 
 pub(crate) async fn run(
-    machine: &crate::agents::state_machine::StateMachine<'_, Session, GooseEffect>,
+    machine: &crate::agents::state_machine::StateMachine<'_, Session, ArakanEffect>,
     runtime: &SessionManager,
     hook_manager: &HookManager,
     session_id: &str,
@@ -388,7 +388,7 @@ pub(crate) async fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::GooseMode;
+    use crate::config::ArakanMode;
     use crate::conversation::message::Message;
     use crate::session::session_manager::SessionType;
 
@@ -400,7 +400,7 @@ mod tests {
                 "/tmp".into(),
                 "concurrent compaction".into(),
                 SessionType::User,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await
             .unwrap();

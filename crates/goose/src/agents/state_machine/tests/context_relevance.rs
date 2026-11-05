@@ -3,10 +3,10 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_providers::decision::{
+use arakan_providers::decision::{
     DecisionAnswer, DecisionProvider, DecisionRequest, DecisionResponse, DecisionUsage,
 };
-use goose_providers::errors::ProviderError;
+use arakan_providers::errors::ProviderError;
 use rmcp::model::{
     Annotations, CallToolRequestParams, CallToolResult, ContentBlock, ErrorData, Role, TextContent,
 };
@@ -21,7 +21,7 @@ use super::pipeline::{
 use crate::agents::state_machine::ops_context_relevance::{
     truncated_json, with_turn, ContextRelevanceOperation, NAME, VERSION,
 };
-use crate::agents::state_machine::{Emitter, GooseEffect, Operation, OperationResult};
+use crate::agents::state_machine::{Emitter, ArakanEffect, Operation, OperationResult};
 use crate::agents::state_machine_builder::context_relevance_provider;
 use crate::config::Config;
 use crate::conversation::message::{Message, MessageContent};
@@ -552,7 +552,7 @@ async fn a_decision_that_never_answers_times_out() {
     let OperationResult::Applied(result) = result else {
         panic!("a timeout is recorded")
     };
-    let [GooseEffect::SetExtensionState { value, .. }] = result.effects.as_slice() else {
+    let [ArakanEffect::SetExtensionState { value, .. }] = result.effects.as_slice() else {
         panic!("the shadow operation may only record its own state")
     };
     assert_eq!(value["turns"][0]["status"], "timeout");
@@ -590,7 +590,7 @@ fn judges_only_complete_visible_single_results() {
         "external",
         Ok(CallToolRequestParams::new("read")),
         None,
-        Some(json!({"goose.external_dispatch": true})),
+        Some(json!({"arakan.external_dispatch": true})),
     );
     let [_, external_result] = tool_pair("external", &sentinel("EXTERNAL"));
     let bundle_request = Message::assistant()
@@ -897,7 +897,7 @@ fn arguments_are_serialized_only_up_to_the_limit() {
 #[tokio::test]
 async fn opt_in_reports_setup_failures_and_skips_context_owning_providers() -> Result<()> {
     let _env = env_lock::lock_env([
-        ("GOOSE_CONTEXT_RELEVANCE_SHADOW", None::<&str>),
+        ("ARAKAN_CONTEXT_RELEVANCE_SHADOW", None::<&str>),
         ("TYPESAFE_API_KEY", None),
     ]);
     let (compacting, _api) = test_pipeline().await?;
@@ -913,7 +913,7 @@ async fn opt_in_reports_setup_failures_and_skips_context_owning_providers() -> R
     )?;
     assert!(context_relevance_provider(&config, compacting.provider()).is_none());
 
-    config.set_param("GOOSE_CONTEXT_RELEVANCE_SHADOW", true)?;
+    config.set_param("ARAKAN_CONTEXT_RELEVANCE_SHADOW", true)?;
     let unavailable = context_relevance_provider(&config, compacting.provider()).unwrap();
     let request = ContextRelevanceOperation::request(
         &Conversation::new_unvalidated([Message::user().with_text("goal")]),

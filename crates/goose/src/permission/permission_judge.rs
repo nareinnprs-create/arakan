@@ -13,7 +13,7 @@ use std::sync::Arc;
 async fn resolve_model_config(
     session_manager: &crate::session::SessionManager,
     session_id: &str,
-) -> anyhow::Result<goose_providers::model::ModelConfig> {
+) -> anyhow::Result<arakan_providers::model::ModelConfig> {
     if !session_id.is_empty() {
         if let Ok(session) = session_manager.get_session(session_id, false).await {
             if let Some(model_config) = session.model_config {
@@ -24,10 +24,10 @@ async fn resolve_model_config(
 
     let config = crate::config::Config::global();
     let provider_name = config
-        .get_goose_provider()
+        .get_arakan_provider()
         .map_err(|_| anyhow::anyhow!("missing provider"))?;
     let model_name = config
-        .get_goose_model()
+        .get_arakan_model()
         .map_err(|_| anyhow::anyhow!("missing model"))?;
     crate::model_config::model_config_from_user_config(&provider_name, &model_name)
 }

@@ -5,7 +5,7 @@ use anyhow::Result;
 use rmcp::model::{Role, Tool};
 use tokio_util::sync::CancellationToken;
 
-pub use goose_sdk_types::custom_requests::{
+pub use arakan_sdk_types::custom_requests::{
     ContextCategory, ContextPart, ContextReportModel, ContextReportResponse, ContextSegment,
 };
 
@@ -152,7 +152,7 @@ impl StateMachineServices {
         let input = machine
             .collect_inference_input(&session, &next_conversation)
             .await?;
-        if session.goose_mode == crate::config::GooseMode::SmartApprove {
+        if session.arakan_mode == crate::config::ArakanMode::SmartApprove {
             self.tool_inspection_manager
                 .apply_tool_annotations(&input.tools);
         }
@@ -161,7 +161,7 @@ impl StateMachineServices {
         let prompt = PromptManager::new().build_system_prompt_parts(
             &session,
             input.prompt_parts,
-            session.goose_mode,
+            session.arakan_mode,
         )?;
         let turn_context = crate::agents::moim::turn_context_event(
             &session.working_dir,
@@ -588,7 +588,7 @@ mod tests {
         );
         if let Some(owner) = owner {
             tool.meta = Some(rmcp::model::MetaObject(
-                rmcp::object!({ "goose_extension": owner }),
+                rmcp::object!({ "arakan_extension": owner }),
             ));
         }
         tool

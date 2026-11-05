@@ -1,4 +1,4 @@
-pub use goose_context_management::structured;
+pub use arakan_context_management::structured;
 
 use crate::conversation::message::MessageMetadata;
 use crate::conversation::message::{Message, MessageContent};
@@ -8,9 +8,9 @@ use crate::providers::base::Provider;
 use crate::providers::base::{stream_from_single_message, MessageStream};
 use crate::{config::Config, token_counter::create_token_counter};
 use anyhow::Result;
-use goose_providers::conversation::token_usage::ProviderUsage;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan_providers::conversation::token_usage::ProviderUsage;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 use indoc::indoc;
 use rmcp::model::Role;
 #[cfg(test)]
@@ -18,7 +18,7 @@ use rmcp::model::{Annotations, ContentBlock, TextContent};
 use tracing::info;
 use tracing::log::warn;
 
-pub use goose_context_management::DEFAULT_COMPACTION_THRESHOLD;
+pub use arakan_context_management::DEFAULT_COMPACTION_THRESHOLD;
 
 /// Starts compaction with headroom below OpenAI's long-context price tier
 /// (above 272k input tokens). This is not a maximum request size.
@@ -31,10 +31,10 @@ pub fn auto_compact_threshold(context_limit: usize) -> f64 {
     let config = Config::global();
     capped_compaction_threshold(
         config
-            .get_param::<f64>("GOOSE_AUTO_COMPACT_THRESHOLD")
+            .get_param::<f64>("ARAKAN_AUTO_COMPACT_THRESHOLD")
             .unwrap_or(DEFAULT_COMPACTION_THRESHOLD),
         config
-            .get_param::<usize>("GOOSE_AUTO_COMPACT_TOKEN_LIMIT")
+            .get_param::<usize>("ARAKAN_AUTO_COMPACT_TOKEN_LIMIT")
             .unwrap_or(DEFAULT_AUTO_COMPACT_TOKEN_LIMIT),
         context_limit,
     )
@@ -54,7 +54,7 @@ pub fn capped_compaction_threshold(
 
 pub(crate) fn tool_pair_summarization_enabled() -> bool {
     Config::global()
-        .get_param::<bool>("GOOSE_TOOL_PAIR_SUMMARIZATION")
+        .get_param::<bool>("ARAKAN_TOOL_PAIR_SUMMARIZATION")
         .unwrap_or(false)
 }
 
@@ -283,7 +283,7 @@ pub async fn check_if_compaction_needed(
     let config = Config::global();
     let threshold = threshold_override.unwrap_or_else(|| {
         config
-            .get_param::<f64>("GOOSE_AUTO_COMPACT_THRESHOLD")
+            .get_param::<f64>("ARAKAN_AUTO_COMPACT_THRESHOLD")
             .unwrap_or(DEFAULT_COMPACTION_THRESHOLD)
     });
 
@@ -321,14 +321,14 @@ pub async fn check_if_compaction_needed(
     Ok(needs_compaction)
 }
 
-struct GooseCompactionModel<'a> {
+struct ArakanCompactionModel<'a> {
     provider: &'a dyn Provider,
     model_config: &'a ModelConfig,
     session_id: &'a str,
 }
 
 #[async_trait::async_trait]
-impl goose_context_management::CompactionModel for GooseCompactionModel<'_> {
+impl arakan_context_management::CompactionModel for ArakanCompactionModel<'_> {
     async fn complete(
         &self,
         system: &str,
@@ -346,10 +346,10 @@ impl goose_context_management::CompactionModel for GooseCompactionModel<'_> {
     }
 }
 
-struct GooseTokenEstimator;
+struct ArakanTokenEstimator;
 
 #[async_trait::async_trait]
-impl goose_context_management::TokenEstimator for GooseTokenEstimator {
+impl arakan_context_management::TokenEstimator for ArakanTokenEstimator {
     async fn count_chat_tokens(&self, system: &str, messages: &[Message]) -> usize {
         match create_token_counter().await {
             Ok(counter) => counter.count_chat_tokens(system, messages, &[]),
@@ -371,8 +371,8 @@ impl goose_context_management::TokenEstimator for GooseTokenEstimator {
     }
 }
 
-fn compaction_templates() -> Result<goose_context_management::Templates> {
-    Ok(goose_context_management::Templates {
+fn compaction_templates() -> Result<arakan_context_management::Templates> {
+    Ok(arakan_context_management::Templates {
         compaction: crate::prompt_template::template_source("compaction.md")?,
         summary: crate::prompt_template::template_source("compaction_summary.md")?,
     })
@@ -393,14 +393,14 @@ async fn do_compact(
     )
     .agent_visible_messages();
 
-    let model = GooseCompactionModel {
+    let model = ArakanCompactionModel {
         provider,
         model_config,
         session_id,
     };
-    let summary = goose_context_management::summarize(
+    let summary = arakan_context_management::summarize(
         &model,
-        Some(&GooseTokenEstimator),
+        Some(&ArakanTokenEstimator),
         &compaction_templates()?,
         &agent_visible_messages,
     )
@@ -409,7 +409,7 @@ async fn do_compact(
     Ok((summary.message, summary.usage))
 }
 
-pub use goose_context_management::format_message_for_compacting;
+pub use arakan_context_management::format_message_for_compacting;
 
 pub fn compute_tool_call_cutoff(context_limit: usize, compaction_threshold: f64) -> usize {
     let threshold = if compaction_threshold > 0.0 && compaction_threshold <= 1.0 {
@@ -541,7 +541,7 @@ pub async fn summarize_tool_call(
 mod tests {
     use super::*;
     use async_trait::async_trait;
-    use goose_providers::conversation::token_usage::Usage;
+    use arakan_providers::conversation::token_usage::Usage;
     use rmcp::model::{CallToolRequestParams, Tool};
 
     #[test]
@@ -988,7 +988,7 @@ mod tests {
                 std::path::PathBuf::from("/tmp/test"),
                 "carry order".to_string(),
                 crate::session::session_manager::SessionType::User,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();

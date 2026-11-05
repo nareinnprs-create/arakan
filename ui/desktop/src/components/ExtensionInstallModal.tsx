@@ -43,7 +43,7 @@ const i18n = defineMessages({
   policyErrorMessage: {
     id: 'extensionInstallModal.policyErrorMessage',
     defaultMessage:
-      'The extension allowlist policy could not be retrieved. Extension installation is blocked until the policy is available.\n\nContact your administrator to check the GOOSE_ALLOWLIST configuration.',
+      'The extension allowlist policy could not be retrieved. Extension installation is blocked until the policy is available.\n\nContact your administrator to check the ARAKAN_ALLOWLIST configuration.',
   },
   untrustedTitle: {
     id: 'extensionInstallModal.untrustedTitle',
@@ -180,7 +180,7 @@ export function ExtensionInstallModal({ addExtension, setView }: ExtensionInstal
   ): Promise<ModalType> => {
     try {
       const config = window.electron.getConfig();
-      const ALLOWLIST_WARNING_MODE = config.GOOSE_ALLOWLIST_WARNING === true;
+      const ALLOWLIST_WARNING_MODE = config.ARAKAN_ALLOWLIST_WARNING === true;
 
       if (ALLOWLIST_WARNING_MODE) {
         return 'untrusted';

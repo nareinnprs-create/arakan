@@ -1,25 +1,25 @@
 ---
-title: Build an app with goose
-sidebar_label: Build an app with goose
-description: Launch goose from your application, send prompts, and stream responses over ACP.
+title: Build an app with arakan
+sidebar_label: Build an app with arakan
+description: Launch arakan from your application, send prompts, and stream responses over ACP.
 displayed_sidebar: gdkSidebar
 ---
 
-# Build an app with goose
+# Build an app with arakan
 
 If your application needs an agent, you do not have to assemble one from GDK
-components. You can launch the pre-built goose binary and talk to it over the
+components. You can launch the pre-built arakan binary and talk to it over the
 [Agent Client Protocol (ACP)](https://agentclientprotocol.com/).
 
-Your application owns the interface and workflow. goose supplies the agent,
+Your application owns the interface and workflow. arakan supplies the agent,
 model connections, tools, and saved conversations. ACP connects them: your app
 sends prompts and receives streamed responses, tool activity, and permission
-requests. This is also how goose Desktop talks to its backend.
+requests. This is also how arakan Desktop talks to its backend.
 
 The example below uses Node.js 22 or later and the
 [ACP TypeScript SDK](https://github.com/agentclientprotocol/typescript-sdk),
 with JavaScript so it can run without a build step. Install the
-[goose CLI](/docs/getting-started/installation) and configure a
+[arakan CLI](/docs/getting-started/installation) and configure a
 [model provider](/docs/getting-started/providers) first. Use a working directory
 and configured tools appropriate for the access you want the agent to have.
 
@@ -31,7 +31,7 @@ Put the following three JavaScript blocks, in order, in a file named `app.mjs`.
 
 ## Connect over stdio
 
-Launch `goose acp` as a subprocess. Its stdin and stdout carry ACP messages;
+Launch `arakan acp` as a subprocess. Its stdin and stdout carry ACP messages;
 stderr is for logs. The SDK turns those pipes into a bidirectional connection.
 
 ```javascript
@@ -39,13 +39,13 @@ import { spawn } from "node:child_process";
 import { Readable, Writable } from "node:stream";
 import * as acp from "@agentclientprotocol/sdk";
 
-const goose = spawn("goose", ["acp"], {
+const arakan = spawn("arakan", ["acp"], {
   stdio: ["pipe", "pipe", "inherit"],
 });
 
 const stream = acp.ndJsonStream(
-  Writable.toWeb(goose.stdin),
-  Readable.toWeb(goose.stdout),
+  Writable.toWeb(arakan.stdin),
+  Readable.toWeb(arakan.stdout),
 );
 ```
 
@@ -54,7 +54,7 @@ works with the agent, and close the connection and process when finished.
 
 ## Stream updates into your interface
 
-Register handlers before sending a prompt. While a turn is running, goose sends
+Register handlers before sending a prompt. While a turn is running, arakan sends
 `session/update` notifications with the session ID and an update payload.
 Append text chunks as they arrive, and use tool call IDs to update the matching
 tool activity in your interface.
@@ -82,7 +82,7 @@ const app = acp
 
 This example cancels permission requests rather than automatically approving
 them. In your app, show the supplied choices to the user and return their
-selection. Permission callbacks are not a sandbox: goose's configured mode
+selection. Permission callbacks are not a sandbox: arakan's configured mode
 determines when approval is requested, and its tools run with the backend's
 access to the machine.
 
@@ -90,7 +90,7 @@ access to the machine.
 
 Initialize the connection to negotiate the protocol version and capabilities.
 Then create a session with an absolute working directory on the machine running
-goose. The returned session ID identifies the conversation for subsequent
+arakan. The returned session ID identifies the conversation for subsequent
 prompts and notifications.
 
 ```javascript
@@ -117,7 +117,7 @@ try {
 
   console.log(`\nTurn finished: ${result.stopReason}`);
 } finally {
-  goose.kill();
+  arakan.kill();
 }
 ```
 
@@ -149,12 +149,12 @@ History is replayed through the same notification handler. A stop button sends
 
 ## Use a server instead
 
-If a subprocess is not the right fit, `goose serve` exposes ACP over HTTP and
+If a subprocess is not the right fit, `arakan serve` exposes ACP over HTTP and
 WebSocket. Your app uses the same session and prompt concepts through a
 different transport.
 
 ```bash
-GOOSE_SERVER__SECRET_KEY='replace-with-a-long-random-secret' goose serve
+ARAKAN_SERVER__SECRET_KEY='replace-with-a-long-random-secret' arakan serve
 ```
 
 By default, the endpoint is `http://127.0.0.1:3284/acp` (or `ws://` for
@@ -162,17 +162,17 @@ WebSocket). Authenticate with `X-Secret-Key`, or the `token` query parameter
 when a browser WebSocket cannot set that header. Keep the backend secret out of
 public frontend code. Browser origins may also need to be allowed explicitly.
 
-See the [server command options](/docs/guides/goose-cli-commands#serve-options)
+See the [server command options](/docs/guides/arakan-cli-commands#serve-options)
 for authentication and origin flags, and the
-[remote server guide](/docs/guides/remote-goose-server) for deployment and TLS.
+[remote server guide](/docs/guides/remote-arakan-server) for deployment and TLS.
 
 ## Examples and reference
 
-- [Top Goose](/docs/gdk/demos/top-goose) maps GitHub issues and pull requests to
-  persistent conversations with a `goose acp` subprocess.
+- [Top Arakan](/docs/gdk/demos/top-arakan) maps GitHub issues and pull requests to
+  persistent conversations with a `arakan acp` subprocess.
 - [Berd](/docs/gdk/demos/berd) builds a custom desktop interface around a bundled
-  `goose serve` backend over WebSocket.
+  `arakan serve` backend over WebSocket.
 - The [ACP protocol reference](https://agentclientprotocol.com/protocol/v1/overview)
   defines initialization, sessions, prompts, updates, permissions, and cancellation.
-- The [goose ACP reference](/docs/gdk/acp/reference) documents goose-specific
+- The [arakan ACP reference](/docs/gdk/acp/reference) documents arakan-specific
   methods and types.

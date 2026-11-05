@@ -3,16 +3,16 @@ use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use goose_providers::conversation::{effective_role, Conversation, EffectiveRole};
-use goose_providers::decision::{
+use arakan_providers::conversation::{effective_role, Conversation, EffectiveRole};
+use arakan_providers::decision::{
     DecisionAnswer, DecisionProvider, DecisionQuestion, DecisionRequest,
 };
-use goose_providers::thinking::ThinkingEffort;
+use arakan_providers::thinking::ThinkingEffort;
 use serde::{Deserialize, Serialize};
 
 use super::{
     applied, last_effective_role, messages_since_kickoff, not_applicable, ConversationEffect,
-    Emitter, GooseEffect, Operation, OperationResult, CLIENT_LOG,
+    Emitter, ArakanEffect, Operation, OperationResult, CLIENT_LOG,
 };
 use crate::session::Session;
 
@@ -161,7 +161,7 @@ pub(super) fn current_turn_effort(conversation: &Conversation) -> Option<Thinkin
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for AutoEffortOperation {
+impl Operation<Session, ArakanEffect> for AutoEffortOperation {
     fn name(&self) -> &'static str {
         OPERATION
     }
@@ -171,7 +171,7 @@ impl Operation<Session, GooseEffect> for AutoEffortOperation {
         _session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let messages = messages_since_kickoff(conversation)?;
         let kickoff = &messages[0];
         if self.message_meta(kickoff, DECISION).is_some()

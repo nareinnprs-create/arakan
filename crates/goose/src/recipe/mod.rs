@@ -98,10 +98,10 @@ pub struct Author {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Settings {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub goose_provider: Option<String>,
+    pub arakan_provider: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub goose_model: Option<String>,
+    pub arakan_model: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub temperature: Option<f32>,

@@ -4,7 +4,7 @@ use crate::agents::mcp_client::{Error, McpClientTrait};
 use crate::agents::ToolCallContext;
 use crate::config::Config;
 use async_trait::async_trait;
-use goose_sdk_types::custom_requests::{SourceEntry, SourceType};
+use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
 use rmcp::model::{
     CallToolResult, ContentBlock, Implementation, InitializeResult, JsonObject, ListToolsResult,
     ServerCapabilities, ServerNotification, Tool,
@@ -35,7 +35,7 @@ impl Default for SkillsClient {
 }
 
 impl SkillsClient {
-    /// Controls whether Goose's bundled skills are exposed by this client.
+    /// Controls whether Arakan's bundled skills are exposed by this client.
     /// Bundled skills are enabled by default.
     pub fn with_builtin_skills(mut self, enabled: bool) -> Self {
         self.exclude_builtin_skills = !enabled;
@@ -310,7 +310,7 @@ mod tests {
 
     fn test_client(project: &Path, plugin_name: &str, enabled: bool) -> SkillsClient {
         let config = Box::leak(Box::new(
-            Config::new(project.join("test-config.yaml"), "goose-skills-test").unwrap(),
+            Config::new(project.join("test-config.yaml"), "arakan-skills-test").unwrap(),
         ));
         let plugin_root = project.join(".agents/plugins").join(plugin_name);
         config
@@ -455,7 +455,7 @@ mod tests {
     #[tokio::test]
     async fn test_load_filesystem_skill_without_builtin_skills() {
         let temp_dir = TempDir::new().unwrap();
-        let skill_dir = temp_dir.path().join(".goose/skills/my-skill");
+        let skill_dir = temp_dir.path().join(".arakan/skills/my-skill");
         fs::create_dir_all(&skill_dir).unwrap();
         fs::write(
             skill_dir.join("SKILL.md"),

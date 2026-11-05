@@ -1,10 +1,10 @@
-use super::completion::GooseCompleter;
+use super::completion::ArakanCompleter;
 use super::paste::{
     read_paste_aware_input, PasteAwareEnterHandler, PasteCaptureHandler, PasteState,
 };
 use super::{CompletionCache, HintStatus};
 use anyhow::Result;
-use goose::config::{Config, GooseMode};
+use arakan::config::{Config, ArakanMode};
 use rustyline::Editor;
 use shlex;
 use std::collections::HashMap;
@@ -22,7 +22,7 @@ pub enum InputResult {
     Retry,
     ListPrompts(Option<String>),
     PromptCommand(PromptCommandOptions),
-    GooseMode(String),
+    ArakanMode(String),
     Model(ModelCommandOptions),
     Clear,
     New,
@@ -86,13 +86,13 @@ impl rustyline::ConditionalEventHandler for CtrlCHandler {
 }
 
 /// The Ctrl-modified character that inserts a newline instead of submitting the
-/// prompt. Configurable via `GOOSE_CLI_NEWLINE_KEY`, defaulting to `j` (Ctrl+J).
+/// prompt. Configurable via `ARAKAN_CLI_NEWLINE_KEY`, defaulting to `j` (Ctrl+J).
 /// Characters already bound to other actions are rejected: `m` (Ctrl+M is Enter)
 /// and `c` (Ctrl+C interrupts), both of which would otherwise shadow the paste
 /// and interrupt handlers.
 pub fn get_newline_key() -> char {
     Config::global()
-        .get_param::<String>("GOOSE_CLI_NEWLINE_KEY")
+        .get_param::<String>("ARAKAN_CLI_NEWLINE_KEY")
         .ok()
         .and_then(|s| s.chars().next())
         .map(|c| c.to_ascii_lowercase())
@@ -102,8 +102,8 @@ pub fn get_newline_key() -> char {
 
 /// Determine whether the editor should be used for every prompt.
 ///
-/// When `goose_prompt_editor` is configured, defaults to `true` (backward compat).
-/// Users can override by explicitly setting `goose_prompt_editor_always` to `false`.
+/// When `arakan_prompt_editor` is configured, defaults to `true` (backward compat).
+/// Users can override by explicitly setting `arakan_prompt_editor_always` to `false`.
 /// When no editor is configured, defaults to `false`.
 fn should_use_editor_always(
     prompt_editor: Option<&str>,
@@ -114,16 +114,16 @@ fn should_use_editor_always(
 }
 
 pub fn get_input(
-    editor: &mut Editor<GooseCompleter, rustyline::history::DefaultHistory>,
+    editor: &mut Editor<ArakanCompleter, rustyline::history::DefaultHistory>,
     conversation_messages: Option<&Vec<String>>,
 ) -> Result<InputResult> {
     let config = Config::global();
-    let prompt_editor = config.get_goose_prompt_editor().ok().flatten();
-    let editor_always_override = config.get_goose_prompt_editor_always().ok().flatten();
+    let prompt_editor = config.get_arakan_prompt_editor().ok().flatten();
+    let editor_always_override = config.get_arakan_prompt_editor_always().ok().flatten();
     let editor_always = should_use_editor_always(prompt_editor.as_deref(), editor_always_override);
 
     if editor_always {
-        if let Ok(Some(editor_cmd)) = config.get_goose_prompt_editor() {
+        if let Ok(Some(editor_cmd)) = config.get_arakan_prompt_editor() {
             if !editor_cmd.is_empty() {
                 let messages = extract_recent_messages(conversation_messages);
                 let message_refs: Vec<&str> = messages.iter().map(|s| s.as_str()).collect();
@@ -289,7 +289,7 @@ fn handle_slash_command(input: &str) -> Option<InputResult> {
         s if s.starts_with(CMD_BUILTIN) => Some(InputResult::AddBuiltin(
             s.get(CMD_BUILTIN.len()..).unwrap_or("").to_string(),
         )),
-        s if s.starts_with(CMD_MODE) => Some(InputResult::GooseMode(
+        s if s.starts_with(CMD_MODE) => Some(InputResult::ArakanMode(
             s.get(CMD_MODE.len()..).unwrap_or("").to_string(),
         )),
         s if s == CMD_MODEL => Some(InputResult::Model(ModelCommandOptions::default())),
@@ -409,7 +409,7 @@ fn parse_prompt_command(args: &str) -> Option<InputResult> {
 }
 
 fn help_text() -> String {
-    let modes = GooseMode::VARIANTS.join(", ");
+    let modes = ArakanMode::VARIANTS.join(", ");
     let newline_key = get_newline_key().to_ascii_uppercase();
     let additional_builtin_help = additional_builtin_help();
     let additional_builtin_help = if additional_builtin_help.is_empty() {
@@ -428,13 +428,13 @@ fn help_text() -> String {
 /builtin <names> - Add builtin extensions by name (comma-separated)
 /prompts [--extension <name>] - List all available prompts, optionally filtered by extension
 /prompt <n> [--info] [key=value...] - Get prompt info or execute a prompt
-/mode <name> - Set the goose mode to use ({modes})
+/mode <name> - Set the arakan mode to use ({modes})
 /model [name] - Show the current model, or switch models for this session while keeping the same provider
 /model --provider <name> [model] - Switch to a different provider (optionally specifying a model)
 /compact - Compact the current conversation to reduce context length while preserving key information.
 {additional_builtin_help}/status - Show session status: session ID, model, provider, mode, and token usage.
 /edit [text] - Open your prompt editor to compose a message. Optionally pre-fill with text.
-               Uses $GOOSE_PROMPT_EDITOR, $VISUAL, or $EDITOR (in that order).
+               Uses $ARAKAN_PROMPT_EDITOR, $VISUAL, or $EDITOR (in that order).
 /skills - List available skills or enable skills by name (usage: /skills [<name>...])
 /? or /help - Display this help message
 /clear - Clears the current chat history
@@ -442,10 +442,10 @@ fn help_text() -> String {
 
 Navigation:
 Enter - Send message
-Ctrl+{newline_key} - Add a newline (configurable via GOOSE_CLI_NEWLINE_KEY)
+Ctrl+{newline_key} - Add a newline (configurable via ARAKAN_CLI_NEWLINE_KEY)
 Ctrl+C - Clear current line if text is entered, otherwise exit the session
 Up/Down arrows - Navigate through command history
-GOOSE_CLI_BELL=true - Ring the terminal bell when goose finishes a turn or needs approval"
+ARAKAN_CLI_BELL=true - Ring the terminal bell when arakan finishes a turn or needs approval"
     )
 }
 
@@ -453,7 +453,7 @@ fn additional_builtin_help() -> String {
     const DOCUMENTED_BUILTINS: &[&str] =
         &["prompts", "prompt", "compact", "clear", "skills", "status"];
 
-    goose::agents::execute_commands::list_commands()
+    arakan::agents::execute_commands::list_commands()
         .iter()
         .filter(|command| !DOCUMENTED_BUILTINS.contains(&command.name))
         .map(|command| format!("/{} - {}", command.name, command.description))
@@ -483,10 +483,10 @@ fn print_editor_help() {
   /edit opens your configured editor for composing prompts.
   Use '/edit some text' to pre-fill the editor with initial text.
   Previous conversation is included as markdown headings for context.
-  Configure editor: goose configure set goose_prompt_editor \"vim\"
-  Falls back to $VISUAL or $EDITOR if goose_prompt_editor is not set.
-  When goose_prompt_editor is set, the editor is used for every prompt by default.
-  To use inline prompts with on-demand /edit: goose configure set goose_prompt_editor_always false"
+  Configure editor: arakan configure set arakan_prompt_editor \"vim\"
+  Falls back to $VISUAL or $EDITOR if arakan_prompt_editor is not set.
+  When arakan_prompt_editor is set, the editor is used for every prompt by default.
+  To use inline prompts with on-demand /edit: arakan configure set arakan_prompt_editor_always false"
     );
 }
 
@@ -627,7 +627,7 @@ mod tests {
     fn help_lists_builtin_agent_commands() {
         let help = help_text();
 
-        for command in goose::agents::execute_commands::list_commands() {
+        for command in arakan::agents::execute_commands::list_commands() {
             assert!(
                 help.contains(&format!("/{}", command.name)),
                 "help output should list /{}",

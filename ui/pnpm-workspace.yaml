@@ -1,8 +1,8 @@
 packages:
-  - 'goose-acp-client'
-  - 'goose-acp'
+  - 'arakan-acp-client'
+  - 'arakan-acp'
   - 'desktop'
-  - 'goose-binary/*'
+  - 'arakan-binary/*'
 
 registry: https://registry.npmjs.org/
 preferOffline: true

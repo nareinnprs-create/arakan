@@ -38,12 +38,12 @@ pub use container::Container;
 pub use execute_commands::{context_management_unsupported_message, COMPACT_TRIGGERS};
 pub use extension::{ExtensionConfig, ExtensionError};
 pub use extension_manager::{ExtensionLoadResult, ExtensionManager};
-pub use goose_agent::events::AgentEvent;
+pub use arakan_agent::events::AgentEvent;
 pub(crate) use large_response_handler::max_tool_response_size;
 pub use prompt_manager::PromptManager;
 #[cfg(feature = "scheduler")]
 pub use schedule_tool::ScheduleTool;
-pub use services::{GoosePlatform, StateMachineServices, StateMachineServicesConfig, TurnSettings};
+pub use services::{ArakanPlatform, StateMachineServices, StateMachineServicesConfig, TurnSettings};
 pub use session_runtime::{Attachment, SessionRuntime};
 pub use subagent_handler::SUBAGENT_TOOL_REQUEST_TYPE;
 pub use subagent_task_config::TaskConfig;

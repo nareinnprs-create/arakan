@@ -5,14 +5,14 @@ mod common_tests;
 
 use common_tests::fixtures::server::AcpServerConnection;
 use common_tests::fixtures::{run_test, send_custom, Connection, TestConnectionConfig};
-use goose::config::paths::Paths;
-use goose::config::{Config, ConfigError};
-use goose::providers::base::{MessageStream, Provider};
-use goose::providers::inventory::ProviderInventoryService;
-use goose::session::session_manager::SessionStorage;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_test_support::EnforceSessionId;
+use arakan::config::paths::Paths;
+use arakan::config::{Config, ConfigError};
+use arakan::providers::base::{MessageStream, Provider};
+use arakan::providers::inventory::ProviderInventoryService;
+use arakan::session::session_manager::SessionStorage;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_test_support::EnforceSessionId;
 use serial_test::serial;
 use std::sync::Arc;
 
@@ -30,7 +30,7 @@ impl Provider for MockProvider {
         &self,
         _model_config: &ModelConfig,
         _system: &str,
-        _messages: &[goose::conversation::message::Message],
+        _messages: &[arakan::conversation::message::Message],
         _tools: &[rmcp::model::Tool],
     ) -> Result<MessageStream, ProviderError> {
         unimplemented!()
@@ -44,7 +44,7 @@ impl Provider for MockProvider {
     }
 }
 
-fn mock_provider_factory() -> goose::acp::server::AcpProviderFactory {
+fn mock_provider_factory() -> arakan::acp::server::AcpProviderFactory {
     Arc::new(|provider_name| {
         Box::pin(async move {
             Ok(Arc::new(MockProvider {
@@ -57,8 +57,8 @@ fn mock_provider_factory() -> goose::acp::server::AcpProviderFactory {
 fn write_config(config_dir: &std::path::Path) {
     std::fs::create_dir_all(config_dir).unwrap();
     std::fs::write(
-        config_dir.join(goose::config::base::CONFIG_YAML_NAME),
-        "GOOSE_MODEL: gpt-4o\nGOOSE_PROVIDER: openai\nGOOSE_DISABLE_KEYRING: true\n",
+        config_dir.join(arakan::config::base::CONFIG_YAML_NAME),
+        "ARAKAN_MODEL: gpt-4o\nARAKAN_PROVIDER: openai\nARAKAN_DISABLE_KEYRING: true\n",
     )
     .unwrap();
 }
@@ -73,8 +73,8 @@ fn provider_secret_mutations_and_inventory_refresh_invalidate_global_secret_cach
     let root = tempfile::tempdir().unwrap();
     let root_path = root.path().to_string_lossy().to_string();
     let _env = env_lock::lock_env([
-        ("GOOSE_PATH_ROOT", Some(root_path.as_str())),
-        ("GOOSE_DISABLE_KEYRING", Some("1")),
+        ("ARAKAN_PATH_ROOT", Some(root_path.as_str())),
+        ("ARAKAN_DISABLE_KEYRING", Some("1")),
         ("ANTHROPIC_API_KEY", None),
         ("OPENAI_API_KEY", None),
         ("XAI_API_KEY", None),
@@ -99,7 +99,7 @@ fn provider_secret_mutations_and_inventory_refresh_invalidate_global_secret_cach
 
         let save_provider_config = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/config/save",
+            "_arakan/unstable/providers/config/save",
             serde_json::json!({
                 "providerId": "xai",
                 "fields": [
@@ -142,7 +142,7 @@ fn provider_secret_mutations_and_inventory_refresh_invalidate_global_secret_cach
 
         let read_provider_config = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/config/read",
+            "_arakan/unstable/providers/config/read",
             serde_json::json!({
                 "providerId": "xai",
             }),
@@ -166,7 +166,7 @@ fn provider_secret_mutations_and_inventory_refresh_invalidate_global_secret_cach
 
         let delete_provider_config = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/config/delete",
+            "_arakan/unstable/providers/config/delete",
             serde_json::json!({
                 "providerId": "xai",
             }),
@@ -198,7 +198,7 @@ fn provider_secret_mutations_and_inventory_refresh_invalidate_global_secret_cach
 
         let refresh = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/inventory/refresh",
+            "_arakan/unstable/providers/inventory/refresh",
             serde_json::json!({
                 "providerIds": ["anthropic"],
             }),

@@ -35,7 +35,7 @@ describe('UpdateSection install', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     window.electron.installUpdate = vi.fn().mockResolvedValue({
       success: false,
-      error: 'Refusing to auto-update: C:\\Goose does not look like an app install directory',
+      error: 'Refusing to auto-update: C:\\Arakan does not look like an app install directory',
     });
     const button = await renderDownloadedUpdate();
 

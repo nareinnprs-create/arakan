@@ -3,11 +3,11 @@
 //! [`crate::sources`] so all source-style files share one YAML pipeline.
 //!
 //! User-facing CRUD lives in `crate::sources` for parity with skills and
-//! projects; `goose review` consumes [`Check`] and [`discover`] directly.
+//! projects; `arakan review` consumes [`Check`] and [`discover`] directly.
 
 use crate::sources::parse_frontmatter;
 use anyhow::{anyhow, bail, Context, Result};
-use goose_sdk_types::custom_requests::{SourceEntry, SourceType};
+use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
 use serde::Deserialize;
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
@@ -297,7 +297,7 @@ fn read_review_md(path: &Path, canonical_repo_root: &Path) -> Result<Option<Stri
 pub fn global_checks_dirs() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
     if let Some(home) = dirs_home() {
-        dirs.push(home.join(".config").join("goose").join("checks"));
+        dirs.push(home.join(".config").join("arakan").join("checks"));
         dirs.push(home.join(".config").join("agents").join("checks"));
     }
     dirs
@@ -450,7 +450,7 @@ fn read_checks_dir(
             Err(e) => match mode {
                 LoadMode::Strict => return Err(e),
                 LoadMode::Lenient => {
-                    eprintln!("goose review: skipping {}: {e}", path.display());
+                    eprintln!("arakan review: skipping {}: {e}", path.display());
                 }
             },
         }

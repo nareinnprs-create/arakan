@@ -26,7 +26,7 @@ mod tool_lifecycle;
 async fn capture_state_machine_trace_fields(
     capture_setting: Option<&'static str>,
 ) -> Result<serde_json::Map<String, serde_json::Value>> {
-    use goose_test_support::otel::clear_otel_env;
+    use arakan_test_support::otel::clear_otel_env;
     use tokio::sync::mpsc;
     use tokio_util::sync::CancellationToken;
     use tracing_futures::Instrument;
@@ -86,7 +86,7 @@ async fn state_machine_trace_omits_content_without_capture() -> Result<()> {
         assert!(!fields.contains_key("trace_input"));
         assert!(!fields.contains_key("trace_output"));
         assert!(!fields.contains_key("gen_ai.output.messages"));
-        assert_eq!(fields["gen_ai.agent.name"], "goose");
+        assert_eq!(fields["gen_ai.agent.name"], "arakan");
     }
     Ok(())
 }
@@ -109,7 +109,7 @@ async fn capture_tool_span_fields(
     use crate::agents::gen_ai_telemetry::{
         test_support::SpanFieldCapture, CAPTURE_MESSAGE_CONTENT_ENV,
     };
-    use goose_test_support::otel::clear_otel_env;
+    use arakan_test_support::otel::clear_otel_env;
 
     let _env = match capture_setting {
         Some(value) => clear_otel_env(&[(CAPTURE_MESSAGE_CONTENT_ENV, value)]),
@@ -205,10 +205,10 @@ async fn max_turns_counts_inference_calls_and_injects_budget() -> Result<()> {
 async fn auto_effort_is_scoped_to_each_turn_and_reused_across_inferences() -> Result<()> {
     use std::sync::Arc;
 
-    use goose_providers::api_client::{ApiClient, AuthMethod};
-    use goose_providers::model::ModelConfig;
-    use goose_providers::thinking::{ThinkingEffort, ThinkingEffortSupport};
-    use goose_providers::typesafe::TypeSafeProvider;
+    use arakan_providers::api_client::{ApiClient, AuthMethod};
+    use arakan_providers::model::ModelConfig;
+    use arakan_providers::thinking::{ThinkingEffort, ThinkingEffortSupport};
+    use arakan_providers::typesafe::TypeSafeProvider;
     use serde_json::json;
     use wiremock::matchers::{body_partial_json, header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -303,9 +303,9 @@ async fn auto_effort_is_scoped_to_each_turn_and_reused_across_inferences() -> Re
     assert!(available_auto_efforts(
         "claude-acp",
         &ModelConfig::new("current"),
-        ThinkingEffortSupport::Options(goose_providers::thinking::ThinkingEffortCapability {
+        ThinkingEffortSupport::Options(arakan_providers::thinking::ThinkingEffortCapability {
             option_id: "effort".to_string(),
-            values: vec![goose_providers::thinking::ThinkingEffortOption {
+            values: vec![arakan_providers::thinking::ThinkingEffortOption {
                 value: "high".to_string(),
                 label: "High".to_string(),
             }],
@@ -328,7 +328,7 @@ async fn auto_effort_is_scoped_to_each_turn_and_reused_across_inferences() -> Re
     }
     let pipeline = pipeline
         .with_model_config(
-            ModelConfig::new(goose_providers::openai::OPEN_AI_DEFAULT_MODEL)
+            ModelConfig::new(arakan_providers::openai::OPEN_AI_DEFAULT_MODEL)
                 .with_canonical_limits("openai")
                 .with_thinking_effort(ThinkingEffort::Low),
         )

@@ -5,10 +5,10 @@ use std::sync::Arc;
 use axum::body::Body;
 use axum::http::{HeaderValue, Method, Request, Response, StatusCode};
 use axum::Router;
-use goose::acp::server::AcpBuiltinSelection;
-use goose::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
-use goose::acp::transport::{create_acp_router, create_router};
-use goose::agents::GoosePlatform;
+use arakan::acp::server::AcpBuiltinSelection;
+use arakan::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
+use arakan::acp::transport::{create_acp_router, create_router};
+use arakan::agents::ArakanPlatform;
 use tower::ServiceExt;
 
 const SECRET: &str = "test-secret-token";
@@ -21,7 +21,7 @@ fn test_acp_router(dir: &tempfile::TempDir) -> Router {
     let server = Arc::new(AcpServer::new(AcpServerFactoryConfig {
         builtins: AcpBuiltinSelection::default(),
         config_dir: dir.path().join("config"),
-        goose_platform: GoosePlatform::GooseCli,
+        arakan_platform: ArakanPlatform::ArakanCli,
         additional_source_roots: Vec::new(),
         session_cwd: None,
         enable_scheduler: false,
@@ -33,7 +33,7 @@ fn test_authenticated_acp_router(dir: &tempfile::TempDir) -> Router {
     let server = Arc::new(AcpServer::new(AcpServerFactoryConfig {
         builtins: AcpBuiltinSelection::default(),
         config_dir: dir.path().join("config"),
-        goose_platform: GoosePlatform::GooseCli,
+        arakan_platform: ArakanPlatform::ArakanCli,
         additional_source_roots: Vec::new(),
         session_cwd: None,
         enable_scheduler: false,
@@ -49,7 +49,7 @@ fn test_router_with_origins(
     let server = Arc::new(AcpServer::new(AcpServerFactoryConfig {
         builtins: AcpBuiltinSelection::default(),
         config_dir: dir.path().join("config"),
-        goose_platform: GoosePlatform::GooseCli,
+        arakan_platform: ArakanPlatform::ArakanCli,
         additional_source_roots: Vec::new(),
         session_cwd: None,
         enable_scheduler: false,

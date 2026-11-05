@@ -1,5 +1,5 @@
 use anyhow::Result;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage as ProviderTokenUsage};
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage as ProviderTokenUsage};
 use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock};
 
 use super::calculator_extension::{value, ADD};
@@ -97,7 +97,7 @@ async fn proactive_and_manual_compaction_continue_with_replaced_usage() -> Resul
         state_machine::StateMachine::new(Vec::new(), tokio_util::sync::CancellationToken::new());
     let (tx, _rx) = tokio::sync::mpsc::unbounded_channel();
     let emit = state_machine::Emitter::new(tx, tokio_util::sync::CancellationToken::new());
-    let apply = async |mut effects: Vec<state_machine::GooseEffect>| -> Result<()> {
+    let apply = async |mut effects: Vec<state_machine::ArakanEffect>| -> Result<()> {
         let session = pipeline.session().await?;
         machine
             .apply(
@@ -124,7 +124,7 @@ async fn proactive_and_manual_compaction_continue_with_replaced_usage() -> Resul
     );
     apply(vec![
         replacement.into(),
-        state_machine::GooseEffect::RecordUsage(usage),
+        state_machine::ArakanEffect::RecordUsage(usage),
         Message::assistant()
             .with_text("response after replacement")
             .into(),
@@ -154,7 +154,7 @@ async fn tokenless_provider_compacts_estimated_context() -> Result<()> {
     .await?;
     let pipeline = pipeline
         .with_model_config(
-            goose_providers::model::ModelConfig::new("gpt-4.1").with_context_limit(Some(200)),
+            arakan_providers::model::ModelConfig::new("gpt-4.1").with_context_limit(Some(200)),
         )
         .await;
     let large_context = (0..500)

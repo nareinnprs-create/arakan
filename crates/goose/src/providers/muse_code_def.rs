@@ -2,16 +2,16 @@ use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use futures::future::BoxFuture;
-use goose_providers::anthropic::{
+use arakan_providers::anthropic::{
     AnthropicFormatOptions, AnthropicProvider, AnthropicProviderBuilder, ANTHROPIC_API_VERSION,
 };
-use goose_providers::api_client::{ApiClient, AuthMethod, AuthProvider, TlsConfig};
-use goose_providers::base::{
+use arakan_providers::api_client::{ApiClient, AuthMethod, AuthProvider, TlsConfig};
+use arakan_providers::base::{
     model_info_for_provider_model, ConfigKey, MessageStream, ModelInfo, Provider,
     ProviderDescriptor, ProviderMetadata,
 };
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT};
 use reqwest::Client;
 use rmcp::model::Tool;
@@ -36,7 +36,7 @@ pub const MUSE_CODE_API_HOST: &str = "https://api.meta.ai";
 pub const MUSE_CODE_AUTH_HOST: &str = "https://auth.meta.com";
 pub const MUSE_CODE_CLIENT_ID: &str = "1031625952748946";
 const MUSE_CODE_DOC_URL: &str = "https://ai.developer.meta.com/docs/muse-code/subscriptions";
-const MUSE_CODE_USER_AGENT: &str = "goose-muse-code";
+const MUSE_CODE_USER_AGENT: &str = "arakan-muse-code";
 
 const MUSE_CODE_KNOWN_MODELS: &[&str] = &[
     "muse-spark-1.3",
@@ -162,7 +162,7 @@ fn muse_cli_auth_path() -> PathBuf {
 fn muse_cli_keychain_token() -> Option<MuseToken> {
     #[cfg(feature = "system-keyring")]
     {
-        if std::env::var("MUSE_AUTH_PATH").is_ok() || std::env::var("GOOSE_DISABLE_KEYRING").is_ok()
+        if std::env::var("MUSE_AUTH_PATH").is_ok() || std::env::var("ARAKAN_DISABLE_KEYRING").is_ok()
         {
             return None;
         }
@@ -585,9 +585,9 @@ impl ProviderDescriptor for MuseCodeProviderDef {
             ],
         )
         .with_setup_steps(vec![
-            "Run `goose configure` and select 'Meta Muse Code'",
+            "Run `arakan configure` and select 'Meta Muse Code'",
             "A browser window will open — sign in to Meta and confirm the displayed code",
-            "Once authorized, Goose will save your token automatically",
+            "Once authorized, Arakan will save your token automatically",
         ])
         .with_setup(
             crate::providers::catalog::ProviderSetupMetadata::new(
@@ -728,8 +728,8 @@ mod tests {
 
     #[test]
     fn spark_requests_use_adaptive_thinking_and_replay_it() {
-        use goose_providers::conversation::message::MessageContent;
-        use goose_providers::formats::anthropic::create_request;
+        use arakan_providers::conversation::message::MessageContent;
+        use arakan_providers::formats::anthropic::create_request;
 
         let config =
             ModelConfig::new("muse-spark-1.3").with_canonical_limits(MUSE_CODE_PROVIDER_NAME);
@@ -776,7 +776,7 @@ mod tests {
             .await;
 
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("META_MODEL_API_KEY", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_CODE_AUTH_HOST", None::<&str>),
@@ -785,7 +785,7 @@ mod tests {
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         TokenCache::new()
             .save(&fresh_token("test-key"))
@@ -816,13 +816,13 @@ mod tests {
     async fn fetch_supported_models_does_not_authenticate_when_unconfigured() {
         let server = MockServer::start().await;
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_AUTH_PATH", None::<&str>),
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var(
             "MUSE_AUTH_PATH",
@@ -874,7 +874,7 @@ mod tests {
             .await;
 
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_CODE_AUTH_HOST", None::<&str>),
             ("MUSE_CODE_CLIENT_ID", None::<&str>),
@@ -882,7 +882,7 @@ mod tests {
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var("MUSE_CODE_AUTH_HOST", server.uri());
         std::env::set_var(
@@ -927,7 +927,7 @@ mod tests {
             .await;
 
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_CODE_AUTH_HOST", None::<&str>),
             ("MUSE_CODE_CLIENT_ID", None::<&str>),
@@ -935,7 +935,7 @@ mod tests {
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var("MUSE_CODE_AUTH_HOST", server.uri());
         std::env::set_var(
@@ -963,7 +963,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn uses_muse_cli_auth_json_when_goose_cache_is_empty() {
+    async fn uses_muse_cli_auth_json_when_arakan_cache_is_empty() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/v1/models"))
@@ -975,7 +975,7 @@ mod tests {
             .await;
 
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_AUTH_PATH", None::<&str>),
             ("XDG_CONFIG_HOME", None::<&str>),
@@ -997,7 +997,7 @@ mod tests {
             .unwrap(),
         )
         .unwrap();
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var("MUSE_AUTH_PATH", cli_path);
 
@@ -1039,14 +1039,14 @@ mod tests {
             .await;
 
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_CODE_AUTH_HOST", None::<&str>),
             ("MUSE_AUTH_PATH", None::<&str>),
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var(
             "MUSE_AUTH_PATH",
@@ -1098,13 +1098,13 @@ mod tests {
     async fn expired_session_without_identity_token_requires_sign_in() {
         let server = MockServer::start().await;
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_AUTH_PATH", None::<&str>),
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var(
             "MUSE_AUTH_PATH",
@@ -1168,7 +1168,7 @@ mod tests {
             .await;
 
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", None::<&str>),
+            ("ARAKAN_PATH_ROOT", None::<&str>),
             ("MUSE_CODE_HOST", None::<&str>),
             ("MUSE_CODE_AUTH_HOST", None::<&str>),
             ("MUSE_CODE_CLIENT_ID", None::<&str>),
@@ -1176,7 +1176,7 @@ mod tests {
             ("XDG_CONFIG_HOME", None::<&str>),
         ]);
         let temp_dir = tempfile::tempdir().expect("tempdir should be created");
-        std::env::set_var("GOOSE_PATH_ROOT", temp_dir.path());
+        std::env::set_var("ARAKAN_PATH_ROOT", temp_dir.path());
         std::env::set_var("MUSE_CODE_HOST", server.uri());
         std::env::set_var("MUSE_CODE_AUTH_HOST", server.uri());
         std::env::set_var(

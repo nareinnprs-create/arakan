@@ -2,26 +2,26 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose::agents::state_machine::{
-    yielded_with, Emitter, GooseEffect, Inference, InferenceInput, Operation, OperationResult,
+use arakan::agents::state_machine::{
+    yielded_with, Emitter, ArakanEffect, Inference, InferenceInput, Operation, OperationResult,
     RunStatus, StateMachine, Step,
 };
-use goose::agents::AgentEvent;
-use goose::config::GooseMode;
-use goose::conversation::message::Message;
-use goose::conversation::Conversation;
-use goose::providers::base::ProviderUsage;
-use goose::session::session_manager::token_state_from_session_and_totals;
-use goose::session::{Session, SessionManager, SessionType};
-use goose_providers::conversation::token_usage::Usage;
-use goose_providers::model::ModelConfig;
+use arakan::agents::AgentEvent;
+use arakan::config::ArakanMode;
+use arakan::conversation::message::Message;
+use arakan::conversation::Conversation;
+use arakan::providers::base::ProviderUsage;
+use arakan::session::session_manager::token_state_from_session_and_totals;
+use arakan::session::{Session, SessionManager, SessionType};
+use arakan_providers::conversation::token_usage::Usage;
+use arakan_providers::model::ModelConfig;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
 struct PromptPart;
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for PromptPart {
+impl Operation<Session, ArakanEffect> for PromptPart {
     fn name(&self) -> &'static str {
         "prompt_part"
     }
@@ -38,14 +38,14 @@ impl Operation<Session, GooseEffect> for PromptPart {
 struct TestInference;
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for TestInference {
+impl Operation<Session, ArakanEffect> for TestInference {
     fn name(&self) -> &'static str {
         "test_inference"
     }
 }
 
 #[async_trait]
-impl Inference<Session, GooseEffect> for TestInference {
+impl Inference<Session, ArakanEffect> for TestInference {
     fn applies(&self, _conversation: &Conversation) -> bool {
         true
     }
@@ -56,7 +56,7 @@ impl Inference<Session, GooseEffect> for TestInference {
         conversation: &Conversation,
         input: InferenceInput,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         assert_eq!(
             input.prompt_parts,
             [("test".to_string(), "custom context".to_string())]
@@ -70,8 +70,8 @@ impl Inference<Session, GooseEffect> for TestInference {
             .unwrap();
         let message = emit.message(Message::assistant().with_text(format!("{prompt} answered")));
         yielded_with([
-            GooseEffect::from(message),
-            GooseEffect::RecordUsage(ProviderUsage::new(
+            ArakanEffect::from(message),
+            ArakanEffect::RecordUsage(ProviderUsage::new(
                 "test-model".to_string(),
                 Usage::new(Some(5), Some(7), Some(12)),
             )),
@@ -81,7 +81,7 @@ impl Inference<Session, GooseEffect> for TestInference {
 
 #[tokio::test]
 async fn custom_pipeline_supports_step_apply_run_and_usage() -> Result<()> {
-    let _env = goose_test_support::otel::clear_otel_env(&[(
+    let _env = arakan_test_support::otel::clear_otel_env(&[(
         "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT",
         "true",
     )]);
@@ -92,7 +92,7 @@ async fn custom_pipeline_supports_step_apply_run_and_usage() -> Result<()> {
             temp_dir.path().to_path_buf(),
             "state-machine-api".to_string(),
             SessionType::Hidden,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await?;
     session_manager
@@ -119,8 +119,8 @@ async fn custom_pipeline_supports_step_apply_run_and_usage() -> Result<()> {
     let mut result = machine.step(&session, &emit).await?;
     assert!(matches!(
         result.effects.first(),
-        Some(GooseEffect::Conversation(
-            goose::agents::state_machine::ConversationEffect::AppendMessage(message)
+        Some(ArakanEffect::Conversation(
+            arakan::agents::state_machine::ConversationEffect::AppendMessage(message)
         )) if message.id.is_some()
     ));
     machine

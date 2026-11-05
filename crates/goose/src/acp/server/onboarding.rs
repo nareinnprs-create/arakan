@@ -5,7 +5,7 @@ use serde_yaml::Mapping;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
-const GOOSE_CONFIG_PREFIX: &str = "goose_config:";
+const ARAKAN_CONFIG_PREFIX: &str = "arakan_config:";
 const CLAUDE_DESKTOP_PREFIX: &str = "claude_desktop:";
 
 #[derive(Debug, Deserialize)]
@@ -33,9 +33,9 @@ impl AcpConnection {
         let source_filter = source_filter(&req.sources);
         let mut candidates = Vec::new();
 
-        if source_filter.contains(&OnboardingImportSourceKind::GooseConfig) {
-            for path in goose_config_candidate_paths(&self.config_dir) {
-                if let Some(candidate) = scan_goose_config_candidate(&path) {
+        if source_filter.contains(&OnboardingImportSourceKind::ArakanConfig) {
+            for path in arakan_config_candidate_paths(&self.config_dir) {
+                if let Some(candidate) = scan_arakan_config_candidate(&path) {
                     candidates.push(candidate);
                 }
             }
@@ -78,8 +78,8 @@ fn apply_onboarding_import_candidates(
 
     for candidate_id in &req.candidate_ids {
         match parse_candidate_id(candidate_id) {
-            Some((OnboardingImportSourceKind::GooseConfig, path)) => {
-                match apply_goose_config_candidate(config, target_config_dir, &path) {
+            Some((OnboardingImportSourceKind::ArakanConfig, path)) => {
+                match apply_arakan_config_candidate(config, target_config_dir, &path) {
                     Ok(result) => {
                         add_counts(&mut imported, &result.imported);
                         add_counts(&mut skipped, &result.skipped);
@@ -91,7 +91,7 @@ fn apply_onboarding_import_candidates(
                         }
                     }
                     Err(error) => warnings.push(import_failure_warning(
-                        OnboardingImportSourceKind::GooseConfig,
+                        OnboardingImportSourceKind::ArakanConfig,
                         &path,
                         &error,
                     )),
@@ -135,7 +135,7 @@ struct ApplyResult {
 fn source_filter(sources: &[OnboardingImportSourceKind]) -> HashSet<OnboardingImportSourceKind> {
     if sources.is_empty() {
         return [
-            OnboardingImportSourceKind::GooseConfig,
+            OnboardingImportSourceKind::ArakanConfig,
             OnboardingImportSourceKind::ClaudeDesktop,
         ]
         .into_iter()
@@ -160,7 +160,7 @@ fn import_failure_warning(
     error: &anyhow::Error,
 ) -> String {
     let source_name = match source_kind {
-        OnboardingImportSourceKind::GooseConfig => "Goose configuration",
+        OnboardingImportSourceKind::ArakanConfig => "Arakan configuration",
         OnboardingImportSourceKind::ClaudeDesktop => "Claude Desktop tools",
     };
     format!(
@@ -169,10 +169,10 @@ fn import_failure_warning(
     )
 }
 
-fn goose_config_candidate_paths(config_dir: &Path) -> Vec<PathBuf> {
+fn arakan_config_candidate_paths(config_dir: &Path) -> Vec<PathBuf> {
     let mut paths = vec![config_dir.join(CONFIG_YAML_NAME)];
     if let Some(home) = dirs::home_dir() {
-        paths.push(home.join(".config").join("goose").join(CONFIG_YAML_NAME));
+        paths.push(home.join(".config").join("arakan").join(CONFIG_YAML_NAME));
     }
     dedupe_paths(paths)
 }
@@ -207,7 +207,7 @@ fn dedupe_paths(paths: Vec<PathBuf>) -> Vec<PathBuf> {
         .collect()
 }
 
-fn scan_goose_config_candidate(path: &Path) -> Option<OnboardingImportCandidate> {
+fn scan_arakan_config_candidate(path: &Path) -> Option<OnboardingImportCandidate> {
     if !path.exists() {
         return None;
     }
@@ -216,8 +216,8 @@ fn scan_goose_config_candidate(path: &Path) -> Option<OnboardingImportCandidate>
     let mut counts = OnboardingImportCounts::default();
     let mut warnings = Vec::new();
 
-    if mapping_contains_string(&mapping, "GOOSE_PROVIDER")
-        || mapping_contains_string(&mapping, "GOOSE_MODEL")
+    if mapping_contains_string(&mapping, "ARAKAN_PROVIDER")
+        || mapping_contains_string(&mapping, "ARAKAN_MODEL")
     {
         counts.providers = 1;
     }
@@ -228,13 +228,13 @@ fn scan_goose_config_candidate(path: &Path) -> Option<OnboardingImportCandidate>
         .unwrap_or_default();
 
     if counts.sessions > 0 {
-        warnings.push("Sessions are already shared through Goose's data store.".to_string());
+        warnings.push("Sessions are already shared through Arakan's data store.".to_string());
     }
 
     Some(OnboardingImportCandidate {
-        id: candidate_id(GOOSE_CONFIG_PREFIX, path),
-        source_kind: OnboardingImportSourceKind::GooseConfig,
-        display_name: "Existing Goose configuration".to_string(),
+        id: candidate_id(ARAKAN_CONFIG_PREFIX, path),
+        source_kind: OnboardingImportSourceKind::ArakanConfig,
+        display_name: "Existing Arakan configuration".to_string(),
         path: path.to_string_lossy().to_string(),
         counts,
         warnings,
@@ -269,8 +269,8 @@ fn candidate_id(prefix: &str, path: &Path) -> String {
 }
 
 fn parse_candidate_id(id: &str) -> Option<(OnboardingImportSourceKind, PathBuf)> {
-    if let Some(path) = id.strip_prefix(GOOSE_CONFIG_PREFIX) {
-        return Some((OnboardingImportSourceKind::GooseConfig, PathBuf::from(path)));
+    if let Some(path) = id.strip_prefix(ARAKAN_CONFIG_PREFIX) {
+        return Some((OnboardingImportSourceKind::ArakanConfig, PathBuf::from(path)));
     }
     if let Some(path) = id.strip_prefix(CLAUDE_DESKTOP_PREFIX) {
         return Some((
@@ -314,7 +314,7 @@ fn count_skill_dirs(path: &Path) -> u32 {
         .count() as u32
 }
 
-fn apply_goose_config_candidate(
+fn apply_arakan_config_candidate(
     target_config: &Config,
     target_config_dir: &Path,
     source_path: &Path,
@@ -322,8 +322,8 @@ fn apply_goose_config_candidate(
     let source = read_yaml_mapping(source_path)?;
     let mut result = ApplyResult::default();
 
-    let provider = yaml_string(&source, "GOOSE_PROVIDER");
-    let model = yaml_string(&source, "GOOSE_MODEL");
+    let provider = yaml_string(&source, "ARAKAN_PROVIDER");
+    let model = yaml_string(&source, "ARAKAN_MODEL");
     if let Some(ref p) = provider {
         let m = model.clone().unwrap_or_else(|| {
             crate::config::get_provider_entry(target_config, p)
@@ -338,7 +338,7 @@ fn apply_goose_config_candidate(
         result.imported.providers = 1;
     }
 
-    let extension_result = import_goose_config_extensions(target_config, &source)?;
+    let extension_result = import_arakan_config_extensions(target_config, &source)?;
     result.imported.extensions += extension_result.imported;
     result.skipped.extensions += extension_result.skipped;
 
@@ -358,7 +358,7 @@ fn apply_goose_config_candidate(
 
     result
         .warnings
-        .push("Session history already lives in the Goose data store when available.".to_string());
+        .push("Session history already lives in the Arakan data store when available.".to_string());
     Ok(result)
 }
 
@@ -377,7 +377,7 @@ struct ImportPairCount {
     skipped: u32,
 }
 
-fn import_goose_config_extensions(
+fn import_arakan_config_extensions(
     target_config: &Config,
     source: &Mapping,
 ) -> anyhow::Result<ImportPairCount> {
@@ -593,7 +593,7 @@ mod tests {
     fn apply_onboarding_imports_continues_after_candidate_failure() {
         let source = TempDir::new().unwrap();
         let target = TempDir::new().unwrap();
-        let missing_goose_config = source.path().join("missing-config.yaml");
+        let missing_arakan_config = source.path().join("missing-config.yaml");
         let claude_config = source.path().join("claude_desktop_config.json");
         fs::write(
             &claude_config,
@@ -611,7 +611,7 @@ mod tests {
         .unwrap();
         let req = OnboardingImportApplyRequest {
             candidate_ids: vec![
-                candidate_id(GOOSE_CONFIG_PREFIX, &missing_goose_config),
+                candidate_id(ARAKAN_CONFIG_PREFIX, &missing_arakan_config),
                 candidate_id(CLAUDE_DESKTOP_PREFIX, &claude_config),
             ],
             enable_imported_extensions: false,
@@ -623,21 +623,21 @@ mod tests {
         assert!(response
             .warnings
             .iter()
-            .any(|warning| warning.starts_with("Skipped Goose configuration import at ")));
+            .any(|warning| warning.starts_with("Skipped Arakan configuration import at ")));
         let extensions = target_config.get_param::<Mapping>("extensions").unwrap();
         assert!(extensions.contains_key(serde_yaml::Value::String(name_to_key("github"))));
     }
 
     #[test]
-    fn apply_goose_config_imports_defaults_extensions_and_skills() {
+    fn apply_arakan_config_imports_defaults_extensions_and_skills() {
         let source = TempDir::new().unwrap();
         let target = TempDir::new().unwrap();
         let source_config = source.path().join(CONFIG_YAML_NAME);
         fs::write(
             &source_config,
             r#"
-GOOSE_PROVIDER: openai
-GOOSE_MODEL: gpt-5.1
+ARAKAN_PROVIDER: openai
+ARAKAN_MODEL: gpt-5.1
 extensions:
   github:
     enabled: true
@@ -660,21 +660,21 @@ extensions:
         .unwrap();
 
         let result =
-            apply_goose_config_candidate(&target_config, target.path(), &source_config).unwrap();
+            apply_arakan_config_candidate(&target_config, target.path(), &source_config).unwrap();
 
         assert_eq!(result.imported.providers, 1);
         assert_eq!(result.imported.extensions, 1);
         assert_eq!(result.imported.skills, 1);
-        assert_eq!(target_config.get_goose_provider().unwrap(), "openai");
+        assert_eq!(target_config.get_arakan_provider().unwrap(), "openai");
         assert!(target.path().join("skills").join("reviewer").exists());
     }
 
     #[test]
-    fn apply_goose_config_model_only_skips_provider_activation() {
+    fn apply_arakan_config_model_only_skips_provider_activation() {
         let source = TempDir::new().unwrap();
         let target = TempDir::new().unwrap();
         let source_config = source.path().join(CONFIG_YAML_NAME);
-        fs::write(&source_config, "GOOSE_MODEL: gpt-5.1\n").unwrap();
+        fs::write(&source_config, "ARAKAN_MODEL: gpt-5.1\n").unwrap();
 
         let target_config = Config::new_with_file_secrets(
             target.path().join(CONFIG_YAML_NAME),
@@ -683,10 +683,10 @@ extensions:
         .unwrap();
 
         let result =
-            apply_goose_config_candidate(&target_config, target.path(), &source_config).unwrap();
+            apply_arakan_config_candidate(&target_config, target.path(), &source_config).unwrap();
 
         assert_eq!(result.imported.providers, 0);
-        assert!(target_config.get_goose_provider().is_err());
+        assert!(target_config.get_arakan_provider().is_err());
     }
 
     #[cfg(unix)]

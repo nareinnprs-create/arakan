@@ -2,8 +2,8 @@ use std::{sync::Arc, time::Duration};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::{inference::InferenceRunner, tool::ToolOperation};
-use goose_providers::{
+use arakan_agent::{inference::InferenceRunner, tool::ToolOperation};
+use arakan_providers::{
     base::{MessageStream, Provider},
     conversation::token_usage::{ProviderUsage, Usage},
     errors::ProviderError,
@@ -16,7 +16,7 @@ use tracing::Instrument;
 
 use super::test_pipeline;
 use crate::agents::gen_ai_telemetry::test_support::SpanFieldCapture;
-use crate::agents::state_machine::{Emitter, GooseEffect, StateMachine, Step};
+use crate::agents::state_machine::{Emitter, ArakanEffect, StateMachine, Step};
 use crate::agents::AgentEvent;
 use crate::conversation::message::Message;
 use crate::session::Session;
@@ -70,7 +70,7 @@ async fn interrupted_inference_saves_streamed_output_then_answers_its_request() 
         .seed([Message::user().with_text("kickoff")])
         .await?;
     let cancel = CancellationToken::new();
-    let machine: StateMachine<Session, GooseEffect> = StateMachine::new(
+    let machine: StateMachine<Session, ArakanEffect> = StateMachine::new(
         vec![
             Step::Operation(Arc::new(ToolOperation::new())),
             Step::Inference(Arc::new(InferenceRunner::new(
@@ -141,7 +141,7 @@ fn process_is_alive(pid: u32) -> bool {
 async fn stop_kills_a_running_shell_command() -> Result<()> {
     let (pipeline, api) = test_pipeline().await?;
     let pipeline = pipeline
-        .with_goose_mode(crate::config::GooseMode::Auto)
+        .with_arakan_mode(crate::config::ArakanMode::Auto)
         .await;
     pipeline.add_extension("developer").await?;
     let pid_file = pipeline.working_dir().join("shell.pid");

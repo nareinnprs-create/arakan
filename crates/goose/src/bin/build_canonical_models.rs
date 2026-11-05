@@ -9,8 +9,8 @@
 ///
 use anyhow::{Context, Result};
 use clap::Parser;
-use goose::providers::create;
-use goose_providers::canonical::ModelMapping;
+use arakan::providers::create;
+use arakan_providers::canonical::ModelMapping;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
@@ -317,7 +317,7 @@ impl MappingReport {
 
 fn data_file_path(filename: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../goose-provider-types/src/canonical/data")
+        .join("../arakan-provider-types/src/canonical/data")
         .join(filename)
 }
 
@@ -327,7 +327,7 @@ async fn fetch_models_dev() -> Result<Value> {
     let client = reqwest::Client::new();
     let response = client
         .get(MODELS_DEV_API_URL)
-        .header("User-Agent", "goose/canonical-builder")
+        .header("User-Agent", "arakan/canonical-builder")
         .send()
         .await
         .context("Failed to fetch from models.dev API")?;
@@ -407,7 +407,7 @@ fn collect_provider_metadata(
 
 async fn build_canonical_models() -> Result<()> {
     let json = fetch_models_dev().await?;
-    let registry = goose_providers::canonical::models_dev::from_models_dev(&json.to_string())?;
+    let registry = arakan_providers::canonical::models_dev::from_models_dev(&json.to_string())?;
     let output_path = data_file_path("canonical_models.json");
     registry.to_file(&output_path)?;
     println!(

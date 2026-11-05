@@ -1,17 +1,17 @@
 ---
-title: "Automate Your Complex Workflows with Subrecipes in goose"
-description: Did you know you can call recipes from within other recipes? Learn how to orchestrate multiple AI tasks using goose subrecipes.
+title: "Automate Your Complex Workflows with Subrecipes in arakan"
+description: Did you know you can call recipes from within other recipes? Learn how to orchestrate multiple AI tasks using arakan subrecipes.
 authors: 
     - ian
 ---
 
-![goose Subrecipes](goose-subrecipes.png)
+![arakan Subrecipes](arakan-subrecipes.png)
 
 > **Update:** This post is preserved for historical reference. The public Recipe Cookbook submission program has ended, and we are no longer accepting new recipe submissions.
 
-Remember when you first learned to cook? You probably started with simple recipes like scrambled eggs or toast. But eventually you wanted to make something more complex, like a full dinner with multiple dishes. That's how subrecipes work in goose: each recipe can run stand-alone for a dedicated task, and a main recipe can orchestrate how they run.
+Remember when you first learned to cook? You probably started with simple recipes like scrambled eggs or toast. But eventually you wanted to make something more complex, like a full dinner with multiple dishes. That's how subrecipes work in arakan: each recipe can run stand-alone for a dedicated task, and a main recipe can orchestrate how they run.
 
-Let's explore [goose subrecipes](/docs/tutorials/subrecipes-in-parallel) together! You're about to learn know how to orchestrate multiple AI models, coordinate tasks, and build workflows that will turn you into a "head chef" user with goose.
+Let's explore [arakan subrecipes](/docs/tutorials/subrecipes-in-parallel) together! You're about to learn know how to orchestrate multiple AI models, coordinate tasks, and build workflows that will turn you into a "head chef" user with arakan.
 
 <!--truncate-->
 
@@ -19,7 +19,7 @@ Let's explore [goose subrecipes](/docs/tutorials/subrecipes-in-parallel) togethe
 
 Think of subrecipes like having a team of specialized chefs in your kitchen. One chef is amazing at making desserts, another excels at grilling, and a third is the salad master. Instead of having one person try to do everything, you let each specialist focus on what they do best.
 
-That's exactly what subrecipes do for your goose workflows. You can have one recipe that's optimized for creative tasks like image generation, another that's perfect for technical documentation, and a third that excels at writing code. Then you orchestrate them all from a main recipe.
+That's exactly what subrecipes do for your arakan workflows. You can have one recipe that's optimized for creative tasks like image generation, another that's perfect for technical documentation, and a third that excels at writing code. Then you orchestrate them all from a main recipe.
 
 ## A Real-World Example: Project Setup Automation
 
@@ -121,8 +121,8 @@ title: "Project Image Creator"
 description: "Generate project logos and images"
 
 settings:
-  goose_provider: "databricks"
-  goose_model: "goose-claude-4-sonnet"
+  arakan_provider: "databricks"
+  arakan_model: "arakan-claude-4-sonnet"
   temperature: 0.1
 
 instructions: |
@@ -204,8 +204,8 @@ If you did want more creativity, you could use an image generation MCP server an
 
 ```yaml
 settings:
-  goose_provider: "openai"
-  goose_model: "gpt-4o"
+  arakan_provider: "openai"
+  arakan_model: "gpt-4o"
   temperature: 0.8
 ```
 
@@ -219,8 +219,8 @@ title: "Code Generator"
 description: "Write initial project codebase"
 
 settings:
-  goose_provider: "anthropic"
-  goose_model: "claude-sonnet-4"
+  arakan_provider: "anthropic"
+  arakan_model: "claude-sonnet-4"
   temperature: 0.1
 
 instructions: |
@@ -274,8 +274,8 @@ title: "README Generator"
 description: "Generate comprehensive project documentation"
 
 settings:
-  goose_provider: "google"
-  goose_model: "gemini-2.5-flash"
+  arakan_provider: "google"
+  arakan_model: "gemini-2.5-flash"
   temperature: 0.5
 
 instructions: |
@@ -329,9 +329,9 @@ This is crucial. Each subrecipe should work perfectly on its own. Test them indi
 
 ```bash
 # Test each subrecipe individually first
-goose run --recipe 1-readme.yaml --params project_name="test" language="python" description="test project"
-goose run --recipe 2-image.yaml --params project_name="test" description="test project"  
-goose run --recipe 3-code.yaml --params project_name="test" language="python" description="test project"
+arakan run --recipe 1-readme.yaml --params project_name="test" language="python" description="test project"
+arakan run --recipe 2-image.yaml --params project_name="test" description="test project"  
+arakan run --recipe 3-code.yaml --params project_name="test" language="python" description="test project"
 ```
 
 ### 2. Use recipe_dir for Relative Paths
@@ -373,7 +373,7 @@ Some ideas to get you started:
 
 ## The Future of Orchestrated AI
 
-Subrecipes represent something bigger than just a goose feature. They're a glimpse into how we'll work with AI in the future -- not as monolithic systems trying to do everything, but as specialized agents working together toward common goals.
+Subrecipes represent something bigger than just a arakan feature. They're a glimpse into how we'll work with AI in the future -- not as monolithic systems trying to do everything, but as specialized agents working together toward common goals.
 
 Each recipe becomes a reusable component that you can mix and match. Build a library of specialized recipes, then combine them in different ways for different projects. It's like having a toolkit of AI specialists ready to tackle any challenge.
 
@@ -385,14 +385,14 @@ The Recipe Cookbook remains available to browse, but we are no longer accepting 
 
 
 <head>
-  <meta property="og:title" content="Automate Your Complex Workflows with Subrecipes in goose" />
+  <meta property="og:title" content="Automate Your Complex Workflows with Subrecipes in arakan" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025-09-15-subrecipes-in-goose" />
-  <meta property="og:description" content="Did you know you can call recipes from within other recipes? Learn how to orchestrate multiple AI tasks using goose subrecipes." />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/goose-subrecipes-8a009154ceca95aeb34bf22fcc45dcca.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025-09-15-subrecipes-in-arakan" />
+  <meta property="og:description" content="Did you know you can call recipes from within other recipes? Learn how to orchestrate multiple AI tasks using arakan subrecipes." />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/arakan-subrecipes-8a009154ceca95aeb34bf22fcc45dcca.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Automate Your Complex Workflows with Subrecipes in goose" />
-  <meta name="twitter:description" content="Did you know you can call recipes from within other recipes? Learn how to orchestrate multiple AI tasks using goose subrecipes." />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/goose-subrecipes-8a009154ceca95aeb34bf22fcc45dcca.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Automate Your Complex Workflows with Subrecipes in arakan" />
+  <meta name="twitter:description" content="Did you know you can call recipes from within other recipes? Learn how to orchestrate multiple AI tasks using arakan subrecipes." />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/arakan-subrecipes-8a009154ceca95aeb34bf22fcc45dcca.png" />
 </head>

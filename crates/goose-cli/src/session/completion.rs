@@ -1,5 +1,5 @@
-use goose::agents::execute_commands::list_commands;
-use goose::config::{Config, GooseMode};
+use arakan::agents::execute_commands::list_commands;
+use arakan::config::{Config, ArakanMode};
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
 use rustyline::highlight::{CmdKind, Highlighter};
 use rustyline::hint::Hinter;
@@ -11,14 +11,14 @@ use strum::VariantNames;
 
 use super::{CompletionCache, HintStatus};
 
-/// Completer for goose CLI commands
-pub struct GooseCompleter {
+/// Completer for arakan CLI commands
+pub struct ArakanCompleter {
     pub completion_cache: Arc<std::sync::RwLock<CompletionCache>>,
     filename_completer: FilenameCompleter,
 }
 
-impl GooseCompleter {
-    /// Create a new GooseCompleter with a reference to the Session's completion cache
+impl ArakanCompleter {
+    /// Create a new ArakanCompleter with a reference to the Session's completion cache
     pub fn new(completion_cache: Arc<std::sync::RwLock<CompletionCache>>) -> Self {
         Self {
             completion_cache,
@@ -84,7 +84,7 @@ impl GooseCompleter {
 
     /// Complete flags for the /mode command
     fn complete_mode_flags(&self, line: &str) -> Result<(usize, Vec<Pair>)> {
-        let modes = GooseMode::VARIANTS;
+        let modes = ArakanMode::VARIANTS;
 
         let parts: Vec<&str> = line.split_whitespace().collect();
 
@@ -124,7 +124,7 @@ impl GooseCompleter {
 
     /// Complete skill names for the /skills command
     fn complete_skill_names(&self, line: &str) -> Result<(usize, Vec<Pair>)> {
-        use goose::skills::list_installed_skills;
+        use arakan::skills::list_installed_skills;
 
         let cwd = std::env::current_dir().unwrap_or_default();
         let skills = list_installed_skills(Some(&cwd));
@@ -200,7 +200,7 @@ impl GooseCompleter {
         let current_provider = {
             let cache = self.completion_cache.read().unwrap();
             if cache.current_session_provider.is_empty() {
-                Config::global().get_goose_provider().unwrap_or_default()
+                Config::global().get_arakan_provider().unwrap_or_default()
             } else {
                 cache.current_session_provider.clone()
             }
@@ -406,7 +406,7 @@ impl GooseCompleter {
     }
 }
 
-impl Completer for GooseCompleter {
+impl Completer for ArakanCompleter {
     type Candidate = Pair;
 
     fn complete(
@@ -506,10 +506,10 @@ impl Completer for GooseCompleter {
 }
 
 // Implement the Helper trait which is required by rustyline
-impl Helper for GooseCompleter {}
+impl Helper for ArakanCompleter {}
 
 // Implement required traits with default implementations
-impl Hinter for GooseCompleter {
+impl Hinter for ArakanCompleter {
     type Hint = String;
 
     fn hint(&self, line: &str, _pos: usize, _ctx: &Context<'_>) -> Option<Self::Hint> {
@@ -528,7 +528,7 @@ impl Hinter for GooseCompleter {
 
         match cache.hint_status {
             HintStatus::Interrupted => {
-                Some("Interrupted, what should goose work on instead?".to_string())
+                Some("Interrupted, what should arakan work on instead?".to_string())
             }
             HintStatus::MaybeExit => {
                 Some("Press Ctrl+C again to exit, or type new instructions to continue".to_string())
@@ -541,7 +541,7 @@ impl Hinter for GooseCompleter {
     }
 }
 
-impl Highlighter for GooseCompleter {
+impl Highlighter for ArakanCompleter {
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
         &'s self,
         prompt: &'p str,
@@ -565,7 +565,7 @@ impl Highlighter for GooseCompleter {
     }
 }
 
-impl Validator for GooseCompleter {
+impl Validator for ArakanCompleter {
     fn validate(
         &self,
         _ctx: &mut rustyline::validate::ValidationContext,
@@ -660,7 +660,7 @@ mod tests {
     #[test]
     fn test_complete_slash_commands() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         // Test complete match
         let (pos, candidates) = completer.complete_slash_commands("/exit").unwrap();
@@ -697,7 +697,7 @@ mod tests {
     #[test]
     fn test_complete_slash_commands_new() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         let (pos, candidates) = completer.complete_slash_commands("/new").unwrap();
         assert_eq!(pos, 0);
@@ -709,7 +709,7 @@ mod tests {
     #[test]
     fn test_complete_model_names() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         let (pos, candidates) = completer
             .complete_model_names("/model --provider ")
@@ -750,7 +750,7 @@ mod tests {
     #[test]
     fn test_complete_model_names_edge_cases() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         let (pos, candidates) = completer
             .complete_model_names("/model --provider z")
@@ -797,7 +797,7 @@ mod tests {
     #[test]
     fn test_complete_prompt_names() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         // Test with just "/prompt "
         let (pos, candidates) = completer.complete_prompt_names("/prompt ").unwrap();
@@ -828,7 +828,7 @@ mod tests {
     #[test]
     fn test_complete_prompt_flags() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         // Test with partial flag
         let (_pos, candidates) = completer
@@ -860,7 +860,7 @@ mod tests {
     #[test]
     fn test_complete_argument_keys() {
         let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
+        let completer = ArakanCompleter::new(cache);
 
         // Test with just a prompt name (no space after)
         // This case doesn't return any candidates in the current implementation

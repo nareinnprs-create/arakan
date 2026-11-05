@@ -22,13 +22,13 @@ use super::extension::{
 use super::tool_execution::ToolCallResult;
 use crate::action_required_manager::ActionRequiredManager;
 use crate::agents::mcp_client::{
-    ConnectContext, GooseMcpClientCapabilities, GooseMcpHostInfo, McpClientTrait,
+    ConnectContext, ArakanMcpClientCapabilities, ArakanMcpHostInfo, McpClientTrait,
 };
 use crate::agents::provider_manager::{provider_name_for, ProviderManager};
-use crate::agents::services::GoosePlatform;
+use crate::agents::services::ArakanPlatform;
 use crate::config::extensions::name_to_key;
 use crate::config::{get_extension_by_name, Config};
-use crate::oauth::GooseCredentialStore;
+use crate::oauth::ArakanCredentialStore;
 use crate::session::{EnabledExtensionsState, Session};
 use rmcp::model::{CallToolResult, ErrorCode, ErrorData, MetaObject, ServerConfig, Tool};
 use serde_json::Value;
@@ -47,7 +47,7 @@ pub enum ExtensionMutation {
     Disable { name: String },
 }
 
-const EXTENSION_MUTATION_META_KEY: &str = "goose_extension_mutation";
+const EXTENSION_MUTATION_META_KEY: &str = "arakan_extension_mutation";
 
 impl ExtensionMutation {
     pub fn attach(self, result: &mut CallToolResult) {
@@ -123,7 +123,7 @@ impl Drop for ActionRequiredStream {
 fn resolve_timeout(timeout: Option<u64>) -> u64 {
     timeout.unwrap_or_else(|| {
         Config::global()
-            .get_goose_default_extension_timeout()
+            .get_arakan_default_extension_timeout()
             .unwrap_or(crate::config::DEFAULT_EXTENSION_TIMEOUT)
     })
 }
@@ -165,7 +165,7 @@ impl Placement {
         }
         let working_dir = working_dir
             .map(Path::to_path_buf)
-            .or_else(|| std::env::var("GOOSE_WORKING_DIR").ok().map(PathBuf::from))
+            .or_else(|| std::env::var("ARAKAN_WORKING_DIR").ok().map(PathBuf::from))
             .unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
         Some(Self {
             working_dir,
@@ -387,23 +387,23 @@ impl Extension {
 #[derive(Clone)]
 pub struct ClientContext {
     pub name: String,
-    pub capabilities: GooseMcpClientCapabilities,
+    pub capabilities: ArakanMcpClientCapabilities,
 }
 
 impl ClientContext {
-    pub fn new(platform: &GoosePlatform, host_info: Option<GooseMcpHostInfo>) -> Self {
+    pub fn new(platform: &ArakanPlatform, host_info: Option<ArakanMcpHostInfo>) -> Self {
         let mcpui = host_info
             .as_ref()
             .filter(|host_info| host_info.explicit_extensions)
-            .map(GooseMcpHostInfo::mcpui_enabled)
-            .unwrap_or(matches!(platform, GoosePlatform::GooseDesktop));
+            .map(ArakanMcpHostInfo::mcpui_enabled)
+            .unwrap_or(matches!(platform, ArakanPlatform::ArakanDesktop));
         let name = host_info
             .as_ref()
             .and_then(|host_info| host_info.client_name.clone())
             .unwrap_or_else(|| platform.to_string());
         Self {
             name,
-            capabilities: GooseMcpClientCapabilities {
+            capabilities: ArakanMcpClientCapabilities {
                 mcpui,
                 host_info,
                 elicitation_handler: None,
@@ -435,7 +435,7 @@ impl ClientContext {
 
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GooseMcpAppToolAttachment {
+pub struct ArakanMcpAppToolAttachment {
     pub tool_name: String,
     pub tool_name_is_actual: bool,
     pub extension_name: String,
@@ -448,9 +448,9 @@ pub struct GooseMcpAppToolAttachment {
     pub read_error: Option<String>,
 }
 
-pub(crate) const TRUSTED_TOOL_UPDATE_META_KEY: &str = "__goose_tool_update_meta";
+pub(crate) const TRUSTED_TOOL_UPDATE_META_KEY: &str = "__arakan_tool_update_meta";
 
-/// Manages goose extensions / MCP clients and their interactions
+/// Manages arakan extensions / MCP clients and their interactions
 pub struct ExtensionManager {
     scopes: Mutex<HashMap<String, IndexMap<String, Arc<ExtensionSlot>>>>,
     /// Slots `enable` has started but not yet selected. A lease resolved from
@@ -506,7 +506,7 @@ pub fn get_parameter_names(tool: &Tool) -> Vec<String> {
     names
 }
 
-const TOOL_EXTENSION_META_KEY: &str = "goose_extension";
+const TOOL_EXTENSION_META_KEY: &str = "arakan_extension";
 
 pub fn get_tool_owner(tool: &Tool) -> Option<String> {
     tool.meta
@@ -536,7 +536,7 @@ pub(crate) fn recover_mangled_tool_name<'a>(
 
     let mut matched: Option<&str> = None;
     for (name, owner) in tools {
-        // Prefixed tools: the model turns Goose's "__" separator into a dot
+        // Prefixed tools: the model turns Arakan's "__" separator into a dot
         // ("developer__shell" -> "developer.shell").
         let separator_mangled = name
             .split_once("__")
@@ -587,18 +587,18 @@ fn remove_untrusted_mcp_app_meta(result: &mut CallToolResult) {
 
     meta.0.remove(TRUSTED_TOOL_UPDATE_META_KEY);
 
-    let remove_goose = meta
+    let remove_arakan = meta
         .0
-        .get_mut("goose")
+        .get_mut("arakan")
         .and_then(Value::as_object_mut)
-        .map(|goose_meta| {
-            goose_meta.remove("mcpApp");
-            goose_meta.is_empty()
+        .map(|arakan_meta| {
+            arakan_meta.remove("mcpApp");
+            arakan_meta.is_empty()
         })
         .unwrap_or(false);
 
-    if remove_goose {
-        meta.0.remove("goose");
+    if remove_arakan {
+        meta.0.remove("arakan");
     }
 
     if meta.0.is_empty() {
@@ -620,7 +620,7 @@ fn remove_subagent_session_meta(result: &mut CallToolResult) {
 
 fn insert_trusted_tool_update_meta(
     result: &mut CallToolResult,
-    attachment: &GooseMcpAppToolAttachment,
+    attachment: &ArakanMcpAppToolAttachment,
 ) {
     let Ok(attachment_value) = serde_json::to_value(attachment) else {
         return;
@@ -700,7 +700,7 @@ impl ExtensionManager {
             Default::default(),
             session_manager,
             None,
-            ClientContext::new(&GoosePlatform::GooseCli, None),
+            ClientContext::new(&ArakanPlatform::ArakanCli, None),
         )
     }
 
@@ -925,7 +925,7 @@ impl ExtensionManager {
                 streamable_http::connect(
                     params,
                     socket.as_deref(),
-                    Box::new(GooseCredentialStore::new(name.clone())),
+                    Box::new(ArakanCredentialStore::new(name.clone())),
                 )
                 .await?
             }
@@ -1186,7 +1186,7 @@ mod tests {
 
     use super::super::tool_execution::{ToolCallContext, ToolCallNotificationEmitter};
     use futures::StreamExt;
-    use goose_test_support::mcp::{McpFixtureServer, FAKE_CODE};
+    use arakan_test_support::mcp::{McpFixtureServer, FAKE_CODE};
     use rmcp::model::{CallToolRequestParams, GetPromptResult, Resource};
     use rmcp::ServiceExt;
     use std::sync::atomic::AtomicUsize;
@@ -1946,7 +1946,7 @@ mod tests {
                 working_dir.to_path_buf(),
                 "selection".to_string(),
                 crate::session::SessionType::Hidden,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -2280,7 +2280,7 @@ mod tests {
         )
         .unwrap();
         let slots = || async { manager.scopes.lock().await[set.scope_id()].clone() };
-        let mut client = ClientContext::new(&GoosePlatform::GooseDesktop, None);
+        let mut client = ClientContext::new(&ArakanPlatform::ArakanDesktop, None);
         manager.attach_client(set.scope_id(), client.clone());
         let held = manager.resolve(&set).await;
         assert!(held.start().await.iter().all(|result| result.success));
@@ -2602,7 +2602,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "mixed-mutations".to_string(),
                 crate::session::SessionType::Hidden,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();

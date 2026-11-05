@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use goose::config::GooseMode;
-use goose::conversation::message::{Message, ToolRequest};
-use goose::tool_inspection::{
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, ToolRequest};
+use arakan::tool_inspection::{
     InspectionAction, InspectionResult, ToolInspectionManager, ToolInspector,
 };
 
@@ -28,7 +28,7 @@ impl ToolInspector for MockInspectorOk {
         _session_id: &str,
         _tool_requests: &[ToolRequest],
         _messages: &[Message],
-        _goose_mode: GooseMode,
+        _arakan_mode: ArakanMode,
     ) -> Result<Vec<InspectionResult>> {
         Ok(self.results.clone())
     }
@@ -47,7 +47,7 @@ impl ToolInspector for MockInspectorErr {
         _session_id: &str,
         _tool_requests: &[ToolRequest],
         _messages: &[Message],
-        _goose_mode: GooseMode,
+        _arakan_mode: ArakanMode,
     ) -> Result<Vec<InspectionResult>> {
         Err(anyhow!("simulated failure"))
     }
@@ -89,10 +89,10 @@ async fn test_inspect_tools_aggregates_and_handles_errors() {
     // Act
     let results = manager
         .inspect_tools(
-            goose_test_support::TEST_SESSION_ID,
+            arakan_test_support::TEST_SESSION_ID,
             &tool_requests,
             &messages,
-            GooseMode::Approve,
+            ArakanMode::Approve,
         )
         .await
         .expect("inspect_tools should not fail when one inspector errors");

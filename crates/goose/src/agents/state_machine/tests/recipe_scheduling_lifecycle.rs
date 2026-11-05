@@ -16,7 +16,7 @@ use crate::agents::final_output_tool::{FINAL_OUTPUT_CONTINUATION_MESSAGE, FINAL_
 use crate::agents::platform_extensions::scheduler::MANAGE_SCHEDULE_TOOL_NAME_COMPLETE;
 use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
 use crate::agents::types::{RetryConfig, SuccessCheck};
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::Message;
 #[cfg(feature = "tree-sitter")]
 use crate::recipe::build_recipe::build_recipe_from_template;
@@ -164,7 +164,7 @@ extensions:
 #[tokio::test]
 async fn recipe_delegation_respects_mode_and_child_turn_limit() -> Result<()> {
     let (pipeline, api) = test_pipeline().await?;
-    let pipeline = pipeline.with_goose_mode(GooseMode::Chat).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Chat).await;
     let recipe = Recipe::builder()
         .title("Chat recipe")
         .description("Chat recipe")
@@ -678,9 +678,9 @@ async fn scheduler_is_advertised_only_when_configured_and_manages_jobs() -> Resu
 
     let host = api.uri();
     let _guard = env_lock::lock_env([
-        ("GOOSE_PROVIDER", Some("openai")),
+        ("ARAKAN_PROVIDER", Some("openai")),
         ("OPENAI_BASE_PATH", Some("chat/completions")),
-        ("GOOSE_MODEL", Some("gpt-4o")),
+        ("ARAKAN_MODEL", Some("gpt-4o")),
         ("OPENAI_API_KEY", Some("fake-openai-no-keyring")),
         ("OPENAI_HOST", Some(host.as_str())),
         ("OPENAI_CUSTOM_HEADERS", Some("")),
@@ -759,9 +759,9 @@ async fn scheduled_run_attaches_recipe_to_session_before_inference() -> Result<(
         .hold_reply("done");
     let host = api.uri();
     let _guard = env_lock::lock_env([
-        ("GOOSE_PROVIDER", Some("openai")),
+        ("ARAKAN_PROVIDER", Some("openai")),
         ("OPENAI_BASE_PATH", Some("chat/completions")),
-        ("GOOSE_MODEL", Some("gpt-4o")),
+        ("ARAKAN_MODEL", Some("gpt-4o")),
         ("OPENAI_API_KEY", Some("fake-openai-no-keyring")),
         ("OPENAI_HOST", Some(host.as_str())),
         ("OPENAI_CUSTOM_HEADERS", Some("")),
@@ -804,7 +804,7 @@ prompt: check
             crate::config::permission::PermissionManager::instance(),
             Some(scheduler.clone()),
             true,
-            crate::agents::GoosePlatform::GooseCli,
+            crate::agents::ArakanPlatform::ArakanCli,
         ),
     );
     let job = crate::scheduler::ScheduledJob {

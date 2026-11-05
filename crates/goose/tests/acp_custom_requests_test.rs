@@ -11,11 +11,11 @@ use common_tests::fixtures::{
     run_test, send_custom, Connection, PermissionDecision, Session, SessionData,
     TestConnectionConfig,
 };
-use goose::acp::server::AcpProviderFactory;
-use goose::providers::base::{MessageStream, Provider};
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_test_support::{EnforceSessionId, IgnoreSessionId, McpFixture, FAKE_CODE};
+use arakan::acp::server::AcpProviderFactory;
+use arakan::providers::base::{MessageStream, Provider};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_test_support::{EnforceSessionId, IgnoreSessionId, McpFixture, FAKE_CODE};
 use serial_test::serial;
 use std::path::PathBuf;
 use std::sync::{Arc, LazyLock};
@@ -24,22 +24,22 @@ use std::time::Duration;
 use common_tests::fixtures::OpenAiFixture;
 
 const DEFAULT_ACP_TEST_CONFIG: &str =
-    "GOOSE_MODEL: gpt-4o\nGOOSE_PROVIDER: openai\nGOOSE_DISABLE_KEYRING: true\n";
+    "ARAKAN_MODEL: gpt-4o\nARAKAN_PROVIDER: openai\nARAKAN_DISABLE_KEYRING: true\n";
 
 static ACP_CONFIG_ROOT: LazyLock<tempfile::TempDir> =
     LazyLock::new(|| tempfile::tempdir().unwrap());
 
 fn write_acp_global_config(contents: &str) -> PathBuf {
-    std::env::set_var("GOOSE_PATH_ROOT", ACP_CONFIG_ROOT.path());
-    std::env::set_var("GOOSE_DISABLE_KEYRING", "1");
-    let config_dir = goose::config::paths::Paths::config_dir();
+    std::env::set_var("ARAKAN_PATH_ROOT", ACP_CONFIG_ROOT.path());
+    std::env::set_var("ARAKAN_DISABLE_KEYRING", "1");
+    let config_dir = arakan::config::paths::Paths::config_dir();
     std::fs::create_dir_all(&config_dir).unwrap();
     let mut contents = contents.to_string();
-    if !contents.contains("GOOSE_DISABLE_KEYRING") {
-        contents.push_str("GOOSE_DISABLE_KEYRING: true\n");
+    if !contents.contains("ARAKAN_DISABLE_KEYRING") {
+        contents.push_str("ARAKAN_DISABLE_KEYRING: true\n");
     }
     std::fs::write(
-        config_dir.join(goose::config::base::CONFIG_YAML_NAME),
+        config_dir.join(arakan::config::base::CONFIG_YAML_NAME),
         contents,
     )
     .unwrap();
@@ -62,7 +62,7 @@ impl Provider for MockProvider {
         &self,
         _model_config: &ModelConfig,
         _system: &str,
-        _messages: &[goose::conversation::message::Message],
+        _messages: &[arakan::conversation::message::Message],
         _tools: &[rmcp::model::Tool],
     ) -> Result<MessageStream, ProviderError> {
         unimplemented!()
@@ -86,7 +86,7 @@ fn active_run_id_from_update(update: &SessionUpdate) -> Option<String> {
     };
     info.meta
         .as_ref()?
-        .get("goose")?
+        .get("arakan")?
         .get("activeRunId")?
         .as_str()
         .map(ToString::to_string)
@@ -101,7 +101,7 @@ fn queued_steer_message_ids(updates: &[SessionUpdate]) -> Vec<String> {
             };
             info.meta
                 .as_ref()?
-                .get("goose")?
+                .get("arakan")?
                 .get("queuedSteer")?
                 .get("messageId")?
                 .as_str()
@@ -117,9 +117,9 @@ fn steer_chunk_message_ids(updates: &[SessionUpdate]) -> Vec<String> {
             let SessionUpdate::UserMessageChunk(chunk) = update else {
                 return None;
             };
-            let goose = chunk.meta.as_ref()?.get("goose")?;
-            goose.get("steer")?.as_bool().filter(|b| *b)?;
-            goose.get("messageId")?.as_str().map(ToString::to_string)
+            let arakan = chunk.meta.as_ref()?.get("arakan")?;
+            arakan.get("steer")?.as_bool().filter(|b| *b)?;
+            arakan.get("messageId")?.as_str().map(ToString::to_string)
         })
         .collect()
 }
@@ -140,7 +140,7 @@ fn steer_chunk_texts(updates: &[SessionUpdate]) -> Vec<String> {
             let is_steer = chunk
                 .meta
                 .as_ref()
-                .and_then(|m| m.get("goose"))
+                .and_then(|m| m.get("arakan"))
                 .and_then(|g| g.get("steer"))
                 .and_then(|s| s.as_bool())
                 .unwrap_or(false);
@@ -175,7 +175,7 @@ fn test_custom_get_tools() {
 
         let result = send_custom(
             conn.cx(),
-            "_goose/unstable/tools/list",
+            "_arakan/unstable/tools/list",
             serde_json::json!({ "sessionId": session_id }),
         )
         .await;
@@ -192,7 +192,7 @@ fn test_custom_get_tools() {
 #[cfg(feature = "live-voice")]
 fn test_live_voice_availability_is_bound_to_an_accessible_main_session() {
     let _guard = env_lock::lock_env([
-        ("GOOSE_LIVE_VOICE_ENABLED", None::<&str>),
+        ("ARAKAN_LIVE_VOICE_ENABLED", None::<&str>),
         ("OPENAI_API_KEY", None::<&str>),
     ]);
     write_acp_global_config(DEFAULT_ACP_TEST_CONFIG);
@@ -203,7 +203,7 @@ fn test_live_voice_availability_is_bound_to_an_accessible_main_session() {
         let SessionData { session, .. } = conn.new_session().await.unwrap();
         let disabled = send_custom(
             conn.cx(),
-            "_goose/unstable/session/live-voice/availability",
+            "_arakan/unstable/session/live-voice/availability",
             serde_json::json!({
                 "sessionId": session.session_id().0
             }),
@@ -215,9 +215,9 @@ fn test_live_voice_availability_is_bound_to_an_accessible_main_session() {
 
         send_custom(
             conn.cx(),
-            "_goose/unstable/config/upsert",
+            "_arakan/unstable/config/upsert",
             serde_json::json!({
-                "key": "GOOSE_LIVE_VOICE_ENABLED",
+                "key": "ARAKAN_LIVE_VOICE_ENABLED",
                 "value": true,
                 "isSecret": false
             }),
@@ -226,7 +226,7 @@ fn test_live_voice_availability_is_bound_to_an_accessible_main_session() {
         .unwrap();
         send_custom(
             conn.cx(),
-            "_goose/unstable/config/upsert",
+            "_arakan/unstable/config/upsert",
             serde_json::json!({
                 "key": "OPENAI_API_KEY",
                 "value": "test-live-key",
@@ -238,7 +238,7 @@ fn test_live_voice_availability_is_bound_to_an_accessible_main_session() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/session/live-voice/availability",
+            "_arakan/unstable/session/live-voice/availability",
             serde_json::json!({
                 "sessionId": session.session_id().0
             }),
@@ -250,7 +250,7 @@ fn test_live_voice_availability_is_bound_to_an_accessible_main_session() {
 
         let inaccessible = send_custom(
             conn.cx(),
-            "_goose/unstable/session/live-voice/availability",
+            "_arakan/unstable/session/live-voice/availability",
             serde_json::json!({
                 "sessionId": "not-loaded-on-this-connection"
             }),
@@ -273,7 +273,7 @@ fn test_custom_get_extensions() {
 
         let add_result = send_custom(
             conn.cx(),
-            "_goose/unstable/config/extensions/add",
+            "_arakan/unstable/config/extensions/add",
             serde_json::json!({
                 "enabled": true,
                 "extension": {
@@ -295,7 +295,7 @@ fn test_custom_get_extensions() {
         )
         .await;
         assert!(add_result.is_ok(), "expected ok, got: {:?}", add_result);
-        let stored_inline_token = goose::config::Config::global()
+        let stored_inline_token = arakan::config::Config::global()
             .get_secret::<String>("INLINE_TOKEN")
             .expect("inline env should be saved as a secret");
         assert!(
@@ -306,7 +306,7 @@ fn test_custom_get_extensions() {
         let list_extension = || async {
             let result = send_custom(
                 conn.cx(),
-                "_goose/unstable/config/extensions/list",
+                "_arakan/unstable/config/extensions/list",
                 serde_json::json!({}),
             )
             .await;
@@ -347,7 +347,7 @@ fn test_custom_get_extensions() {
 
         let set_enabled_result = send_custom(
             conn.cx(),
-            "_goose/unstable/config/extensions/set-enabled",
+            "_arakan/unstable/config/extensions/set-enabled",
             serde_json::json!({
                 "configKey": config_key,
                 "enabled": false,
@@ -367,7 +367,7 @@ fn test_custom_get_extensions() {
 
         let remove_result = send_custom(
             conn.cx(),
-            "_goose/unstable/config/extensions/remove",
+            "_arakan/unstable/config/extensions/remove",
             serde_json::json!({
                 "configKey": config_key,
             }),
@@ -403,7 +403,7 @@ fn test_custom_session_extensions_add_list_remove() {
         let list_extension = || async {
             let result = send_custom(
                 conn.cx(),
-                "_goose/unstable/session/extensions/list",
+                "_arakan/unstable/session/extensions/list",
                 serde_json::json!({ "sessionId": session_id.clone() }),
             )
             .await;
@@ -427,7 +427,7 @@ fn test_custom_session_extensions_add_list_remove() {
 
         let add_result = send_custom(
             conn.cx(),
-            "_goose/unstable/session/extensions/add",
+            "_arakan/unstable/session/extensions/add",
             serde_json::json!({
                 "sessionId": session_id.clone(),
                 "extension": {
@@ -452,7 +452,7 @@ fn test_custom_session_extensions_add_list_remove() {
 
         let unknown_remove_result = send_custom(
             conn.cx(),
-            "_goose/unstable/session/extensions/remove",
+            "_arakan/unstable/session/extensions/remove",
             serde_json::json!({
                 "sessionId": session_id.clone(),
                 "extensionKey": "missing-extension",
@@ -471,7 +471,7 @@ fn test_custom_session_extensions_add_list_remove() {
 
         let remove_result = send_custom(
             conn.cx(),
-            "_goose/unstable/session/extensions/remove",
+            "_arakan/unstable/session/extensions/remove",
             serde_json::json!({
                 "sessionId": session_id.clone(),
                 "extensionKey": extension_name,
@@ -503,7 +503,7 @@ fn test_custom_prompt_methods() {
 
         let list_response = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/list",
+            "_arakan/unstable/config/prompts/list",
             serde_json::json!({}),
         )
         .await
@@ -518,7 +518,7 @@ fn test_custom_prompt_methods() {
 
         let get_response = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/get",
+            "_arakan/unstable/config/prompts/get",
             serde_json::json!({ "name": "system.md" }),
         )
         .await
@@ -532,7 +532,7 @@ fn test_custom_prompt_methods() {
         let content = "custom acp system prompt";
         let save_response = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/save",
+            "_arakan/unstable/config/prompts/save",
             serde_json::json!({ "name": "system.md", "content": content }),
         )
         .await
@@ -541,7 +541,7 @@ fn test_custom_prompt_methods() {
 
         let get_response = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/get",
+            "_arakan/unstable/config/prompts/get",
             serde_json::json!({ "name": "system.md" }),
         )
         .await
@@ -551,7 +551,7 @@ fn test_custom_prompt_methods() {
 
         let reset_response = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/reset",
+            "_arakan/unstable/config/prompts/reset",
             serde_json::json!({ "name": "system.md" }),
         )
         .await
@@ -563,7 +563,7 @@ fn test_custom_prompt_methods() {
 
         let get_response = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/get",
+            "_arakan/unstable/config/prompts/get",
             serde_json::json!({ "name": "system.md" }),
         )
         .await
@@ -573,7 +573,7 @@ fn test_custom_prompt_methods() {
 
         let missing = send_custom(
             conn.cx(),
-            "_goose/unstable/config/prompts/get",
+            "_arakan/unstable/config/prompts/get",
             serde_json::json!({ "name": "missing.md" }),
         )
         .await
@@ -639,7 +639,7 @@ fn test_steer_session_adds_input_to_active_prompt() {
                     if let Some(run_id) = updates.iter().find_map(active_run_id_from_update) {
                         let response = send_custom(
                             conn.cx(),
-                            "_goose/unstable/session/steer",
+                            "_arakan/unstable/session/steer",
                             serde_json::json!({
                                 "sessionId": session_id,
                                 "expectedRunId": run_id,
@@ -681,7 +681,7 @@ fn test_steer_session_adds_input_to_active_prompt() {
             steer_chunks
                 .iter()
                 .any(|t| t.contains("steer while active")),
-            "expected a chunk marked _meta.goose.steer with the steer text, got: {steer_chunks:?}"
+            "expected a chunk marked _meta.arakan.steer with the steer text, got: {steer_chunks:?}"
         );
 
         // The queued steer must be announced (so a UI can show it as pending)
@@ -711,7 +711,7 @@ fn test_custom_list_builtin_skill_sources() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/sources/list",
+            "_arakan/unstable/sources/list",
             serde_json::json!({ "type": "builtinSkill" }),
         )
         .await
@@ -722,8 +722,8 @@ fn test_custom_list_builtin_skill_sources() {
             .expect("missing sources array");
         let builtin = sources
             .iter()
-            .find(|source| source.get("name") == Some(&serde_json::json!("goose-doc-guide")))
-            .expect("expected goose-doc-guide builtin skill");
+            .find(|source| source.get("name") == Some(&serde_json::json!("arakan-doc-guide")))
+            .expect("expected arakan-doc-guide builtin skill");
 
         assert_eq!(
             builtin.get("type"),
@@ -732,7 +732,7 @@ fn test_custom_list_builtin_skill_sources() {
         assert_eq!(builtin.get("global"), Some(&serde_json::json!(true)));
         assert_eq!(
             builtin.get("path"),
-            Some(&serde_json::json!("builtin://skills/goose-doc-guide"))
+            Some(&serde_json::json!("builtin://skills/arakan-doc-guide"))
         );
     });
 }
@@ -747,7 +747,7 @@ fn test_custom_provider_inventory_includes_metadata() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/list",
+            "_arakan/unstable/providers/list",
             serde_json::json!({}),
         )
         .await
@@ -774,7 +774,7 @@ fn test_custom_provider_inventory_includes_metadata() {
 #[serial]
 fn test_custom_preferences_read_save() {
     let config_dir = write_acp_global_config(
-        "GOOSE_MODEL: gpt-4o\nGOOSE_PROVIDER: openai\nGOOSE_AUTO_COMPACT_THRESHOLD: 0.7\nGOOSE_THINKING_EFFORT: high\nVOICE_AUTO_SUBMIT_PHRASES: send it\n",
+        "ARAKAN_MODEL: gpt-4o\nARAKAN_PROVIDER: openai\nARAKAN_AUTO_COMPACT_THRESHOLD: 0.7\nARAKAN_THINKING_EFFORT: high\nVOICE_AUTO_SUBMIT_PHRASES: send it\n",
     );
 
     run_test(async move {
@@ -787,11 +787,11 @@ fn test_custom_preferences_read_save() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/preferences/read",
+            "_arakan/unstable/preferences/read",
             serde_json::json!({
                 "keys": [
                     "autoCompactThreshold",
-                    "gooseThinkingEffort",
+                    "arakanThinkingEffort",
                     "voiceAutoSubmitPhrases",
                     "voiceDictationPreferredMic"
                 ],
@@ -803,7 +803,7 @@ fn test_custom_preferences_read_save() {
             response.get("values"),
             Some(&serde_json::json!([
                 { "key": "autoCompactThreshold", "value": 0.7 },
-                { "key": "gooseThinkingEffort", "value": "high" },
+                { "key": "arakanThinkingEffort", "value": "high" },
                 { "key": "voiceAutoSubmitPhrases", "value": "send it" },
                 { "key": "voiceDictationPreferredMic", "value": null },
             ]))
@@ -811,10 +811,10 @@ fn test_custom_preferences_read_save() {
 
         send_custom(
             conn.cx(),
-            "_goose/unstable/preferences/save",
+            "_arakan/unstable/preferences/save",
             serde_json::json!({
                 "values": [
-                    { "key": "gooseThinkingEffort", "value": "disabled" },
+                    { "key": "arakanThinkingEffort", "value": "disabled" },
                     { "key": "voiceDictationProvider", "value": "__disabled__" },
                     { "key": "voiceDictationPreferredMic", "value": "mic-1" }
                 ],
@@ -825,9 +825,9 @@ fn test_custom_preferences_read_save() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/preferences/read",
+            "_arakan/unstable/preferences/read",
             serde_json::json!({
-                "keys": ["gooseThinkingEffort", "voiceDictationProvider", "voiceDictationPreferredMic"],
+                "keys": ["arakanThinkingEffort", "voiceDictationProvider", "voiceDictationPreferredMic"],
             }),
         )
         .await
@@ -835,7 +835,7 @@ fn test_custom_preferences_read_save() {
         assert_eq!(
             response.get("values"),
             Some(&serde_json::json!([
-                { "key": "gooseThinkingEffort", "value": "off" },
+                { "key": "arakanThinkingEffort", "value": "off" },
                 { "key": "voiceDictationProvider", "value": "__disabled__" },
                 { "key": "voiceDictationPreferredMic", "value": "mic-1" },
             ]))
@@ -859,10 +859,10 @@ fn test_custom_preferences_save_rejects_invalid_values() {
                 "values": [{ "key": "autoCompactThreshold", "value": 1.1 }],
             }),
             serde_json::json!({
-                "values": [{ "key": "gooseThinkingEffort", "value": "bogus" }],
+                "values": [{ "key": "arakanThinkingEffort", "value": "bogus" }],
             }),
             serde_json::json!({
-                "values": [{ "key": "gooseThinkingEffort", "value": ["high"] }],
+                "values": [{ "key": "arakanThinkingEffort", "value": ["high"] }],
             }),
             serde_json::json!({
                 "values": [{ "key": "voiceAutoSubmitPhrases", "value": ["send"] }],
@@ -876,13 +876,13 @@ fn test_custom_preferences_save_rejects_invalid_values() {
         ];
 
         for payload in invalid_payloads {
-            let result = send_custom(conn.cx(), "_goose/unstable/preferences/save", payload).await;
+            let result = send_custom(conn.cx(), "_arakan/unstable/preferences/save", payload).await;
             assert!(result.is_err(), "expected invalid params error");
         }
 
         let result = send_custom(
             conn.cx(),
-            "_goose/unstable/preferences/save",
+            "_arakan/unstable/preferences/save",
             serde_json::json!({
                 "values": [
                     { "key": "voiceDictationPreferredMic", "value": "mic-1" },
@@ -895,7 +895,7 @@ fn test_custom_preferences_save_rejects_invalid_values() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/preferences/read",
+            "_arakan/unstable/preferences/read",
             serde_json::json!({
                 "keys": ["voiceDictationPreferredMic"],
             }),
@@ -915,7 +915,7 @@ fn test_custom_preferences_save_rejects_invalid_values() {
 #[serial]
 fn test_custom_defaults_read() {
     let config_dir = write_acp_global_config(
-        "GOOSE_MODEL: claude-3-5-haiku-latest\nGOOSE_PROVIDER: anthropic\n",
+        "ARAKAN_MODEL: claude-3-5-haiku-latest\nARAKAN_PROVIDER: anthropic\n",
     );
 
     run_test(async move {
@@ -928,7 +928,7 @@ fn test_custom_defaults_read() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/defaults/read",
+            "_arakan/unstable/defaults/read",
             serde_json::json!({}),
         )
         .await
@@ -952,7 +952,7 @@ fn test_custom_defaults_read() {
 fn test_custom_defaults_save_allows_unlisted_model() {
     let _env = env_lock::lock_env([("ANTHROPIC_API_KEY", Some("test-key"))]);
     let config_dir = write_acp_global_config(
-        "GOOSE_MODEL: claude-3-5-haiku-latest\nGOOSE_PROVIDER: anthropic\n",
+        "ARAKAN_MODEL: claude-3-5-haiku-latest\nARAKAN_PROVIDER: anthropic\n",
     );
 
     run_test(async move {
@@ -965,7 +965,7 @@ fn test_custom_defaults_save_allows_unlisted_model() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/defaults/save",
+            "_arakan/unstable/defaults/save",
             serde_json::json!({
                 "providerId": "anthropic",
                 "modelId": "custom-unlisted-model",
@@ -993,12 +993,12 @@ fn test_raw_config_and_secret_methods_are_removed() {
         let conn = AcpServerConnection::new(TestConnectionConfig::default(), openai).await;
 
         for method in [
-            "_goose/config/read",
-            "_goose/config/upsert",
-            "_goose/config/remove",
-            "_goose/secret/check",
-            "_goose/secret/upsert",
-            "_goose/secret/remove",
+            "_arakan/config/read",
+            "_arakan/config/upsert",
+            "_arakan/config/remove",
+            "_arakan/secret/check",
+            "_arakan/secret/upsert",
+            "_arakan/secret/remove",
         ] {
             let result = send_custom(conn.cx(), method, serde_json::json!({})).await;
             assert!(result.is_err(), "{method} should be removed");
@@ -1030,9 +1030,9 @@ fn test_provider_switching_updates_session_state() {
             .await
             .expect("provider switch to openai should succeed");
 
-        conn.set_config_option(&session_id, "provider", "goose")
+        conn.set_config_option(&session_id, "provider", "arakan")
             .await
-            .expect("provider reset to goose should succeed");
+            .expect("provider reset to arakan should succeed");
     });
 }
 
@@ -1061,7 +1061,7 @@ fn test_custom_provider_supported_models_lists_raw_provider_models() {
                     name: provider_name,
                     recommended_models: vec!["canonical-filtered-model".to_string()],
                     supported_models: Ok(vec![
-                        "goose-claude-opus-4-8".to_string(),
+                        "arakan-claude-opus-4-8".to_string(),
                         "raw-databricks-endpoint".to_string(),
                     ]),
                 }) as Arc<dyn Provider>)
@@ -1078,7 +1078,7 @@ fn test_custom_provider_supported_models_lists_raw_provider_models() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/supported-models/list",
+            "_arakan/unstable/providers/supported-models/list",
             serde_json::json!({ "providerId": "openai" }),
         )
         .await
@@ -1091,7 +1091,7 @@ fn test_custom_provider_supported_models_lists_raw_provider_models() {
         assert_eq!(
             response.get("models"),
             Some(&serde_json::json!([
-                "goose-claude-opus-4-8",
+                "arakan-claude-opus-4-8",
                 "raw-databricks-endpoint"
             ]))
         );
@@ -1124,7 +1124,7 @@ fn test_custom_provider_supported_models_maps_not_configured_error() {
 
         let error = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/supported-models/list",
+            "_arakan/unstable/providers/supported-models/list",
             serde_json::json!({ "providerId": "openai" }),
         )
         .await
@@ -1163,7 +1163,7 @@ fn test_custom_provider_supported_models_maps_authentication_error() {
 
         let error = send_custom(
             conn.cx(),
-            "_goose/unstable/providers/supported-models/list",
+            "_arakan/unstable/providers/supported-models/list",
             serde_json::json!({ "providerId": "openai" }),
         )
         .await
@@ -1196,7 +1196,7 @@ async fn call_app_tool(
 ) -> Result<serde_json::Value, agent_client_protocol::Error> {
     send_custom(
         conn.cx(),
-        "_goose/unstable/tools/call",
+        "_arakan/unstable/tools/call",
         serde_json::json!({
             "sessionId": session_id,
             "extensionName": "mcp-fixture",
@@ -1267,7 +1267,7 @@ fn test_custom_context_report() {
 
         let empty = send_custom(
             conn.cx(),
-            "_goose/unstable/context/report",
+            "_arakan/unstable/context/report",
             serde_json::json!({ "sessionId": session_id }),
         )
         .await
@@ -1288,7 +1288,7 @@ fn test_custom_context_report() {
 
         let report = send_custom(
             conn.cx(),
-            "_goose/unstable/context/report",
+            "_arakan/unstable/context/report",
             serde_json::json!({ "sessionId": session_id }),
         )
         .await
@@ -1335,7 +1335,7 @@ fn test_app_tool_call_applies_extension_mutation() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/tools/list",
+            "_arakan/unstable/tools/list",
             serde_json::json!({
                 "sessionId": session_id,
                 "extensionName": "analyze"
@@ -1347,7 +1347,7 @@ fn test_app_tool_call_applies_extension_mutation() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/tools/call",
+            "_arakan/unstable/tools/call",
             serde_json::json!({
                 "sessionId": session_id,
                 "extensionName": "Extension Manager",
@@ -1364,7 +1364,7 @@ fn test_app_tool_call_applies_extension_mutation() {
 
         let response = send_custom(
             conn.cx(),
-            "_goose/unstable/tools/list",
+            "_arakan/unstable/tools/list",
             serde_json::json!({
                 "sessionId": session_id,
                 "extensionName": "analyze"

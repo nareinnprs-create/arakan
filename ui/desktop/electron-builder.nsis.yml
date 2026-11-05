@@ -5,7 +5,7 @@
 # Also the shortcut AppUserModelID and the registry key the install is recorded under. Matches
 # the macOS bundle identifier electron-packager derives from the product name. Updates and
 # uninstalls find the existing install through it, so it must never change.
-appId: com.electron.goose
+appId: com.electron.arakan
 # Publisher shown by Apps & features, the same as the deb and rpm maintainer. Injected here so
 # package.json and the forge build stay unchanged.
 extraMetadata:

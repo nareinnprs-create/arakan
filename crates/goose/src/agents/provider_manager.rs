@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, Result};
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 use tracing::warn;
 
 use crate::config::Config;
@@ -48,7 +48,7 @@ impl ProviderManager {
             warn!("Failed to apply model selection to provider: {e}");
         }
         provider
-            .update_mode(&session.id, session.goose_mode)
+            .update_mode(&session.id, session.arakan_mode)
             .await
             .map_err(|e| anyhow!("Failed to propagate mode to provider: {e}"))?;
         *slot = Some(provider.clone());
@@ -100,7 +100,7 @@ pub fn provider_name_for(session: &Session) -> Result<String> {
     match &session.provider_name {
         Some(name) => Ok(name.clone()),
         None => Config::global()
-            .get_goose_provider()
+            .get_arakan_provider()
             .map_err(|_| anyhow!("Could not configure agent: missing provider")),
     }
 }
@@ -112,7 +112,7 @@ pub fn model_config_for(session: &Session) -> Result<ModelConfig> {
     let config = Config::global();
     let provider_name = provider_name_for(session)?;
     let model_name = config
-        .get_goose_model()
+        .get_arakan_model()
         .map_err(|_| anyhow!("Could not resolve model config: missing model"))?;
     crate::model_config::model_config_from_user_config(&provider_name, &model_name)
         .map_err(|e| anyhow!("Could not resolve model config: {e}"))

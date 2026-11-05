@@ -1,6 +1,6 @@
 use anyhow::Result;
 use futures::future::BoxFuture;
-use goose_providers::base::ProviderDescriptor;
+use arakan_providers::base::ProviderDescriptor;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -12,8 +12,8 @@ use crate::providers::custom_provider_config::ConfigKeyResolver;
 use crate::session_context::{
     session_id_request_builder, session_id_request_builder_with_header_override,
 };
-use goose_providers::api_client::{ApiClient, AuthMethod};
-use goose_providers::openai::{
+use arakan_providers::api_client::{ApiClient, AuthMethod};
+use arakan_providers::openai::{
     parse_custom_headers, parse_openai_base_url, OpenAiProvider, OpenAiProviderBuilder,
     OpenAiSessionIdProvider, OPEN_AI_DEFAULT_BASE_PATH, OPEN_AI_VERSIONLESS_BASE_PATH,
 };
@@ -21,7 +21,7 @@ use goose_providers::openai::{
 pub struct OpenAiProviderDef;
 
 impl ProviderDescriptor for OpenAiProviderDef {
-    fn metadata() -> goose_providers::base::ProviderMetadata {
+    fn metadata() -> arakan_providers::base::ProviderMetadata {
         OpenAiProvider::metadata().with_setup(
             crate::providers::catalog::ProviderSetupMetadata::new(
                 crate::providers::catalog::ProviderSetupCategory::Model,
@@ -51,7 +51,7 @@ impl ProviderDef for OpenAiProviderDef {
 }
 
 pub async fn from_env(
-    tls_config: Option<goose_providers::api_client::TlsConfig>,
+    tls_config: Option<arakan_providers::api_client::TlsConfig>,
 ) -> Result<OpenAiProvider> {
     let config = crate::config::Config::global();
 
@@ -59,9 +59,9 @@ pub async fn from_env(
     //
     // Priority (highest first):
     //   1. OPENAI_HOST env var — session override (deprecated but still
-    //      honoured so that `OPENAI_HOST=… goose` keeps working)
+    //      honoured so that `OPENAI_HOST=… arakan` keeps working)
     //   2. OPENAI_BASE_URL (env or config) — ecosystem-standard
-    //   3. OPENAI_HOST from config file — persisted by `goose configure`
+    //   3. OPENAI_HOST from config file — persisted by `arakan configure`
     //   4. Default "https://api.openai.com"
     //
     // OPENAI_BASE_URL is parsed into host + query params + a flag
@@ -182,7 +182,7 @@ pub fn resolve_api_key(
                 ConfigError::NotFound(_) => {
                     if config.requires_auth {
                         anyhow::bail!(
-                            "Required API key {} is not set. Configure it via `goose configure` or set the {} environment variable.",
+                            "Required API key {} is not set. Configure it via `arakan configure` or set the {} environment variable.",
                             config.api_key_env,
                             config.api_key_env
                         );
@@ -208,13 +208,13 @@ pub fn resolve_api_key(
 
 pub fn from_custom_config(
     config: DeclarativeProviderConfig,
-    tls_config: Option<goose_providers::api_client::TlsConfig>,
+    tls_config: Option<arakan_providers::api_client::TlsConfig>,
 ) -> Result<OpenAiProvider> {
     let auth_override = config.auth.clone();
     let request_builder = session_id_request_builder_with_header_override(
         config.session_id_header_override.as_deref(),
     )?;
-    goose_providers::openai::from_declarative_config(
+    arakan_providers::openai::from_declarative_config(
         config,
         tls_config,
         ConfigKeyResolver::new(Config::global()),
@@ -269,7 +269,7 @@ fn parse_base_url(raw_url: &str) -> Result<ParsedBaseUrl> {
 /// Priority (highest first):
 ///   1. OPENAI_HOST env var — session override (deprecated but still honoured)
 ///   2. OPENAI_BASE_URL (env or config) — ecosystem-standard
-///   3. OPENAI_HOST from config file — persisted by `goose configure`
+///   3. OPENAI_HOST from config file — persisted by `arakan configure`
 ///   4. Default "https://api.openai.com"
 fn resolve_base_url(config: &crate::config::Config) -> Result<ParsedBaseUrl> {
     if let Ok(h) = std::env::var("OPENAI_HOST") {

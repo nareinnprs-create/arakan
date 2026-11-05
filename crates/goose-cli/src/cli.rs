@@ -2,22 +2,18 @@ use anyhow::Result;
 use clap::{Args, CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell as ClapShell};
 use clap_complete_nushell::Nushell as ClapNushell;
-use goose::agents::{GoosePlatform, StateMachineServices, StateMachineServicesConfig};
+use arakan::agents::{ArakanPlatform, StateMachineServices, StateMachineServicesConfig};
 #[cfg(feature = "bundled-mcp")]
-use goose::builtin_extension::register_builtin_extensions;
-use goose::config::{Config, GooseMode};
-#[cfg(feature = "telemetry")]
-use goose::posthog::get_telemetry_choice;
-use goose::recipe::Recipe;
+use arakan::builtin_extension::register_builtin_extensions;
+use arakan::config::{Config, ArakanMode};
+use arakan::recipe::Recipe;
 #[cfg(feature = "acp-http")]
-use goose::source_roots::SourceRoot;
+use arakan::source_roots::SourceRoot;
 #[cfg(feature = "bundled-mcp")]
-use goose_mcp::mcp_server_runner::{serve, McpCommand};
+use arakan_mcp::mcp_server_runner::{serve, McpCommand};
 #[cfg(feature = "bundled-mcp")]
-use goose_mcp::{AutoVisualiserRouter, ComputerControllerServer, MemoryServer, TutorialServer};
+use arakan_mcp::{AutoVisualiserRouter, ComputerControllerServer, MemoryServer, TutorialServer};
 
-#[cfg(feature = "telemetry")]
-use crate::commands::configure::configure_telemetry_consent_dialog;
 use crate::commands::configure::{configure_provider_dialog, handle_configure};
 use crate::commands::info::handle_info;
 use crate::commands::plugin::{handle_plugin_install, handle_plugin_update};
@@ -41,20 +37,20 @@ use crate::recipes::recipe::{explain_recipe, render_recipe_as_yaml};
 use crate::session::{
     build_session, is_provider_unavailable_error, try_build_session, SessionBuilderConfig,
 };
-use goose::agents::Container;
-use goose::session::session_manager::SessionType;
-use goose::session::SessionManager;
+use arakan::agents::Container;
+use arakan::session::session_manager::SessionType;
+use arakan::session::SessionManager;
 use std::io::Read;
 use std::path::PathBuf;
 #[cfg(feature = "acp-http")]
-const GOOSE_SERVER_SECRET_KEY_ENV: &str = "GOOSE_SERVER__SECRET_KEY";
+const ARAKAN_SERVER_SECRET_KEY_ENV: &str = "ARAKAN_SERVER__SECRET_KEY";
 
 #[cfg(feature = "acp-http")]
 fn generate_serve_secret_key() -> String {
     use rand::distr::{Alphanumeric, SampleString};
 
     format!(
-        "goose-acp-{}",
+        "arakan-acp-{}",
         Alphanumeric.sample_string(&mut rand::rng(), 32)
     )
 }
@@ -66,17 +62,17 @@ enum ServePlatform {
     Desktop,
 }
 
-impl From<ServePlatform> for GoosePlatform {
+impl From<ServePlatform> for ArakanPlatform {
     fn from(platform: ServePlatform) -> Self {
         match platform {
-            ServePlatform::Cli => GoosePlatform::GooseCli,
-            ServePlatform::Desktop => GoosePlatform::GooseDesktop,
+            ServePlatform::Cli => ArakanPlatform::ArakanCli,
+            ServePlatform::Desktop => ArakanPlatform::ArakanDesktop,
         }
     }
 }
 
 #[derive(Parser)]
-#[command(name = "goose", author, version, display_name = "", about, long_about = None)]
+#[command(name = "arakan", author, version, display_name = "", about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
@@ -143,7 +139,7 @@ pub struct SessionOptions {
         long = "container",
         value_name = "CONTAINER_ID",
         help = "Docker container ID to run extensions inside",
-        long_help = "Run extensions (stdio and built-in) inside the specified container. The extension must exist in the container. For built-in extensions, goose must be installed inside the container."
+        long_help = "Run extensions (stdio and built-in) inside the specified container. The extension must exist in the container. For built-in extensions, arakan must be installed inside the container."
     )]
     pub container: Option<String>,
 }
@@ -156,7 +152,7 @@ pub struct StreamableHttpOptions {
 
 fn parse_streamable_http_extension(input: &str) -> Result<StreamableHttpOptions, String> {
     let mut input_iter = input.split_whitespace();
-    let (mut url, mut timeout) = (String::new(), goose::config::DEFAULT_EXTENSION_TIMEOUT);
+    let (mut url, mut timeout) = (String::new(), arakan::config::DEFAULT_EXTENSION_TIMEOUT);
 
     if let Some(url_str) = input_iter.next() {
         url.push_str(url_str);
@@ -206,7 +202,7 @@ pub struct ExtensionOptions {
         long = "with-builtin",
         value_name = "NAME",
         help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
-        long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+        long_help = "Add one or more builtin extensions that are bundled with arakan by specifying their names, comma-separated",
         value_delimiter = ','
     )]
     pub builtins: Vec<String>,
@@ -237,8 +233,8 @@ pub struct InputOptions {
         short = 't',
         long = "text",
         value_name = "TEXT",
-        help = "Input text to provide to goose directly",
-        long_help = "Input text containing commands for goose. Use this in lieu of the instructions argument.",
+        help = "Input text to provide to arakan directly",
+        long_help = "Input text containing commands for arakan. Use this in lieu of the instructions argument.",
         conflicts_with = "instructions",
         conflicts_with = "recipe"
     )]
@@ -269,7 +265,7 @@ pub struct InputOptions {
     #[arg(
         long,
         value_name = "KEY=VALUE",
-        help = "Dynamic parameters (e.g., --params username=alice --params channel_name=goose-channel)",
+        help = "Dynamic parameters (e.g., --params username=alice --params channel_name=arakan-channel)",
         long_help = "Key-value parameters to pass to the recipe file. Can be specified multiple times.",
         action = clap::ArgAction::Append,
         value_parser = parse_key_val,
@@ -281,7 +277,7 @@ pub struct InputOptions {
         long = "sub-recipe",
         value_name = "RECIPE",
         help = "Sub-recipe name or file path (can be specified multiple times)",
-        long_help = "Specify sub-recipes to include alongside the main recipe. Can be:\n  - Recipe names from GitHub (if GOOSE_RECIPE_GITHUB_REPO is configured)\n  - Local file paths to YAML files\nCan be specified multiple times to include multiple sub-recipes.",
+        long_help = "Specify sub-recipes to include alongside the main recipe. Can be:\n  - Recipe names from GitHub (if ARAKAN_RECIPE_GITHUB_REPO is configured)\n  - Local file paths to YAML files\nCan be specified multiple times to include multiple sub-recipes.",
         action = clap::ArgAction::Append
     )]
     pub additional_sub_recipes: Vec<String>,
@@ -340,7 +336,7 @@ pub struct ModelOptions {
         long = "provider",
         value_name = "PROVIDER",
         help = "Specify the LLM provider to use (e.g., 'openai', 'anthropic')",
-        long_help = "Override the GOOSE_PROVIDER environment variable for this run. Available providers include openai, anthropic, ollama, databricks, gemini-cli, claude-code, and others."
+        long_help = "Override the ARAKAN_PROVIDER environment variable for this run. Available providers include openai, anthropic, ollama, databricks, gemini-cli, claude-code, and others."
     )]
     pub provider: Option<String>,
 
@@ -349,7 +345,7 @@ pub struct ModelOptions {
         long = "model",
         value_name = "MODEL",
         help = "Specify the model to use (e.g., 'gpt-4o', 'claude-sonnet-4-20250514')",
-        long_help = "Override the GOOSE_MODEL environment variable for this run. The model must be supported by the specified provider."
+        long_help = "Override the ARAKAN_MODEL environment variable for this run. The model must be supported by the specified provider."
     )]
     pub model: Option<String>,
 }
@@ -406,7 +402,7 @@ async fn get_or_create_session_id(
     identifier: Option<Identifier>,
     resume: bool,
     no_session: bool,
-    goose_mode: GooseMode,
+    arakan_mode: ArakanMode,
 ) -> Result<Option<String>> {
     if no_session {
         return Ok(None);
@@ -452,7 +448,7 @@ async fn get_or_create_session_id(
                     std::env::current_dir()?,
                     "CLI Session".to_string(),
                     SessionType::User,
-                    goose_mode,
+                    arakan_mode,
                 )
                 .await?;
             return Ok(Some(session.id));
@@ -469,7 +465,7 @@ async fn get_or_create_session_id(
                 std::env::current_dir()?,
                 name.clone(),
                 SessionType::User,
-                goose_mode,
+                arakan_mode,
             )
             .await?;
 
@@ -581,7 +577,7 @@ enum SessionCommand {
     #[command(about = "Import a session from JSON or a Claude Code / Codex / Pi .jsonl")]
     Import {
         #[arg(
-            help = "Path to a goose session export, or a Claude Code, Codex, or Pi .jsonl transcript"
+            help = "Path to a arakan session export, or a Claude Code, Codex, or Pi .jsonl transcript"
         )]
         input: String,
     },
@@ -732,8 +728,8 @@ enum PluginCommand {
 
 #[derive(Subcommand)]
 enum SkillsCommand {
-    /// List all skills available to the goose agent
-    #[command(about = "List all skills available to the goose agent")]
+    /// List all skills available to the arakan agent
+    #[command(about = "List all skills available to the arakan agent")]
     List,
 }
 
@@ -765,8 +761,8 @@ enum RecipeCommand {
         params: Vec<String>,
     },
 
-    /// Open a recipe in Goose Desktop
-    #[command(about = "Open a recipe in Goose Desktop")]
+    /// Open a recipe in Arakan Desktop
+    #[command(about = "Open a recipe in Arakan Desktop")]
     Open {
         /// Recipe name to get recipe file to open
         #[arg(help = "recipe name or full path to the recipe file")]
@@ -805,12 +801,12 @@ enum RecipeCommand {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Configure goose settings
-    #[command(about = "Configure goose settings")]
+    /// Configure arakan settings
+    #[command(about = "Configure arakan settings")]
     Configure {},
 
-    /// Display goose configuration information
-    #[command(about = "Display goose information")]
+    /// Display arakan configuration information
+    #[command(about = "Display arakan information")]
     Info {
         /// Show verbose information including current configuration
         #[arg(short, long, help = "Show verbose information including config.yaml")]
@@ -819,26 +815,26 @@ enum Command {
         check: bool,
     },
 
-    #[command(about = "Check that your Goose setup is working")]
+    #[command(about = "Check that your Arakan setup is working")]
     Doctor {},
 
     /// Manage system prompts and behaviors
     #[cfg(feature = "bundled-mcp")]
-    #[command(about = "Run one of the mcp servers bundled with goose")]
+    #[command(about = "Run one of the mcp servers bundled with arakan")]
     Mcp {
         #[arg(value_parser = clap::value_parser!(McpCommand))]
         server: McpCommand,
     },
 
-    /// Run goose as an ACP (Agent Client Protocol) agent
-    #[command(about = "Run goose as an ACP agent server on stdio")]
+    /// Run arakan as an ACP (Agent Client Protocol) agent
+    #[command(about = "Run arakan as an ACP agent server on stdio")]
     Acp {
         /// Add builtin extensions by name
         #[arg(
             long = "with-builtin",
             value_name = "NAME",
             help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
-            long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+            long_help = "Add one or more builtin extensions that are bundled with arakan by specifying their names, comma-separated",
             value_delimiter = ','
         )]
         builtins: Vec<String>,
@@ -881,7 +877,7 @@ enum Command {
             long = "with-builtin",
             value_name = "NAME",
             help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
-            long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+            long_help = "Add one or more builtin extensions that are bundled with arakan by specifying their names, comma-separated",
             value_delimiter = ',',
             action = clap::ArgAction::Append
         )]
@@ -889,7 +885,7 @@ enum Command {
 
         #[arg(
             long = "dangerously-unauthenticated",
-            help = "Start the ACP endpoint without requiring GOOSE_SERVER__SECRET_KEY"
+            help = "Start the ACP endpoint without requiring ARAKAN_SERVER__SECRET_KEY"
         )]
         dangerously_unauthenticated: bool,
 
@@ -904,11 +900,11 @@ enum Command {
         #[arg(long, help = "Enable scheduled recipe execution")]
         enable_scheduler: bool,
 
-        /// Also expose this server over goose roam (p2p) so paired devices can connect remotely
+        /// Also expose this server over arakan roam (p2p) so paired devices can connect remotely
         #[cfg(feature = "roaming")]
         #[arg(
             long,
-            help = "Also expose this server over goose roam (p2p) so paired devices can connect remotely"
+            help = "Also expose this server over arakan roam (p2p) so paired devices can connect remotely"
         )]
         roam: bool,
     },
@@ -1043,35 +1039,17 @@ enum Command {
         command: GatewayCommand,
     },
 
-    /// Update the goose CLI version
-    #[cfg(feature = "update")]
-    #[command(about = "Update the goose CLI version")]
-    Update {
-        /// Update to canary version
-        #[arg(
-            short,
-            long,
-            help = "Update to canary version",
-            long_help = "Update to the latest canary version of the goose CLI, otherwise updates to the latest stable version."
-        )]
-        canary: bool,
-
-        /// Enforce to re-configure goose during update
-        #[arg(short, long, help = "Enforce to re-configure goose during update")]
-        reconfigure: bool,
-    },
-
     /// Terminal-integrated session (one session per terminal)
     #[command(
-        about = "Terminal-integrated goose session",
-        long_about = "Runs a goose session tied to your terminal window.\n\
+        about = "Terminal-integrated arakan session",
+        long_about = "Runs a arakan session tied to your terminal window.\n\
                       Each terminal maintains its own persistent session that resumes automatically.\n\n\
                       Setup:\n  \
-                        eval \"$(goose term init zsh)\"  # zsh/bash\n  \
-                        let init = ($nu.cache-dir | path join \"goose-term-init.nu\"); ^goose term init nu | save --force $init; source $init\n\n\
+                        eval \"$(arakan term init zsh)\"  # zsh/bash\n  \
+                        let init = ($nu.cache-dir | path join \"arakan-term-init.nu\"); ^arakan term init nu | save --force $init; source $init\n\n\
                       Usage:\n  \
-                        goose term run \"list files in this directory\"\n  \
-                        @goose \"create a python script\"  # using alias\n  \
+                        arakan term run \"list files in this directory\"\n  \
+                        @arakan \"create a python script\"  # using alias\n  \
                         @g \"quick question\"  # short alias"
     )]
     Term {
@@ -1095,7 +1073,7 @@ enum Command {
         #[arg(value_enum)]
         shell: CompletionShell,
 
-        #[arg(long, default_value = "goose", help = "Provide a custom binary name")]
+        #[arg(long, default_value = "arakan", help = "Provide a custom binary name")]
         bin_name: String,
     },
 
@@ -1104,8 +1082,8 @@ enum Command {
     /// Discovers `**/.agents/checks/*.md` subagent reviewers and
     /// `**/.agents/REVIEW.md` scoped prompt overrides, builds a review
     /// request from the working tree (or an explicit diff range), and
-    /// runs the review through goose.
-    #[command(about = "Review the current diff using goose")]
+    /// runs the review through arakan.
+    #[command(about = "Review the current diff using arakan")]
     Review {
         /// Diff range to review (e.g. "main...HEAD"). Defaults to the working
         /// tree vs HEAD.
@@ -1149,7 +1127,7 @@ enum Command {
         /// Disable the Rust-driven parallel orchestrator and fall back to
         /// the single-prompt path that asks the main agent to delegate
         /// each check via `delegate(...)`. The default
-        /// orchestrator dispatches one `goose run` subprocess per check
+        /// orchestrator dispatches one `arakan run` subprocess per check
         /// (capped at 4 concurrent), bounding wall-clock to the slowest
         /// single check rather than waiting on the model to issue
         /// dispatches.
@@ -1210,7 +1188,7 @@ enum Command {
 
     #[command(
         name = "mcp-probe",
-        about = "Start a Goose MCP session without an LLM and inspect a stdio MCP server",
+        about = "Start a Arakan MCP session without an LLM and inspect a stdio MCP server",
         hide = true
     )]
     McpProbe {
@@ -1285,17 +1263,17 @@ enum TermCommand {
     #[command(
         about = "Print shell initialization script",
         long_about = "Prints shell configuration to set up terminal-integrated sessions.\n\
-                      Each terminal gets a persistent goose session that automatically resumes.\n\n\
+                      Each terminal gets a persistent arakan session that automatically resumes.\n\n\
                       Setup:\n  \
-                        echo 'eval \"$(goose term init zsh)\"' >> ~/.zshrc\n  \
+                        echo 'eval \"$(arakan term init zsh)\"' >> ~/.zshrc\n  \
                         source ~/.zshrc\n\n\
                         Nushell:\n  \
-                        let init = ($nu.cache-dir | path join \"goose-term-init.nu\")\n  \
-                        ^goose term init nu | save --force $init\n  \
+                        let init = ($nu.cache-dir | path join \"arakan-term-init.nu\")\n  \
+                        ^arakan term init nu | save --force $init\n  \
                         source $init\n\n\
-                      With --default (anything typed that isn't a command goes to goose):\n  \
-                        echo 'eval \"$(goose term init zsh --default)\"' >> ~/.zshrc\n  \
-                        ^goose term init nu --default | save --force $init"
+                      With --default (anything typed that isn't a command goes to arakan):\n  \
+                        echo 'eval \"$(arakan term init zsh --default)\"' >> ~/.zshrc\n  \
+                        ^arakan term init nu --default | save --force $init"
     )]
     Init {
         /// Shell type (bash, zsh, fish, nu, powershell)
@@ -1305,20 +1283,20 @@ enum TermCommand {
         #[arg(short, long, help = "Name for the terminal session")]
         name: Option<String>,
 
-        /// Make goose the default handler for unknown commands
+        /// Make arakan the default handler for unknown commands
         #[arg(
             long = "default",
-            help = "Make goose the default handler for unknown commands",
-            long_help = "When enabled, anything you type that isn't a valid command will be sent to goose. Supported for zsh, bash, and nu."
+            help = "Make arakan the default handler for unknown commands",
+            long_help = "When enabled, anything you type that isn't a valid command will be sent to arakan. Supported for zsh, bash, and nu."
         )]
         default: bool,
 
-        /// Record recent shell commands as context for @goose
+        /// Record recent shell commands as context for @arakan
         #[arg(
             long = "dangerous-include-history",
-            help = "Record recent shell commands as context for @goose",
-            long_help = "When enabled, goose records recent shell commands and includes them as \
-                         context when you ask @goose a question.\n\n\
+            help = "Record recent shell commands as context for @arakan",
+            long_help = "When enabled, arakan records recent shell commands and includes them as \
+                         context when you ask @arakan a question.\n\n\
                          WARNING: command lines can contain credentials and other sensitive data, \
                          which will be sent to the configured model provider."
         )]
@@ -1337,12 +1315,12 @@ enum TermCommand {
         about = "Run a prompt in the terminal session",
         long_about = "Run a prompt in the terminal-integrated session.\n\n\
                       Examples:\n  \
-                        goose term run list files in this directory\n  \
-                        @goose list files  # using alias\n  \
+                        arakan term run list files in this directory\n  \
+                        @arakan list files  # using alias\n  \
                         @g why did that fail  # short alias"
     )]
     Run {
-        /// The prompt to send to goose (multiple words allowed without quotes)
+        /// The prompt to send to arakan (multiple words allowed without quotes)
         #[arg(required = true, num_args = 1..)]
         prompt: Vec<String>,
     },
@@ -1411,8 +1389,6 @@ fn get_command_name(command: &Option<Command>) -> &'static str {
         Some(Command::Gateway { .. }) => "gateway",
         #[cfg(feature = "scheduler")]
         Some(Command::Schedule { .. }) => "schedule",
-        #[cfg(feature = "update")]
-        Some(Command::Update { .. }) => "update",
         Some(Command::Recipe { .. }) => "recipe",
         Some(Command::Skills { .. }) => "skills",
         Some(Command::Plugin { .. }) => "plugin",
@@ -1434,7 +1410,7 @@ struct McpProbeScript {
     steps: Vec<McpProbeStep>,
     elicitation: Option<McpProbeElicitation>,
     #[serde(default)]
-    oauth: goose::oauth::OAuthFlowConfig,
+    oauth: arakan::oauth::OAuthFlowConfig,
     protocol_version: Option<String>,
 }
 
@@ -1461,9 +1437,9 @@ enum McpProbeElicitation {
 }
 
 async fn handle_mcp_probe(extension_command: String, script_path: Option<String>) -> Result<()> {
-    use goose::agents::extension_manager::CallRequest;
-    use goose::agents::{StateMachineServices, StateMachineServicesConfig};
-    use goose::config::ExtensionConfig;
+    use arakan::agents::extension_manager::CallRequest;
+    use arakan::agents::{StateMachineServices, StateMachineServicesConfig};
+    use arakan::config::ExtensionConfig;
     use rmcp::model::{ElicitRequestParams, ElicitResult, ElicitationAction};
     use tokio_util::sync::CancellationToken;
 
@@ -1484,7 +1460,7 @@ async fn handle_mcp_probe(extension_command: String, script_path: Option<String>
                 McpProbeStep::ListResources,
             ],
             elicitation: None,
-            oauth: goose::oauth::OAuthFlowConfig::default(),
+            oauth: arakan::oauth::OAuthFlowConfig::default(),
             protocol_version: None,
         }
     };
@@ -1494,7 +1470,7 @@ async fn handle_mcp_probe(extension_command: String, script_path: Option<String>
     {
         crate::session::CliSession::parse_streamable_http_extension(
             &extension_command,
-            goose::config::DEFAULT_EXTENSION_TIMEOUT,
+            arakan::config::DEFAULT_EXTENSION_TIMEOUT,
         )
     } else {
         crate::session::CliSession::parse_stdio_extension(&extension_command)?
@@ -1507,16 +1483,16 @@ async fn handle_mcp_probe(extension_command: String, script_path: Option<String>
     }
 
     if let Some(client_id) = &script.oauth.client_id {
-        std::env::set_var("GOOSE_MCP_OAUTH_CLIENT_ID", client_id);
+        std::env::set_var("ARAKAN_MCP_OAUTH_CLIENT_ID", client_id);
     }
     if let Some(client_secret) = &script.oauth.client_secret {
-        std::env::set_var("GOOSE_MCP_OAUTH_CLIENT_SECRET", client_secret);
+        std::env::set_var("ARAKAN_MCP_OAUTH_CLIENT_SECRET", client_secret);
     }
     if let Some(client_metadata_url) = &script.oauth.client_metadata_url {
-        std::env::set_var("GOOSE_MCP_OAUTH_CLIENT_METADATA_URL", client_metadata_url);
+        std::env::set_var("ARAKAN_MCP_OAUTH_CLIENT_METADATA_URL", client_metadata_url);
     }
 
-    let config = goose::config::Config::global();
+    let config = arakan::config::Config::global();
     let mut services_config = StateMachineServicesConfig::cli();
     services_config.disable_session_naming = true;
     if let Some(protocol_version) = script.protocol_version.as_deref() {
@@ -1562,8 +1538,8 @@ async fn handle_mcp_probe(extension_command: String, script_path: Option<String>
         .create_session(
             std::env::current_dir()?,
             "MCP Probe".to_string(),
-            goose::session::session_manager::SessionType::Hidden,
-            config.get_goose_mode().unwrap_or_default(),
+            arakan::session::session_manager::SessionType::Hidden,
+            config.get_arakan_mode().unwrap_or_default(),
         )
         .await?;
     let session_id = session.id.as_str();
@@ -1653,11 +1629,11 @@ struct ServeCommandArgs {
 
 #[cfg(feature = "roaming")]
 type RoamShareSlot =
-    std::sync::Arc<tokio::sync::RwLock<Option<std::sync::Arc<goose_roaming::RoamingNode>>>>;
+    std::sync::Arc<tokio::sync::RwLock<Option<std::sync::Arc<arakan_roaming::RoamingNode>>>>;
 
 #[cfg(feature = "roaming")]
 fn spawn_roam_share(
-    server: std::sync::Arc<goose::acp::server_factory::AcpServer>,
+    server: std::sync::Arc<arakan::acp::server_factory::AcpServer>,
 ) -> RoamShareSlot {
     use crate::commands::roam::try_acquire_roam_lock_owner;
 
@@ -1682,7 +1658,7 @@ fn spawn_roam_share(
                     if !standing_by {
                         standing_by = true;
                         eprintln!(
-                            "another goose process owns the roaming endpoint; standing by to take over if it exits"
+                            "another arakan process owns the roaming endpoint; standing by to take over if it exits"
                         );
                     }
                 }
@@ -1702,14 +1678,14 @@ fn spawn_roam_share(
 
 #[cfg(feature = "roaming")]
 async fn start_roam_share(
-    server: std::sync::Arc<goose::acp::server_factory::AcpServer>,
-) -> Result<std::sync::Arc<goose_roaming::RoamingNode>> {
+    server: std::sync::Arc<arakan::acp::server_factory::AcpServer>,
+) -> Result<std::sync::Arc<arakan_roaming::RoamingNode>> {
     use crate::commands::roam::{
         directory_path, load_identity, resolve_relay_settings, trust_path,
     };
     use crate::commands::roam_full_bridge::FullAcpBridge;
-    use goose::config::paths::Paths;
-    use goose_roaming::{RoamingConfig, RoamingNode, TrustBook};
+    use arakan::config::paths::Paths;
+    use arakan_roaming::{RoamingConfig, RoamingNode, TrustBook};
     use std::sync::Arc;
 
     let status_path = Paths::data_dir().join("roam/serve.json");
@@ -1721,14 +1697,14 @@ async fn start_roam_share(
         relay: resolve_relay_settings()?,
         trust: TrustBook::new(),
         trust_path: Some(trust_path()),
-        directory: goose_roaming::Directory::persistent_owned(directory_path()),
+        directory: arakan_roaming::Directory::persistent_owned(directory_path()),
         bind_addr: None,
         relay_tls: None,
     })
     .await?;
 
     let agent_id = node.endpoint_id().to_string();
-    // Roaming sessions run where `goose serve` was started: the connector's
+    // Roaming sessions run where `arakan serve` was started: the connector's
     // machine-local path is meaningless on this host, and the serve-wide
     // server keeps `session_cwd: None` for local ACP clients.
     let session_cwd =
@@ -1773,10 +1749,10 @@ async fn start_roam_share(
 #[cfg(feature = "acp-http")]
 async fn handle_serve_command(args: ServeCommandArgs) -> Result<()> {
     use axum::http::HeaderValue;
-    use goose::acp::server::AcpBuiltinSelection;
-    use goose::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
-    use goose::acp::transport::create_router;
-    use goose::config::paths::Paths;
+    use arakan::acp::server::AcpBuiltinSelection;
+    use arakan::acp::server_factory::{AcpServer, AcpServerFactoryConfig};
+    use arakan::acp::transport::create_router;
+    use arakan::config::paths::Paths;
     use std::net::SocketAddr;
     use std::sync::Arc;
     use tracing::{info, warn};
@@ -1813,24 +1789,24 @@ async fn handle_serve_command(args: ServeCommandArgs) -> Result<()> {
     let server = Arc::new(AcpServer::new(AcpServerFactoryConfig {
         builtins,
         config_dir: Paths::config_dir(),
-        goose_platform: platform.into(),
+        arakan_platform: platform.into(),
         additional_source_roots,
         session_cwd: None,
         enable_scheduler,
     }));
-    let env_secret = std::env::var(GOOSE_SERVER_SECRET_KEY_ENV)
+    let env_secret = std::env::var(ARAKAN_SERVER_SECRET_KEY_ENV)
         .ok()
         .map(|secret| secret.trim().to_string())
         .filter(|secret| !secret.is_empty());
     let require_token = env_secret.is_some();
     if !require_token && !dangerously_unauthenticated {
         anyhow::bail!(
-            "{GOOSE_SERVER_SECRET_KEY_ENV} must be set to start `goose serve`; pass --dangerously-unauthenticated to run without ACP authentication"
+            "{ARAKAN_SERVER_SECRET_KEY_ENV} must be set to start `arakan serve`; pass --dangerously-unauthenticated to run without ACP authentication"
         );
     }
     if dangerously_unauthenticated && !require_token {
         warn!(
-            "{GOOSE_SERVER_SECRET_KEY_ENV} is not set and --dangerously-unauthenticated was passed; the ACP endpoint will accept unauthenticated connections"
+            "{ARAKAN_SERVER_SECRET_KEY_ENV} is not set and --dangerously-unauthenticated was passed; the ACP endpoint will accept unauthenticated connections"
         );
     }
     let additional_allowed_origins = allowed_origins
@@ -1864,11 +1840,11 @@ async fn handle_serve_command(args: ServeCommandArgs) -> Result<()> {
 
     let config = Config::global();
     let tls_cert_path =
-        tls_cert_path.or_else(|| config.get_param::<String>("GOOSE_TLS_CERT_PATH").ok());
+        tls_cert_path.or_else(|| config.get_param::<String>("ARAKAN_TLS_CERT_PATH").ok());
     let tls_key_path =
-        tls_key_path.or_else(|| config.get_param::<String>("GOOSE_TLS_KEY_PATH").ok());
+        tls_key_path.or_else(|| config.get_param::<String>("ARAKAN_TLS_KEY_PATH").ok());
     let tls = tls
-        || config.get_param::<bool>("GOOSE_TLS").unwrap_or(false)
+        || config.get_param::<bool>("ARAKAN_TLS").unwrap_or(false)
         || tls_cert_path.is_some()
         || tls_key_path.is_some();
 
@@ -1876,7 +1852,7 @@ async fn handle_serve_command(args: ServeCommandArgs) -> Result<()> {
     if tls {
         #[cfg(any(feature = "rustls-tls", feature = "native-tls"))]
         {
-            let tls_setup = goose::acp::transport::tls::setup_tls(
+            let tls_setup = arakan::acp::transport::tls::setup_tls(
                 tls_cert_path.as_deref(),
                 tls_key_path.as_deref(),
             )
@@ -2036,11 +2012,6 @@ async fn handle_interactive_session(args: InteractiveSessionArgs) -> Result<()> 
         extension_opts,
         model_opts,
     } = args;
-    #[cfg(feature = "telemetry")]
-    if get_telemetry_choice().is_none() {
-        configure_telemetry_consent_dialog()?;
-    }
-
     let session_start = std::time::Instant::now();
     let session_type = if fork {
         "forked"
@@ -2051,7 +2022,7 @@ async fn handle_interactive_session(args: InteractiveSessionArgs) -> Result<()> 
     };
 
     tracing::info!(
-        monotonic_counter.goose.session_starts = 1,
+        monotonic_counter.arakan.session_starts = 1,
         session_type,
         interactive = true,
         "Session started"
@@ -2068,8 +2039,8 @@ async fn handle_interactive_session(args: InteractiveSessionArgs) -> Result<()> 
         }
     }
 
-    let goose_mode = Config::global().get_goose_mode().unwrap_or_default();
-    let mut session_id = get_or_create_session_id(identifier, resume, false, goose_mode).await?;
+    let arakan_mode = Config::global().get_arakan_mode().unwrap_or_default();
+    let mut session_id = get_or_create_session_id(identifier, resume, false, arakan_mode).await?;
 
     if edit || fork {
         if let Some(ref id) = session_id {
@@ -2149,7 +2120,7 @@ async fn log_session_completion(
         .unwrap_or((0, 0));
 
     tracing::info!(
-        monotonic_counter.goose.session_completions = 1,
+        monotonic_counter.arakan.session_completions = 1,
         session_type,
         exit_type,
         duration_ms = session_duration.as_millis() as u64,
@@ -2159,14 +2130,14 @@ async fn log_session_completion(
     );
 
     tracing::info!(
-        monotonic_counter.goose.session_duration_ms = session_duration.as_millis() as u64,
+        monotonic_counter.arakan.session_duration_ms = session_duration.as_millis() as u64,
         session_type,
         "Session duration"
     );
 
     if total_tokens > 0 {
         tracing::info!(
-            monotonic_counter.goose.session_tokens = total_tokens,
+            monotonic_counter.arakan.session_tokens = total_tokens,
             session_type,
             "Session tokens"
         );
@@ -2198,7 +2169,7 @@ fn parse_run_input(
         (Some(file), _, _) => {
             let contents = std::fs::read_to_string(file).unwrap_or_else(|err| {
                 eprintln!(
-                    "Instruction file not found — did you mean to use goose run --text?\n{}",
+                    "Instruction file not found — did you mean to use arakan run --text?\n{}",
                     err
                 );
                 std::process::exit(1);
@@ -2227,7 +2198,7 @@ fn parse_run_input(
             let recipe_version = crate::recipes::search_recipe::load_recipe_file(recipe_name)
                 .ok()
                 .and_then(|rf| {
-                    goose::recipe::template_recipe::parse_recipe_content(
+                    arakan::recipe::template_recipe::parse_recipe_content(
                         &rf.content,
                         Some(rf.parent_dir.display().to_string()),
                     )
@@ -2249,7 +2220,7 @@ fn parse_run_input(
             }
 
             tracing::info!(
-                monotonic_counter.goose.recipe_runs = 1,
+                monotonic_counter.arakan.recipe_runs = 1,
                 recipe_name = %recipe_display_name,
                 recipe_version = %recipe_version,
                 session_type = "recipe",
@@ -2283,11 +2254,6 @@ async fn handle_run_command(
     output_opts: OutputOptions,
     model_opts: ModelOptions,
 ) -> Result<()> {
-    #[cfg(feature = "telemetry")]
-    if run_behavior.interactive && get_telemetry_choice().is_none() {
-        configure_telemetry_consent_dialog()?;
-    }
-
     let parsed = parse_run_input(&input_opts, output_opts.quiet)?;
 
     let Some((input_config, recipe)) = parsed else {
@@ -2305,12 +2271,12 @@ async fn handle_run_command(
         }
     }
 
-    let goose_mode = Config::global().get_goose_mode().unwrap_or_default();
+    let arakan_mode = Config::global().get_arakan_mode().unwrap_or_default();
     let session_id = get_or_create_session_id(
         identifier,
         run_behavior.resume,
         run_behavior.no_session,
-        goose_mode,
+        arakan_mode,
     )
     .await?;
 
@@ -2346,7 +2312,7 @@ async fn handle_run_command(
         let session_type = if recipe.is_some() { "recipe" } else { "run" };
 
         tracing::info!(
-            monotonic_counter.goose.session_starts = 1,
+            monotonic_counter.arakan.session_starts = 1,
             session_type,
             interactive = false,
             "Headless session started"
@@ -2373,7 +2339,7 @@ async fn handle_gateway_command(command: GatewayCommand) -> Result<()> {
             bot_token,
         } => {
             let mut platform_config = serde_json::json!({ "bot_token": bot_token });
-            if let Some(ids) = goose::gateway::manager::saved_allowed_user_ids(&gateway_type) {
+            if let Some(ids) = arakan::gateway::manager::saved_allowed_user_ids(&gateway_type) {
                 platform_config["allowed_user_ids"] = serde_json::json!(ids);
             }
             gateway::handle_gateway_start(services, gateway_type, platform_config).await
@@ -2454,11 +2420,11 @@ async fn handle_term_subcommand(command: TermCommand) -> Result<()> {
 }
 
 #[cfg(feature = "local-inference")]
-fn print_download_progress(manager: &goose::download_manager::DownloadManager) {
+fn print_download_progress(manager: &arakan::download_manager::DownloadManager) {
     let Some(progress) = manager
         .list_progress()
         .into_iter()
-        .find(|progress| progress.status == goose::download_manager::DownloadStatus::Downloading)
+        .find(|progress| progress.status == arakan::download_manager::DownloadStatus::Downloading)
     else {
         return;
     };
@@ -2525,9 +2491,9 @@ fn local_search_memory_limit(ram_gb: Option<f64>) -> Result<u64> {
         return gb_to_bytes(gb);
     }
 
-    match goose::providers::local_inference::InferenceRuntime::get_or_init() {
+    match arakan::providers::local_inference::InferenceRuntime::get_or_init() {
         Ok(runtime) => Ok(
-            goose::providers::local_inference::available_inference_memory_bytes(runtime.as_ref()),
+            arakan::providers::local_inference::available_inference_memory_bytes(runtime.as_ref()),
         ),
         Err(_) => gb_to_bytes(16.0),
     }
@@ -2544,10 +2510,10 @@ fn format_size(bytes: u64) -> String {
 
 #[cfg(feature = "local-inference")]
 fn recommended_variant(
-    model: &goose::providers::local_inference::hf_models::HfModelInfo,
+    model: &arakan::providers::local_inference::hf_models::HfModelInfo,
     available_memory: u64,
-) -> Option<&goose::providers::local_inference::hf_models::HfModelVariant> {
-    use goose::providers::local_inference::hf_models::{recommend_variant, HfQuantVariant};
+) -> Option<&arakan::providers::local_inference::hf_models::HfModelVariant> {
+    use arakan::providers::local_inference::hf_models::{recommend_variant, HfQuantVariant};
 
     let mut variant_indexes = Vec::new();
     let mut gguf_variants = Vec::new();
@@ -2573,9 +2539,9 @@ fn recommended_variant(
 
 #[cfg(feature = "local-inference")]
 async fn handle_local_models_command(command: LocalModelsCommand) -> Result<()> {
-    use goose::providers::local_inference::hf_models;
+    use arakan::providers::local_inference::hf_models;
 
-    goose::providers::local_inference::configure_huggingface_auth();
+    arakan::providers::local_inference::configure_huggingface_auth();
 
     match command {
         LocalModelsCommand::Search {
@@ -2678,7 +2644,7 @@ async fn handle_local_models_command(command: LocalModelsCommand) -> Result<()> 
                         format_size(variant.size_bytes)
                     );
                     println!(
-                        "    Download: goose local-models download '{}'",
+                        "    Download: arakan local-models download '{}'",
                         variant.download_id
                     );
                 } else {
@@ -2709,7 +2675,7 @@ async fn handle_local_models_command(command: LocalModelsCommand) -> Result<()> 
                     );
                     if variant.supported {
                         println!(
-                            "    Download: goose local-models download '{}'",
+                            "    Download: arakan local-models download '{}'",
                             variant.download_id
                         );
                     }
@@ -2718,7 +2684,7 @@ async fn handle_local_models_command(command: LocalModelsCommand) -> Result<()> 
         }
         LocalModelsCommand::Download { spec } => {
             println!("Resolving {}...", spec);
-            let manager = goose::download_manager::get_download_manager();
+            let manager = arakan::download_manager::get_download_manager();
             let resolve_task = hf_models::resolve_local_model_spec(&spec);
             tokio::pin!(resolve_task);
             let resolved = loop {
@@ -2777,13 +2743,8 @@ async fn handle_default_session() -> Result<()> {
         return handle_configure().await;
     }
 
-    #[cfg(feature = "telemetry")]
-    if get_telemetry_choice().is_none() {
-        configure_telemetry_consent_dialog()?;
-    }
-
-    let goose_mode = Config::global().get_goose_mode().unwrap_or_default();
-    let session_id = get_or_create_session_id(None, false, false, goose_mode).await?;
+    let arakan_mode = Config::global().get_arakan_mode().unwrap_or_default();
+    let session_id = get_or_create_session_id(None, false, false, arakan_mode).await?;
 
     let mut session = match try_build_session(SessionBuilderConfig {
         session_id,
@@ -2823,13 +2784,13 @@ async fn handle_default_session() -> Result<()> {
 
 pub async fn cli() -> anyhow::Result<()> {
     #[cfg(feature = "bundled-mcp")]
-    register_builtin_extensions(goose_mcp::BUILTIN_EXTENSIONS.clone());
+    register_builtin_extensions(arakan_mcp::BUILTIN_EXTENSIONS.clone());
 
     let cli = Cli::parse();
 
     let command_name = get_command_name(&cli.command);
     tracing::info!(
-        monotonic_counter.goose.cli_commands = 1,
+        monotonic_counter.arakan.cli_commands = 1,
         command = command_name,
         "CLI command executed"
     );
@@ -2848,7 +2809,7 @@ pub async fn cli() -> anyhow::Result<()> {
         Some(Command::Acp {
             builtins,
             enable_scheduler,
-        }) => goose::acp::server::run(builtins, enable_scheduler).await,
+        }) => arakan::acp::server::run(builtins, enable_scheduler).await,
         #[cfg(feature = "roaming")]
         Some(Command::Roam { command }) => handle_roam_command(command).await,
         #[cfg(feature = "acp-http")]
@@ -2933,14 +2894,6 @@ pub async fn cli() -> anyhow::Result<()> {
         Some(Command::Gateway { command }) => handle_gateway_command(command).await,
         #[cfg(feature = "scheduler")]
         Some(Command::Schedule { command }) => handle_schedule_command(command).await,
-        #[cfg(feature = "update")]
-        Some(Command::Update {
-            canary,
-            reconfigure,
-        }) => {
-            crate::commands::update::update(canary, reconfigure).await?;
-            Ok(())
-        }
         Some(Command::Recipe { command }) => handle_recipe_subcommand(command),
         Some(Command::Skills { command }) => handle_skills_subcommand(command).await,
         Some(Command::Plugin { command }) => handle_plugin_subcommand(command),
@@ -2987,7 +2940,7 @@ pub async fn cli() -> anyhow::Result<()> {
             .await
         }
         Some(Command::ValidateExtensions { file }) => {
-            use goose::agents::validate_extensions::validate_bundled_extensions;
+            use arakan::agents::validate_extensions::validate_bundled_extensions;
             match validate_bundled_extensions(&file) {
                 Ok(msg) => {
                     println!("{msg}");
@@ -3010,7 +2963,7 @@ mod tests {
 
     #[test]
     fn completion_command_accepts_nushell_alias() {
-        let cli = Cli::try_parse_from(["goose", "completion", "nushell"]).expect("parse failed");
+        let cli = Cli::try_parse_from(["arakan", "completion", "nushell"]).expect("parse failed");
 
         match cli.command {
             Some(Command::Completion {
@@ -3024,7 +2977,7 @@ mod tests {
     #[test]
     fn session_resume_accepts_provider_and_model_overrides() {
         let cli = Cli::try_parse_from([
-            "goose",
+            "arakan",
             "session",
             "--resume",
             "--provider",
@@ -3048,7 +3001,7 @@ mod tests {
 
     #[test]
     fn session_accepts_provider_override_without_resume() {
-        let cli = Cli::try_parse_from(["goose", "session", "--provider", "openai"])
+        let cli = Cli::try_parse_from(["arakan", "session", "--provider", "openai"])
             .expect("provider override should work for a new session");
 
         match cli.command {
@@ -3064,7 +3017,7 @@ mod tests {
 
     #[test]
     fn session_accepts_model_override_without_resume() {
-        let cli = Cli::try_parse_from(["goose", "session", "--model", "gpt-5.4"])
+        let cli = Cli::try_parse_from(["arakan", "session", "--model", "gpt-5.4"])
             .expect("model override should work for a new session");
 
         match cli.command {
@@ -3080,7 +3033,7 @@ mod tests {
 
     #[test]
     fn session_accepts_system_prompt() {
-        let cli = Cli::try_parse_from(["goose", "session", "--system", "extra instructions"])
+        let cli = Cli::try_parse_from(["arakan", "session", "--system", "extra instructions"])
             .expect("system prompt should work for a new session");
 
         match cli.command {
@@ -3096,11 +3049,11 @@ mod tests {
         let mut cmd = Cli::command();
         let mut buffer = Vec::new();
 
-        CompletionShell::Nu.generate(&mut cmd, "goose", &mut buffer);
+        CompletionShell::Nu.generate(&mut cmd, "arakan", &mut buffer);
 
         let script = String::from_utf8(buffer).expect("utf8");
         assert!(script.contains("module completions"));
-        assert!(script.contains("export extern goose"));
+        assert!(script.contains("export extern arakan"));
         assert!(script.contains("export use completions *"));
     }
 
@@ -3114,7 +3067,7 @@ mod tests {
         init.write_long_help(&mut buffer).expect("write help");
 
         let help = String::from_utf8(buffer).expect("utf8");
-        assert!(help.contains("goose term init nu"));
+        assert!(help.contains("arakan term init nu"));
         assert!(help.contains("Supported for zsh, bash, and nu"));
     }
 
@@ -3134,7 +3087,7 @@ mod tests {
 
     #[test]
     fn skills_command_accepts_list_subcommand() {
-        let cli = Cli::try_parse_from(["goose", "skills", "list"]).expect("parse failed");
+        let cli = Cli::try_parse_from(["arakan", "skills", "list"]).expect("parse failed");
 
         match cli.command {
             Some(Command::Skills {
@@ -3148,7 +3101,7 @@ mod tests {
     #[test]
     fn serve_command_accepts_dangerously_unauthenticated_flag() {
         let cli = Cli::try_parse_from([
-            "goose",
+            "arakan",
             "serve",
             "--dangerously-unauthenticated",
             "--allowed-origin",
@@ -3177,7 +3130,7 @@ mod tests {
     #[test]
     fn review_command_accepts_options() {
         let cli = Cli::try_parse_from([
-            "goose",
+            "arakan",
             "review",
             "origin/main...HEAD",
             "--prompt",

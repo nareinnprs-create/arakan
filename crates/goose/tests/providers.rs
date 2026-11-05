@@ -1,35 +1,35 @@
 use anyhow::Result;
 use dotenvy::dotenv;
 use futures::StreamExt;
-use goose::acp::ACP_CURRENT_MODEL;
-use goose::agents::extension_manager::CallRequest;
-use goose::agents::{
-    AgentEvent, GoosePlatform, PromptManager, SessionConfig, StateMachineServices,
+use arakan::acp::ACP_CURRENT_MODEL;
+use arakan::agents::extension_manager::CallRequest;
+use arakan::agents::{
+    AgentEvent, ArakanPlatform, PromptManager, SessionConfig, StateMachineServices,
     StateMachineServicesConfig,
 };
-use goose::config::{ExtensionConfig, GooseMode, PermissionManager};
-use goose::conversation::message::{ActionRequiredData, Message, MessageContent};
-use goose::permission::Permission;
-use goose::providers::anthropic::ANTHROPIC_DEFAULT_MODEL;
-use goose::providers::azure::AZURE_DEFAULT_MODEL;
-use goose::providers::base::Provider;
+use arakan::config::{ExtensionConfig, ArakanMode, PermissionManager};
+use arakan::conversation::message::{ActionRequiredData, Message, MessageContent};
+use arakan::permission::Permission;
+use arakan::providers::anthropic::ANTHROPIC_DEFAULT_MODEL;
+use arakan::providers::azure::AZURE_DEFAULT_MODEL;
+use arakan::providers::base::Provider;
 #[cfg(feature = "aws-providers")]
-use goose::providers::bedrock::BEDROCK_DEFAULT_MODEL;
-use goose::providers::claude_code::CLAUDE_CODE_DEFAULT_MODEL;
-use goose::providers::codex::CODEX_DEFAULT_MODEL;
-use goose::providers::create;
-use goose::providers::google::GOOGLE_DEFAULT_MODEL;
-use goose::providers::litellm::LITELLM_DEFAULT_MODEL;
-use goose::providers::openai::OPEN_AI_DEFAULT_MODEL;
+use arakan::providers::bedrock::BEDROCK_DEFAULT_MODEL;
+use arakan::providers::claude_code::CLAUDE_CODE_DEFAULT_MODEL;
+use arakan::providers::codex::CODEX_DEFAULT_MODEL;
+use arakan::providers::create;
+use arakan::providers::google::GOOGLE_DEFAULT_MODEL;
+use arakan::providers::litellm::LITELLM_DEFAULT_MODEL;
+use arakan::providers::openai::OPEN_AI_DEFAULT_MODEL;
 #[cfg(feature = "aws-providers")]
-use goose::providers::sagemaker_tgi::SAGEMAKER_TGI_DEFAULT_MODEL;
-use goose::providers::snowflake::SNOWFLAKE_DEFAULT_MODEL;
-use goose::providers::xai::XAI_DEFAULT_MODEL;
-use goose::session::{SessionManager, SessionType};
-use goose_providers::databricks::DATABRICKS_DEFAULT_MODEL;
-use goose_providers::errors::ProviderError;
-use goose_providers::thinking::ThinkingEffortSupport;
-use goose_test_support::{
+use arakan::providers::sagemaker_tgi::SAGEMAKER_TGI_DEFAULT_MODEL;
+use arakan::providers::snowflake::SNOWFLAKE_DEFAULT_MODEL;
+use arakan::providers::xai::XAI_DEFAULT_MODEL;
+use arakan::session::{SessionManager, SessionType};
+use arakan_providers::databricks::DATABRICKS_DEFAULT_MODEL;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::thinking::ThinkingEffortSupport;
+use arakan_test_support::{
     EnforceSessionId, ExpectedSessionId, IgnoreSessionId, McpFixture, FAKE_CODE,
 };
 use std::collections::HashMap;
@@ -105,7 +105,7 @@ struct ProviderFixture {
     expect_context_length_exceeded: bool,
     context_length_exceeded: usize,
     provider: Arc<dyn Provider>,
-    model_config: goose_providers::model::ModelConfig,
+    model_config: arakan_providers::model::ModelConfig,
     services: Arc<StateMachineServices>,
     session_id: String,
     _mcp: McpFixture,
@@ -222,9 +222,9 @@ impl ProviderTestConfig {
 }
 
 impl ProviderFixture {
-    async fn setup(config: &ProviderTestConfig, mode: GooseMode) -> Result<Self> {
+    async fn setup(config: &ProviderTestConfig, mode: ArakanMode) -> Result<Self> {
         let mut env_vars: Vec<(&'static str, Option<&str>)> =
-            vec![("GOOSE_MODE", Some(<&str>::from(mode)))];
+            vec![("ARAKAN_MODE", Some(<&str>::from(mode)))];
         for &var in config.clear_env {
             env_vars.push((var, None));
         }
@@ -250,7 +250,7 @@ impl ProviderFixture {
         )
         .await
         .map_err(|e| anyhow::anyhow!("{}", e))?;
-        let model_config = goose::model_config::model_config_from_user_config(
+        let model_config = arakan::model_config::model_config_from_user_config(
             &config.name.to_lowercase(),
             config.model_name,
         )?;
@@ -264,7 +264,7 @@ impl ProviderFixture {
             permission_manager,
             None,
             true,
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         ));
         let session = session_manager
             .create_session(
@@ -309,7 +309,7 @@ impl ProviderFixture {
     async fn tool_roundtrip(
         &self,
         prompt: &str,
-        model_config: Option<goose_providers::model::ModelConfig>,
+        model_config: Option<arakan_providers::model::ModelConfig>,
     ) -> Result<Message> {
         let lease = self
             .services
@@ -326,7 +326,7 @@ impl ProviderFixture {
 
         let message = Message::user().with_text(prompt);
         let model_config = model_config.unwrap_or_else(|| self.model_config.clone());
-        let (response1, _) = goose::session_context::with_session_id(
+        let (response1, _) = arakan::session_context::with_session_id(
             Some(self.session_id.clone()),
             self.provider.complete(
                 &model_config,
@@ -356,7 +356,7 @@ impl ProviderFixture {
         }
 
         let params = tool_req.tool_call.as_ref().unwrap().clone();
-        let ctx = goose::agents::ToolCallContext::new(
+        let ctx = arakan::agents::ToolCallContext::new(
             self.session_id.to_string(),
             None,
             Some("test-id".to_string()),
@@ -374,7 +374,7 @@ impl ProviderFixture {
             .unwrap();
         let tool_response = Message::user().with_tool_response(&tool_req.id, Ok(result));
 
-        let (response2, _) = goose::session_context::with_session_id(
+        let (response2, _) = arakan::session_context::with_session_id(
             Some(self.session_id.clone()),
             self.provider.complete(
                 &model_config,
@@ -391,7 +391,7 @@ impl ProviderFixture {
         let message = Message::user().with_text("Just say hello!");
         let model_config = self.model_config.clone();
 
-        let (response, _) = goose::session_context::with_session_id(
+        let (response, _) = arakan::session_context::with_session_id(
             Some(self.session_id.clone()),
             self.provider.complete(
                 &model_config,
@@ -432,7 +432,7 @@ impl ProviderFixture {
         let messages = vec![Message::user().with_text(&large_message_content)];
         let model_config = self.model_config.clone();
 
-        let result = goose::session_context::with_session_id(
+        let result = arakan::session_context::with_session_id(
             Some(self.session_id.clone()),
             self.provider.complete(
                 &model_config,
@@ -462,7 +462,7 @@ impl ProviderFixture {
 
     async fn test_image_content_support(&self) -> Result<()> {
         let image_config = self.image_model.as_ref().map(|model| {
-            goose_providers::model::ModelConfig::new(model).with_canonical_limits(&self.name)
+            arakan_providers::model::ModelConfig::new(model).with_canonical_limits(&self.name)
         });
         let response = self
             .tool_roundtrip(
@@ -472,7 +472,7 @@ impl ProviderFixture {
             .await?;
         let text = response.as_concat_text().to_lowercase();
         assert!(
-            text.contains("hello goose") || text.contains("test image"),
+            text.contains("hello arakan") || text.contains("test image"),
             "{text}"
         );
         println!("=== {}::image_content === {}", self.name, text);
@@ -483,10 +483,10 @@ impl ProviderFixture {
         let default = &self.model_config.model_name;
         let alt = self.model_switch_name.as_deref().unwrap();
         let alt_config =
-            goose_providers::model::ModelConfig::new(alt).with_canonical_limits(&self.name);
+            arakan_providers::model::ModelConfig::new(alt).with_canonical_limits(&self.name);
 
         let message = Message::user().with_text("Just say hello!");
-        let (response, _) = goose::session_context::with_session_id(
+        let (response, _) = arakan::session_context::with_session_id(
             Some(self.session_id.clone()),
             self.provider
                 .complete(&alt_config, "You are a helpful assistant.", &[message], &[]),
@@ -536,7 +536,7 @@ impl ProviderFixture {
                 serde_json::json!(target),
             )]));
         let message = Message::user().with_text("Just say hello!");
-        let (response, _) = goose::session_context::with_session_id(
+        let (response, _) = arakan::session_context::with_session_id(
             Some(self.session_id.clone()),
             self.provider.complete(
                 &effort_config,
@@ -660,7 +660,7 @@ impl ProviderFixture {
         // Start in Auto mode (fixture default), tools auto-approved.
         // Switch to Approve mode dynamically via agent.
         self.services
-            .update_goose_mode(GooseMode::Approve, &self.session_id)
+            .update_arakan_mode(ArakanMode::Approve, &self.session_id)
             .await?;
         // Verify tool call now requires permission (ActionRequired).
         // Cancel prevents the task from completing → tool fails.
@@ -704,67 +704,67 @@ async fn test_provider(config: ProviderTestConfig) -> Result<()> {
         }
     }
 
-    let run_test = |mode: GooseMode| ProviderFixture::setup(&config, mode);
+    let run_test = |mode: ArakanMode| ProviderFixture::setup(&config, mode);
 
-    if run_test(GooseMode::Auto).await.is_err() {
+    if run_test(ArakanMode::Auto).await.is_err() {
         println!("Skipping {} tests - failed to create provider", name);
         TEST_REPORT.record_skip(name);
         return Ok(());
     }
 
     let result: Result<()> = async {
-        run_test(GooseMode::Auto)
+        run_test(ArakanMode::Auto)
             .await?
             .test_model_listing()
             .await?;
-        run_test(GooseMode::Auto)
+        run_test(ArakanMode::Auto)
             .await?
             .test_basic_response()
             .await?;
         if config.test_mcp_tools {
-            run_test(GooseMode::Auto).await?.test_tool_usage().await?;
-            run_test(GooseMode::Auto)
+            run_test(ArakanMode::Auto).await?.test_tool_usage().await?;
+            run_test(ArakanMode::Auto)
                 .await?
                 .test_image_content_support()
                 .await?;
         }
         if config.model_switch_name.is_some() {
-            run_test(GooseMode::Auto).await?.test_model_switch().await?;
+            run_test(ArakanMode::Auto).await?.test_model_switch().await?;
         }
         if config.test_context_length_exceeded {
-            run_test(GooseMode::Auto)
+            run_test(ArakanMode::Auto)
                 .await?
                 .test_context_length_exceeded_error()
                 .await?;
         }
         if config.test_thinking_effort {
-            run_test(GooseMode::Auto)
+            run_test(ArakanMode::Auto)
                 .await?
                 .test_thinking_effort()
                 .await?;
         }
         if config.test_permissions {
-            run_test(GooseMode::Approve)
+            run_test(ArakanMode::Approve)
                 .await?
                 .test_permission_allow()
                 .await?;
-            run_test(GooseMode::Approve)
+            run_test(ArakanMode::Approve)
                 .await?
                 .test_permission_deny()
                 .await?;
             if config.test_smart_approve {
-                run_test(GooseMode::SmartApprove)
+                run_test(ArakanMode::SmartApprove)
                     .await?
                     .test_smart_approve_llm_detect()
                     .await?;
-                run_test(GooseMode::SmartApprove)
+                run_test(ArakanMode::SmartApprove)
                     .await?
                     .test_smart_approve_readonly()
                     .await?;
             }
         }
         if config.test_mode_update {
-            run_test(GooseMode::Auto).await?.test_mode_update().await?;
+            run_test(ArakanMode::Auto).await?.test_mode_update().await?;
         }
         Ok(())
     }

@@ -1,5 +1,5 @@
-use goose::acp::custom_notifications::custom_notification_schemas;
-use goose::acp::server::{agent_request_schemas, AcpConnection};
+use arakan::acp::custom_notifications::custom_notification_schemas;
+use arakan::acp::server::{agent_request_schemas, AcpConnection};
 use schemars::SchemaGenerator;
 use serde_json::{json, Map, Value};
 use std::collections::{BTreeSet, HashMap};
@@ -321,7 +321,7 @@ fn main() {
     // Assemble the root schema document.
     let root = json!({
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "GooseExtensions",
+        "title": "ArakanExtensions",
         "$defs": defs,
         "anyOf": [
             {
@@ -420,7 +420,7 @@ fn main() {
 }
 
 fn is_unstable_method(method: &str) -> bool {
-    method.contains("_goose/unstable")
+    method.contains("_arakan/unstable")
 }
 
 fn generated_type_name(name: &str, unstable_type_names: &BTreeSet<String>) -> String {

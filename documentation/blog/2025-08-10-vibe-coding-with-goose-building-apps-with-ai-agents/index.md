@@ -1,6 +1,6 @@
 ---
 title: How 7 AI Agents Worked Together to Build an App in One Hour
-description: "Learn how to build a full-stack AI app in under an hour using Goose's subagent orchestration, from planning to testing."
+description: "Learn how to build a full-stack AI app in under an hour using Arakan's subagent orchestration, from planning to testing."
 authors: 
     - angie
 ---
@@ -9,7 +9,7 @@ authors:
 
 What if I told you that you could build a complete, working web application in under an hour using nothing but AI agents? Not just a simple "Hello World" app, but a full-stack application with a backend API, responsive frontend, unit tests, and documentation?
 
-That's exactly what we accomplished during the Vibe Coding workshop at [Berkeley's Agentic AI Summit](https://www.youtube.com/live/_w5m3h9jY-w?t=5310), where I demonstrated how to use Goose's subagent orchestration to spin up an entire development team of AI agents. Each agent took on a specific role - from product planning to QA testing - and worked together to build "AI BriefMe", a web app that generates executive style briefings on any topic.
+That's exactly what we accomplished during the Vibe Coding workshop at [Berkeley's Agentic AI Summit](https://www.youtube.com/live/_w5m3h9jY-w?t=5310), where I demonstrated how to use Arakan's subagent orchestration to spin up an entire development team of AI agents. Each agent took on a specific role - from product planning to QA testing - and worked together to build "AI BriefMe", a web app that generates executive style briefings on any topic.
 
 <!-- truncate -->
 
@@ -17,7 +17,7 @@ That's exactly what we accomplished during the Vibe Coding workshop at [Berkeley
 
 Traditional AI coding assistants are great at helping you write individual functions or debug specific issues. But what if you need to build something from scratch? What if you want to simulate an entire software development lifecycle?
 
-That's where Goose's subagent feature shines. Instead of doing everything yourself, you can orchestrate a team of specialized AI agents, each with their own expertise:
+That's where Arakan's subagent feature shines. Instead of doing everything yourself, you can orchestrate a team of specialized AI agents, each with their own expertise:
 
 - 🧠 **Planner** - Defines the product vision and MVP scope
 - 📋 **Project Manager** - Breaks down tasks and coordinates execution  
@@ -58,7 +58,7 @@ Build a functional web app that generates daily briefings on any topic in **40 m
 ## Technical Stack (Keep It Simple)
 - **Frontend**: Single HTML page with vanilla JS (no frameworks)
 - **Backend**: Python Flask app with single endpoint
-- **AI**: Headless Goose as an LLM service
+- **AI**: Headless Arakan as an LLM service
 - **Deployment**: Local development server (no cloud deployment)
 
 ## Team Responsibilities
@@ -288,7 +288,7 @@ The Architect agent established the technical foundation:
 - **Stack**: Vanilla HTML/CSS/JS frontend, Express.js backend
 - **API Design**: Simple POST endpoint accepting `{"topic": "string"}`
 - **File Structure**: Organized project with clear separation of concerns
-- **Dependencies**: Express, CORS, and child_process for calling Headless Goose
+- **Dependencies**: Express, CORS, and child_process for calling Headless Arakan
 
 The Architect also defined the API contract, which made it possible for the next step where the frontend and backend developer agents can work in parallel.
 
@@ -303,22 +303,22 @@ The **Frontend Developer** created:
 
 The **Backend Developer** implemented:
 - Express server with proper error handling
-- `/api/briefing` endpoint that uses Headless Goose for AI generation
+- `/api/briefing` endpoint that uses Headless Arakan for AI generation
 - Response parsing and JSON formatting
 - Timeout handling and CORS configuration
 
-#### The Magic of Headless Goose
+#### The Magic of Headless Arakan
 
-One of the coolest aspects of this project was how the backend used [Headless Goose](/docs/tutorials/headless-goose) by essentially calling Goose programmatically to generate the AI briefings:
+One of the coolest aspects of this project was how the backend used [Headless Arakan](/docs/tutorials/headless-arakan) by essentially calling Arakan programmatically to generate the AI briefings:
 
 ```javascript
-const gooseProcess = spawn('goose', [
+const arakanProcess = spawn('arakan', [
   'run', '-t', prompt, 
   '--quiet', '--no-session', '--max-turns', '1'
 ]);
 ```
 
-This creates a fascinating recursive scenario: we're using Goose to build an app that uses Goose to generate content. It's AI agents all the way down!
+This creates a fascinating recursive scenario: we're using Arakan to build an app that uses Arakan to generate content. It's AI agents all the way down!
 
 ### Step 5: Testing and Docs
 Finally, we ran QA and Tech Writer agents in parallel:
@@ -374,7 +374,7 @@ But here's the important part: this wasn't production-ready code. The QA agent w
 
 ## The Human Still Matters
 
-This workshop perfectly illustrates the current state of AI-assisted development. Goose and its subagents can absolutely accelerate prototyping and help you build working applications quickly. But the human developer still owns the critical judgment calls:
+This workshop perfectly illustrates the current state of AI-assisted development. Arakan and its subagents can absolutely accelerate prototyping and help you build working applications quickly. But the human developer still owns the critical judgment calls:
 
 - **Architecture decisions**: Is this the right approach for the problem?
 - **Security considerations**: What are the risks we need to mitigate?
@@ -394,7 +394,7 @@ What we demonstrated in this workshop hints at a fascinating future for software
 
 Want to try this yourself? Here's what you need:
 
-1. **Install and Configure Goose**: Follow the [quickstart guide](https://goose-docs.ai/docs/quickstart)
+1. **Install and Configure Arakan**: Follow the [quickstart guide](https://arakan-docs.ai/docs/quickstart)
 2. **Start Small**: Try building a simple app first to get comfortable with the workflow
 
 :::note
@@ -411,17 +411,17 @@ Remember, this is about prototyping and exploration, not production deployment. 
 
 *Want to see this in action? Check out the full workshop video where we build AI BriefMe live:*
 
-<iframe class="aspect-ratio" src="https://www.youtube.com/embed/_w5m3h9jY-w?start=5310" title="Vibe Coding with Goose Workshop" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe class="aspect-ratio" src="https://www.youtube.com/embed/_w5m3h9jY-w?start=5310" title="Vibe Coding with Arakan Workshop" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <head>
   <meta property="og:title" content="How 7 AI Agents Worked Together to Build an App in One Hour" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/08/10/vibe-coding-with-goose-building-apps-with-ai-agents" />
-  <meta property="og:description" content="Learn how to build a full-stack AI app in under an hour using Goose's multi-agent orchestration, from planning to QA testing." />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/header-image-b685ea475ff7b8ae3563317b347fddb0.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/08/10/vibe-coding-with-arakan-building-apps-with-ai-agents" />
+  <meta property="og:description" content="Learn how to build a full-stack AI app in under an hour using Arakan's multi-agent orchestration, from planning to QA testing." />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/header-image-b685ea475ff7b8ae3563317b347fddb0.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
   <meta name="twitter:title" content="How 7 AI Agents Worked Together to Build an App in One Hour" />
-  <meta name="twitter:description" content="Learn how to build a full-stack AI app in under an hour using Goose's multi-agent orchestration, from planning to QA testing." />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/header-image-b685ea475ff7b8ae3563317b347fddb0.png" />
+  <meta name="twitter:description" content="Learn how to build a full-stack AI app in under an hour using Arakan's multi-agent orchestration, from planning to QA testing." />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/header-image-b685ea475ff7b8ae3563317b347fddb0.png" />
 </head>

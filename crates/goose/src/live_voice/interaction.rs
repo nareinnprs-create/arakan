@@ -4,7 +4,7 @@ use super::service::{
 use super::transcript::{DelegationContext, LiveTranscript};
 use crate::{conversation::message::Message, session::SessionManager, token_counter::TokenCounter};
 use futures::future::BoxFuture;
-use goose_providers::live_voice_provider::{
+use arakan_providers::live_voice_provider::{
     DelegationUpdate, DelegationUpdateDelivery, ProviderConnection, ProviderConnectionEvent,
 };
 use rmcp::model::Role;
@@ -19,7 +19,7 @@ pub(super) const DELEGATION_INSTRUCTION: &str =
 const DELEGATION_UPDATE_TOKEN_LIMIT: usize = 500;
 const UNDELIVERED_DELEGATION_UPDATE_NOTICE: &str =
     "I couldn't confirm that the latest delegated update reached this voice conversation. Please ask me to share it again.";
-const SAVED_RESULT_NOTICE: &str = "\n\nThe full result is saved in Goose.";
+const SAVED_RESULT_NOTICE: &str = "\n\nThe full result is saved in Arakan.";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct LiveVoiceInteractionId(pub(crate) String);

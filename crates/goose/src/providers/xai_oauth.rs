@@ -11,8 +11,8 @@ use axum::{extract::Query, response::Html, routing::get, Router};
 use base64::Engine;
 use chrono::{DateTime, Utc};
 use futures::future::BoxFuture;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 use rmcp::model::Tool;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
@@ -165,8 +165,8 @@ fn build_authorize_url(pkce: &PkceChallenge, state: &str, nonce: &str) -> Result
     let redirect = redirect_uri();
     // `plan=generic` opts the consent screen into xAI's generic OAuth plan
     // tier; without it, accounts.x.ai rejects loopback OAuth from
-    // non-allowlisted clients. `referrer=goose` lets xAI attribute
-    // goose-originated logins.
+    // non-allowlisted clients. `referrer=arakan` lets xAI attribute
+    // arakan-originated logins.
     let params = [
         ("response_type", "code"),
         ("client_id", CLIENT_ID),
@@ -177,7 +177,7 @@ fn build_authorize_url(pkce: &PkceChallenge, state: &str, nonce: &str) -> Result
         ("state", state),
         ("nonce", nonce),
         ("plan", "generic"),
-        ("referrer", "goose"),
+        ("referrer", "arakan"),
     ];
     let query = serde_urlencoded::to_string(params)?;
     Ok(format!("{}?{}", AUTHORIZE_URL, query))
@@ -360,7 +360,7 @@ async fn poll_device_code_token(device: &DeviceCodeResponse) -> Result<TokenResp
             }
             Some("expired_token") => {
                 return Err(anyhow!(
-                    "xAI device code expired - please re-run goose configure"
+                    "xAI device code expired - please re-run arakan configure"
                 ));
             }
             other => {
@@ -381,7 +381,7 @@ async fn poll_device_code_token(device: &DeviceCodeResponse) -> Result<TokenResp
 const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
 <html>
   <head>
-    <title>goose - xAI Authorization Successful</title>
+    <title>arakan - xAI Authorization Successful</title>
     <style>
       body {
         font-family: system-ui, -apple-system, sans-serif;
@@ -401,7 +401,7 @@ const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
   <body>
     <div class="container">
       <h1>Authorization Successful</h1>
-      <p>You can close this window and return to goose.</p>
+      <p>You can close this window and return to arakan.</p>
     </div>
     <script>const AUTO_CLOSE_TIMEOUT_MS = __AUTO_CLOSE_TIMEOUT_MS__; setTimeout(() => window.close(), AUTO_CLOSE_TIMEOUT_MS)</script>
   </body>
@@ -420,7 +420,7 @@ fn html_error(error: &str) -> String {
         r#"<!doctype html>
 <html>
   <head>
-    <title>goose - xAI Authorization Failed</title>
+    <title>arakan - xAI Authorization Failed</title>
     <style>
       body {{
         font-family: system-ui, -apple-system, sans-serif;
@@ -573,7 +573,7 @@ async fn perform_loopback_oauth_flow(auth_state: &XaiAuthState) -> Result<TokenD
 
     if webbrowser::open(&auth_url).is_err() {
         tracing::info!(
-            "Please open this URL in your browser to authorize goose with xAI:\n{}",
+            "Please open this URL in your browser to authorize arakan with xAI:\n{}",
             auth_url
         );
     }
@@ -598,7 +598,7 @@ async fn perform_device_code_flow() -> Result<TokenData> {
         device.user_code
     );
     eprintln!(
-        "\nTo authorize goose with xAI, open this URL in any browser:\n  {}\nand enter code: {}\n",
+        "\nTo authorize arakan with xAI, open this URL in any browser:\n  {}\nand enter code: {}\n",
         url, device.user_code
     );
     let tokens = poll_device_code_token(&device).await?;
@@ -773,7 +773,7 @@ impl Provider for XaiOAuthProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for XaiOAuthProvider {
+impl arakan_providers::base::ProviderDescriptor for XaiOAuthProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::with_models(
             XAI_OAUTH_PROVIDER_NAME,
@@ -877,7 +877,7 @@ mod tests {
         assert!(url.contains("state=state-fixture"));
         assert!(url.contains("nonce=nonce-fixture"));
         assert!(url.contains("plan=generic"));
-        assert!(url.contains("referrer=goose"));
+        assert!(url.contains("referrer=arakan"));
         assert!(url.contains("scope=openid"));
         assert!(url.contains("offline_access"));
         assert!(url.contains("grok-cli%3Aaccess"));
@@ -891,7 +891,7 @@ mod tests {
     }
 
     #[test]
-    fn token_cache_path_lives_under_goose_config_dir() {
+    fn token_cache_path_lives_under_arakan_config_dir() {
         let path = get_cache_path();
         let s = path.to_string_lossy().into_owned();
         assert!(

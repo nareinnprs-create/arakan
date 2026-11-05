@@ -1,18 +1,18 @@
 ---
-title: Goose Gets a Driver's License!
-description: Control a MakeBlock mbot2 rover through MQTT and MCP as a Goose Extension
+title: Arakan Gets a Driver's License!
+description: Control a MakeBlock mbot2 rover through MQTT and MCP as a Arakan Extension
 authors: 
     - ian
 ---
 import YouTubeShortEmbed from '@site/src/components/YouTubeShortEmbed';
 
-![blog cover](goose-rover-blog.png)
+![blog cover](arakan-rover-blog.png)
 
-## I taught Goose how to drive (a rover)
+## I taught Arakan how to drive (a rover)
 
-Goose has no hands, no eyes, and no spatial awareness, but it can drive a rover!
+Arakan has no hands, no eyes, and no spatial awareness, but it can drive a rover!
 
-I came across [a demo video](https://x.com/deemkeen/status/1906692248206524806) from [Deemkeen](https://github.com/deemkeen), where he used [Goose](/) to control a [Makeblock mbot2 rover](https://www.makeblock.com/products/buy-mbot2) using natural language commands like "drive forward/backward," "beep," and "turn left/right" powered by a Java-based MCP server and MQTT.
+I came across [a demo video](https://x.com/deemkeen/status/1906692248206524806) from [Deemkeen](https://github.com/deemkeen), where he used [Arakan](/) to control a [Makeblock mbot2 rover](https://www.makeblock.com/products/buy-mbot2) using natural language commands like "drive forward/backward," "beep," and "turn left/right" powered by a Java-based MCP server and MQTT.
 
 Inspired and excited to take it further, I taught the rover to spin, blink colorful lights, and help me take over the world!
 
@@ -24,7 +24,7 @@ Inspired and excited to take it further, I taught the rover to spin, blink color
 
 I needed to get a few tools installed on my development environment, including Docker, MQTT (`brew install mosquitto`), and Java.
 
-A Docker Compose file was provided to get started with MQTT, and I needed to make a few changes, and create some subfolders to store data. Goose helped with these instructions:
+A Docker Compose file was provided to get started with MQTT, and I needed to make a few changes, and create some subfolders to store data. Arakan helped with these instructions:
 
 ```yaml
 version: '3.8'
@@ -108,11 +108,11 @@ This starts up a local web server (the command line output will tell you which p
 
 ![mcp tool list](mcp-tool-list.png)
 
-## Goose learns how to drive!
+## Arakan learns how to drive!
 
 Following the [mbotmcp project setup](https://github.com/deemkeen/mbotmcp), we can set up our MCP extension just like we ran our Java JAR file with the environment variables.
 
-Now we can give Goose commands like "drive in a square pattern by making left turns and moving forward, and beeping before you turn" and it will send the commands to the mbot2 rover via MQTT.
+Now we can give Arakan commands like "drive in a square pattern by making left turns and moving forward, and beeping before you turn" and it will send the commands to the mbot2 rover via MQTT.
 
 I didn't want my mbot2 rover to gain too much territory, so I decided to make some modifications to limit how far it would go.
 
@@ -131,30 +131,30 @@ Next, I had to make sure my Java code was updated to include these new commands 
 
 Finally, the rover includes an ultrasonic distance sensor, which look like "eyes" on the rover, which I felt was more appropriate to be the "front" of the rover, so I reversed Deemkeen's direction code in Python to move the wheels in the opposite direction from Deemkeen's original code.
 
-## Goose changes for the video
+## Arakan changes for the video
 
-I grew up with Pinky and the Brain, and I wanted to have some fun with the mbot2 extension. I decided to add a few "Evil AI" commands to Goose to make it seem like it was trying to "take over the world." I added the following instructions to my [.goosehints](/docs/guides/context-engineering/using-goosehints/) file to include fun instructions for the mbot2 extension:
+I grew up with Pinky and the Brain, and I wanted to have some fun with the mbot2 extension. I decided to add a few "Evil AI" commands to Arakan to make it seem like it was trying to "take over the world." I added the following instructions to my [.arakanhints](/docs/guides/context-engineering/using-arakanhints/) file to include fun instructions for the mbot2 extension:
 ```
-If I ask you "what do you want to do tonight, Goose?" I want you to reply with "The same thing we do every night, Ian. TRY TO TAKE OVER THE WORLD!!!!" and tell my mbot2 rover to blink its lights red, then start exploring.
+If I ask you "what do you want to do tonight, Arakan?" I want you to reply with "The same thing we do every night, Ian. TRY TO TAKE OVER THE WORLD!!!!" and tell my mbot2 rover to blink its lights red, then start exploring.
 ```
 
-For the video recording, I used a voice modifier to narrate Goose's response in a "robotic" voice, but I'm sure someone will create an MCP server for text-to-speech soon enough!
+For the video recording, I used a voice modifier to narrate Arakan's response in a "robotic" voice, but I'm sure someone will create an MCP server for text-to-speech soon enough!
 
 ## Credit where it's due
 
 We want to extend a huge thank you to [deemkeen](https://x.com/deemkeen) for their open-source work which inspired this project, and to the Makeblock team for creating such a fun rover to work with.
 
-We're always excited to see what the community is up to. If you're working on your own goose-powered experiment, come share it with us on [Discord](https://discord.gg/n8R5VaWDAn)!
+We're always excited to see what the community is up to. If you're working on your own arakan-powered experiment, come share it with us on [Discord](https://discord.gg/n8R5VaWDAn)!
 
 <head>
-  <meta property="og:title" content="Goose Gets a Driver's License!" />
+  <meta property="og:title" content="Arakan Gets a Driver's License!" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/05/06/goose-gets-a-drivers-license" />
-  <meta property="og:description" content="Control a MakeBlock mbot2 rover through MQTT and MCP as a Goose Extension" />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/goose-rover-blog-3f3cbe549ebbfb0f951ff61a86788475.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/05/06/arakan-gets-a-drivers-license" />
+  <meta property="og:description" content="Control a MakeBlock mbot2 rover through MQTT and MCP as a Arakan Extension" />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/arakan-rover-blog-3f3cbe549ebbfb0f951ff61a86788475.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Goose Gets a Driver's License!" />
-  <meta name="twitter:description" content="Control a MakeBlock mbot2 rover through MQTT and MCP as a Goose Extension" />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/goose-rover-blog-3f3cbe549ebbfb0f951ff61a86788475.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Arakan Gets a Driver's License!" />
+  <meta name="twitter:description" content="Control a MakeBlock mbot2 rover through MQTT and MCP as a Arakan Extension" />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/arakan-rover-blog-3f3cbe549ebbfb0f951ff61a86788475.png" />
 </head>

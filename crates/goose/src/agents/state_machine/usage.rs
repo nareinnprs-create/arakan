@@ -1,15 +1,15 @@
 use anyhow::Result;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage as TokenUsage};
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage as TokenUsage};
 
-use crate::agents::state_machine::{ConversationEffect, GooseEffect};
+use crate::agents::state_machine::{ConversationEffect, ArakanEffect};
 use crate::conversation::message::MessageUsage;
 use crate::conversation::Conversation;
 use crate::providers::canonical_cost::resolve_usage_cost;
 use crate::session::{Session, SessionManager};
 
-fn attach_to_last_assistant(effects: &mut [GooseEffect], usage: &ProviderUsage) {
+fn attach_to_last_assistant(effects: &mut [ArakanEffect], usage: &ProviderUsage) {
     let Some(message) = effects.iter_mut().rev().find_map(|effect| match effect {
-        GooseEffect::Conversation(ConversationEffect::AppendMessage(message))
+        ArakanEffect::Conversation(ConversationEffect::AppendMessage(message))
             if message.role == rmcp::model::Role::Assistant && message.error_kind().is_none() =>
         {
             Some(message)
@@ -21,11 +21,11 @@ fn attach_to_last_assistant(effects: &mut [GooseEffect], usage: &ProviderUsage) 
     message.metadata.usage = Some(Box::new(MessageUsage::from_provider_usage(usage, false)));
 }
 
-pub(super) fn enrich(session: &Session, effects: &mut [GooseEffect]) {
+pub(super) fn enrich(session: &Session, effects: &mut [ArakanEffect]) {
     for index in 0..effects.len() {
         let (usage, replaces_conversation) = match &effects[index] {
-            GooseEffect::RecordUsage(usage) => (usage.clone(), false),
-            GooseEffect::CompactConversation {
+            ArakanEffect::RecordUsage(usage) => (usage.clone(), false),
+            ArakanEffect::CompactConversation {
                 usage: Some(usage), ..
             } => (usage.clone(), true),
             _ => continue,
@@ -40,8 +40,8 @@ pub(super) fn enrich(session: &Session, effects: &mut [GooseEffect]) {
             attach_to_last_assistant(effects, &enriched);
         }
         match &mut effects[index] {
-            GooseEffect::RecordUsage(usage) => *usage = enriched,
-            GooseEffect::CompactConversation { usage, .. } => *usage = Some(enriched),
+            ArakanEffect::RecordUsage(usage) => *usage = enriched,
+            ArakanEffect::CompactConversation { usage, .. } => *usage = Some(enriched),
             _ => {}
         }
     }

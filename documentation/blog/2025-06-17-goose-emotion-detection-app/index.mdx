@@ -1,6 +1,6 @@
 ---
-title: "Why I Used Goose to Build a Chaotic Emotion Detection App"
-description: The joys of experimenting with computer vision using Goose, an MCP host
+title: "Why I Used Arakan to Build a Chaotic Emotion Detection App"
+description: The joys of experimenting with computer vision using Arakan, an MCP host
 authors:
     - rizel
 ---
@@ -9,7 +9,7 @@ authors:
 
 Developers deserve to have fun. There was a time when the internet felt magical. I remember going to the library just to create a character on The Doll Palace. At home, I'd spend hours changing fonts with WordArt. But as I grew up, the industry did too. We've shifted away from marquees and glittery cursors. Grown-up me started using ones and zeros to build reliable systems for insurance, banking, and healthcare companies. There's pride in that, but it's harder to justify doing something just because it's fun.
 
-That's why I tapped into my inner child and used [Goose](/) to [build a UI that reacts to users' emotions](https://chaotic-emotion-detector-production.up.railway.app/).
+That's why I tapped into my inner child and used [Arakan](/) to [build a UI that reacts to users' emotions](https://chaotic-emotion-detector-production.up.railway.app/).
 
 <!-- truncate -->
 
@@ -23,7 +23,7 @@ In an [article](https://www.oreilly.com/radar/takeaways-from-coding-with-ai/) by
 
 Playing with code and experimenting with technology motivates our minds to solve problems more creatively.
 
-To celebrate the return of joyful programming, I started a livestream series called [**The Great Goose Off**](https://www.youtube.com/watch?v=wS5-4hXcnL4&list=PLyMFt_U2IX4v-yCUa11zgRGDgJbUUWKan), where two people compete to prompt Goose, an open source AI agent, to create the silliest, most chaotic apps possible.
+To celebrate the return of joyful programming, I started a livestream series called [**The Great Arakan Off**](https://www.youtube.com/watch?v=wS5-4hXcnL4&list=PLyMFt_U2IX4v-yCUa11zgRGDgJbUUWKan), where two people compete to prompt Arakan, an open source AI agent, to create the silliest, most chaotic apps possible.
 
 Participants face challenges like building:
 
@@ -33,14 +33,14 @@ Participants face challenges like building:
 
 ## My Strategy
 
-Hosting The Great Goose Off gave me a new perspective on Goose. It is good at writing code, but it is even better at being silly. That inspired me to build a computer vision app that not only detects emotion but responds to it. I used Goose as my creative partner to shape how the interface would behave. 
+Hosting The Great Arakan Off gave me a new perspective on Arakan. It is good at writing code, but it is even better at being silly. That inspired me to build a computer vision app that not only detects emotion but responds to it. I used Arakan as my creative partner to shape how the interface would behave. 
 
 ### Let the Agent Lead
-I observed that participants (of The Great Goose Off) who were not engineers often created the most imaginative applications. They gave Goose room to interpret prompts without narrowing its scope too early. This resulted in outputs that felt fresh and unpredictable. I took a similar approach. I gave high-level instructions and allowed the agent to explore how to implement them.
+I observed that participants (of The Great Arakan Off) who were not engineers often created the most imaginative applications. They gave Arakan room to interpret prompts without narrowing its scope too early. This resulted in outputs that felt fresh and unpredictable. I took a similar approach. I gave high-level instructions and allowed the agent to explore how to implement them.
 
 ### Choosing a Performant Model
 
-As my manager Angie Jones says, Claude Sonnet 4 was “born to code.” I chose it because it helps Goose pivot quickly when something breaks. It’s also great at documenting code and anticipating next steps. That came in handy when the face-api CDN failed to load. Goose immediately switched to downloading the models locally instead.
+As my manager Angie Jones says, Claude Sonnet 4 was “born to code.” I chose it because it helps Arakan pivot quickly when something breaks. It’s also great at documenting code and anticipating next steps. That came in handy when the face-api CDN failed to load. Arakan immediately switched to downloading the models locally instead.
 
 ### Prompt Chaining
 
@@ -61,7 +61,7 @@ After each step, I committed changes to GitHub to enable easy rollbacks if neede
 
 ## The Result
 
-In the end, Goose and I built a delightfully chaotic application where the interface responds to my facial expressions. For example:
+In the end, Arakan and I built a delightfully chaotic application where the interface responds to my facial expressions. For example:
 
 * If I make an angry face, the screen turns red and starts to shake  
 * If I smile, multiple colorful hues appear across the interface  
@@ -90,19 +90,19 @@ It's okay to not build for utility sometimes. In fact, our industry needs more d
 
 - Use the [app](https://chaotic-emotion-detector-production.up.railway.app/)
 - Fork the [GitHub Repository](https://github.com/blackgirlbytes/chaotic-emotion-detector)
-- Use the [recipe](goose://recipe?config=eyJpZCI6InVudGl0bGVkIiwibmFtZSI6IlVudGl0bGVkIFJlY2lwZSIsImRlc2NyaXB0aW9uIjoiTWFrZSB5b3VyIFVJIHJlYWN0IHRvIHlvdXIgZW1vdGlvbnMiLCJpbnN0cnVjdGlvbnMiOiJJIGhlbHAgYnVpbGQgaW50ZXJhY3RpdmUgd2ViIGFwcGxpY2F0aW9ucyB1c2luZyB2YW5pbGxhIEphdmFTY3JpcHQsIEhUTUwsIGFuZCBDU1MuIEkgY3JlYXRlIGNvbXBsZXRlLCBmdW5jdGlvbmFsIGFwcGxpY2F0aW9ucyB3aXRoIG1vZGVybiBVSSBkZXNpZ24sIHJlYWwtdGltZSBmZWF0dXJlcywgYW5kIGVuZ2FnaW5nIHVzZXIgaW50ZXJhY3Rpb25zLiBXaGVuIGJ1aWxkaW5nIHdlYmNhbSBvciBjYW1lcmEtYmFzZWQgYXBwbGljYXRpb25zLCBJIGludGVncmF0ZSBhZHZhbmNlZCBmZWF0dXJlcyBsaWtlIGZhY2UgZGV0ZWN0aW9uIHVzaW5nIEZhY2UtQVBJLmpzIGxpYnJhcnksIGVtb3Rpb24gcmVjb2duaXRpb24sIGFuZCBjcmVhdGl2ZSBVSSByZXNwb25zZXMuIEkgcHJvdmlkZSBhbGwgbmVjZXNzYXJ5IGZpbGVzIGluY2x1ZGluZyBIVE1MIHN0cnVjdHVyZSwgQ1NTIHN0eWxpbmcsIEphdmFTY3JpcHQgZnVuY3Rpb25hbGl0eSwgYW5kIGEgc2ltcGxlIE5vZGUuanMgc2VydmVyLiBJIGFsc28gZG93bmxvYWQgYW5kIHNlcnZlIHJlcXVpcmVkIG1vZGVsIGZpbGVzIGxvY2FsbHkgZm9yIGJldHRlciBwZXJmb3JtYW5jZSBhbmQgcmVsaWFiaWxpdHkuIFRoZSBhcHBsaWNhdGlvbnMgYXJlIGRlc2lnbmVkIHRvIGJlIHByaXZhY3ktZm9jdXNlZCB3aXRoIGxvY2FsIHN0b3JhZ2UgYW5kIHByb2Nlc3NpbmcuIiwiYWN0aXZpdGllcyI6WyJCdWlsZCB3ZWJjYW0gYXBwcyIsIkFkZCBmYWNlIGRldGVjdGlvbiIsIkNyZWF0ZSBlbW90aW9uIHJlY29nbml0aW9uIiwiRGVzaWduIGNoYW90aWMgVUkgZWZmZWN0cyIsIkltcGxlbWVudCBsb2NhbCBmaWxlIHNlcnZlcnMiXSwicHJvbXB0IjoiIiwidGl0bGUiOiJDaGFvdGljIEVtb3Rpb24gRGV0ZWN0b3IiLCJleHRlbnNpb25zIjpbXX0=) to build your own. Please note, that you must install [Goose](/docs/getting-started/installation) to use the recipe.
+- Use the [recipe](arakan://recipe?config=eyJpZCI6InVudGl0bGVkIiwibmFtZSI6IlVudGl0bGVkIFJlY2lwZSIsImRlc2NyaXB0aW9uIjoiTWFrZSB5b3VyIFVJIHJlYWN0IHRvIHlvdXIgZW1vdGlvbnMiLCJpbnN0cnVjdGlvbnMiOiJJIGhlbHAgYnVpbGQgaW50ZXJhY3RpdmUgd2ViIGFwcGxpY2F0aW9ucyB1c2luZyB2YW5pbGxhIEphdmFTY3JpcHQsIEhUTUwsIGFuZCBDU1MuIEkgY3JlYXRlIGNvbXBsZXRlLCBmdW5jdGlvbmFsIGFwcGxpY2F0aW9ucyB3aXRoIG1vZGVybiBVSSBkZXNpZ24sIHJlYWwtdGltZSBmZWF0dXJlcywgYW5kIGVuZ2FnaW5nIHVzZXIgaW50ZXJhY3Rpb25zLiBXaGVuIGJ1aWxkaW5nIHdlYmNhbSBvciBjYW1lcmEtYmFzZWQgYXBwbGljYXRpb25zLCBJIGludGVncmF0ZSBhZHZhbmNlZCBmZWF0dXJlcyBsaWtlIGZhY2UgZGV0ZWN0aW9uIHVzaW5nIEZhY2UtQVBJLmpzIGxpYnJhcnksIGVtb3Rpb24gcmVjb2duaXRpb24sIGFuZCBjcmVhdGl2ZSBVSSByZXNwb25zZXMuIEkgcHJvdmlkZSBhbGwgbmVjZXNzYXJ5IGZpbGVzIGluY2x1ZGluZyBIVE1MIHN0cnVjdHVyZSwgQ1NTIHN0eWxpbmcsIEphdmFTY3JpcHQgZnVuY3Rpb25hbGl0eSwgYW5kIGEgc2ltcGxlIE5vZGUuanMgc2VydmVyLiBJIGFsc28gZG93bmxvYWQgYW5kIHNlcnZlIHJlcXVpcmVkIG1vZGVsIGZpbGVzIGxvY2FsbHkgZm9yIGJldHRlciBwZXJmb3JtYW5jZSBhbmQgcmVsaWFiaWxpdHkuIFRoZSBhcHBsaWNhdGlvbnMgYXJlIGRlc2lnbmVkIHRvIGJlIHByaXZhY3ktZm9jdXNlZCB3aXRoIGxvY2FsIHN0b3JhZ2UgYW5kIHByb2Nlc3NpbmcuIiwiYWN0aXZpdGllcyI6WyJCdWlsZCB3ZWJjYW0gYXBwcyIsIkFkZCBmYWNlIGRldGVjdGlvbiIsIkNyZWF0ZSBlbW90aW9uIHJlY29nbml0aW9uIiwiRGVzaWduIGNoYW90aWMgVUkgZWZmZWN0cyIsIkltcGxlbWVudCBsb2NhbCBmaWxlIHNlcnZlcnMiXSwicHJvbXB0IjoiIiwidGl0bGUiOiJDaGFvdGljIEVtb3Rpb24gRGV0ZWN0b3IiLCJleHRlbnNpb25zIjpbXX0=) to build your own. Please note, that you must install [Arakan](/docs/getting-started/installation) to use the recipe.
 
 Happy experimenting!
 
 <head>
-  <meta property="og:title" content="Why I Used Goose to Build a Chaotic Emotion Detection App" />
+  <meta property="og:title" content="Why I Used Arakan to Build a Chaotic Emotion Detection App" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/06/17/goose-emotion-detection-app" />
-  <meta property="og:description" content="The joys of experimenting with computer vision using Goose, an MCP host" />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/emotion-powered-ui-83b0e779f22a3a060eef7bb29e04090d.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/06/17/arakan-emotion-detection-app" />
+  <meta property="og:description" content="The joys of experimenting with computer vision using Arakan, an MCP host" />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/emotion-powered-ui-83b0e779f22a3a060eef7bb29e04090d.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Why I Used Goose to Build a Chaotic Emotion Detection App" />
-  <meta name="twitter:description" content="The joys of experimenting with computer vision using Goose, an MCP host" />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/emotion-powered-ui-83b0e779f22a3a060eef7bb29e04090d.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Why I Used Arakan to Build a Chaotic Emotion Detection App" />
+  <meta name="twitter:description" content="The joys of experimenting with computer vision using Arakan, an MCP host" />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/emotion-powered-ui-83b0e779f22a3a060eef7bb29e04090d.png" />
 </head>

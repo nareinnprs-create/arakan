@@ -471,7 +471,7 @@ const liveOutputToString = (notifications: NotificationEvent[] | undefined): str
   notifications
     ?.filter((notification) => {
       const message = notification.message as { method?: string };
-      return message.method === 'goose/live_output';
+      return message.method === 'arakan/live_output';
     })
     .flatMap((notification) => {
       const message = notification.message as { params?: LiveOutputNotificationParams };

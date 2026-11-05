@@ -1,5 +1,5 @@
 use crate::config::paths::Paths;
-use goose_providers::canonical::{fetch_remote_catalog, load_cached_catalog};
+use arakan_providers::canonical::{fetch_remote_catalog, load_cached_catalog};
 use std::path::PathBuf;
 
 const CATALOG_URL: &str = "https://models.dev/api.json";

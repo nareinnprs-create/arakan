@@ -12,12 +12,10 @@ use tokio_cron_scheduler::{job::JobId, Job, JobScheduler as TokioJobScheduler};
 use tokio_util::sync::CancellationToken;
 
 use crate::agents::{AgentEvent, SessionConfig, StateMachineServices};
-use crate::config::{resolve_extensions_for_new_session, Config, GooseMode};
+use crate::config::{resolve_extensions_for_new_session, Config, ArakanMode};
 use crate::conversation::message::Message;
 use crate::conversation::Conversation;
 use crate::model_config::resolve_provider_and_model_config;
-#[cfg(feature = "telemetry")]
-use crate::posthog;
 use crate::recipe::build_recipe::build_recipe_from_template;
 use crate::recipe::validate_recipe::{
     recipe_file_format, validate_recipe_for_scheduling, SchedulerRecipeError,
@@ -179,7 +177,7 @@ impl Scheduler {
 
             Box::pin(async move {
                 let Some(services) = services_cell.wait().await.upgrade() else {
-                    tracing::error!("Job '{}' skipped: goose is shutting down", task_job_id);
+                    tracing::error!("Job '{}' skipped: arakan is shutting down", task_job_id);
                     return;
                 };
                 let should_execute = {
@@ -245,8 +243,6 @@ impl Scheduler {
                     Ok(_) => tracing::info!("Job '{}' completed", task_job_id),
                     Err(ref e) => {
                         tracing::error!("Job '{}' failed: {}", task_job_id, e);
-                        #[cfg(feature = "telemetry")]
-                        crate::posthog::emit_error("scheduler_job_failed", &e.to_string());
                     }
                 }
             })
@@ -671,7 +667,7 @@ impl Scheduler {
                 )
                 .await
             }
-            None => Err(anyhow!("No goose services are attached to run the job")),
+            None => Err(anyhow!("No arakan services are attached to run the job")),
         };
         let was_cancelled = cancel_token.is_cancelled();
 
@@ -881,7 +877,7 @@ async fn execute_job(
             std::env::current_dir()?,
             format!("Scheduled job: {}", job.id),
             SessionType::Scheduled,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await?;
     services.touch_session(&session.id).await;
@@ -903,7 +899,7 @@ async fn execute_job(
             .switch_provider(&session.id, &provider_name, model_config)
             .await?;
         services
-            .update_goose_mode(GooseMode::Auto, &session.id)
+            .update_arakan_mode(ArakanMode::Auto, &session.id)
             .await?;
 
         let mut jobs_guard = jobs.lock().await;
@@ -921,7 +917,7 @@ async fn execute_job(
         let recipe_version = recipe.version.clone();
 
         tracing::info!(
-            monotonic_counter.goose.session_starts = 1,
+            monotonic_counter.arakan.session_starts = 1,
             session_type = "schedule",
             interface = "scheduler",
             interactive = false,
@@ -929,25 +925,13 @@ async fn execute_job(
         );
 
         tracing::info!(
-            monotonic_counter.goose.recipe_runs = 1,
+            monotonic_counter.arakan.recipe_runs = 1,
             recipe_name = %recipe_display_name,
             recipe_version = %recipe_version,
             session_type = "schedule",
             interface = "scheduler",
             "Recipe execution started"
         );
-
-        #[cfg(feature = "telemetry")]
-        tokio::spawn(async move {
-            let mut props = HashMap::new();
-            props.insert(
-                "trigger".to_string(),
-                serde_json::Value::String("automated".to_string()),
-            );
-            if let Err(e) = posthog::emit_event("schedule_job_started", props).await {
-                tracing::debug!("Failed to send schedule telemetry: {}", e);
-            }
-        });
 
         let prompt_text = recipe
             .prompt
@@ -1022,7 +1006,7 @@ async fn execute_job(
                 .unwrap_or((0, 0));
 
             tracing::info!(
-                monotonic_counter.goose.session_completions = 1,
+                monotonic_counter.arakan.session_completions = 1,
                 session_type = "schedule",
                 interface = "scheduler",
                 exit_type,
@@ -1033,7 +1017,7 @@ async fn execute_job(
             );
 
             tracing::info!(
-                monotonic_counter.goose.session_duration_ms = session_duration.as_millis() as u64,
+                monotonic_counter.arakan.session_duration_ms = session_duration.as_millis() as u64,
                 session_type = "schedule",
                 interface = "scheduler",
                 "Session duration"
@@ -1041,35 +1025,12 @@ async fn execute_job(
 
             if total_tokens > 0 {
                 tracing::info!(
-                    monotonic_counter.goose.session_tokens = total_tokens,
+                    monotonic_counter.arakan.session_tokens = total_tokens,
                     session_type = "schedule",
                     interface = "scheduler",
                     "Session tokens"
                 );
             }
-        }
-
-        #[cfg(feature = "telemetry")]
-        {
-            let duration_secs = start_time.elapsed().as_secs();
-            tokio::spawn(async move {
-                let mut props = HashMap::new();
-                props.insert(
-                    "trigger".to_string(),
-                    serde_json::Value::String("automated".to_string()),
-                );
-                props.insert(
-                    "status".to_string(),
-                    serde_json::Value::String("completed".to_string()),
-                );
-                props.insert(
-                    "duration_seconds".to_string(),
-                    serde_json::Value::Number(serde_json::Number::from(duration_secs)),
-                );
-                if let Err(e) = posthog::emit_event("schedule_job_completed", props).await {
-                    tracing::debug!("Failed to send schedule telemetry: {}", e);
-                }
-            });
         }
 
         Ok(session.id.clone())
@@ -1212,7 +1173,7 @@ mod tests {
     async fn validated_recipe_bytes_and_base_are_persisted_after_source_replacement() {
         let temp_dir = tempdir().unwrap();
         let _guard =
-            env_lock::lock_env([("GOOSE_PATH_ROOT", Some(temp_dir.path().to_str().unwrap()))]);
+            env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(temp_dir.path().to_str().unwrap()))]);
         let trusted_dir = temp_dir.path().join("trusted");
         let replacement_dir = temp_dir.path().join("replacement");
         fs::create_dir_all(&trusted_dir).unwrap();
@@ -1362,9 +1323,9 @@ mod tests {
     #[tokio::test]
     async fn test_job_runs_on_schedule() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", Some("openai")),
-            ("GOOSE_MODEL", Some("gpt-4o")),
-            ("GOOSE_MODE", Some("chat")),
+            ("ARAKAN_PROVIDER", Some("openai")),
+            ("ARAKAN_MODEL", Some("gpt-4o")),
+            ("ARAKAN_MODE", Some("chat")),
             ("OPENAI_API_KEY", Some("fake-openai-no-keyring")),
             ("OPENAI_CUSTOM_HEADERS", Some("")),
         ]);
@@ -1381,7 +1342,7 @@ mod tests {
                 crate::config::permission::PermissionManager::instance(),
                 Some(scheduler.clone()),
                 true,
-                crate::agents::GoosePlatform::GooseCli,
+                crate::agents::ArakanPlatform::ArakanCli,
             ));
 
         let job = ScheduledJob {
@@ -1420,7 +1381,7 @@ mod tests {
             !sessions.is_empty(),
             "Scheduled job should create a session"
         );
-        assert_eq!(sessions[0].goose_mode, GooseMode::Auto);
+        assert_eq!(sessions[0].arakan_mode, ArakanMode::Auto);
 
         scheduler
             .remove_scheduled_job("scheduled_job", false)
@@ -1431,8 +1392,8 @@ mod tests {
     #[tokio::test]
     async fn run_now_runs_on_the_attached_services_and_releases_the_session() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", Some("openai")),
-            ("GOOSE_MODEL", Some("gpt-4o")),
+            ("ARAKAN_PROVIDER", Some("openai")),
+            ("ARAKAN_MODEL", Some("gpt-4o")),
             ("OPENAI_API_KEY", Some("fake-openai-no-keyring")),
             ("OPENAI_HOST", Some("http://127.0.0.1:9")),
             ("OPENAI_CUSTOM_HEADERS", Some("")),
@@ -1461,7 +1422,7 @@ mod tests {
         scheduler.add_scheduled_job(job, true).await.unwrap();
 
         let error = scheduler.run_now("run_now_job").await.unwrap_err();
-        assert!(error.to_string().contains("No goose services"), "{error}");
+        assert!(error.to_string().contains("No arakan services"), "{error}");
 
         let services =
             StateMachineServices::with_config(crate::agents::StateMachineServicesConfig::new(
@@ -1469,7 +1430,7 @@ mod tests {
                 crate::config::permission::PermissionManager::instance(),
                 Some(scheduler.clone()),
                 true,
-                crate::agents::GoosePlatform::GooseCli,
+                crate::agents::ArakanPlatform::ArakanCli,
             ));
         let _ = scheduler.run_now("run_now_job").await;
 
@@ -1487,8 +1448,8 @@ mod tests {
     #[tokio::test]
     async fn test_scheduled_run_uses_recipe_model_settings() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", Some("openai")),
-            ("GOOSE_MODEL", Some("gpt-4o")),
+            ("ARAKAN_PROVIDER", Some("openai")),
+            ("ARAKAN_MODEL", Some("gpt-4o")),
             ("OPENAI_API_KEY", Some("fake-openai-no-keyring")),
             ("OPENAI_HOST", Some("http://127.0.0.1:9")),
             ("OPENAI_CUSTOM_HEADERS", Some("")),
@@ -1498,7 +1459,7 @@ mod tests {
         let recipe_path = temp_dir.path().join("recipe_settings.yaml");
         fs::write(
             &recipe_path,
-            "title: recipe_settings\ndescription: Recipe with model settings\nprompt: test\nsettings:\n  goose_model: gpt-4o-mini\n  temperature: 0.3\n",
+            "title: recipe_settings\ndescription: Recipe with model settings\nprompt: test\nsettings:\n  arakan_model: gpt-4o-mini\n  temperature: 0.3\n",
         )
         .unwrap();
         let session_manager = Arc::new(SessionManager::new(temp_dir.path().to_path_buf()));
@@ -1511,7 +1472,7 @@ mod tests {
                 crate::config::permission::PermissionManager::instance(),
                 Some(scheduler.clone()),
                 true,
-                crate::agents::GoosePlatform::GooseCli,
+                crate::agents::ArakanPlatform::ArakanCli,
             ));
 
         let job = ScheduledJob {
@@ -1557,8 +1518,8 @@ mod tests {
     #[tokio::test]
     async fn test_paused_job_does_not_run() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", Some("openai")),
-            ("GOOSE_MODEL", Some("gpt-4o")),
+            ("ARAKAN_PROVIDER", Some("openai")),
+            ("ARAKAN_MODEL", Some("gpt-4o")),
             ("OPENAI_API_KEY", Some("fake-openai-no-keyring")),
             ("OPENAI_CUSTOM_HEADERS", Some("")),
         ]);

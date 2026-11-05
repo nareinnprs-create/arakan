@@ -8,7 +8,7 @@ use super::pipeline::{
 #[cfg(feature = "code-mode")]
 use crate::config::permission::PermissionLevel;
 #[cfg(feature = "code-mode")]
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 #[cfg(feature = "code-mode")]
 use crate::conversation::message::MessageContent;
 
@@ -150,7 +150,7 @@ async fn unadvertised_load_skill_is_not_confirmed_or_loaded() -> Result<()> {
 
     pipeline.add_extension("code_execution").await?;
     pipeline.set_permission("load_skill", PermissionLevel::AlwaysAllow);
-    let pipeline = pipeline.with_goose_mode(GooseMode::Approve).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Approve).await;
     api.on("try the hidden skill")
         .unadvertised_call("load_skill", json!({ "name": "private" }));
     api.on("not available").reply("skill call blocked");

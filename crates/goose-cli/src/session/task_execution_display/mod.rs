@@ -1,8 +1,8 @@
-use goose::agents::subagent_execution_tool::lib::TaskStatus;
-use goose::agents::subagent_execution_tool::notification_events::{
+use arakan::agents::subagent_execution_tool::lib::TaskStatus;
+use arakan::agents::subagent_execution_tool::notification_events::{
     TaskExecutionNotificationEvent, TaskInfo,
 };
-use goose::utils::safe_truncate;
+use arakan::utils::safe_truncate;
 use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
 

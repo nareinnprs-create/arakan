@@ -17,14 +17,14 @@ impl Paths {
             }
         } else {
             // NOTE: "Block" is kept here for backwards compatibility with existing
-            // user config/data directories (e.g. ~/Library/Application Support/Block/goose/).
+            // user config/data directories (e.g. ~/Library/Application Support/Block/arakan/).
             // Changing this would orphan existing installations.
             let strategy = choose_app_strategy(AppStrategyArgs {
                 top_level_domain: "Block".to_string(),
                 author: "Block".to_string(),
-                app_name: "goose".to_string(),
+                app_name: "arakan".to_string(),
             })
-            .expect("goose requires a home dir");
+            .expect("arakan requires a home dir");
 
             match dir_type {
                 DirType::Config => strategy.config_dir(),
@@ -38,7 +38,7 @@ impl Paths {
     }
 
     pub(crate) fn path_root() -> Option<PathBuf> {
-        Self::validated_path_root(std::env::var_os("GOOSE_PATH_ROOT"))
+        Self::validated_path_root(std::env::var_os("ARAKAN_PATH_ROOT"))
     }
 
     fn validated_path_root(value: Option<OsString>) -> Option<PathBuf> {
@@ -111,7 +111,7 @@ mod tests {
 
         let absolute = std::env::current_dir()
             .unwrap()
-            .join("nonexistent-goose-root");
+            .join("nonexistent-arakan-root");
         assert_eq!(
             Paths::validated_path_root(Some(absolute.clone().into_os_string())),
             Some(absolute)

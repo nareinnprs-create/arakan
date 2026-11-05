@@ -1,14 +1,14 @@
 ---
-title: "Democratizing Detection Engineering at Block: Taking Flight with Goose and Panther MCP"
-description: "A comprehensive overview of how Block leverages Goose and Panther MCP to democratize and accelerate security detection engineering."
+title: "Democratizing Detection Engineering at Block: Taking Flight with Arakan and Panther MCP"
+description: "A comprehensive overview of how Block leverages Arakan and Panther MCP to democratize and accelerate security detection engineering."
 authors:
   - tomasz
   - glenn
 ---
 
-![blog cover](goose-panther-header.png)
+![blog cover](arakan-panther-header.png)
 
-Detection engineering stands at the forefront of cybersecurity, yet it’s often a tangled web of complexity. Traditional detection writing involves painstaking manual processes encompassing log format and schema comprehension, intricate query creation, threat modeling, and iterative manual detection testing and refinement, leading to time expenditure and reliance on specialized expertise. This can lead to gaps in threat coverage and an overwhelming number of alerts. At Block, we face the relentless challenge of evolving threats and intricate system complexities. To stay ahead, we've embraced AI-driven solutions, notably Goose, Block’s open-source AI agent, and Panther MCP, to allow the broader organization to contribute high-quality rules that are contextual to their area of expertise. This post delves into how we're transforming complicated detection workflows into streamlined, AI-powered, accessible processes for all stakeholders.
+Detection engineering stands at the forefront of cybersecurity, yet it’s often a tangled web of complexity. Traditional detection writing involves painstaking manual processes encompassing log format and schema comprehension, intricate query creation, threat modeling, and iterative manual detection testing and refinement, leading to time expenditure and reliance on specialized expertise. This can lead to gaps in threat coverage and an overwhelming number of alerts. At Block, we face the relentless challenge of evolving threats and intricate system complexities. To stay ahead, we've embraced AI-driven solutions, notably Arakan, Block’s open-source AI agent, and Panther MCP, to allow the broader organization to contribute high-quality rules that are contextual to their area of expertise. This post delves into how we're transforming complicated detection workflows into streamlined, AI-powered, accessible processes for all stakeholders.
 
 <!-- truncate -->
 
@@ -28,13 +28,13 @@ We envision a future where anyone at Block can effortlessly create and deploy se
 
 ### What is Panther MCP?
 
-[Panther MCP](https://github.com/panther-labs/mcp-panther) is an open-source model context protocol server born from the collaboration between [Panther](https://panther.com/) and Block to democratize security operations workflows. By tightly integrating with Goose as an extension, Panther MCP allows security teams at Block to translate natural language instructions into precise, executable SIEM detection logic, making threat detection contributions easier and faster than ever.
+[Panther MCP](https://github.com/panther-labs/mcp-panther) is an open-source model context protocol server born from the collaboration between [Panther](https://panther.com/) and Block to democratize security operations workflows. By tightly integrating with Arakan as an extension, Panther MCP allows security teams at Block to translate natural language instructions into precise, executable SIEM detection logic, making threat detection contributions easier and faster than ever.
 
-This integration empowers analysts and engineers across Block to interact with Panther’s security analytics platform seamlessly. It shifts detection development from a coding-heavy process into an intuitive workflow accessible to everyone, regardless of technical background. Goose serves as an intermediary agent, coordinating calls to Panther MCP, reviewing the output, creating rule content, testing it, and making necessary edits for correctness or style. This AI-driven feedback loop saves countless hours of time.
+This integration empowers analysts and engineers across Block to interact with Panther’s security analytics platform seamlessly. It shifts detection development from a coding-heavy process into an intuitive workflow accessible to everyone, regardless of technical background. Arakan serves as an intermediary agent, coordinating calls to Panther MCP, reviewing the output, creating rule content, testing it, and making necessary edits for correctness or style. This AI-driven feedback loop saves countless hours of time.
 
 ### Key Features
 
-Panther MCP offers dozens of tools that enhance and accelerate detection engineering workflows powered by Goose:
+Panther MCP offers dozens of tools that enhance and accelerate detection engineering workflows powered by Arakan:
 
 1. **Natural Language to Detection Logic**  
    Engineers define detections using plain English prompts, which Panther MCP translates directly into Panther-compatible detection rules that can be checked into their [panther-analysis](https://github.com/panther-labs/panther-analysis) repository.  
@@ -43,21 +43,21 @@ Panther MCP offers dozens of tools that enhance and accelerate detection enginee
 3. **Unified Alert Triage and Response**  
    Enables AI-led alert triage with insights drawn from historical data and existing detections.
 
-## Accelerating Detection Creation with Goose
+## Accelerating Detection Creation with Arakan
 
-Goose significantly accelerates security detection creation by using AI to automate traditionally manual tasks like log analysis and rule generation. This drastically reduces effort, improves the speed of developing and deploying threat coverage, and enhances agility against evolving threats.
+Arakan significantly accelerates security detection creation by using AI to automate traditionally manual tasks like log analysis and rule generation. This drastically reduces effort, improves the speed of developing and deploying threat coverage, and enhances agility against evolving threats.
 
-### Integrating Panther MCP as a Goose Extension
+### Integrating Panther MCP as a Arakan Extension
 
-Panther MCP functions as a Goose extension, seamlessly embedding its capabilities within the Goose environment through the following process:
+Panther MCP functions as a Arakan extension, seamlessly embedding its capabilities within the Arakan environment through the following process:
 
-1. **Extension Registration:** Panther MCP is registered within Goose, making its suite of tools readily accessible via the Goose interface.  
+1. **Extension Registration:** Panther MCP is registered within Arakan, making its suite of tools readily accessible via the Arakan interface.  
 2. **API Connectivity:** The extension establishes a connection to Panther's backend API, enabling seamless context retrieval.  
-3. **Available Tools:** Panther MCP provides Goose with a range of tools designed for efficient detection creation, intuitive data interaction, and streamlined alert management.
+3. **Available Tools:** Panther MCP provides Arakan with a range of tools designed for efficient detection creation, intuitive data interaction, and streamlined alert management.
 
-### Leveraging Enhanced Context with `.goosehints`
+### Leveraging Enhanced Context with `.arakanhints`
 
-The integration between Panther MCP and Goose is enhanced through the use of the [.goosehints](/docs/guides/context-engineering/using-goosehints/) file—a Goose feature that supplies additional context like rule examples and best practices. This enriched context enables Goose to generate more accurate and efficient detections, aligned with Block’s standards and requirements. 
+The integration between Panther MCP and Arakan is enhanced through the use of the [.arakanhints](/docs/guides/context-engineering/using-arakanhints/) file—a Arakan feature that supplies additional context like rule examples and best practices. This enriched context enables Arakan to generate more accurate and efficient detections, aligned with Block’s standards and requirements. 
 
 Let's illustrate this with an example: creating a rule to detect users adding themselves to privileged Okta groups, a common privilege escalation technique.
 
@@ -70,34 +70,34 @@ Traditionally, creating this detection would require:
 3. Python programming skills  
 4. Familiarity with different testing frameworks
 
-With Goose and Panther MCP, this becomes as simple as:
+With Arakan and Panther MCP, this becomes as simple as:
 
 > “Write a detection rule for users adding themselves to privileged Okta groups.”
 
 ## The Intelligence Behind the Simplicity
 
-When a natural language request like "Write a detection rule for users adding themselves to privileged Okta groups" is received, Goose leverages a sophisticated, multi-stage process powered by Panther MCP to generate production-ready detection logic. This automated approach mirrors the workflow of an experienced detection engineer, encompassing threat research, relevant log identification, detection goal definition, logic outlining, sample log analysis, rule development, false positive consideration, severity/context assignment, thorough testing, refinement/optimization, and documentation. However, Goose executes these steps with the speed and scalability afforded by AI and automation.
+When a natural language request like "Write a detection rule for users adding themselves to privileged Okta groups" is received, Arakan leverages a sophisticated, multi-stage process powered by Panther MCP to generate production-ready detection logic. This automated approach mirrors the workflow of an experienced detection engineer, encompassing threat research, relevant log identification, detection goal definition, logic outlining, sample log analysis, rule development, false positive consideration, severity/context assignment, thorough testing, refinement/optimization, and documentation. However, Arakan executes these steps with the speed and scalability afforded by AI and automation.
 
-Goose first parses the natural language input to understand the core intent and requirements. It identifies key entities like "users", "privileged Okta groups", and the action "adding themselves". This understanding forms the basis for outlining the detection's objective, the necessary log source (`Okta.SystemLog`), and the fundamental logic: identifying events where the actor (user initiating the action) is the same as the target user (the user being added to the group), and the group being joined is designated as privileged. Goose also considers potential false positives (e.g., legitimate automated processes) and assigns a preliminary severity level based on the potential impact of the detected activity (privilege escalation).
+Arakan first parses the natural language input to understand the core intent and requirements. It identifies key entities like "users", "privileged Okta groups", and the action "adding themselves". This understanding forms the basis for outlining the detection's objective, the necessary log source (`Okta.SystemLog`), and the fundamental logic: identifying events where the actor (user initiating the action) is the same as the target user (the user being added to the group), and the group being joined is designated as privileged. Arakan also considers potential false positives (e.g., legitimate automated processes) and assigns a preliminary severity level based on the potential impact of the detected activity (privilege escalation).
 
 ![Process overview diagram](process-overview-diagram.png)
 
-To ensure the generated logic is accurate and operates on valid data, Goose interacts with Panther MCP to retrieve the schema of the specified log source (`Okta.SystemLog`). This provides Goose with a structured understanding of the available fields and their data types within Okta logs. Furthermore, Goose utilizes Panther MCP's querying capabilities to fetch sample log events related to group membership changes. This step is crucial for:
+To ensure the generated logic is accurate and operates on valid data, Arakan interacts with Panther MCP to retrieve the schema of the specified log source (`Okta.SystemLog`). This provides Arakan with a structured understanding of the available fields and their data types within Okta logs. Furthermore, Arakan utilizes Panther MCP's querying capabilities to fetch sample log events related to group membership changes. This step is crucial for:
 
-* **Identifying Common Event Patterns:** Analyzing real-world logs allows Goose to understand the typical structure and values associated with relevant events (e.g., `group.user_membership.add`).  
-* **Inferring Privileged Group Naming Conventions:** By examining historical data, Goose can identify patterns and keywords commonly used in the naming of privileged groups within the organization's Okta instance (e.g., "admin", "administrator", "security-admin").  
+* **Identifying Common Event Patterns:** Analyzing real-world logs allows Arakan to understand the typical structure and values associated with relevant events (e.g., `group.user_membership.add`).  
+* **Inferring Privileged Group Naming Conventions:** By examining historical data, Arakan can identify patterns and keywords commonly used in the naming of privileged groups within the organization's Okta instance (e.g., "admin", "administrator", "security-admin").  
 * **Discovering Edge Cases:** Examining diverse log samples helps uncover potential variations in event data or less common scenarios that the detection logic needs to accommodate.  
 * **Mapping Typical User Behavior:** Understanding baseline user behavior around group membership changes helps refine the detection logic and reduce the likelihood of false positives.
 
-The interaction with Panther MCP at this stage involves API calls to retrieve schema information and execute analytical queries, enabling Goose to ground its reasoning in actual log data.
+The interaction with Panther MCP at this stage involves API calls to retrieve schema information and execute analytical queries, enabling Arakan to ground its reasoning in actual log data.
 
-![Goose interacts with Panther MCP](goose-panther-mcp-interaction.png)
+![Arakan interacts with Panther MCP](arakan-panther-mcp-interaction.png)
 
-Goose doesn't operate in isolation; it accesses a repository of existing Panther detection rules to identify similar logic or reusable components. This promotes consistency across the detection landscape, encourages the reuse of well-tested helper functions (like `okta_alert_context`), and ensures adherence to established rule standards within our security ecosystem. Learning from existing detections is a core component of Goose’s intelligence, allowing it to build upon prior knowledge and avoid reinventing the wheel.
+Arakan doesn't operate in isolation; it accesses a repository of existing Panther detection rules to identify similar logic or reusable components. This promotes consistency across the detection landscape, encourages the reuse of well-tested helper functions (like `okta_alert_context`), and ensures adherence to established rule standards within our security ecosystem. Learning from existing detections is a core component of Arakan’s intelligence, allowing it to build upon prior knowledge and avoid reinventing the wheel.
 
 ![Rule context reuse](context-reuse-example.png)
 
-Based on the understanding of the detection goal, the analysis of log data, and the knowledge gleaned from existing detections facilitated by Panther MCP, Goose generates the complete Panther detection rule in Python. This includes:
+Based on the understanding of the detection goal, the analysis of log data, and the knowledge gleaned from existing detections facilitated by Panther MCP, Arakan generates the complete Panther detection rule in Python. This includes:
 
 * **Rule Function (`rule()`):** This function contains the core logic for evaluating each log event. In the example, it checks for the `group.user_membership.add` event type, verifies that the actor and target user IDs (or emails) are the same, and confirms that the target group's display name contains keywords indicative of a privileged group (defined in the `PRIVILEGED_GROUPS` set).  
 * **Metadata Functions (`title()`, `alert_context()`, `severity()`, `destinations()`):** These functions provide crucial context and operational information for triggered alerts.
@@ -190,7 +190,7 @@ def destinations(_event):
     return ["staging_destination"]
 ```
 
-Beyond the Python code, Goose also generates the corresponding YAML-based rule configuration file. This file contains essential metadata about the detection:
+Beyond the Python code, Arakan also generates the corresponding YAML-based rule configuration file. This file contains essential metadata about the detection:
 
 ```yaml
 AnalysisType: rule
@@ -200,9 +200,9 @@ Enabled: true
 DedupPeriodMinutes: 60
 LogTypes:
   - Okta.SystemLog
-RuleID: "goose.Okta.Self.Privileged.Group.Add"
+RuleID: "arakan.Okta.Self.Privileged.Group.Add"
 Threshold: 1
-Filename: goose_okta_self_privileged_group_add.py
+Filename: arakan_okta_self_privileged_group_add.py
 Reference: >
   https://developer.okta.com/docs/reference/api/system-log/
   https://attack.mitre.org/techniques/T1078/004/
@@ -220,7 +220,7 @@ Reports:
 Severity: High
 Tags:
   - author:tomasz
-  - coauthor:goose
+  - coauthor:arakan
 Tests:
   - Name: User adds themselves to privileged group
     ExpectedResult: true
@@ -374,7 +374,7 @@ Tests:
       p_log_type: "Okta.SystemLog"
 ```
 
-Every detection rule generated by Goose undergoes rigorous automated testing and validation. This includes:
+Every detection rule generated by Arakan undergoes rigorous automated testing and validation. This includes:
 
 * **Unit Testing:** Using the test cases defined in the rule configuration, the Panther Analysis Tool is executed to verify that the rule logic correctly identifies true positives and avoids false negatives against simulated log data.  
 * **Linting:** Code linting tools (like Pylint) are automatically run to ensure the generated Python code adheres to established coding standards, including proper formatting, style conventions, and best practices. This contributes to code maintainability and reduces the risk of errors.
@@ -382,14 +382,14 @@ Every detection rule generated by Goose undergoes rigorous automated testing and
 ![Automated testing graphic](automated-testing-graphic.png)
 ![Process improvement chart](process-improvement-chart.png)
 
-The seamless integration of Goose with Panther MCP automates these intricate steps, significantly reducing the time and specialized knowledge required to create and deploy security detections. This democratization empowers more individuals to contribute to Block's security posture, leading to more comprehensive threat coverage and a more resilient security environment.
+The seamless integration of Arakan with Panther MCP automates these intricate steps, significantly reducing the time and specialized knowledge required to create and deploy security detections. This democratization empowers more individuals to contribute to Block's security posture, leading to more comprehensive threat coverage and a more resilient security environment.
 
 ## Democratization in Practice
 
 A typical detection creation workflow now looks like:
 
 1. **Proposal:** A user describes a malicious behavior in natural language.  
-2. **Generation:** Goose transforms this description into detection logic with Panther MCP.  
+2. **Generation:** Arakan transforms this description into detection logic with Panther MCP.  
 3. **Review:** The detection team reviews each detection against defined quality benchmarks.  
 4. **Deployment:** Approved detections are deployed to staging/production.
 
@@ -397,7 +397,7 @@ A typical detection creation workflow now looks like:
 
 ### Expanding Collaboration to Enhance Coverage and Enable Self-Service
 
-* **Lowering the Technical Barrier:** Goose and Panther MCP empower subject matter experts (SMEs) to easily understand their logs in Panther, enabling a self-service model where teams can create their own detections without extensive security engineering expertise, thus distributing the workload.  
+* **Lowering the Technical Barrier:** Arakan and Panther MCP empower subject matter experts (SMEs) to easily understand their logs in Panther, enabling a self-service model where teams can create their own detections without extensive security engineering expertise, thus distributing the workload.  
 * **Reduced Dependency on the Detection Team:** Panther MCP reduces security team dependency by enabling users to independently resolve inquiries autonomously. This includes threat intelligence teams assessing MITRE ATT&CK coverage, compliance teams identifying relevant detections, and helping service SMEs create their own detections.  
 * **Cross-Functional Detection Development:** Democratizing detection engineering allows specialized teams to create detections that security teams might miss, leading to a more diverse detection ecosystem covering niche use cases. This fosters two-way knowledge transfer, enhancing overall security awareness and capabilities.
 
@@ -413,7 +413,7 @@ A typical detection creation workflow now looks like:
 * **Code Reuse and Efficiency:** Promote code reuse and efficiency through global helpers/filters, explicit typing in function signatures, and detailed docstrings for better function understanding and LLM code generation.  
 * **Maintainability Improvements:** Detections are designed with a consistent structure and standardized patterns, making them easier to understand, maintain, and update. This uniformity ensures predictable behavior across the detection code base and simplifies bulk changes when needed.  
 * **Comprehensive Testing Requirements:** For our team, each detection is required to include at least two unit tests: one positive case that triggers the detection and one negative case that does not. Test names are descriptive and aligned with expected outcomes to enhance readability and maintainability.  
-* **Metadata and Documentation Standards:** Metadata and documentation standards are being strengthened through structured definitions within pytests, helping to codify detection ownership and context. This includes clearly defined author and coauthor tags (e.g., for Goose-generated content), environment references such as staging or production, and accurate mapping of alert destinations.  
+* **Metadata and Documentation Standards:** Metadata and documentation standards are being strengthened through structured definitions within pytests, helping to codify detection ownership and context. This includes clearly defined author and coauthor tags (e.g., for Arakan-generated content), environment references such as staging or production, and accurate mapping of alert destinations.  
 * **Structural Validation:** This supports compliance with organizational standards by enforcing filename conventions (e.g., prefixing, length, lowercase formatting), ensuring Python rules include all required functions, and verifying that YAML files contain the necessary fields for proper functionality and processing.  
 * **Security Framework Alignment:** Relevant rules are mapped to applicable MITRE ATT&CK techniques to highlight coverage gaps, inform detection development, prioritize research efforts, and establish a common language for discussing threats.
 
@@ -429,14 +429,14 @@ Block is dedicated to improving its security defenses and supporting its team by
 
 <!-- Social Media Meta Tags (edit values as needed) -->
 <head>
-  <meta property="og:title" content="Democratizing Detection Engineering at Block: Taking Flight with Goose and Panther MCP" />
+  <meta property="og:title" content="Democratizing Detection Engineering at Block: Taking Flight with Arakan and Panther MCP" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/06/02/goose-panther-mcp" />
-  <meta property="og:description" content="A comprehensive overview of how Block leverages Goose and Panther MCP to democratize and accelerate security detection engineering." />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/goose-panther-header-25b5891acdd70e6a7bbe6b84e34f08f0.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/06/02/arakan-panther-mcp" />
+  <meta property="og:description" content="A comprehensive overview of how Block leverages Arakan and Panther MCP to democratize and accelerate security detection engineering." />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/arakan-panther-header-25b5891acdd70e6a7bbe6b84e34f08f0.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Democratizing Detection Engineering at Block: Taking Flight with Goose and Panther MCP" />
-  <meta name="twitter:description" content="A comprehensive overview of how Block leverages Goose and Panther MCP to democratize and accelerate security detection engineering." />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/goose-panther-header-25b5891acdd70e6a7bbe6b84e34f08f0.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Democratizing Detection Engineering at Block: Taking Flight with Arakan and Panther MCP" />
+  <meta name="twitter:description" content="A comprehensive overview of how Block leverages Arakan and Panther MCP to democratize and accelerate security detection engineering." />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/arakan-panther-header-25b5891acdd70e6a7bbe6b84e34f08f0.png" />
 </head>

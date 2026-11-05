@@ -1,26 +1,26 @@
-# @aaif/goose-acp-client
+# @aaif/arakan-acp-client
 
-TypeScript client library for communicating with Goose over an existing Agent
+TypeScript client library for communicating with Arakan over an existing Agent
 Client Protocol (ACP) transport.
 
 This package provides:
 
-- TypeScript types and Zod validators for Goose ACP extension methods
-- `GooseExtClient` for calling Goose extension methods
+- TypeScript types and Zod validators for Arakan ACP extension methods
+- `ArakanExtClient` for calling Arakan extension methods
 - Client capability definitions and MCP Apps helpers
 
-It does not install, resolve, or start the Goose executable. Applications own
+It does not install, resolve, or start the Arakan executable. Applications own
 the transport and process lifecycle.
 
 ## Installation
 
 ```bash
-npm install @aaif/goose-acp-client @agentclientprotocol/sdk
+npm install @aaif/arakan-acp-client @agentclientprotocol/sdk
 ```
 
 ## Usage
 
-Compose the Goose extension client with the standard ACP SDK:
+Compose the Arakan extension client with the standard ACP SDK:
 
 ```typescript
 import {
@@ -29,12 +29,12 @@ import {
   PROTOCOL_VERSION,
   type Stream,
 } from "@agentclientprotocol/sdk";
-import { GooseExtClient } from "@aaif/goose-acp-client";
+import { ArakanExtClient } from "@aaif/arakan-acp-client";
 
-async function connectToGoose(stream: Stream) {
+async function connectToArakan(stream: Stream) {
   const app = createAcpClient({ name: "my-product" });
   const connection = app.connect(stream);
-  const goose = new GooseExtClient(connection.agent);
+  const arakan = new ArakanExtClient(connection.agent);
 
   await connection.agent.request(methods.agent.initialize, {
     protocolVersion: PROTOCOL_VERSION,
@@ -45,7 +45,7 @@ async function connectToGoose(stream: Stream) {
     clientCapabilities: {},
   });
 
-  return { connection, goose };
+  return { connection, arakan };
 }
 ```
 
@@ -55,10 +55,10 @@ needs the connection.
 
 ## Development
 
-From `ui/goose-acp-client`:
+From `ui/arakan-acp-client`:
 
 ```bash
 pnpm run build
 ```
 
-The generated TypeScript types come from the Rust schemas in `crates/goose`.
+The generated TypeScript types come from the Rust schemas in `crates/arakan`.

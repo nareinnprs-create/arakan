@@ -19,7 +19,7 @@ const report: ContextReport = {
       label: 'Base system prompt',
       source: 'prompts/system.md',
       tokenCount: 1_000,
-      contentPreview: 'You are goose',
+      contentPreview: 'You are arakan',
       parts: [],
     },
     {

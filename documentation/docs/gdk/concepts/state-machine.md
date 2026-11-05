@@ -114,4 +114,4 @@ effects or guarantee that work started outside the async task has stopped.
 
 Next, read [Operations](/docs/gdk/concepts/operations) to see how to compose a
 policy into this cycle. The full API is in
-[`goose-agent::machine`](https://docs.rs/goose-agent/latest/goose_agent/machine/).
+[`arakan-agent::machine`](https://docs.rs/arakan-agent/latest/arakan_agent/machine/).

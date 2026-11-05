@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, ExternalLink, Check } from 'lucide-react';
 import { Input } from '../../../../ui/input';
 import { Select } from '../../../../ui/Select';
-import type { ProviderTemplateCatalogEntryDto, ProviderTemplateDto } from '@aaif/goose-acp-client';
+import type { ProviderTemplateCatalogEntryDto, ProviderTemplateDto } from '@aaif/arakan-acp-client';
 import {
   acpGetProviderTemplate,
   acpListProviderCatalogEntries,

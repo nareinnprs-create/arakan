@@ -9,7 +9,7 @@ use crate::agents::retry::{
 };
 use crate::agents::state_machine::{
     applied, ends_turn, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect,
-    Emitter, GooseEffect, Operation, OperationResult, SlashCommand,
+    Emitter, ArakanEffect, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::types::RetryConfig;
 use crate::conversation::message::{Message, MessageErrorKind, SystemNotificationType};
@@ -73,7 +73,7 @@ impl RetryOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for RetryOperation {
+impl Operation<Session, ArakanEffect> for RetryOperation {
     fn name(&self) -> &'static str {
         "retry"
     }
@@ -84,7 +84,7 @@ impl Operation<Session, GooseEffect> for RetryOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let mut state = GoalState::of(session);
         let target = match command.command {
             "goal" => &mut state.goal,
@@ -152,7 +152,7 @@ impl Operation<Session, GooseEffect> for RetryOperation {
             response.into(),
         ];
         if !params.is_empty() {
-            effects.push(GooseEffect::extension_state(&state)?);
+            effects.push(ArakanEffect::extension_state(&state)?);
         }
         if starts_turn {
             effects.push(
@@ -174,7 +174,7 @@ impl Operation<Session, GooseEffect> for RetryOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let messages = messages_since_kickoff(conversation)?;
         if !ends_turn(messages) {
             return not_applicable();
@@ -217,7 +217,7 @@ impl Operation<Session, GooseEffect> for RetryOperation {
         }
 
         if state.goal.is_some() {
-            return applied([GooseEffect::extension_state(&GoalState::default())?]);
+            return applied([ArakanEffect::extension_state(&GoalState::default())?]);
         }
 
         let Some(retry_config) = Self::retry_config(session) else {
@@ -249,11 +249,6 @@ impl Operation<Session, GooseEffect> for RetryOperation {
                     "Maximum retry attempts ({}) exceeded. Unable to complete the task successfully.",
                     retry_config.max_retries
                 ),
-            );
-            #[cfg(feature = "telemetry")]
-            crate::posthog::emit_error(
-                "retry_max_exceeded",
-                &format!("Max retries ({}) exceeded", retry_config.max_retries),
             );
             let message = emit.message(message);
             return applied([message.into()]);

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use goose_sdk_types::custom_requests::{
+use arakan_sdk_types::custom_requests::{
     RecipeAuthorDto, RecipeDto, RecipeExtensionDto, RecipeParameterDto,
     RecipeParameterInputTypeDto, RecipeParameterRequirementDto, RecipeResponseDto,
     RecipeRetryConfigDto, RecipeSettingsDto, RecipeSuccessCheckDto, SubRecipeDto,
@@ -104,8 +104,8 @@ impl From<Author> for RecipeAuthorDto {
 impl From<RecipeSettingsDto> for Settings {
     fn from(dto: RecipeSettingsDto) -> Self {
         Self {
-            goose_provider: dto.goose_provider,
-            goose_model: dto.goose_model,
+            arakan_provider: dto.arakan_provider,
+            arakan_model: dto.arakan_model,
             temperature: dto.temperature,
             max_turns: dto.max_turns,
         }
@@ -115,8 +115,8 @@ impl From<RecipeSettingsDto> for Settings {
 impl From<Settings> for RecipeSettingsDto {
     fn from(settings: Settings) -> Self {
         Self {
-            goose_provider: settings.goose_provider,
-            goose_model: settings.goose_model,
+            arakan_provider: settings.arakan_provider,
+            arakan_model: settings.arakan_model,
             temperature: settings.temperature,
             max_turns: settings.max_turns,
         }
@@ -472,8 +472,8 @@ pub fn recipe_manifest_to_list_entry_dto(
     last_modified: String,
     schedule_cron: Option<String>,
     slash_command: Option<String>,
-) -> Result<goose_sdk_types::custom_requests::RecipeListEntryDto> {
-    Ok(goose_sdk_types::custom_requests::RecipeListEntryDto {
+) -> Result<arakan_sdk_types::custom_requests::RecipeListEntryDto> {
+    Ok(arakan_sdk_types::custom_requests::RecipeListEntryDto {
         id,
         recipe: RecipeDto::try_from(recipe)?,
         file_path: file_path.to_string(),
@@ -510,7 +510,7 @@ mod tests {
                 RecipeExtensionDto::Stdio {
                     name: "local".to_string(),
                     description: Some("Local tool".to_string()),
-                    cmd: "goose-mcp".to_string(),
+                    cmd: "arakan-mcp".to_string(),
                     args: vec!["run".to_string()],
                     envs: HashMap::from([("LOCAL_MODE".to_string(), "true".to_string())]),
                     env_keys: vec!["API_KEY".to_string()],
@@ -536,8 +536,8 @@ mod tests {
                 },
             ]),
             settings: Some(RecipeSettingsDto {
-                goose_provider: Some("openai".to_string()),
-                goose_model: Some("gpt-5".to_string()),
+                arakan_provider: Some("openai".to_string()),
+                arakan_model: Some("gpt-5".to_string()),
                 temperature: Some(0.2),
                 max_turns: Some(4),
             }),

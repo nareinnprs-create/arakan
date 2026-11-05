@@ -54,7 +54,7 @@ describe.skipIf(process.platform !== 'win32')('Windows npx wrapper', () => {
   function runWrapper(options: {
     pathDirs: string[];
     args: string[];
-    goosePortableDir?: string;
+    arakanPortableDir?: string;
     exitCode?: number;
   }) {
     const args = options.args.map((arg) => (/[\s^&|<>]/.test(arg) ? `"${arg}"` : arg));
@@ -72,7 +72,7 @@ describe.skipIf(process.platform !== 'win32')('Windows npx wrapper', () => {
           PATHEXT: process.env.PATHEXT,
           TEMP: rootDir,
           TMP: rootDir,
-          GOOSE_NODE_DIR: options.goosePortableDir ?? emptyNodeDir,
+          ARAKAN_NODE_DIR: options.arakanPortableDir ?? emptyNodeDir,
           FAKE_NPX_REPORT: path.join(rootDir, 'report.js'),
           FAKE_NPX_EXIT: String(options.exitCode ?? 0),
           // PowerShell is not on PATH, so the download step fails at once instead of using the network.
@@ -86,7 +86,7 @@ describe.skipIf(process.platform !== 'win32')('Windows npx wrapper', () => {
   }
 
   beforeAll(() => {
-    rootDir = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'goose npx wrapper ')));
+    rootDir = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'arakan npx wrapper ')));
     fs.writeFileSync(path.join(rootDir, 'report.js'), reportSource);
 
     systemNodeDir = makeDir('system node');
@@ -146,8 +146,8 @@ describe.skipIf(process.platform !== 'win32')('Windows npx wrapper', () => {
     expect((JSON.parse(result.stdout) as ChildReport).nodeDir).toBe(systemNodeDir);
   });
 
-  it.each<[string, () => { pathDirs: string[]; goosePortableDir?: string }]>([
-    ['the downloaded Node.js', () => ({ pathDirs: [], goosePortableDir: portableNodeDir })],
+  it.each<[string, () => { pathDirs: string[]; arakanPortableDir?: string }]>([
+    ['the downloaded Node.js', () => ({ pathDirs: [], arakanPortableDir: portableNodeDir })],
     ['a system Node.js', () => ({ pathDirs: [systemNodeDir] })],
   ])('keeps ! and ^ in the arguments with %s', (_name, setup) => {
     const args = ['-y', 'pkg', '--token=abc!123', '--pattern=a^b!c', 'x!'];
@@ -164,11 +164,11 @@ describe.skipIf(process.platform !== 'win32')('Windows npx wrapper', () => {
     expect((JSON.parse(result.stdout) as ChildReport).nodeDir).toBe(systemNodeDir);
   });
 
-  it('keeps the Goose portable Node.js first when it is installed', () => {
+  it('keeps the Arakan portable Node.js first when it is installed', () => {
     const result = runWrapper({
       pathDirs: [systemNodeDir],
       args: ['-y', 'pkg'],
-      goosePortableDir: portableNodeDir,
+      arakanPortableDir: portableNodeDir,
       exitCode: 5,
     });
 

@@ -6,7 +6,7 @@ use crate::conversation::message::{
 use crate::providers::base::Provider;
 use crate::session::SessionManager;
 use crate::utils::safe_truncate;
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 use serde_json::json;
 use std::slice::from_ref;
 use std::time::Duration;
@@ -227,12 +227,12 @@ async fn complete_label(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::agents::{GoosePlatform, StateMachineServicesConfig};
-    use crate::config::{GooseMode, PermissionManager};
+    use crate::agents::{ArakanPlatform, StateMachineServicesConfig};
+    use crate::config::{ArakanMode, PermissionManager};
     use crate::providers::base::{MessageStream, ProviderUsage, Usage};
     use crate::session::{SessionManager, SessionType};
     use async_trait::async_trait;
-    use goose_providers::errors::ProviderError;
+    use arakan_providers::errors::ProviderError;
     use rmcp::model::{CallToolRequestParams, ErrorData, Tool};
     use serde_json::json;
     use std::collections::VecDeque;
@@ -422,14 +422,14 @@ mod tests {
             let provider = MockProvider::new(vec![Ok(Message::assistant().with_text("title"))]);
             let request = tool_request(json!({}));
             let model_config = ModelConfig::new("test-model")
-                .with_thinking_effort(goose_providers::thinking::ThinkingEffort::High);
+                .with_thinking_effort(arakan_providers::thinking::ThinkingEffort::High);
 
             generate_tool_title_with_provider(&provider, &model_config, "session-1", &request)
                 .await;
 
             assert_eq!(
                 provider.first_model_config().thinking_effort(),
-                Some(goose_providers::thinking::ThinkingEffort::Off),
+                Some(arakan_providers::thinking::ThinkingEffort::Off),
             );
         }
 
@@ -485,14 +485,14 @@ mod tests {
                 permission_manager,
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let session = session_manager
                 .create_session(
                     PathBuf::new(),
                     "test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await
                 .unwrap();
@@ -558,14 +558,14 @@ mod tests {
                 permission_manager,
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let session = session_manager
                 .create_session(
                     PathBuf::new(),
                     "test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await
                 .unwrap();
@@ -717,14 +717,14 @@ mod tests {
                 permission_manager,
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let session = session_manager
                 .create_session(
                     PathBuf::new(),
                     "test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await
                 .unwrap();
@@ -761,14 +761,14 @@ mod tests {
                 permission_manager,
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let session = session_manager
                 .create_session(
                     PathBuf::new(),
                     "test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await
                 .unwrap();
@@ -805,14 +805,14 @@ mod tests {
                 permission_manager,
                 None,
                 true,
-                GoosePlatform::GooseCli,
+                ArakanPlatform::ArakanCli,
             ));
             let session = session_manager
                 .create_session(
                     PathBuf::new(),
                     "test".to_string(),
                     SessionType::Hidden,
-                    GooseMode::Auto,
+                    ArakanMode::Auto,
                 )
                 .await
                 .unwrap();

@@ -53,11 +53,11 @@ represent a `Message`:
 ```rust
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::operation::{
+use arakan_agent::operation::{
     assistant_turn_count, ends_turn, messages_since_kickoff,
     not_applicable, yielded_with, Emitter, Operation, OperationResult,
 };
-use goose_provider_types::conversation::{message::Message, Conversation};
+use arakan_provider_types::conversation::{message::Message, Conversation};
 
 struct TurnLimit {
     max_turns: u32,
@@ -119,27 +119,27 @@ tool calls that need separate handling.
 
 When the user sends a new message, it becomes the next kickoff and the count
 starts again. No mutable counter needs to survive a restart. This is a limit
-on assistant turns, not a dollar, token, or tool-call budget. The complete goose
+on assistant turns, not a dollar, token, or tool-call budget. The complete arakan
 application has its own `MaxTurnsOperation` with additional prompt context.
 
 ## Operations available today
 
 ### Reusable GDK components
 
-These are public APIs in `goose-agent`; your application supplies the required
+These are public APIs in `arakan-agent`; your application supplies the required
 tools, provider, or subagent runner:
 
 | Component                                                                                                    | Purpose                                                                                                                        |
 | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| [`ToolOperation`](https://docs.rs/goose-agent/latest/goose_agent/tool/struct.ToolOperation.html)             | Advertise and execute typed synchronous or asynchronous tools, or tools supplied dynamically by a `ToolProvider`.              |
-| [`SubagentOperation`](https://docs.rs/goose-agent/latest/goose_agent/subagent/struct.SubagentOperation.html) | Run requested subagent sessions through your `SubagentRunner`, deliver their updates, and handle concurrency and cancellation. |
-| [`InferenceRunner`](https://docs.rs/goose-agent/latest/goose_agent/inference/struct.InferenceRunner.html)    | Prepare provider requests, stream inference, and return message and usage effects. Register it as an inference step.           |
+| [`ToolOperation`](https://docs.rs/arakan-agent/latest/arakan_agent/tool/struct.ToolOperation.html)             | Advertise and execute typed synchronous or asynchronous tools, or tools supplied dynamically by a `ToolProvider`.              |
+| [`SubagentOperation`](https://docs.rs/arakan-agent/latest/arakan_agent/subagent/struct.SubagentOperation.html) | Run requested subagent sessions through your `SubagentRunner`, deliver their updates, and handle concurrency and cancellation. |
+| [`InferenceRunner`](https://docs.rs/arakan-agent/latest/arakan_agent/inference/struct.InferenceRunner.html)    | Prepare provider requests, stream inference, and return message and usage effects. Register it as an inference step.           |
 
-### Operations in goose
+### Operations in arakan
 
-goose composes a larger agent from the same interfaces. The following are
-implementations in the goose application, **not stable, reusable GDK APIs**.
-They depend on goose's session, configuration, extensions, and hooks. Use them
+arakan composes a larger agent from the same interfaces. The following are
+implementations in the arakan application, **not stable, reusable GDK APIs**.
+They depend on arakan's session, configuration, extensions, and hooks. Use them
 as examples of the behavior an operation can own, not as an import list for
 your application.
 
@@ -160,14 +160,14 @@ your application.
 | `EmptyResponseOperation`      | Make an empty-response fallback visible when another operation has not taken over.                |
 | `StopHookOperation`           | Let configured stop hooks accept or block the end of a turn.                                      |
 | `ExitOnErrorOperation`        | Yield when an error remains at the end of the conversation.                                       |
-| `MaxTurnsOperation`           | Enforce goose's autonomous turn budget and contribute remaining-budget context.                   |
+| `MaxTurnsOperation`           | Enforce arakan's autonomous turn budget and contribute remaining-budget context.                   |
 | `AutoEffortOperation`         | Select and record thinking effort for a turn when automatic effort selection is enabled.          |
 | `SlashCommandOperation`       | Route a recognized slash command to operations' command handlers.                                 |
 | `StatusOperation`             | Report the current session, model, and usage through `/status`.                                   |
 
-The [state machine builder](https://github.com/aaif-goose/goose/blob/main/crates/goose/src/agents/state_machine_builder.rs)
+The [state machine builder](https://github.com/aaif-arakan/arakan/blob/main/crates/arakan/src/agents/state_machine_builder.rs)
 shows the main composition and ordering. The
-[operation modules](https://github.com/aaif-goose/goose/tree/main/crates/goose/src/agents/state_machine)
+[operation modules](https://github.com/aaif-arakan/arakan/tree/main/crates/arakan/src/agents/state_machine)
 contain the implementations; some operations are only active with the relevant
 configuration or are invoked through command handlers.
 
@@ -190,6 +190,6 @@ an operation has already done. If a step holds received output across an await,
 implement `finalize_cancellation` to return output that has not yet been saved.
 Cancellation does not roll back external actions.
 
-For a larger example, [GooseBusters](/docs/gdk/demos/goosebusters) uses custom
+For a larger example, [ArakanBusters](/docs/gdk/demos/arakanbusters) uses custom
 operations to coordinate a phone call. The full contract and result types are
-in [`goose-agent::operation`](https://docs.rs/goose-agent/latest/goose_agent/operation/).
+in [`arakan-agent::operation`](https://docs.rs/arakan-agent/latest/arakan_agent/operation/).

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "GooseExtensions",
+  "title": "ArakanExtensions",
   "$defs": {
     "AddSessionExtensionRequest_unstable": {
       "type": "object",
@@ -9,7 +9,7 @@
           "type": "string"
         },
         "extension": {
-          "$ref": "#/$defs/GooseExtension"
+          "$ref": "#/$defs/ArakanExtension"
         }
       },
       "required": [
@@ -18,9 +18,9 @@
       ],
       "description": "Add an extension to an active session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/extensions/add"
+      "x-method": "_arakan/unstable/session/extensions/add"
     },
-    "GooseExtension": {
+    "ArakanExtension": {
       "oneOf": [
         {
           "type": "object",
@@ -432,7 +432,7 @@
       ],
       "description": "Remove an extension from an active session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/extensions/remove"
+      "x-method": "_arakan/unstable/session/extensions/remove"
     },
     "GetToolsRequest_unstable": {
       "type": "object",
@@ -453,7 +453,7 @@
       ],
       "description": "List all tools available in a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/tools/list"
+      "x-method": "_arakan/unstable/tools/list"
     },
     "GetToolsResponse_unstable": {
       "type": "object",
@@ -470,7 +470,7 @@
       ],
       "description": "Tools response.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/tools/list"
+      "x-method": "_arakan/unstable/tools/list"
     },
     "ToolListItem": {
       "type": "object",
@@ -532,7 +532,7 @@
       ],
       "description": "Set permission levels for one or more tools.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/tools/permissions/set"
+      "x-method": "_arakan/unstable/tools/permissions/set"
     },
     "ToolPermissionEntry": {
       "type": "object",
@@ -553,9 +553,9 @@
     "SetToolPermissionsResponse_unstable": {
       "type": "object",
       "x-side": "agent",
-      "x-method": "_goose/unstable/tools/permissions/set"
+      "x-method": "_arakan/unstable/tools/permissions/set"
     },
-    "GooseToolCallRequest_unstable": {
+    "ArakanToolCallRequest_unstable": {
       "type": "object",
       "properties": {
         "sessionId": {
@@ -578,9 +578,9 @@
       ],
       "description": "Call a tool from an extension.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/tools/call"
+      "x-method": "_arakan/unstable/tools/call"
     },
-    "GooseToolCallResponse_unstable": {
+    "ArakanToolCallResponse_unstable": {
       "type": "object",
       "properties": {
         "content": {
@@ -599,7 +599,7 @@
       ],
       "description": "Tool call response.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/tools/call"
+      "x-method": "_arakan/unstable/tools/call"
     },
     "ReadResourceRequest_unstable": {
       "type": "object",
@@ -621,7 +621,7 @@
       ],
       "description": "Read a resource from an extension.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/resources/read"
+      "x-method": "_arakan/unstable/resources/read"
     },
     "ReadResourceResponse_unstable": {
       "type": "object",
@@ -633,7 +633,7 @@
       },
       "description": "Resource read response.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/resources/read"
+      "x-method": "_arakan/unstable/resources/read"
     },
     "AppsListRequest_unstable": {
       "type": "object",
@@ -645,9 +645,9 @@
           ]
         }
       },
-      "description": "List available goose apps, optionally scoped to a session.",
+      "description": "List available arakan apps, optionally scoped to a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/list"
+      "x-method": "_arakan/unstable/apps/list"
     },
     "AppsListResponse_unstable": {
       "type": "object",
@@ -659,7 +659,7 @@
         }
       },
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/list"
+      "x-method": "_arakan/unstable/apps/list"
     },
     "AppsExportRequest_unstable": {
       "type": "object",
@@ -671,9 +671,9 @@
       "required": [
         "name"
       ],
-      "description": "Export a goose app as HTML.",
+      "description": "Export a arakan app as HTML.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/export"
+      "x-method": "_arakan/unstable/apps/export"
     },
     "AppsExportResponse_unstable": {
       "type": "object",
@@ -686,7 +686,7 @@
         "html"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/export"
+      "x-method": "_arakan/unstable/apps/export"
     },
     "AppsImportRequest_unstable": {
       "type": "object",
@@ -698,9 +698,9 @@
       "required": [
         "html"
       ],
-      "description": "Import a goose app from HTML.",
+      "description": "Import a arakan app from HTML.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/import"
+      "x-method": "_arakan/unstable/apps/import"
     },
     "AppsImportResponse_unstable": {
       "type": "object",
@@ -717,7 +717,7 @@
         "message"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/import"
+      "x-method": "_arakan/unstable/apps/import"
     },
     "AppsDeleteRequest_unstable": {
       "type": "object",
@@ -729,9 +729,9 @@
       "required": [
         "name"
       ],
-      "description": "Delete a goose app by name.",
+      "description": "Delete a arakan app by name.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/delete"
+      "x-method": "_arakan/unstable/apps/delete"
     },
     "AppsDeleteResponse_unstable": {
       "type": "object",
@@ -748,7 +748,7 @@
         "message"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/apps/delete"
+      "x-method": "_arakan/unstable/apps/delete"
     },
     "UpdateWorkingDirRequest_unstable": {
       "type": "object",
@@ -766,7 +766,7 @@
       ],
       "description": "Update the working directory for a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/working-dir/update"
+      "x-method": "_arakan/unstable/session/working-dir/update"
     },
     "SetSessionSystemPromptRequest_unstable": {
       "type": "object",
@@ -792,21 +792,21 @@
         "sessionId",
         "text"
       ],
-      "description": "Set, append, or clear system prompt text for a session.\n\n`mode: \"set\"` replaces goose's base system prompt. `mode: \"append\"` adds an\ninstruction under \"Additional Instructions\". Reusing a key replaces the\nprevious value for that mode/key; sending empty text clears it.",
+      "description": "Set, append, or clear system prompt text for a session.\n\n`mode: \"set\"` replaces arakan's base system prompt. `mode: \"append\"` adds an\ninstruction under \"Additional Instructions\". Reusing a key replaces the\nprevious value for that mode/key; sending empty text clears it.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/system-prompt/set"
+      "x-method": "_arakan/unstable/session/system-prompt/set"
     },
     "SessionSystemPromptMode": {
       "oneOf": [
         {
           "type": "string",
           "const": "set",
-          "description": "Replace Goose's base system prompt with the provided text."
+          "description": "Replace Arakan's base system prompt with the provided text."
         },
         {
           "type": "string",
           "const": "append",
-          "description": "Append the provided text under Goose's \"Additional Instructions\" section."
+          "description": "Append the provided text under Arakan's \"Additional Instructions\" section."
         }
       ],
       "description": "How a session system prompt update should be applied."
@@ -834,7 +834,7 @@
       ],
       "description": "Add user input to the currently active prompt without starting a new prompt.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/steer"
+      "x-method": "_arakan/unstable/session/steer"
     },
     "ContentBlock": {
       "oneOf": [
@@ -1289,7 +1289,7 @@
         },
         "messageId": {
           "type": "string",
-          "description": "Stable id of the queued steer message. The same id later appears as\n`messageId` on the streamed `UserMessageChunk` (with `_meta.goose.steer`),\nletting clients correlate a queued steer with its pickup."
+          "description": "Stable id of the queued steer message. The same id later appears as\n`messageId` on the streamed `UserMessageChunk` (with `_meta.arakan.steer`),\nletting clients correlate a queued steer with its pickup."
         }
       },
       "required": [
@@ -1297,7 +1297,7 @@
         "messageId"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/steer"
+      "x-method": "_arakan/unstable/session/steer"
     },
     "LiveVoiceAvailabilityRequest_unstable": {
       "type": "object",
@@ -1318,7 +1318,7 @@
       },
       "description": "Ask whether a new or existing chat can enter direct Live voice.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/live-voice/availability"
+      "x-method": "_arakan/unstable/session/live-voice/availability"
     },
     "LiveVoiceAvailabilityResponse_unstable": {
       "type": "object",
@@ -1335,7 +1335,7 @@
         "message"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/live-voice/availability"
+      "x-method": "_arakan/unstable/session/live-voice/availability"
     },
     "LiveVoiceStatus": {
       "type": "string",
@@ -1367,7 +1367,7 @@
       ],
       "description": "Get a diagnostic report for a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/live-voice/start"
+      "x-method": "_arakan/unstable/session/live-voice/start"
     },
     "LiveVoiceStartResponse_unstable": {
       "type": "object",
@@ -1384,7 +1384,7 @@
         "answerSdp"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/live-voice/start"
+      "x-method": "_arakan/unstable/session/live-voice/start"
     },
     "LiveVoiceStopRequest_unstable": {
       "type": "object",
@@ -1401,7 +1401,7 @@
         "interactionId"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/live-voice/stop"
+      "x-method": "_arakan/unstable/session/live-voice/stop"
     },
     "DiagnosticsGetRequest_unstable": {
       "type": "object",
@@ -1418,7 +1418,7 @@
         "sessionId"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/diagnostics/get"
+      "x-method": "_arakan/unstable/diagnostics/get"
     },
     "DiagnosticsReportLevel": {
       "type": "string",
@@ -1436,7 +1436,7 @@
         "report"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/diagnostics/get"
+      "x-method": "_arakan/unstable/diagnostics/get"
     },
     "ContextReportRequest_unstable": {
       "type": "object",
@@ -1450,7 +1450,7 @@
       ],
       "description": "Break down what fills the model's context window if the session were\nprompted right now. Makes no model call.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/context/report"
+      "x-method": "_arakan/unstable/context/report"
     },
     "ContextReportResponse_unstable": {
       "type": "object",
@@ -1460,7 +1460,7 @@
         },
         "totalTokens": {
           "type": "integer",
-          "description": "Measured with goose's local tokenizer; always the sum of the segments.",
+          "description": "Measured with arakan's local tokenizer; always the sum of the segments.",
           "minimum": 0
         },
         "segments": {
@@ -1472,7 +1472,7 @@
         },
         "providerManagesContext": {
           "type": "boolean",
-          "description": "The provider keeps its own history and only receives the latest prompt\n(Claude Code, Gemini CLI), so goose assembles no request to break down;\n`segments` is empty and `total_tokens` is zero."
+          "description": "The provider keeps its own history and only receives the latest prompt\n(Claude Code, Gemini CLI), so arakan assembles no request to break down;\n`segments` is empty and `total_tokens` is zero."
         },
         "autoCompactionPending": {
           "type": "boolean",
@@ -1487,7 +1487,7 @@
         "autoCompactionPending"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/context/report"
+      "x-method": "_arakan/unstable/context/report"
     },
     "ContextReportModel": {
       "type": "object",
@@ -1606,9 +1606,9 @@
     },
     "ListPromptsRequest_unstable": {
       "type": "object",
-      "description": "List all available goose prompt templates.",
+      "description": "List all available arakan prompt templates.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/prompts/list"
+      "x-method": "_arakan/unstable/config/prompts/list"
     },
     "ListPromptsResponse_unstable": {
       "type": "object",
@@ -1624,7 +1624,7 @@
         "prompts"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/prompts/list"
+      "x-method": "_arakan/unstable/config/prompts/list"
     },
     "PromptTemplateEntry": {
       "type": "object",
@@ -1666,9 +1666,9 @@
       "required": [
         "name"
       ],
-      "description": "Read a goose prompt template.",
+      "description": "Read a arakan prompt template.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/prompts/get"
+      "x-method": "_arakan/unstable/config/prompts/get"
     },
     "GetPromptResponse_unstable": {
       "type": "object",
@@ -1693,7 +1693,7 @@
         "isCustomized"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/prompts/get"
+      "x-method": "_arakan/unstable/config/prompts/get"
     },
     "SavePromptRequest_unstable": {
       "type": "object",
@@ -1709,9 +1709,9 @@
         "name",
         "content"
       ],
-      "description": "Save a custom goose prompt template.",
+      "description": "Save a custom arakan prompt template.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/prompts/save"
+      "x-method": "_arakan/unstable/config/prompts/save"
     },
     "PromptOperationResponse_unstable": {
       "type": "object",
@@ -1735,15 +1735,15 @@
       "required": [
         "name"
       ],
-      "description": "Reset a goose prompt template to its default content.",
+      "description": "Reset a arakan prompt template to its default content.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/prompts/reset"
+      "x-method": "_arakan/unstable/config/prompts/reset"
     },
     "GetConfigExtensionsRequest_unstable": {
       "type": "object",
       "description": "List configured extensions and any warnings.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/extensions/list"
+      "x-method": "_arakan/unstable/config/extensions/list"
     },
     "GetConfigExtensionsResponse_unstable": {
       "type": "object",
@@ -1751,7 +1751,7 @@
         "extensions": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/GooseExtensionEntry"
+            "$ref": "#/$defs/ArakanExtensionEntry"
           }
         },
         "warnings": {
@@ -1767,13 +1767,13 @@
       ],
       "description": "List configured extensions and any warnings.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/extensions/list"
+      "x-method": "_arakan/unstable/config/extensions/list"
     },
-    "GooseExtensionEntry": {
+    "ArakanExtensionEntry": {
       "type": "object",
       "properties": {
         "extension": {
-          "$ref": "#/$defs/GooseExtension"
+          "$ref": "#/$defs/ArakanExtension"
         },
         "enabled": {
           "type": "boolean"
@@ -1794,7 +1794,7 @@
       "type": "object",
       "properties": {
         "extension": {
-          "$ref": "#/$defs/GooseExtension"
+          "$ref": "#/$defs/ArakanExtension"
         },
         "enabled": {
           "type": "boolean",
@@ -1804,9 +1804,9 @@
       "required": [
         "extension"
       ],
-      "description": "Persist a new extension to the user's global goose config.",
+      "description": "Persist a new extension to the user's global arakan config.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/extensions/add"
+      "x-method": "_arakan/unstable/config/extensions/add"
     },
     "RemoveConfigExtensionRequest_unstable": {
       "type": "object",
@@ -1818,9 +1818,9 @@
       "required": [
         "configKey"
       ],
-      "description": "Remove a persisted extension from the user's global goose config.",
+      "description": "Remove a persisted extension from the user's global arakan config.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/extensions/remove"
+      "x-method": "_arakan/unstable/config/extensions/remove"
     },
     "SetConfigExtensionEnabledRequest_unstable": {
       "type": "object",
@@ -1836,9 +1836,9 @@
         "configKey",
         "enabled"
       ],
-      "description": "Set the `enabled` flag for a persisted extension in the user's global goose config.",
+      "description": "Set the `enabled` flag for a persisted extension in the user's global arakan config.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/extensions/set-enabled"
+      "x-method": "_arakan/unstable/config/extensions/set-enabled"
     },
     "GetSessionExtensionsRequest_unstable": {
       "type": "object",
@@ -1852,7 +1852,7 @@
       ],
       "description": "List extensions enabled for an active session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/extensions/list"
+      "x-method": "_arakan/unstable/session/extensions/list"
     },
     "GetSessionExtensionsResponse_unstable": {
       "type": "object",
@@ -1868,13 +1868,13 @@
         "extensions"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/extensions/list"
+      "x-method": "_arakan/unstable/session/extensions/list"
     },
     "SessionExtensionEntry": {
       "type": "object",
       "properties": {
         "extension": {
-          "$ref": "#/$defs/GooseExtension"
+          "$ref": "#/$defs/ArakanExtension"
         },
         "extensionKey": {
           "type": "string"
@@ -1899,7 +1899,7 @@
       },
       "description": "List providers with setup metadata and the current model inventory snapshot.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/list"
+      "x-method": "_arakan/unstable/providers/list"
     },
     "ListProvidersResponse_unstable": {
       "type": "object",
@@ -1916,7 +1916,7 @@
       ],
       "description": "Provider list response.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/list"
+      "x-method": "_arakan/unstable/providers/list"
     },
     "ProviderInventoryEntryDto": {
       "type": "object",
@@ -1939,7 +1939,7 @@
         },
         "configured": {
           "type": "boolean",
-          "description": "Whether Goose has enough configuration to use this provider."
+          "description": "Whether Arakan has enough configuration to use this provider."
         },
         "available": {
           "type": "boolean",
@@ -2138,7 +2138,7 @@
       ],
       "description": "List the raw model identifiers returned by a provider's live supported-models API.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/supported-models/list"
+      "x-method": "_arakan/unstable/providers/supported-models/list"
     },
     "ProviderSupportedModelsListResponse_unstable": {
       "type": "object",
@@ -2158,7 +2158,7 @@
         "models"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/supported-models/list"
+      "x-method": "_arakan/unstable/providers/supported-models/list"
     },
     "ProviderCatalogListRequest_unstable": {
       "type": "object",
@@ -2172,7 +2172,7 @@
       },
       "description": "List custom-provider catalog entries. Omit `format` to list all formats.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/catalog/list"
+      "x-method": "_arakan/unstable/providers/catalog/list"
     },
     "ProviderCatalogListResponse_unstable": {
       "type": "object",
@@ -2188,7 +2188,7 @@
         "providers"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/catalog/list"
+      "x-method": "_arakan/unstable/providers/catalog/list"
     },
     "ProviderTemplateCatalogEntryDto": {
       "type": "object",
@@ -2230,7 +2230,7 @@
       "type": "object",
       "description": "List provider setup catalog entries",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/setup/catalog/list"
+      "x-method": "_arakan/unstable/providers/setup/catalog/list"
     },
     "ProviderSetupCatalogListResponse_unstable": {
       "type": "object",
@@ -2246,7 +2246,7 @@
         "providers"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/setup/catalog/list"
+      "x-method": "_arakan/unstable/providers/setup/catalog/list"
     },
     "ProviderSetupCatalogEntryDto": {
       "type": "object",
@@ -2407,7 +2407,7 @@
       ],
       "description": "Return the editable template for one catalog provider.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/catalog/template"
+      "x-method": "_arakan/unstable/providers/catalog/template"
     },
     "ProviderCatalogTemplateResponse_unstable": {
       "type": "object",
@@ -2420,7 +2420,7 @@
         "template"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/catalog/template"
+      "x-method": "_arakan/unstable/providers/catalog/template"
     },
     "ProviderTemplateDto": {
       "type": "object",
@@ -2585,9 +2585,9 @@
         "requiresAuth",
         "toolshim"
       ],
-      "description": "Create a custom provider backed by goose's declarative provider store.",
+      "description": "Create a custom provider backed by arakan's declarative provider store.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/create"
+      "x-method": "_arakan/unstable/providers/custom/create"
     },
     "CustomProviderCreateResponse_unstable": {
       "type": "object",
@@ -2608,7 +2608,7 @@
         "refresh"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/create"
+      "x-method": "_arakan/unstable/providers/custom/create"
     },
     "ProviderConfigStatusDto": {
       "type": "object",
@@ -2649,7 +2649,7 @@
       ],
       "description": "Refresh acknowledgement.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/inventory/refresh"
+      "x-method": "_arakan/unstable/providers/inventory/refresh"
     },
     "RefreshProviderInventorySkipDto": {
       "type": "object",
@@ -2687,7 +2687,7 @@
       ],
       "description": "Read a declarative provider config. Custom configs are editable; bundled configs are read-only.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/read"
+      "x-method": "_arakan/unstable/providers/custom/read"
     },
     "CustomProviderReadResponse_unstable": {
       "type": "object",
@@ -2708,7 +2708,7 @@
         "status"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/read"
+      "x-method": "_arakan/unstable/providers/custom/read"
     },
     "CustomProviderConfigDto": {
       "type": "object",
@@ -2861,9 +2861,9 @@
         "requiresAuth",
         "toolshim"
       ],
-      "description": "Update a custom provider backed by goose's declarative provider store.",
+      "description": "Update a custom provider backed by arakan's declarative provider store.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/update"
+      "x-method": "_arakan/unstable/providers/custom/update"
     },
     "CustomProviderUpdateResponse_unstable": {
       "type": "object",
@@ -2884,7 +2884,7 @@
         "refresh"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/update"
+      "x-method": "_arakan/unstable/providers/custom/update"
     },
     "CustomProviderDeleteRequest_unstable": {
       "type": "object",
@@ -2896,9 +2896,9 @@
       "required": [
         "providerId"
       ],
-      "description": "Delete a custom provider from goose's declarative provider store.",
+      "description": "Delete a custom provider from arakan's declarative provider store.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/delete"
+      "x-method": "_arakan/unstable/providers/custom/delete"
     },
     "CustomProviderDeleteResponse_unstable": {
       "type": "object",
@@ -2915,7 +2915,7 @@
         "refresh"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/custom/delete"
+      "x-method": "_arakan/unstable/providers/custom/delete"
     },
     "RefreshProviderInventoryRequest_unstable": {
       "type": "object",
@@ -2931,7 +2931,7 @@
       },
       "description": "Trigger a background refresh of provider inventories.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/inventory/refresh"
+      "x-method": "_arakan/unstable/providers/inventory/refresh"
     },
     "ProviderReadinessCheckRequest_unstable": {
       "type": "object",
@@ -2945,7 +2945,7 @@
       ],
       "description": "Check whether an ACP provider can initialize and create a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/readiness/check"
+      "x-method": "_arakan/unstable/providers/readiness/check"
     },
     "ProviderReadinessCheckResponse_unstable": {
       "type": "object",
@@ -2968,7 +2968,7 @@
         "ready"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/readiness/check"
+      "x-method": "_arakan/unstable/providers/readiness/check"
     },
     "ProviderConfigReadRequest_unstable": {
       "type": "object",
@@ -2982,7 +2982,7 @@
       ],
       "description": "Read saved configuration field values for one provider.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/read"
+      "x-method": "_arakan/unstable/providers/config/read"
     },
     "ProviderConfigReadResponse_unstable": {
       "type": "object",
@@ -2998,7 +2998,7 @@
         "fields"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/read"
+      "x-method": "_arakan/unstable/providers/config/read"
     },
     "ProviderConfigFieldValueDto": {
       "type": "object",
@@ -3043,7 +3043,7 @@
       },
       "description": "Return provider configured statuses. Empty provider_ids means all providers.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/status"
+      "x-method": "_arakan/unstable/providers/config/status"
     },
     "ProviderConfigStatusResponse_unstable": {
       "type": "object",
@@ -3059,7 +3059,7 @@
         "statuses"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/status"
+      "x-method": "_arakan/unstable/providers/config/status"
     },
     "ProviderConfigSaveRequest_unstable": {
       "type": "object",
@@ -3080,7 +3080,7 @@
       ],
       "description": "Save provider configuration fields and start an inventory refresh when supported.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/save"
+      "x-method": "_arakan/unstable/providers/config/save"
     },
     "ProviderConfigFieldUpdate": {
       "type": "object",
@@ -3125,7 +3125,7 @@
       ],
       "description": "Delete provider configuration fields and start an inventory refresh when supported.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/delete"
+      "x-method": "_arakan/unstable/providers/config/delete"
     },
     "ProviderConfigAuthenticateRequest_unstable": {
       "type": "object",
@@ -3139,13 +3139,13 @@
       ],
       "description": "Run a provider-owned native authentication flow and start an inventory refresh when supported.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/config/authenticate"
+      "x-method": "_arakan/unstable/providers/config/authenticate"
     },
     "ProviderSecretsListRequest_unstable": {
       "type": "object",
-      "description": "List provider credentials stored locally by goose.",
+      "description": "List provider credentials stored locally by arakan.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/secrets/list"
+      "x-method": "_arakan/unstable/providers/secrets/list"
     },
     "ProviderSecretsListResponse_unstable": {
       "type": "object",
@@ -3161,7 +3161,7 @@
         "secrets"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/secrets/list"
+      "x-method": "_arakan/unstable/providers/secrets/list"
     },
     "ProviderSecretDto": {
       "type": "object",
@@ -3249,7 +3249,7 @@
       ],
       "description": "Delete a locally stored provider credential by id.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/secrets/delete"
+      "x-method": "_arakan/unstable/providers/secrets/delete"
     },
     "CanonicalModelInfoRequest_unstable": {
       "type": "object",
@@ -3267,7 +3267,7 @@
       ],
       "description": "Look up canonical (bundled-registry) model info for a provider/model pair.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/canonical-model-info"
+      "x-method": "_arakan/unstable/providers/canonical-model-info"
     },
     "CanonicalModelInfoResponse_unstable": {
       "type": "object",
@@ -3284,7 +3284,7 @@
         }
       },
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/canonical-model-info"
+      "x-method": "_arakan/unstable/providers/canonical-model-info"
     },
     "CanonicalModelInfoDto": {
       "type": "object",
@@ -3362,13 +3362,13 @@
       },
       "description": "Read allowlisted user preferences. Empty `keys` means all supported preferences.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/preferences/read"
+      "x-method": "_arakan/unstable/preferences/read"
     },
     "PreferenceKey": {
       "type": "string",
       "enum": [
         "autoCompactThreshold",
-        "gooseThinkingEffort",
+        "arakanThinkingEffort",
         "voiceAutoSubmitPhrases",
         "voiceDictationProvider",
         "voiceDictationPreferredMic"
@@ -3388,7 +3388,7 @@
         "values"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/preferences/read"
+      "x-method": "_arakan/unstable/preferences/read"
     },
     "PreferenceValue": {
       "type": "object",
@@ -3417,7 +3417,7 @@
       },
       "description": "Save allowlisted user preferences.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/preferences/save"
+      "x-method": "_arakan/unstable/preferences/save"
     },
     "ConfigReadRequest_unstable": {
       "type": "object",
@@ -3433,9 +3433,9 @@
       "required": [
         "key"
       ],
-      "description": "Read one goose configuration value.",
+      "description": "Read one arakan configuration value.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/read"
+      "x-method": "_arakan/unstable/config/read"
     },
     "ConfigReadResponse_unstable": {
       "type": "object",
@@ -3445,7 +3445,7 @@
         }
       },
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/read"
+      "x-method": "_arakan/unstable/config/read"
     },
     "ConfigUpsertRequest_unstable": {
       "type": "object",
@@ -3463,9 +3463,9 @@
         "key",
         "value"
       ],
-      "description": "Create or replace one goose configuration value.",
+      "description": "Create or replace one arakan configuration value.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/upsert"
+      "x-method": "_arakan/unstable/config/upsert"
     },
     "ConfigRemoveRequest_unstable": {
       "type": "object",
@@ -3481,15 +3481,15 @@
       "required": [
         "key"
       ],
-      "description": "Remove one goose configuration value.",
+      "description": "Remove one arakan configuration value.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/remove"
+      "x-method": "_arakan/unstable/config/remove"
     },
     "ConfigReadAllRequest_unstable": {
       "type": "object",
-      "description": "Read all non-secret goose configuration values.",
+      "description": "Read all non-secret arakan configuration values.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/read-all"
+      "x-method": "_arakan/unstable/config/read-all"
     },
     "ConfigReadAllResponse_unstable": {
       "type": "object",
@@ -3503,13 +3503,13 @@
         "config"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/config/read-all"
+      "x-method": "_arakan/unstable/config/read-all"
     },
     "DefaultsReadRequest_unstable": {
       "type": "object",
-      "description": "Read goose default provider and model configuration.",
+      "description": "Read arakan default provider and model configuration.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/defaults/read"
+      "x-method": "_arakan/unstable/defaults/read"
     },
     "DefaultsReadResponse_unstable": {
       "type": "object",
@@ -3545,15 +3545,15 @@
       "required": [
         "providerId"
       ],
-      "description": "Save goose default provider and model configuration.",
+      "description": "Save arakan default provider and model configuration.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/defaults/save"
+      "x-method": "_arakan/unstable/defaults/save"
     },
     "DefaultsClearRequest_unstable": {
       "type": "object",
-      "description": "Clear goose default provider and model configuration.",
+      "description": "Clear arakan default provider and model configuration.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/defaults/clear"
+      "x-method": "_arakan/unstable/defaults/clear"
     },
     "OnboardingImportScanRequest_unstable": {
       "type": "object",
@@ -3567,14 +3567,14 @@
           "default": []
         }
       },
-      "description": "Scan for existing goose and compatible app data that onboarding can import.",
+      "description": "Scan for existing arakan and compatible app data that onboarding can import.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/onboarding/import/scan"
+      "x-method": "_arakan/unstable/onboarding/import/scan"
     },
     "OnboardingImportSourceKind": {
       "type": "string",
       "enum": [
-        "goose_config",
+        "arakan_config",
         "claude_desktop"
       ],
       "description": "Sources that onboarding knows how to discover and import."
@@ -3593,7 +3593,7 @@
         "candidates"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/onboarding/import/scan"
+      "x-method": "_arakan/unstable/onboarding/import/scan"
     },
     "OnboardingImportCandidate": {
       "type": "object",
@@ -3683,7 +3683,7 @@
       },
       "description": "Import selected onboarding candidates.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/onboarding/import/apply"
+      "x-method": "_arakan/unstable/onboarding/import/apply"
     },
     "OnboardingImportApplyResponse_unstable": {
       "type": "object",
@@ -3717,7 +3717,7 @@
         "skipped"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/onboarding/import/apply"
+      "x-method": "_arakan/unstable/onboarding/import/apply"
     },
     "ExportSessionRequest_unstable": {
       "type": "object",
@@ -3735,7 +3735,7 @@
       ],
       "description": "Export a session as a JSON or markdown string.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/export"
+      "x-method": "_arakan/unstable/session/export"
     },
     "SessionExportFormat": {
       "type": "string",
@@ -3754,9 +3754,9 @@
       "required": [
         "data"
       ],
-      "description": "Export session response — raw JSON of the goose session with `conversation`,\nor a markdown transcript when `format` is `markdown`.",
+      "description": "Export session response — raw JSON of the arakan session with `conversation`,\nor a markdown transcript when `format` is `markdown`.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/export"
+      "x-method": "_arakan/unstable/session/export"
     },
     "ImportSessionRequest_unstable": {
       "type": "object",
@@ -3770,7 +3770,7 @@
       ],
       "description": "Import a session from a serialized session JSON string.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/import"
+      "x-method": "_arakan/unstable/session/import"
     },
     "ImportSessionResponse_unstable": {
       "type": "object",
@@ -3801,7 +3801,7 @@
       ],
       "description": "Import session response — metadata about the newly created session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/import"
+      "x-method": "_arakan/unstable/session/import"
     },
     "EncodeRecipeRequest_unstable": {
       "type": "object",
@@ -3813,9 +3813,9 @@
       "required": [
         "recipe"
       ],
-      "description": "Encode a recipe as a goose deep link.",
+      "description": "Encode a recipe as a arakan deep link.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/encode"
+      "x-method": "_arakan/unstable/recipes/encode"
     },
     "RecipeDto": {
       "type": "object",
@@ -4193,13 +4193,13 @@
     "RecipeSettingsDto": {
       "type": "object",
       "properties": {
-        "goose_provider": {
+        "arakan_provider": {
           "type": [
             "string",
             "null"
           ]
         },
-        "goose_model": {
+        "arakan_model": {
           "type": [
             "string",
             "null"
@@ -4405,7 +4405,7 @@
         "deeplink"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/encode"
+      "x-method": "_arakan/unstable/recipes/encode"
     },
     "DecodeRecipeRequest_unstable": {
       "type": "object",
@@ -4417,9 +4417,9 @@
       "required": [
         "deeplink"
       ],
-      "description": "Decode a goose deep link into a recipe.",
+      "description": "Decode a arakan deep link into a recipe.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/decode"
+      "x-method": "_arakan/unstable/recipes/decode"
     },
     "DecodeRecipeResponse_unstable": {
       "type": "object",
@@ -4432,7 +4432,7 @@
         "recipe"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/decode"
+      "x-method": "_arakan/unstable/recipes/decode"
     },
     "ScanRecipeRequest_unstable": {
       "type": "object",
@@ -4446,7 +4446,7 @@
       ],
       "description": "Scan a recipe for security warnings.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/scan"
+      "x-method": "_arakan/unstable/recipes/scan"
     },
     "ScanRecipeResponse_unstable": {
       "type": "object",
@@ -4459,13 +4459,13 @@
         "has_security_warnings"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/scan"
+      "x-method": "_arakan/unstable/recipes/scan"
     },
     "ListRecipesRequest_unstable": {
       "type": "object",
       "description": "List recipes in the local recipe library.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/list"
+      "x-method": "_arakan/unstable/recipes/list"
     },
     "ListRecipesResponse_unstable": {
       "type": "object",
@@ -4481,7 +4481,7 @@
         "recipes"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/list"
+      "x-method": "_arakan/unstable/recipes/list"
     },
     "RecipeListEntryDto": {
       "type": "object",
@@ -4530,7 +4530,7 @@
       ],
       "description": "Delete a recipe from the local recipe library.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/delete"
+      "x-method": "_arakan/unstable/recipes/delete"
     },
     "ScheduleRecipeRequest_unstable": {
       "type": "object",
@@ -4550,7 +4550,7 @@
       ],
       "description": "Set or clear a recipe's cron schedule.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/schedule"
+      "x-method": "_arakan/unstable/recipes/schedule"
     },
     "SetRecipeSlashCommandRequest_unstable": {
       "type": "object",
@@ -4570,7 +4570,7 @@
       ],
       "description": "Set or clear a recipe's slash command.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/slash-command"
+      "x-method": "_arakan/unstable/recipes/slash-command"
     },
     "SaveRecipeRequest_unstable": {
       "type": "object",
@@ -4590,7 +4590,7 @@
       ],
       "description": "Save a recipe to the local recipe library.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/save"
+      "x-method": "_arakan/unstable/recipes/save"
     },
     "SaveRecipeResponse_unstable": {
       "type": "object",
@@ -4611,7 +4611,7 @@
         "file_path"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/save"
+      "x-method": "_arakan/unstable/recipes/save"
     },
     "ParseRecipeRequest_unstable": {
       "type": "object",
@@ -4625,7 +4625,7 @@
       ],
       "description": "Parse serialized recipe content.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/parse"
+      "x-method": "_arakan/unstable/recipes/parse"
     },
     "ParseRecipeResponse_unstable": {
       "type": "object",
@@ -4638,7 +4638,7 @@
         "recipe"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/parse"
+      "x-method": "_arakan/unstable/recipes/parse"
     },
     "RecipeToYamlRequest_unstable": {
       "type": "object",
@@ -4652,7 +4652,7 @@
       ],
       "description": "Serialize a recipe as YAML.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/to-yaml"
+      "x-method": "_arakan/unstable/recipes/to-yaml"
     },
     "RecipeToYamlResponse_unstable": {
       "type": "object",
@@ -4665,13 +4665,13 @@
         "yaml"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/recipes/to-yaml"
+      "x-method": "_arakan/unstable/recipes/to-yaml"
     },
     "ListSchedulesRequest_unstable": {
       "type": "object",
       "description": "List scheduled recipe jobs.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/list"
+      "x-method": "_arakan/unstable/schedules/list"
     },
     "ListSchedulesResponse_unstable": {
       "type": "object",
@@ -4687,7 +4687,7 @@
         "jobs"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/list"
+      "x-method": "_arakan/unstable/schedules/list"
     },
     "ScheduledJobDto": {
       "type": "object",
@@ -4751,7 +4751,7 @@
       ],
       "description": "List recent sessions created by a scheduled recipe job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/sessions/list"
+      "x-method": "_arakan/unstable/schedules/sessions/list"
     },
     "ListScheduleSessionsResponse_unstable": {
       "type": "object",
@@ -4767,7 +4767,7 @@
         "sessions"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/sessions/list"
+      "x-method": "_arakan/unstable/schedules/sessions/list"
     },
     "SessionInfo": {
       "type": "object",
@@ -4845,7 +4845,7 @@
       ],
       "description": "Create a scheduled recipe job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/create"
+      "x-method": "_arakan/unstable/schedules/create"
     },
     "CreateScheduleResponse_unstable": {
       "type": "object",
@@ -4858,7 +4858,7 @@
         "job"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/create"
+      "x-method": "_arakan/unstable/schedules/create"
     },
     "DeleteScheduleRequest_unstable": {
       "type": "object",
@@ -4872,7 +4872,7 @@
       ],
       "description": "Delete a scheduled recipe job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/delete"
+      "x-method": "_arakan/unstable/schedules/delete"
     },
     "PauseScheduleRequest_unstable": {
       "type": "object",
@@ -4886,7 +4886,7 @@
       ],
       "description": "Pause a scheduled recipe job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/pause"
+      "x-method": "_arakan/unstable/schedules/pause"
     },
     "UnpauseScheduleRequest_unstable": {
       "type": "object",
@@ -4900,7 +4900,7 @@
       ],
       "description": "Resume a paused scheduled recipe job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/unpause"
+      "x-method": "_arakan/unstable/schedules/unpause"
     },
     "UpdateScheduleRequest_unstable": {
       "type": "object",
@@ -4918,7 +4918,7 @@
       ],
       "description": "Update the cron expression for a scheduled recipe job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/update"
+      "x-method": "_arakan/unstable/schedules/update"
     },
     "UpdateScheduleResponse_unstable": {
       "type": "object",
@@ -4931,7 +4931,7 @@
         "job"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/update"
+      "x-method": "_arakan/unstable/schedules/update"
     },
     "RunScheduleNowRequest_unstable": {
       "type": "object",
@@ -4945,7 +4945,7 @@
       ],
       "description": "Run a scheduled recipe job immediately.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/run-now"
+      "x-method": "_arakan/unstable/schedules/run-now"
     },
     "RunScheduleNowResponse_unstable": {
       "type": "object",
@@ -4964,7 +4964,7 @@
         "status"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/run-now"
+      "x-method": "_arakan/unstable/schedules/run-now"
     },
     "RunScheduleNowStatus": {
       "type": "string",
@@ -4985,7 +4985,7 @@
       ],
       "description": "Stop a currently running scheduled job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/running-job/kill"
+      "x-method": "_arakan/unstable/schedules/running-job/kill"
     },
     "KillRunningJobResponse_unstable": {
       "type": "object",
@@ -4998,7 +4998,7 @@
         "message"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/running-job/kill"
+      "x-method": "_arakan/unstable/schedules/running-job/kill"
     },
     "InspectRunningJobRequest_unstable": {
       "type": "object",
@@ -5012,7 +5012,7 @@
       ],
       "description": "Inspect the current state of a running scheduled job.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/running-job/inspect"
+      "x-method": "_arakan/unstable/schedules/running-job/inspect"
     },
     "InspectRunningJobResponse_unstable": {
       "type": "object",
@@ -5043,7 +5043,7 @@
         "running"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/schedules/running-job/inspect"
+      "x-method": "_arakan/unstable/schedules/running-job/inspect"
     },
     "GetSessionInfoRequest_unstable": {
       "type": "object",
@@ -5057,7 +5057,7 @@
       ],
       "description": "Return list-style metadata for a single session without loading the conversation.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/info"
+      "x-method": "_arakan/unstable/session/info"
     },
     "GetSessionInfoResponse_unstable": {
       "type": "object",
@@ -5070,7 +5070,7 @@
         "session"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/info"
+      "x-method": "_arakan/unstable/session/info"
     },
     "TruncateSessionConversationRequest_unstable": {
       "type": "object",
@@ -5088,7 +5088,7 @@
       ],
       "description": "Truncate a session conversation from the given message timestamp onward.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/conversation/truncate"
+      "x-method": "_arakan/unstable/session/conversation/truncate"
     },
     "UpdateSessionProjectRequest_unstable": {
       "type": "object",
@@ -5108,7 +5108,7 @@
       ],
       "description": "Update the project association for a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/project/update"
+      "x-method": "_arakan/unstable/session/project/update"
     },
     "RenameSessionRequest_unstable": {
       "type": "object",
@@ -5126,7 +5126,7 @@
       ],
       "description": "Rename a session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/rename"
+      "x-method": "_arakan/unstable/session/rename"
     },
     "ArchiveSessionRequest_unstable": {
       "type": "object",
@@ -5140,7 +5140,7 @@
       ],
       "description": "Archive a session (soft delete).",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/archive"
+      "x-method": "_arakan/unstable/session/archive"
     },
     "UnarchiveSessionRequest_unstable": {
       "type": "object",
@@ -5154,7 +5154,7 @@
       ],
       "description": "Unarchive a previously archived session.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/unarchive"
+      "x-method": "_arakan/unstable/session/unarchive"
     },
     "CreateSourceRequest_unstable": {
       "type": "object",
@@ -5189,7 +5189,7 @@
       ],
       "description": "Create a new source in an explicit target scope (global or project-scoped).",
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/create"
+      "x-method": "_arakan/unstable/sources/create"
     },
     "SourceType": {
       "type": "string",
@@ -5263,7 +5263,7 @@
         "source"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/create"
+      "x-method": "_arakan/unstable/sources/create"
     },
     "SourceEntry": {
       "type": "object",
@@ -5314,7 +5314,7 @@
         "path",
         "global"
       ],
-      "description": "A source discovered by Goose. Filesystem sources use an on-disk path;\nbuilt-in sources use a stable synthetic path. Sources may be either\n`global` (shared across all projects) or project-specific."
+      "description": "A source discovered by Arakan. Filesystem sources use an on-disk path;\nbuilt-in sources use a stable synthetic path. Sources may be either\n`global` (shared across all projects) or project-specific."
     },
     "ListSourcesRequest_unstable": {
       "type": "object",
@@ -5343,7 +5343,7 @@
       },
       "description": "List discovered sources.\n\nIf `type` is omitted or `skill`, this lists filesystem/plugin skills only.\nBoth global and project-scoped skills are included when `project_dir` is\nset. If `type` is `builtinSkill`, this lists shipped read-only built-in\nskills.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/list"
+      "x-method": "_arakan/unstable/sources/list"
     },
     "ListSourcesResponse_unstable": {
       "type": "object",
@@ -5359,7 +5359,7 @@
         "sources"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/list"
+      "x-method": "_arakan/unstable/sources/list"
     },
     "ListAgentMentionsRequest_unstable": {
       "type": "object",
@@ -5379,7 +5379,7 @@
       },
       "description": "List user-facing agent mention targets for `@` autocomplete.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/agent-mentions/list"
+      "x-method": "_arakan/unstable/agent-mentions/list"
     },
     "ListAgentMentionsResponse_unstable": {
       "type": "object",
@@ -5395,7 +5395,7 @@
         "agents"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/agent-mentions/list"
+      "x-method": "_arakan/unstable/agent-mentions/list"
     },
     "AgentMention": {
       "type": "object",
@@ -5445,7 +5445,7 @@
       },
       "description": "List slash commands available for `/` autocomplete.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/slash-commands/list"
+      "x-method": "_arakan/unstable/slash-commands/list"
     },
     "ListSlashCommandsResponse_unstable": {
       "type": "object",
@@ -5461,7 +5461,7 @@
         "availableCommands"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/slash-commands/list"
+      "x-method": "_arakan/unstable/slash-commands/list"
     },
     "AvailableCommand": {
       "type": "object",
@@ -5569,7 +5569,7 @@
       ],
       "description": "Update an existing source's name, description, and content by absolute path.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/update"
+      "x-method": "_arakan/unstable/sources/update"
     },
     "UpdateSourceResponse_unstable": {
       "type": "object",
@@ -5582,7 +5582,7 @@
         "source"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/update"
+      "x-method": "_arakan/unstable/sources/update"
     },
     "DeleteSourceRequest_unstable": {
       "type": "object",
@@ -5600,7 +5600,7 @@
       ],
       "description": "Delete a source and its on-disk directory by absolute path.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/delete"
+      "x-method": "_arakan/unstable/sources/delete"
     },
     "ExportSourceRequest_unstable": {
       "type": "object",
@@ -5618,7 +5618,7 @@
       ],
       "description": "Export a source at an absolute path as a portable JSON payload.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/export"
+      "x-method": "_arakan/unstable/sources/export"
     },
     "ExportSourceResponse_unstable": {
       "type": "object",
@@ -5635,7 +5635,7 @@
         "filename"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/export"
+      "x-method": "_arakan/unstable/sources/export"
     },
     "ImportSourcesRequest_unstable": {
       "type": "object",
@@ -5651,9 +5651,9 @@
         "data",
         "target"
       ],
-      "description": "Import a source from a JSON export payload produced by `_goose/unstable/sources/export`.\nThe imported source is written into the explicit target scope; on name\ncollisions a `-imported` suffix is appended.",
+      "description": "Import a source from a JSON export payload produced by `_arakan/unstable/sources/export`.\nThe imported source is written into the explicit target scope; on name\ncollisions a `-imported` suffix is appended.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/import"
+      "x-method": "_arakan/unstable/sources/import"
     },
     "ImportSourcesResponse_unstable": {
       "type": "object",
@@ -5669,7 +5669,7 @@
         "sources"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/sources/import"
+      "x-method": "_arakan/unstable/sources/import"
     },
     "DictationTranscribeRequest_unstable": {
       "type": "object",
@@ -5694,7 +5694,7 @@
       ],
       "description": "Transcribe audio via a dictation provider.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/transcribe"
+      "x-method": "_arakan/unstable/dictation/transcribe"
     },
     "DictationTranscribeResponse_unstable": {
       "type": "object",
@@ -5708,13 +5708,13 @@
       ],
       "description": "Transcription result.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/transcribe"
+      "x-method": "_arakan/unstable/dictation/transcribe"
     },
     "DictationConfigRequest_unstable": {
       "type": "object",
       "description": "Get the configuration status of all dictation providers.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/config"
+      "x-method": "_arakan/unstable/dictation/config"
     },
     "DictationConfigResponse_unstable": {
       "type": "object",
@@ -5731,7 +5731,7 @@
       ],
       "description": "Dictation config response — map of provider name to status.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/config"
+      "x-method": "_arakan/unstable/dictation/config"
     },
     "DictationProviderStatusEntry": {
       "type": "object",
@@ -5819,7 +5819,7 @@
       "type": "object",
       "description": "List available local Whisper models with their download status.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/list"
+      "x-method": "_arakan/unstable/dictation/models/list"
     },
     "DictationModelsListResponse_unstable": {
       "type": "object",
@@ -5835,7 +5835,7 @@
         "models"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/list"
+      "x-method": "_arakan/unstable/dictation/models/list"
     },
     "DictationLocalModelStatus": {
       "type": "object",
@@ -5885,7 +5885,7 @@
       ],
       "description": "Kick off a background download of a local Whisper model.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/download"
+      "x-method": "_arakan/unstable/dictation/models/download"
     },
     "DictationModelDownloadProgressRequest_unstable": {
       "type": "object",
@@ -5899,7 +5899,7 @@
       ],
       "description": "Poll the progress of an in-flight download.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/download/progress"
+      "x-method": "_arakan/unstable/dictation/models/download/progress"
     },
     "DictationModelDownloadProgressResponse_unstable": {
       "type": "object",
@@ -5917,7 +5917,7 @@
         }
       },
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/download/progress"
+      "x-method": "_arakan/unstable/dictation/models/download/progress"
     },
     "DictationDownloadProgress": {
       "type": "object",
@@ -5964,7 +5964,7 @@
       ],
       "description": "Cancel an in-flight download.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/cancel"
+      "x-method": "_arakan/unstable/dictation/models/cancel"
     },
     "DictationModelDeleteRequest_unstable": {
       "type": "object",
@@ -5978,13 +5978,13 @@
       ],
       "description": "Delete a downloaded local Whisper model from disk.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/dictation/models/delete"
+      "x-method": "_arakan/unstable/dictation/models/delete"
     },
     "LocalInferenceModelsListRequest_unstable": {
       "type": "object",
       "description": "List locally available inference models.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/list"
+      "x-method": "_arakan/unstable/local-inference/models/list"
     },
     "LocalInferenceModelsListResponse_unstable": {
       "type": "object",
@@ -6000,7 +6000,7 @@
         "models"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/list"
+      "x-method": "_arakan/unstable/local-inference/models/list"
     },
     "LocalInferenceModelDto": {
       "type": "object",
@@ -6390,7 +6390,7 @@
       ],
       "description": "Download a model for local inference.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/download"
+      "x-method": "_arakan/unstable/local-inference/models/download"
     },
     "LocalInferenceModelDownloadResponse_unstable": {
       "type": "object",
@@ -6403,7 +6403,7 @@
         "modelId"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/download"
+      "x-method": "_arakan/unstable/local-inference/models/download"
     },
     "LocalInferenceModelDownloadProgressRequest_unstable": {
       "type": "object",
@@ -6417,7 +6417,7 @@
       ],
       "description": "Get the progress of a local model download.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/download/progress"
+      "x-method": "_arakan/unstable/local-inference/models/download/progress"
     },
     "LocalInferenceModelDownloadProgressResponse_unstable": {
       "type": "object",
@@ -6434,7 +6434,7 @@
         }
       },
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/download/progress"
+      "x-method": "_arakan/unstable/local-inference/models/download/progress"
     },
     "LocalInferenceDownloadProgressDto": {
       "type": "object",
@@ -6502,7 +6502,7 @@
       ],
       "description": "Cancel a local model download.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/download/cancel"
+      "x-method": "_arakan/unstable/local-inference/models/download/cancel"
     },
     "LocalInferenceModelDeleteRequest_unstable": {
       "type": "object",
@@ -6516,7 +6516,7 @@
       ],
       "description": "Delete a downloaded local inference model.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/delete"
+      "x-method": "_arakan/unstable/local-inference/models/delete"
     },
     "LocalInferenceModelEvictRequest_unstable": {
       "type": "object",
@@ -6530,7 +6530,7 @@
       ],
       "description": "Evict a local inference model from memory.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/evict"
+      "x-method": "_arakan/unstable/local-inference/models/evict"
     },
     "LocalInferenceModelSettingsReadRequest_unstable": {
       "type": "object",
@@ -6544,7 +6544,7 @@
       ],
       "description": "Read the sampling settings for a local inference model.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/settings/read"
+      "x-method": "_arakan/unstable/local-inference/models/settings/read"
     },
     "LocalInferenceModelSettingsReadResponse_unstable": {
       "type": "object",
@@ -6557,7 +6557,7 @@
         "settings"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/settings/read"
+      "x-method": "_arakan/unstable/local-inference/models/settings/read"
     },
     "LocalInferenceModelSettingsUpdateRequest_unstable": {
       "type": "object",
@@ -6575,7 +6575,7 @@
       ],
       "description": "Update the sampling settings for a local inference model.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/settings/update"
+      "x-method": "_arakan/unstable/local-inference/models/settings/update"
     },
     "LocalInferenceModelSettingsUpdateResponse_unstable": {
       "type": "object",
@@ -6588,7 +6588,7 @@
         "settings"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/models/settings/update"
+      "x-method": "_arakan/unstable/local-inference/models/settings/update"
     },
     "LocalInferenceHuggingFaceSearchRequest_unstable": {
       "type": "object",
@@ -6609,7 +6609,7 @@
       ],
       "description": "Search Hugging Face for local inference models.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/huggingface/search"
+      "x-method": "_arakan/unstable/local-inference/huggingface/search"
     },
     "LocalInferenceHuggingFaceSearchResponse_unstable": {
       "type": "object",
@@ -6625,7 +6625,7 @@
         "models"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/huggingface/search"
+      "x-method": "_arakan/unstable/local-inference/huggingface/search"
     },
     "LocalInferenceHfModelInfoDto": {
       "type": "object",
@@ -6773,7 +6773,7 @@
       ],
       "description": "List downloadable variants of a Hugging Face model repository.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/huggingface/repo/variants"
+      "x-method": "_arakan/unstable/local-inference/huggingface/repo/variants"
     },
     "LocalInferenceHuggingFaceRepoVariantsResponse_unstable": {
       "type": "object",
@@ -6815,13 +6815,13 @@
         "downloadedVariants"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/huggingface/repo/variants"
+      "x-method": "_arakan/unstable/local-inference/huggingface/repo/variants"
     },
     "LocalInferenceBuiltinChatTemplatesListRequest_unstable": {
       "type": "object",
       "description": "List built-in chat templates for local inference.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/chat-templates/builtin/list"
+      "x-method": "_arakan/unstable/local-inference/chat-templates/builtin/list"
     },
     "LocalInferenceBuiltinChatTemplatesListResponse_unstable": {
       "type": "object",
@@ -6837,27 +6837,27 @@
         "templates"
       ],
       "x-side": "agent",
-      "x-method": "_goose/unstable/local-inference/chat-templates/builtin/list"
+      "x-method": "_arakan/unstable/local-inference/chat-templates/builtin/list"
     },
-    "GooseSessionNotification_unstable": {
+    "ArakanSessionNotification_unstable": {
       "type": "object",
       "properties": {
         "sessionId": {
           "type": "string"
         },
         "update": {
-          "$ref": "#/$defs/GooseSessionUpdate"
+          "$ref": "#/$defs/ArakanSessionUpdate"
         }
       },
       "required": [
         "sessionId",
         "update"
       ],
-      "description": "Goose-custom session update notification — a parallel to ACP's\n`session/update` carrying goose-specific update variants.",
+      "description": "Arakan-custom session update notification — a parallel to ACP's\n`session/update` carrying arakan-specific update variants.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/session/update"
+      "x-method": "_arakan/unstable/session/update"
     },
-    "GooseSessionUpdate": {
+    "ArakanSessionUpdate": {
       "oneOf": [
         {
           "$ref": "#/$defs/SessionUsageUpdate",
@@ -6912,7 +6912,7 @@
           ]
         }
       ],
-      "description": "Discriminated union of goose-specific session update payloads.\nVariant tag matches ACP's convention (`sessionUpdate: \"<snake_case>\"`).\n\n`discriminator.mapping` is what makes TS codegen (`@hey-api/openapi-ts`)\nemit the correct snake_case tag value even when this enum has a single\nvariant. Add a mapping entry per variant.",
+      "description": "Discriminated union of arakan-specific session update payloads.\nVariant tag matches ACP's convention (`sessionUpdate: \"<snake_case>\"`).\n\n`discriminator.mapping` is what makes TS codegen (`@hey-api/openapi-ts`)\nemit the correct snake_case tag value even when this enum has a single\nvariant. Add a mapping entry per variant.",
       "discriminator": {
         "propertyName": "sessionUpdate",
         "mapping": {
@@ -7077,7 +7077,7 @@
           "default": false
         }
       },
-      "description": "Wire mirror of the conversation `MessageUsage` (this crate cannot depend on\ngoose-provider-types); field names and serde casing MUST stay in parity."
+      "description": "Wire mirror of the conversation `MessageUsage` (this crate cannot depend on\narakan-provider-types); field names and serde casing MUST stay in parity."
     },
     "CostSourceData": {
       "oneOf": [
@@ -7157,9 +7157,9 @@
         "verificationUri",
         "expiresIn"
       ],
-      "description": "Dedicated provider notification for OAuth device-code flow.\nSent during provider authentication when the ACP client supports\n`goose.customNotifications` — avoids a fake empty session ID.",
+      "description": "Dedicated provider notification for OAuth device-code flow.\nSent during provider authentication when the ACP client supports\n`arakan.customNotifications` — avoids a fake empty session ID.",
       "x-side": "agent",
-      "x-method": "_goose/unstable/providers/authentication/device-code"
+      "x-method": "_arakan/unstable/providers/authentication/device-code"
     },
     "RequestRecipeParams_unstable": {
       "type": "object",
@@ -7186,7 +7186,7 @@
       ],
       "description": "Ask the client to provide values for a recipe's parameters.",
       "x-side": "client",
-      "x-method": "_goose/unstable/session/recipe/request-params"
+      "x-method": "_arakan/unstable/session/recipe/request-params"
     },
     "RecipeParamsResponse_unstable": {
       "type": "object",
@@ -7204,7 +7204,7 @@
         }
       },
       "x-side": "client",
-      "x-method": "_goose/unstable/session/recipe/request-params"
+      "x-method": "_arakan/unstable/session/recipe/request-params"
     },
     "RecipeParamsAction": {
       "type": "string",
@@ -7231,7 +7231,7 @@
                       "$ref": "#/$defs/AddSessionExtensionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/extensions/add",
+                  "description": "Params for _arakan/unstable/session/extensions/add",
                   "title": "AddSessionExtensionRequest_unstable"
                 },
                 {
@@ -7240,7 +7240,7 @@
                       "$ref": "#/$defs/RemoveSessionExtensionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/extensions/remove",
+                  "description": "Params for _arakan/unstable/session/extensions/remove",
                   "title": "RemoveSessionExtensionRequest_unstable"
                 },
                 {
@@ -7249,7 +7249,7 @@
                       "$ref": "#/$defs/GetToolsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/tools/list",
+                  "description": "Params for _arakan/unstable/tools/list",
                   "title": "GetToolsRequest_unstable"
                 },
                 {
@@ -7258,17 +7258,17 @@
                       "$ref": "#/$defs/SetToolPermissionsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/tools/permissions/set",
+                  "description": "Params for _arakan/unstable/tools/permissions/set",
                   "title": "SetToolPermissionsRequest_unstable"
                 },
                 {
                   "allOf": [
                     {
-                      "$ref": "#/$defs/GooseToolCallRequest_unstable"
+                      "$ref": "#/$defs/ArakanToolCallRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/tools/call",
-                  "title": "GooseToolCallRequest_unstable"
+                  "description": "Params for _arakan/unstable/tools/call",
+                  "title": "ArakanToolCallRequest_unstable"
                 },
                 {
                   "allOf": [
@@ -7276,7 +7276,7 @@
                       "$ref": "#/$defs/ReadResourceRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/resources/read",
+                  "description": "Params for _arakan/unstable/resources/read",
                   "title": "ReadResourceRequest_unstable"
                 },
                 {
@@ -7285,7 +7285,7 @@
                       "$ref": "#/$defs/AppsListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/apps/list",
+                  "description": "Params for _arakan/unstable/apps/list",
                   "title": "AppsListRequest_unstable"
                 },
                 {
@@ -7294,7 +7294,7 @@
                       "$ref": "#/$defs/AppsExportRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/apps/export",
+                  "description": "Params for _arakan/unstable/apps/export",
                   "title": "AppsExportRequest_unstable"
                 },
                 {
@@ -7303,7 +7303,7 @@
                       "$ref": "#/$defs/AppsImportRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/apps/import",
+                  "description": "Params for _arakan/unstable/apps/import",
                   "title": "AppsImportRequest_unstable"
                 },
                 {
@@ -7312,7 +7312,7 @@
                       "$ref": "#/$defs/AppsDeleteRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/apps/delete",
+                  "description": "Params for _arakan/unstable/apps/delete",
                   "title": "AppsDeleteRequest_unstable"
                 },
                 {
@@ -7321,7 +7321,7 @@
                       "$ref": "#/$defs/UpdateWorkingDirRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/working-dir/update",
+                  "description": "Params for _arakan/unstable/session/working-dir/update",
                   "title": "UpdateWorkingDirRequest_unstable"
                 },
                 {
@@ -7330,7 +7330,7 @@
                       "$ref": "#/$defs/SetSessionSystemPromptRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/system-prompt/set",
+                  "description": "Params for _arakan/unstable/session/system-prompt/set",
                   "title": "SetSessionSystemPromptRequest_unstable"
                 },
                 {
@@ -7339,7 +7339,7 @@
                       "$ref": "#/$defs/SteerSessionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/steer",
+                  "description": "Params for _arakan/unstable/session/steer",
                   "title": "SteerSessionRequest_unstable"
                 },
                 {
@@ -7348,7 +7348,7 @@
                       "$ref": "#/$defs/LiveVoiceAvailabilityRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/live-voice/availability",
+                  "description": "Params for _arakan/unstable/session/live-voice/availability",
                   "title": "LiveVoiceAvailabilityRequest_unstable"
                 },
                 {
@@ -7357,7 +7357,7 @@
                       "$ref": "#/$defs/LiveVoiceStartRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/live-voice/start",
+                  "description": "Params for _arakan/unstable/session/live-voice/start",
                   "title": "LiveVoiceStartRequest_unstable"
                 },
                 {
@@ -7366,7 +7366,7 @@
                       "$ref": "#/$defs/LiveVoiceStopRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/live-voice/stop",
+                  "description": "Params for _arakan/unstable/session/live-voice/stop",
                   "title": "LiveVoiceStopRequest_unstable"
                 },
                 {
@@ -7375,7 +7375,7 @@
                       "$ref": "#/$defs/DiagnosticsGetRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/diagnostics/get",
+                  "description": "Params for _arakan/unstable/diagnostics/get",
                   "title": "DiagnosticsGetRequest_unstable"
                 },
                 {
@@ -7384,7 +7384,7 @@
                       "$ref": "#/$defs/ContextReportRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/context/report",
+                  "description": "Params for _arakan/unstable/context/report",
                   "title": "ContextReportRequest_unstable"
                 },
                 {
@@ -7393,7 +7393,7 @@
                       "$ref": "#/$defs/ListPromptsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/prompts/list",
+                  "description": "Params for _arakan/unstable/config/prompts/list",
                   "title": "ListPromptsRequest_unstable"
                 },
                 {
@@ -7402,7 +7402,7 @@
                       "$ref": "#/$defs/GetPromptRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/prompts/get",
+                  "description": "Params for _arakan/unstable/config/prompts/get",
                   "title": "GetPromptRequest_unstable"
                 },
                 {
@@ -7411,7 +7411,7 @@
                       "$ref": "#/$defs/SavePromptRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/prompts/save",
+                  "description": "Params for _arakan/unstable/config/prompts/save",
                   "title": "SavePromptRequest_unstable"
                 },
                 {
@@ -7420,7 +7420,7 @@
                       "$ref": "#/$defs/ResetPromptRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/prompts/reset",
+                  "description": "Params for _arakan/unstable/config/prompts/reset",
                   "title": "ResetPromptRequest_unstable"
                 },
                 {
@@ -7429,7 +7429,7 @@
                       "$ref": "#/$defs/GetConfigExtensionsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/extensions/list",
+                  "description": "Params for _arakan/unstable/config/extensions/list",
                   "title": "GetConfigExtensionsRequest_unstable"
                 },
                 {
@@ -7438,7 +7438,7 @@
                       "$ref": "#/$defs/AddConfigExtensionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/extensions/add",
+                  "description": "Params for _arakan/unstable/config/extensions/add",
                   "title": "AddConfigExtensionRequest_unstable"
                 },
                 {
@@ -7447,7 +7447,7 @@
                       "$ref": "#/$defs/RemoveConfigExtensionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/extensions/remove",
+                  "description": "Params for _arakan/unstable/config/extensions/remove",
                   "title": "RemoveConfigExtensionRequest_unstable"
                 },
                 {
@@ -7456,7 +7456,7 @@
                       "$ref": "#/$defs/SetConfigExtensionEnabledRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/extensions/set-enabled",
+                  "description": "Params for _arakan/unstable/config/extensions/set-enabled",
                   "title": "SetConfigExtensionEnabledRequest_unstable"
                 },
                 {
@@ -7465,7 +7465,7 @@
                       "$ref": "#/$defs/GetSessionExtensionsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/extensions/list",
+                  "description": "Params for _arakan/unstable/session/extensions/list",
                   "title": "GetSessionExtensionsRequest_unstable"
                 },
                 {
@@ -7474,7 +7474,7 @@
                       "$ref": "#/$defs/ListProvidersRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/list",
+                  "description": "Params for _arakan/unstable/providers/list",
                   "title": "ListProvidersRequest_unstable"
                 },
                 {
@@ -7483,7 +7483,7 @@
                       "$ref": "#/$defs/ProviderSupportedModelsListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/supported-models/list",
+                  "description": "Params for _arakan/unstable/providers/supported-models/list",
                   "title": "ProviderSupportedModelsListRequest_unstable"
                 },
                 {
@@ -7492,7 +7492,7 @@
                       "$ref": "#/$defs/ProviderCatalogListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/catalog/list",
+                  "description": "Params for _arakan/unstable/providers/catalog/list",
                   "title": "ProviderCatalogListRequest_unstable"
                 },
                 {
@@ -7501,7 +7501,7 @@
                       "$ref": "#/$defs/ProviderSetupCatalogListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/setup/catalog/list",
+                  "description": "Params for _arakan/unstable/providers/setup/catalog/list",
                   "title": "ProviderSetupCatalogListRequest_unstable"
                 },
                 {
@@ -7510,7 +7510,7 @@
                       "$ref": "#/$defs/ProviderCatalogTemplateRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/catalog/template",
+                  "description": "Params for _arakan/unstable/providers/catalog/template",
                   "title": "ProviderCatalogTemplateRequest_unstable"
                 },
                 {
@@ -7519,7 +7519,7 @@
                       "$ref": "#/$defs/CustomProviderCreateRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/custom/create",
+                  "description": "Params for _arakan/unstable/providers/custom/create",
                   "title": "CustomProviderCreateRequest_unstable"
                 },
                 {
@@ -7528,7 +7528,7 @@
                       "$ref": "#/$defs/CustomProviderReadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/custom/read",
+                  "description": "Params for _arakan/unstable/providers/custom/read",
                   "title": "CustomProviderReadRequest_unstable"
                 },
                 {
@@ -7537,7 +7537,7 @@
                       "$ref": "#/$defs/CustomProviderUpdateRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/custom/update",
+                  "description": "Params for _arakan/unstable/providers/custom/update",
                   "title": "CustomProviderUpdateRequest_unstable"
                 },
                 {
@@ -7546,7 +7546,7 @@
                       "$ref": "#/$defs/CustomProviderDeleteRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/custom/delete",
+                  "description": "Params for _arakan/unstable/providers/custom/delete",
                   "title": "CustomProviderDeleteRequest_unstable"
                 },
                 {
@@ -7555,7 +7555,7 @@
                       "$ref": "#/$defs/RefreshProviderInventoryRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/inventory/refresh",
+                  "description": "Params for _arakan/unstable/providers/inventory/refresh",
                   "title": "RefreshProviderInventoryRequest_unstable"
                 },
                 {
@@ -7564,7 +7564,7 @@
                       "$ref": "#/$defs/ProviderReadinessCheckRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/readiness/check",
+                  "description": "Params for _arakan/unstable/providers/readiness/check",
                   "title": "ProviderReadinessCheckRequest_unstable"
                 },
                 {
@@ -7573,7 +7573,7 @@
                       "$ref": "#/$defs/ProviderConfigReadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/config/read",
+                  "description": "Params for _arakan/unstable/providers/config/read",
                   "title": "ProviderConfigReadRequest_unstable"
                 },
                 {
@@ -7582,7 +7582,7 @@
                       "$ref": "#/$defs/ProviderConfigStatusRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/config/status",
+                  "description": "Params for _arakan/unstable/providers/config/status",
                   "title": "ProviderConfigStatusRequest_unstable"
                 },
                 {
@@ -7591,7 +7591,7 @@
                       "$ref": "#/$defs/ProviderConfigSaveRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/config/save",
+                  "description": "Params for _arakan/unstable/providers/config/save",
                   "title": "ProviderConfigSaveRequest_unstable"
                 },
                 {
@@ -7600,7 +7600,7 @@
                       "$ref": "#/$defs/ProviderConfigDeleteRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/config/delete",
+                  "description": "Params for _arakan/unstable/providers/config/delete",
                   "title": "ProviderConfigDeleteRequest_unstable"
                 },
                 {
@@ -7609,7 +7609,7 @@
                       "$ref": "#/$defs/ProviderConfigAuthenticateRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/config/authenticate",
+                  "description": "Params for _arakan/unstable/providers/config/authenticate",
                   "title": "ProviderConfigAuthenticateRequest_unstable"
                 },
                 {
@@ -7618,7 +7618,7 @@
                       "$ref": "#/$defs/ProviderSecretsListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/secrets/list",
+                  "description": "Params for _arakan/unstable/providers/secrets/list",
                   "title": "ProviderSecretsListRequest_unstable"
                 },
                 {
@@ -7627,7 +7627,7 @@
                       "$ref": "#/$defs/ProviderSecretDeleteRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/secrets/delete",
+                  "description": "Params for _arakan/unstable/providers/secrets/delete",
                   "title": "ProviderSecretDeleteRequest_unstable"
                 },
                 {
@@ -7636,7 +7636,7 @@
                       "$ref": "#/$defs/CanonicalModelInfoRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/canonical-model-info",
+                  "description": "Params for _arakan/unstable/providers/canonical-model-info",
                   "title": "CanonicalModelInfoRequest_unstable"
                 },
                 {
@@ -7645,7 +7645,7 @@
                       "$ref": "#/$defs/PreferencesReadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/preferences/read",
+                  "description": "Params for _arakan/unstable/preferences/read",
                   "title": "PreferencesReadRequest_unstable"
                 },
                 {
@@ -7654,7 +7654,7 @@
                       "$ref": "#/$defs/PreferencesSaveRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/preferences/save",
+                  "description": "Params for _arakan/unstable/preferences/save",
                   "title": "PreferencesSaveRequest_unstable"
                 },
                 {
@@ -7663,7 +7663,7 @@
                       "$ref": "#/$defs/ConfigReadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/read",
+                  "description": "Params for _arakan/unstable/config/read",
                   "title": "ConfigReadRequest_unstable"
                 },
                 {
@@ -7672,7 +7672,7 @@
                       "$ref": "#/$defs/ConfigUpsertRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/upsert",
+                  "description": "Params for _arakan/unstable/config/upsert",
                   "title": "ConfigUpsertRequest_unstable"
                 },
                 {
@@ -7681,7 +7681,7 @@
                       "$ref": "#/$defs/ConfigRemoveRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/remove",
+                  "description": "Params for _arakan/unstable/config/remove",
                   "title": "ConfigRemoveRequest_unstable"
                 },
                 {
@@ -7690,7 +7690,7 @@
                       "$ref": "#/$defs/ConfigReadAllRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/config/read-all",
+                  "description": "Params for _arakan/unstable/config/read-all",
                   "title": "ConfigReadAllRequest_unstable"
                 },
                 {
@@ -7699,7 +7699,7 @@
                       "$ref": "#/$defs/DefaultsReadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/defaults/read",
+                  "description": "Params for _arakan/unstable/defaults/read",
                   "title": "DefaultsReadRequest_unstable"
                 },
                 {
@@ -7708,7 +7708,7 @@
                       "$ref": "#/$defs/DefaultsSaveRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/defaults/save",
+                  "description": "Params for _arakan/unstable/defaults/save",
                   "title": "DefaultsSaveRequest_unstable"
                 },
                 {
@@ -7717,7 +7717,7 @@
                       "$ref": "#/$defs/DefaultsClearRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/defaults/clear",
+                  "description": "Params for _arakan/unstable/defaults/clear",
                   "title": "DefaultsClearRequest_unstable"
                 },
                 {
@@ -7726,7 +7726,7 @@
                       "$ref": "#/$defs/OnboardingImportScanRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/onboarding/import/scan",
+                  "description": "Params for _arakan/unstable/onboarding/import/scan",
                   "title": "OnboardingImportScanRequest_unstable"
                 },
                 {
@@ -7735,7 +7735,7 @@
                       "$ref": "#/$defs/OnboardingImportApplyRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/onboarding/import/apply",
+                  "description": "Params for _arakan/unstable/onboarding/import/apply",
                   "title": "OnboardingImportApplyRequest_unstable"
                 },
                 {
@@ -7744,7 +7744,7 @@
                       "$ref": "#/$defs/ExportSessionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/export",
+                  "description": "Params for _arakan/unstable/session/export",
                   "title": "ExportSessionRequest_unstable"
                 },
                 {
@@ -7753,7 +7753,7 @@
                       "$ref": "#/$defs/ImportSessionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/import",
+                  "description": "Params for _arakan/unstable/session/import",
                   "title": "ImportSessionRequest_unstable"
                 },
                 {
@@ -7762,7 +7762,7 @@
                       "$ref": "#/$defs/EncodeRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/encode",
+                  "description": "Params for _arakan/unstable/recipes/encode",
                   "title": "EncodeRecipeRequest_unstable"
                 },
                 {
@@ -7771,7 +7771,7 @@
                       "$ref": "#/$defs/DecodeRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/decode",
+                  "description": "Params for _arakan/unstable/recipes/decode",
                   "title": "DecodeRecipeRequest_unstable"
                 },
                 {
@@ -7780,7 +7780,7 @@
                       "$ref": "#/$defs/ScanRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/scan",
+                  "description": "Params for _arakan/unstable/recipes/scan",
                   "title": "ScanRecipeRequest_unstable"
                 },
                 {
@@ -7789,7 +7789,7 @@
                       "$ref": "#/$defs/ListRecipesRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/list",
+                  "description": "Params for _arakan/unstable/recipes/list",
                   "title": "ListRecipesRequest_unstable"
                 },
                 {
@@ -7798,7 +7798,7 @@
                       "$ref": "#/$defs/DeleteRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/delete",
+                  "description": "Params for _arakan/unstable/recipes/delete",
                   "title": "DeleteRecipeRequest_unstable"
                 },
                 {
@@ -7807,7 +7807,7 @@
                       "$ref": "#/$defs/ScheduleRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/schedule",
+                  "description": "Params for _arakan/unstable/recipes/schedule",
                   "title": "ScheduleRecipeRequest_unstable"
                 },
                 {
@@ -7816,7 +7816,7 @@
                       "$ref": "#/$defs/SetRecipeSlashCommandRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/slash-command",
+                  "description": "Params for _arakan/unstable/recipes/slash-command",
                   "title": "SetRecipeSlashCommandRequest_unstable"
                 },
                 {
@@ -7825,7 +7825,7 @@
                       "$ref": "#/$defs/SaveRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/save",
+                  "description": "Params for _arakan/unstable/recipes/save",
                   "title": "SaveRecipeRequest_unstable"
                 },
                 {
@@ -7834,7 +7834,7 @@
                       "$ref": "#/$defs/ParseRecipeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/parse",
+                  "description": "Params for _arakan/unstable/recipes/parse",
                   "title": "ParseRecipeRequest_unstable"
                 },
                 {
@@ -7843,7 +7843,7 @@
                       "$ref": "#/$defs/RecipeToYamlRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/recipes/to-yaml",
+                  "description": "Params for _arakan/unstable/recipes/to-yaml",
                   "title": "RecipeToYamlRequest_unstable"
                 },
                 {
@@ -7852,7 +7852,7 @@
                       "$ref": "#/$defs/ListSchedulesRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/list",
+                  "description": "Params for _arakan/unstable/schedules/list",
                   "title": "ListSchedulesRequest_unstable"
                 },
                 {
@@ -7861,7 +7861,7 @@
                       "$ref": "#/$defs/ListScheduleSessionsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/sessions/list",
+                  "description": "Params for _arakan/unstable/schedules/sessions/list",
                   "title": "ListScheduleSessionsRequest_unstable"
                 },
                 {
@@ -7870,7 +7870,7 @@
                       "$ref": "#/$defs/CreateScheduleRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/create",
+                  "description": "Params for _arakan/unstable/schedules/create",
                   "title": "CreateScheduleRequest_unstable"
                 },
                 {
@@ -7879,7 +7879,7 @@
                       "$ref": "#/$defs/DeleteScheduleRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/delete",
+                  "description": "Params for _arakan/unstable/schedules/delete",
                   "title": "DeleteScheduleRequest_unstable"
                 },
                 {
@@ -7888,7 +7888,7 @@
                       "$ref": "#/$defs/PauseScheduleRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/pause",
+                  "description": "Params for _arakan/unstable/schedules/pause",
                   "title": "PauseScheduleRequest_unstable"
                 },
                 {
@@ -7897,7 +7897,7 @@
                       "$ref": "#/$defs/UnpauseScheduleRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/unpause",
+                  "description": "Params for _arakan/unstable/schedules/unpause",
                   "title": "UnpauseScheduleRequest_unstable"
                 },
                 {
@@ -7906,7 +7906,7 @@
                       "$ref": "#/$defs/UpdateScheduleRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/update",
+                  "description": "Params for _arakan/unstable/schedules/update",
                   "title": "UpdateScheduleRequest_unstable"
                 },
                 {
@@ -7915,7 +7915,7 @@
                       "$ref": "#/$defs/RunScheduleNowRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/run-now",
+                  "description": "Params for _arakan/unstable/schedules/run-now",
                   "title": "RunScheduleNowRequest_unstable"
                 },
                 {
@@ -7924,7 +7924,7 @@
                       "$ref": "#/$defs/KillRunningJobRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/running-job/kill",
+                  "description": "Params for _arakan/unstable/schedules/running-job/kill",
                   "title": "KillRunningJobRequest_unstable"
                 },
                 {
@@ -7933,7 +7933,7 @@
                       "$ref": "#/$defs/InspectRunningJobRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/schedules/running-job/inspect",
+                  "description": "Params for _arakan/unstable/schedules/running-job/inspect",
                   "title": "InspectRunningJobRequest_unstable"
                 },
                 {
@@ -7942,7 +7942,7 @@
                       "$ref": "#/$defs/GetSessionInfoRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/info",
+                  "description": "Params for _arakan/unstable/session/info",
                   "title": "GetSessionInfoRequest_unstable"
                 },
                 {
@@ -7951,7 +7951,7 @@
                       "$ref": "#/$defs/TruncateSessionConversationRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/conversation/truncate",
+                  "description": "Params for _arakan/unstable/session/conversation/truncate",
                   "title": "TruncateSessionConversationRequest_unstable"
                 },
                 {
@@ -7960,7 +7960,7 @@
                       "$ref": "#/$defs/UpdateSessionProjectRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/project/update",
+                  "description": "Params for _arakan/unstable/session/project/update",
                   "title": "UpdateSessionProjectRequest_unstable"
                 },
                 {
@@ -7969,7 +7969,7 @@
                       "$ref": "#/$defs/RenameSessionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/rename",
+                  "description": "Params for _arakan/unstable/session/rename",
                   "title": "RenameSessionRequest_unstable"
                 },
                 {
@@ -7978,7 +7978,7 @@
                       "$ref": "#/$defs/ArchiveSessionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/archive",
+                  "description": "Params for _arakan/unstable/session/archive",
                   "title": "ArchiveSessionRequest_unstable"
                 },
                 {
@@ -7987,7 +7987,7 @@
                       "$ref": "#/$defs/UnarchiveSessionRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/unarchive",
+                  "description": "Params for _arakan/unstable/session/unarchive",
                   "title": "UnarchiveSessionRequest_unstable"
                 },
                 {
@@ -7996,7 +7996,7 @@
                       "$ref": "#/$defs/CreateSourceRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/sources/create",
+                  "description": "Params for _arakan/unstable/sources/create",
                   "title": "CreateSourceRequest_unstable"
                 },
                 {
@@ -8005,7 +8005,7 @@
                       "$ref": "#/$defs/ListSourcesRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/sources/list",
+                  "description": "Params for _arakan/unstable/sources/list",
                   "title": "ListSourcesRequest_unstable"
                 },
                 {
@@ -8014,7 +8014,7 @@
                       "$ref": "#/$defs/ListAgentMentionsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/agent-mentions/list",
+                  "description": "Params for _arakan/unstable/agent-mentions/list",
                   "title": "ListAgentMentionsRequest_unstable"
                 },
                 {
@@ -8023,7 +8023,7 @@
                       "$ref": "#/$defs/ListSlashCommandsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/slash-commands/list",
+                  "description": "Params for _arakan/unstable/slash-commands/list",
                   "title": "ListSlashCommandsRequest_unstable"
                 },
                 {
@@ -8032,7 +8032,7 @@
                       "$ref": "#/$defs/UpdateSourceRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/sources/update",
+                  "description": "Params for _arakan/unstable/sources/update",
                   "title": "UpdateSourceRequest_unstable"
                 },
                 {
@@ -8041,7 +8041,7 @@
                       "$ref": "#/$defs/DeleteSourceRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/sources/delete",
+                  "description": "Params for _arakan/unstable/sources/delete",
                   "title": "DeleteSourceRequest_unstable"
                 },
                 {
@@ -8050,7 +8050,7 @@
                       "$ref": "#/$defs/ExportSourceRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/sources/export",
+                  "description": "Params for _arakan/unstable/sources/export",
                   "title": "ExportSourceRequest_unstable"
                 },
                 {
@@ -8059,7 +8059,7 @@
                       "$ref": "#/$defs/ImportSourcesRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/sources/import",
+                  "description": "Params for _arakan/unstable/sources/import",
                   "title": "ImportSourcesRequest_unstable"
                 },
                 {
@@ -8068,7 +8068,7 @@
                       "$ref": "#/$defs/DictationTranscribeRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/transcribe",
+                  "description": "Params for _arakan/unstable/dictation/transcribe",
                   "title": "DictationTranscribeRequest_unstable"
                 },
                 {
@@ -8077,7 +8077,7 @@
                       "$ref": "#/$defs/DictationConfigRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/config",
+                  "description": "Params for _arakan/unstable/dictation/config",
                   "title": "DictationConfigRequest_unstable"
                 },
                 {
@@ -8086,7 +8086,7 @@
                       "$ref": "#/$defs/DictationModelsListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/models/list",
+                  "description": "Params for _arakan/unstable/dictation/models/list",
                   "title": "DictationModelsListRequest_unstable"
                 },
                 {
@@ -8095,7 +8095,7 @@
                       "$ref": "#/$defs/DictationModelDownloadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/models/download",
+                  "description": "Params for _arakan/unstable/dictation/models/download",
                   "title": "DictationModelDownloadRequest_unstable"
                 },
                 {
@@ -8104,7 +8104,7 @@
                       "$ref": "#/$defs/DictationModelDownloadProgressRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/models/download/progress",
+                  "description": "Params for _arakan/unstable/dictation/models/download/progress",
                   "title": "DictationModelDownloadProgressRequest_unstable"
                 },
                 {
@@ -8113,7 +8113,7 @@
                       "$ref": "#/$defs/DictationModelCancelRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/models/cancel",
+                  "description": "Params for _arakan/unstable/dictation/models/cancel",
                   "title": "DictationModelCancelRequest_unstable"
                 },
                 {
@@ -8122,7 +8122,7 @@
                       "$ref": "#/$defs/DictationModelDeleteRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/dictation/models/delete",
+                  "description": "Params for _arakan/unstable/dictation/models/delete",
                   "title": "DictationModelDeleteRequest_unstable"
                 },
                 {
@@ -8131,7 +8131,7 @@
                       "$ref": "#/$defs/LocalInferenceModelsListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/list",
+                  "description": "Params for _arakan/unstable/local-inference/models/list",
                   "title": "LocalInferenceModelsListRequest_unstable"
                 },
                 {
@@ -8140,7 +8140,7 @@
                       "$ref": "#/$defs/LocalInferenceModelDownloadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/download",
+                  "description": "Params for _arakan/unstable/local-inference/models/download",
                   "title": "LocalInferenceModelDownloadRequest_unstable"
                 },
                 {
@@ -8149,7 +8149,7 @@
                       "$ref": "#/$defs/LocalInferenceModelDownloadProgressRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/download/progress",
+                  "description": "Params for _arakan/unstable/local-inference/models/download/progress",
                   "title": "LocalInferenceModelDownloadProgressRequest_unstable"
                 },
                 {
@@ -8158,7 +8158,7 @@
                       "$ref": "#/$defs/LocalInferenceModelDownloadCancelRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/download/cancel",
+                  "description": "Params for _arakan/unstable/local-inference/models/download/cancel",
                   "title": "LocalInferenceModelDownloadCancelRequest_unstable"
                 },
                 {
@@ -8167,7 +8167,7 @@
                       "$ref": "#/$defs/LocalInferenceModelDeleteRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/delete",
+                  "description": "Params for _arakan/unstable/local-inference/models/delete",
                   "title": "LocalInferenceModelDeleteRequest_unstable"
                 },
                 {
@@ -8176,7 +8176,7 @@
                       "$ref": "#/$defs/LocalInferenceModelEvictRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/evict",
+                  "description": "Params for _arakan/unstable/local-inference/models/evict",
                   "title": "LocalInferenceModelEvictRequest_unstable"
                 },
                 {
@@ -8185,7 +8185,7 @@
                       "$ref": "#/$defs/LocalInferenceModelSettingsReadRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/settings/read",
+                  "description": "Params for _arakan/unstable/local-inference/models/settings/read",
                   "title": "LocalInferenceModelSettingsReadRequest_unstable"
                 },
                 {
@@ -8194,7 +8194,7 @@
                       "$ref": "#/$defs/LocalInferenceModelSettingsUpdateRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/models/settings/update",
+                  "description": "Params for _arakan/unstable/local-inference/models/settings/update",
                   "title": "LocalInferenceModelSettingsUpdateRequest_unstable"
                 },
                 {
@@ -8203,7 +8203,7 @@
                       "$ref": "#/$defs/LocalInferenceHuggingFaceSearchRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/huggingface/search",
+                  "description": "Params for _arakan/unstable/local-inference/huggingface/search",
                   "title": "LocalInferenceHuggingFaceSearchRequest_unstable"
                 },
                 {
@@ -8212,7 +8212,7 @@
                       "$ref": "#/$defs/LocalInferenceHuggingFaceRepoVariantsRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/huggingface/repo/variants",
+                  "description": "Params for _arakan/unstable/local-inference/huggingface/repo/variants",
                   "title": "LocalInferenceHuggingFaceRepoVariantsRequest_unstable"
                 },
                 {
@@ -8221,7 +8221,7 @@
                       "$ref": "#/$defs/LocalInferenceBuiltinChatTemplatesListRequest_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/local-inference/chat-templates/builtin/list",
+                  "description": "Params for _arakan/unstable/local-inference/chat-templates/builtin/list",
                   "title": "LocalInferenceBuiltinChatTemplatesListRequest_unstable"
                 }
               ]
@@ -8281,10 +8281,10 @@
                     {
                       "allOf": [
                         {
-                          "$ref": "#/$defs/GooseToolCallResponse_unstable"
+                          "$ref": "#/$defs/ArakanToolCallResponse_unstable"
                         }
                       ],
-                      "title": "GooseToolCallResponse_unstable"
+                      "title": "ArakanToolCallResponse_unstable"
                     },
                     {
                       "allOf": [
@@ -8928,11 +8928,11 @@
                 {
                   "allOf": [
                     {
-                      "$ref": "#/$defs/GooseSessionNotification_unstable"
+                      "$ref": "#/$defs/ArakanSessionNotification_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/update",
-                  "title": "GooseSessionNotification_unstable"
+                  "description": "Params for _arakan/unstable/session/update",
+                  "title": "ArakanSessionNotification_unstable"
                 },
                 {
                   "allOf": [
@@ -8940,7 +8940,7 @@
                       "$ref": "#/$defs/ProviderDeviceCodeNotification_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/providers/authentication/device-code",
+                  "description": "Params for _arakan/unstable/providers/authentication/device-code",
                   "title": "ProviderDeviceCodeNotification_unstable"
                 }
               ]
@@ -8979,7 +8979,7 @@
                       "$ref": "#/$defs/RequestRecipeParams_unstable"
                     }
                   ],
-                  "description": "Params for _goose/unstable/session/recipe/request-params",
+                  "description": "Params for _arakan/unstable/session/recipe/request-params",
                   "title": "RequestRecipeParams_unstable"
                 }
               ]

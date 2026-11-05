@@ -25,9 +25,9 @@ fn build_chain_summary_update(
     tool_call_id: String,
     chain_summary: &ToolChainSummary,
 ) -> ToolCallUpdate {
-    let goose_meta = Map::from_iter([tool_chain_summary(chain_summary)]);
+    let arakan_meta = Map::from_iter([tool_chain_summary(chain_summary)]);
     let mut meta = Meta::default();
-    meta.insert("goose".to_string(), Value::Object(goose_meta));
+    meta.insert("arakan".to_string(), Value::Object(arakan_meta));
     ToolCallUpdate::new(ToolCallId::new(tool_call_id), ToolCallUpdateFields::new()).meta(Some(meta))
 }
 
@@ -113,7 +113,7 @@ mod tests {
                 json!({
                     "toolCallId": "req_1",
                     "_meta": {
-                        "goose": {
+                        "arakan": {
                             "toolChainSummary": {
                                 "summary": "applied dark mode",
                                 "count": 4,

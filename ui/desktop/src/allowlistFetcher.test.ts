@@ -43,7 +43,7 @@ describe('fetchAllowlistContent', () => {
 
   it('rejects an HTTP initial URL without making a network request', async () => {
     await expect(fetchAllowlistContent('http://example.com/policy.yaml')).rejects.toThrow(
-      'GOOSE_ALLOWLIST must use HTTPS'
+      'ARAKAN_ALLOWLIST must use HTTPS'
     );
     expect(mockHttpsGet).not.toHaveBeenCalled();
   });
@@ -57,7 +57,7 @@ describe('fetchAllowlistContent', () => {
     });
 
     await expect(fetchAllowlistContent('https://example.com/policy.yaml')).rejects.toThrow(
-      'GOOSE_ALLOWLIST must use HTTPS'
+      'ARAKAN_ALLOWLIST must use HTTPS'
     );
     expect(mockHttpsGet).toHaveBeenCalledTimes(1);
     expect(mockHttpsGet).toHaveBeenCalledWith(

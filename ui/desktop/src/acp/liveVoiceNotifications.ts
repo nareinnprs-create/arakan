@@ -1,9 +1,9 @@
-import type { GooseSessionNotification_unstable } from '@aaif/goose-acp-client';
+import type { ArakanSessionNotification_unstable } from '@aaif/arakan-acp-client';
 
 export type LiveVoiceInteractionEndedNotification = {
   sessionId: string;
   update: Extract<
-    GooseSessionNotification_unstable['update'],
+    ArakanSessionNotification_unstable['update'],
     { sessionUpdate: 'live_voice_interaction_ended' }
   >;
 };

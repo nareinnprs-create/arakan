@@ -62,7 +62,7 @@ mod tests {
             last_message_at: None,
             provider_name: Some("databricks".to_string()),
             model_config: None,
-            goose_mode: Default::default(),
+            arakan_mode: Default::default(),
             archived_at: None,
             project_id: None,
             parent_session_id: None,

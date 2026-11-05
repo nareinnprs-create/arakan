@@ -14,7 +14,7 @@ use crate::session::program_status::{BlockedKind, ProgramStatus};
 use crate::session::task_execution_display::{
     format_task_execution_notification, TASK_EXECUTION_NOTIFICATION_TYPE,
 };
-use goose::conversation::Conversation;
+use arakan::conversation::Conversation;
 use std::io::Write;
 use std::str::FromStr;
 use tokio::signal::ctrl_c;
@@ -26,36 +26,36 @@ pub use builder::{
 };
 use console::Color;
 
-use goose::agents::platform_extensions::developer::shell::{
+use arakan::agents::platform_extensions::developer::shell::{
     parse_shell_output_notification, ShellOutputNotificationParams, ShellOutputStream,
 };
-use goose::agents::AgentEvent;
-use goose::agents::SUBAGENT_TOOL_REQUEST_TYPE;
-use goose::permission::Permission;
-use goose::providers::base::{Provider, ProviderUsage};
-use goose::utils::safe_truncate;
+use arakan::agents::AgentEvent;
+use arakan::agents::SUBAGENT_TOOL_REQUEST_TYPE;
+use arakan::permission::Permission;
+use arakan::providers::base::{Provider, ProviderUsage};
+use arakan::utils::safe_truncate;
 
 use anyhow::Result;
-use completion::GooseCompleter;
-use goose::agents::extension::{Envs, ExtensionConfig, PLATFORM_EXTENSIONS};
-use goose::agents::{
+use completion::ArakanCompleter;
+use arakan::agents::extension::{Envs, ExtensionConfig, PLATFORM_EXTENSIONS};
+use arakan::agents::{
     context_management_unsupported_message, SessionConfig, StateMachineServices, COMPACT_TRIGGERS,
 };
-use goose::config::extensions::name_to_key;
-use goose::config::{Config, GooseMode};
+use arakan::config::extensions::name_to_key;
+use arakan::config::{Config, ArakanMode};
 use input::InputResult;
 use rmcp::model::ServerNotification;
 use rmcp::model::{ElicitationAction, PromptMessage};
 use rmcp::model::{ErrorCode, ErrorData};
 use strum::VariantNames;
 
-use goose::config::paths::Paths;
-use goose::config::providers;
-use goose::conversation::message::{
+use arakan::config::paths::Paths;
+use arakan::config::providers;
+use arakan::conversation::message::{
     ActionRequiredData, Message, MessageContent, ToolConfirmationRequest,
 };
-use goose::providers::inventory::ProviderInventoryService;
-use goose::session::SessionManager;
+use arakan::providers::inventory::ProviderInventoryService;
+use arakan::session::SessionManager;
 use rustyline::EditMode;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -204,7 +204,7 @@ impl HistoryManager {
 
     fn load(
         &self,
-        editor: &mut rustyline::Editor<GooseCompleter, rustyline::history::DefaultHistory>,
+        editor: &mut rustyline::Editor<ArakanCompleter, rustyline::history::DefaultHistory>,
     ) {
         if let Some(parent) = self.history_file.parent() {
             if !parent.exists() {
@@ -224,7 +224,7 @@ impl HistoryManager {
 
     fn save(
         &self,
-        editor: &mut rustyline::Editor<GooseCompleter, rustyline::history::DefaultHistory>,
+        editor: &mut rustyline::Editor<ArakanCompleter, rustyline::history::DefaultHistory>,
     ) {
         if let Err(err) = editor.save_history(&self.history_file) {
             eprintln!("Warning: Failed to save command history: {}", err);
@@ -351,7 +351,7 @@ impl CliSession {
     /// whenever one is used (`npx`, `python -m ...`, `uvx`, ...).
     pub fn parse_stdio_extension(extension_command: &str) -> Result<ExtensionConfig> {
         let (explicit_name, command) = split_extension_name_prefix(extension_command);
-        let mut parts = goose::utils::split_command_args(command)?;
+        let mut parts = arakan::utils::split_command_args(command)?;
         let mut envs = HashMap::new();
 
         while let Some(part) = parts.first() {
@@ -382,8 +382,8 @@ impl CliSession {
             args: parts,
             envs: Envs::new(envs),
             env_keys: Vec::new(),
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
-            timeout: Some(goose::config::DEFAULT_EXTENSION_TIMEOUT),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            timeout: Some(arakan::config::DEFAULT_EXTENSION_TIMEOUT),
             cwd: None,
             bundled: None,
             available_tools: Vec::new(),
@@ -418,7 +418,7 @@ impl CliSession {
             envs: Envs::new(HashMap::new()),
             env_keys: Vec::new(),
             headers: HashMap::new(),
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
             timeout: Some(timeout),
             socket: None,
             client_id: None,
@@ -481,7 +481,7 @@ impl CliSession {
     pub async fn add_streamable_http_extension(&mut self, extension_url: String) -> Result<()> {
         let config = Self::parse_streamable_http_extension(
             &extension_url,
-            goose::config::DEFAULT_EXTENSION_TIMEOUT,
+            arakan::config::DEFAULT_EXTENSION_TIMEOUT,
         );
         self.add_and_persist_extensions(vec![config]).await
     }
@@ -593,7 +593,7 @@ impl CliSession {
         let result = self.run_interactive(prompt).await;
 
         self.services
-            .emit_hook(goose::hooks::HookEvent::SessionEnd, &self.session_id)
+            .emit_hook(arakan::hooks::HookEvent::SessionEnd, &self.session_id)
             .await;
 
         if result.is_ok() {
@@ -672,7 +672,7 @@ impl CliSession {
 
     fn create_editor(
         &self,
-    ) -> Result<rustyline::Editor<GooseCompleter, rustyline::history::DefaultHistory>> {
+    ) -> Result<rustyline::Editor<ArakanCompleter, rustyline::history::DefaultHistory>> {
         let builder =
             rustyline::Config::builder().completion_type(rustyline::CompletionType::Circular);
         let builder = match self.edit_mode {
@@ -681,10 +681,10 @@ impl CliSession {
         };
         let config = builder.build();
         let mut editor =
-            rustyline::Editor::<GooseCompleter, rustyline::history::DefaultHistory>::with_config(
+            rustyline::Editor::<ArakanCompleter, rustyline::history::DefaultHistory>::with_config(
                 config,
             )?;
-        let completer = GooseCompleter::new(self.completion_cache.clone());
+        let completer = ArakanCompleter::new(self.completion_cache.clone());
         editor.set_helper(Some(completer));
         Ok(editor)
     }
@@ -693,7 +693,7 @@ impl CliSession {
         &mut self,
         input: InputResult,
         history: &HistoryManager,
-        editor: &mut rustyline::Editor<GooseCompleter, rustyline::history::DefaultHistory>,
+        editor: &mut rustyline::Editor<ArakanCompleter, rustyline::history::DefaultHistory>,
         conversation_messages: &[String],
     ) -> Result<()> {
         // The REPL's loading gate: every command, including future ones, waits
@@ -738,9 +738,9 @@ impl CliSession {
                     Err(e) => output::render_error(&e.to_string()),
                 }
             }
-            InputResult::GooseMode(mode) => {
+            InputResult::ArakanMode(mode) => {
                 history.save(editor);
-                self.handle_goose_mode(&mode).await?;
+                self.handle_arakan_mode(&mode).await?;
             }
             InputResult::Model(options) => {
                 history.save(editor);
@@ -787,7 +787,7 @@ impl CliSession {
                     None => {
                         output::render_error(
                             "No editor found. Set one with:\n  \
-                                 goose configure set goose_prompt_editor \"vim\"\n  \
+                                 arakan configure set arakan_prompt_editor \"vim\"\n  \
                                  or set $VISUAL or $EDITOR in your shell.",
                         );
                     }
@@ -809,7 +809,7 @@ impl CliSession {
         &mut self,
         content: &str,
         history: &HistoryManager,
-        editor: &mut rustyline::Editor<GooseCompleter, rustyline::history::DefaultHistory>,
+        editor: &mut rustyline::Editor<ArakanCompleter, rustyline::history::DefaultHistory>,
     ) -> Result<()> {
         history.save(editor);
         self.push_message(Message::user().with_text(content));
@@ -889,23 +889,23 @@ impl CliSession {
         }
     }
 
-    async fn handle_goose_mode(&self, mode: &str) -> Result<()> {
+    async fn handle_arakan_mode(&self, mode: &str) -> Result<()> {
         let config = Config::global();
-        let mode = match GooseMode::from_str(&mode.to_lowercase()) {
+        let mode = match ArakanMode::from_str(&mode.to_lowercase()) {
             Ok(mode) => mode,
             Err(_) => {
                 output::render_error(&format!(
                     "Invalid mode '{mode}'. Mode must be one of: {}",
-                    GooseMode::VARIANTS.join(", ")
+                    ArakanMode::VARIANTS.join(", ")
                 ));
                 return Ok(());
             }
         };
         self.services
-            .update_goose_mode(mode, &self.session_id)
+            .update_arakan_mode(mode, &self.session_id)
             .await?;
-        config.set_goose_mode(mode)?;
-        output::goose_mode_message(&format!("Goose mode set to '{mode}'"));
+        config.set_arakan_mode(mode)?;
+        output::arakan_mode_message(&format!("Arakan mode set to '{mode}'"));
         Ok(())
     }
 
@@ -919,7 +919,7 @@ impl CliSession {
         let current_model_name = current_model_config.model_name.clone();
 
         if options.provider.is_none() && options.model.is_none() {
-            output::goose_mode_message(&format!(
+            output::arakan_mode_message(&format!(
                 "Current session model: '{}' (provider '{}')\n\
                  Tip: use '/model <name>' to switch model, or '/model --provider <name> [model]' to switch provider.",
                 current_model_name, current_provider_name
@@ -939,7 +939,7 @@ impl CliSession {
             return Ok(());
         }
 
-        let target_entry = match goose::providers::get_from_registry(target_provider_name).await {
+        let target_entry = match arakan::providers::get_from_registry(target_provider_name).await {
             Ok(entry) => entry,
             Err(_) => {
                 output::render_error(&format!(
@@ -1001,7 +1001,7 @@ impl CliSession {
             &current_model_config,
         )?;
 
-        let configured_effort = Config::global().get_goose_thinking_effort();
+        let configured_effort = Config::global().get_arakan_thinking_effort();
         let new_effort = new_model_config.thinking_effort().or(configured_effort);
         let current_effort = current_model_config.thinking_effort().or(configured_effort);
         let provider_unchanged = target_provider_name == current_provider_name;
@@ -1009,14 +1009,14 @@ impl CliSession {
             && new_model_config.model_name == current_model_config.model_name
             && new_effort == current_effort
         {
-            output::goose_mode_message(&format!(
+            output::arakan_mode_message(&format!(
                 "Session already using model '{}' for provider '{}'",
                 current_model_name, current_provider_name
             ));
             return Ok(());
         }
 
-        let current_context_limit = goose::context_limit::get_context_limit(
+        let current_context_limit = arakan::context_limit::get_context_limit(
             provider.as_ref(),
             &current_model_config.model_name,
         )
@@ -1033,7 +1033,7 @@ impl CliSession {
             Err(e) => {
                 output::render_error(&format!(
                     "Cannot switch to provider '{}': {}\n\
-                         Set credentials via `goose configure` or the appropriate environment variable.\n\
+                         Set credentials via `arakan configure` or the appropriate environment variable.\n\
                          Session continues with current provider '{}'.",
                     target_provider_name, e, current_provider_name
                 ));
@@ -1049,7 +1049,7 @@ impl CliSession {
             return Ok(());
         }
 
-        let new_context_limit = goose::context_limit::get_context_limit(
+        let new_context_limit = arakan::context_limit::get_context_limit(
             new_provider.as_ref(),
             &new_model_config.model_name,
         )
@@ -1072,12 +1072,12 @@ impl CliSession {
         self.update_completion_cache().await?;
 
         if provider_unchanged {
-            output::goose_mode_message(&format!(
+            output::arakan_mode_message(&format!(
                 "Session model switched from '{}' to '{}' for provider '{}'",
                 current_model_name, target_model_name, current_provider_name
             ));
         } else {
-            output::goose_mode_message(&format!(
+            output::arakan_mode_message(&format!(
                 "Session switched from provider '{}' / model '{}' to provider '{}' / model '{}'",
                 current_provider_name, current_model_name, target_provider_name, target_model_name
             ));
@@ -1109,7 +1109,7 @@ impl CliSession {
             .services
             .session_manager
             .update(&self.session_id)
-            .usage(goose_providers::conversation::token_usage::Usage::new(
+            .usage(arakan_providers::conversation::token_usage::Usage::new(
                 Some(0),
                 Some(0),
                 Some(0),
@@ -1161,7 +1161,7 @@ impl CliSession {
             .is_empty();
 
         self.services
-            .emit_hook(goose::hooks::HookEvent::SessionEnd, &self.session_id)
+            .emit_hook(arakan::hooks::HookEvent::SessionEnd, &self.session_id)
             .await;
 
         self.services.release_session(&self.session_id).await;
@@ -1174,17 +1174,17 @@ impl CliSession {
             .session_manager
             .get_session(&self.session_id, false)
             .await?
-            .goose_mode;
+            .arakan_mode;
         if let Err(e) = self
             .services
-            .update_goose_mode(mode, &self.session_id)
+            .update_arakan_mode(mode, &self.session_id)
             .await
         {
             output::render_error(&format!("Failed to apply the current mode: {}", e));
         }
 
         if has_extensions {
-            output::goose_mode_message("Restarting extensions for the new session...");
+            output::arakan_mode_message("Restarting extensions for the new session...");
         }
 
         let mut unavailable = Vec::new();
@@ -1221,7 +1221,7 @@ impl CliSession {
         let session_manager = &self.services.session_manager;
         let old_session = session_manager.get_session(&self.session_id, false).await?;
         let new_session_id =
-            create_successor_session(session_manager, &old_session, old_session.goose_mode).await?;
+            create_successor_session(session_manager, &old_session, old_session.arakan_mode).await?;
         let extensions = self
             .services
             .extension_manager
@@ -1258,8 +1258,8 @@ impl CliSession {
 
     async fn handle_list_skills(&mut self) -> Result<()> {
         use comfy_table::{presets, Cell, ContentArrangement, Table};
-        use goose::custom_requests::SourceType;
-        use goose::skills::list_installed_skills;
+        use arakan::custom_requests::SourceType;
+        use arakan::skills::list_installed_skills;
         let cwd = std::env::current_dir().unwrap_or_default();
         let skills = list_installed_skills(Some(&cwd));
 
@@ -1336,7 +1336,7 @@ impl CliSession {
             .process_message(message, CancellationToken::default(), false)
             .await;
         self.services
-            .emit_hook(goose::hooks::HookEvent::SessionEnd, &self.session_id)
+            .emit_hook(arakan::hooks::HookEvent::SessionEnd, &self.session_id)
             .await;
         result?;
         Ok(())
@@ -1411,14 +1411,14 @@ impl CliSession {
                                     // Approve/SmartApprove modes since auto-allowing would
                                     // bypass the safety contract those modes are meant to enforce.
                                     let config = Config::global();
-                                    let goose_mode = config.get_goose_mode().unwrap_or(GooseMode::Auto);
-                                    if goose_mode == GooseMode::Approve || goose_mode == GooseMode::SmartApprove {
+                                    let arakan_mode = config.get_arakan_mode().unwrap_or(ArakanMode::Auto);
+                                    if arakan_mode == ArakanMode::Approve || arakan_mode == ArakanMode::SmartApprove {
                                         cancel_token_clone.cancel();
                                         drain_stopped_run(&mut stream, &mut self.messages, &mut last_usage).await;
                                         return Err(anyhow::anyhow!(
-                                            "Tool approval required in non-interactive mode with GooseMode::{goose_mode}. \
+                                            "Tool approval required in non-interactive mode with ArakanMode::{arakan_mode}. \
                                              This is an invalid configuration — Approve/SmartApprove modes require an \
-                                             interactive terminal. Use GooseMode::Auto for headless sessions."
+                                             interactive terminal. Use ArakanMode::Auto for headless sessions."
                                         ));
                                     }
                                     tracing::warn!(
@@ -1837,7 +1837,7 @@ impl CliSession {
             .await?
             .list_prompts(CancellationToken::default())
             .await;
-        let all_providers = goose::providers::providers().await;
+        let all_providers = arakan::providers::providers().await;
         let session_provider = services.provider(session_id).await?.get_name().to_string();
 
         let provider_ids: Vec<String> = all_providers.iter().map(|(m, _)| m.name.clone()).collect();
@@ -1953,7 +1953,7 @@ impl CliSession {
         println!();
     }
 
-    pub async fn get_session(&self) -> Result<goose::session::Session> {
+    pub async fn get_session(&self) -> Result<arakan::session::Session> {
         self.services
             .session_manager
             .get_session(&self.session_id, false)
@@ -1973,16 +1973,16 @@ impl CliSession {
             .model_config_for_session(&self.session_id)
             .await?;
         let context_limit =
-            goose::context_limit::get_context_limit(provider.as_ref(), &model_config.model_name)
+            arakan::context_limit::get_context_limit(provider.as_ref(), &model_config.model_name)
                 .await?;
 
         let config = Config::global();
         let show_cost = config
-            .get_param::<bool>("GOOSE_CLI_SHOW_COST")
+            .get_param::<bool>("ARAKAN_CLI_SHOW_COST")
             .unwrap_or(false);
 
         let provider_name = config
-            .get_goose_provider()
+            .get_arakan_provider()
             .unwrap_or_else(|_| "unknown".to_string());
 
         match self.get_session().await {
@@ -2102,15 +2102,15 @@ pub(crate) async fn session_provider(
 
 async fn create_successor_session(
     session_manager: &SessionManager,
-    old_session: &goose::session::Session,
-    goose_mode: GooseMode,
+    old_session: &arakan::session::Session,
+    arakan_mode: ArakanMode,
 ) -> Result<String> {
     let new_session = session_manager
         .create_session(
             old_session.working_dir.clone(),
             "CLI Session".to_string(),
             old_session.session_type,
-            goose_mode,
+            arakan_mode,
         )
         .await?;
 
@@ -2306,7 +2306,7 @@ fn prompt_tool_confirmation(request: &ToolConfirmationRequest) -> Result<Permiss
     let prompt = if request.prompt.is_some() {
         "Do you allow this tool call?".to_string()
     } else {
-        "Goose would like to call the above tool, do you allow?".to_string()
+        "Arakan would like to call the above tool, do you allow?".to_string()
     };
 
     let permission_result = if request.prompt.is_none() {
@@ -2574,7 +2574,7 @@ fn format_logging_notification(
                     Some("response_generated") => {
                         let config = Config::global();
                         let min_priority = config
-                            .get_param::<f32>("GOOSE_CLI_MIN_PRIORITY")
+                            .get_param::<f32>("ARAKAN_CLI_MIN_PRIORITY")
                             .ok()
                             .unwrap_or(output::DEFAULT_MIN_PRIORITY);
 
@@ -2640,7 +2640,7 @@ fn display_log_notification(
         } else if ntype == "shell_output" {
             let config = Config::global();
             let min_priority = config
-                .get_param::<f32>("GOOSE_CLI_MIN_PRIORITY")
+                .get_param::<f32>("ARAKAN_CLI_MIN_PRIORITY")
                 .ok()
                 .unwrap_or(output::DEFAULT_MIN_PRIORITY);
 
@@ -2666,7 +2666,7 @@ fn log_tool_metrics(message: &Message, messages: &Conversation) {
         if let MessageContent::ToolRequest(tool_request) = content {
             if let Ok(tool_call) = &tool_request.tool_call {
                 tracing::info!(
-                    monotonic_counter.goose.tool_calls = 1,
+                    monotonic_counter.arakan.tool_calls = 1,
                     tool_name = %tool_call.name,
                     "Tool call started"
                 );
@@ -2697,7 +2697,7 @@ fn log_tool_metrics(message: &Message, messages: &Conversation) {
                 "error"
             };
             tracing::info!(
-                monotonic_counter.goose.tool_completions = 1,
+                monotonic_counter.arakan.tool_completions = 1,
                 tool_name = %tool_name,
                 result = %result_status,
                 "Tool call completed"
@@ -2716,11 +2716,11 @@ fn handle_agent_error(e: &anyhow::Error, is_stream_json_mode: bool) {
         });
     }
 
-    if e.downcast_ref::<goose_providers::errors::ProviderError>()
+    if e.downcast_ref::<arakan_providers::errors::ProviderError>()
         .map(|provider_error| {
             matches!(
                 provider_error,
-                goose_providers::errors::ProviderError::ContextLengthExceeded(_)
+                arakan_providers::errors::ProviderError::ContextLengthExceeded(_)
             )
         })
         .unwrap_or(false)
@@ -2776,9 +2776,9 @@ fn format_elapsed_time(duration: std::time::Duration) -> String {
 fn build_switched_model_config(
     provider_name: &str,
     model_name: &str,
-    current_model_config: &goose_providers::model::ModelConfig,
-) -> Result<goose_providers::model::ModelConfig> {
-    goose::model_config::model_config_from_user_config(provider_name, model_name)
+    current_model_config: &arakan_providers::model::ModelConfig,
+) -> Result<arakan_providers::model::ModelConfig> {
+    arakan::model_config::model_config_from_user_config(provider_name, model_name)
         .map(|config| {
             config
                 .with_temperature(current_model_config.temperature)
@@ -2791,10 +2791,10 @@ fn build_switched_model_config(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use goose::agents::extension::Envs;
-    use goose::config::ExtensionConfig;
-    use goose::conversation::message::MessageErrorKind;
-    use goose::providers::base::Provider;
+    use arakan::agents::extension::Envs;
+    use arakan::config::ExtensionConfig;
+    use arakan::conversation::message::MessageErrorKind;
+    use arakan::providers::base::Provider;
     use serde_json::json;
     use std::collections::HashMap;
     use std::time::Duration;
@@ -2933,8 +2933,8 @@ mod tests {
             args: vec![],
             envs: Envs::default(),
             env_keys: vec![],
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
-            timeout: Some(goose::config::DEFAULT_EXTENSION_TIMEOUT),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            timeout: Some(arakan::config::DEFAULT_EXTENSION_TIMEOUT),
             cwd: None,
             bundled: None,
             available_tools: vec![],
@@ -2949,8 +2949,8 @@ mod tests {
             args: vec!["-y".into(), "@modelcontextprotocol/server-everything".into()],
             envs: Envs::new([("MY_SECRET".into(), "s3cret".into())].into()),
             env_keys: vec![],
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
-            timeout: Some(goose::config::DEFAULT_EXTENSION_TIMEOUT),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            timeout: Some(arakan::config::DEFAULT_EXTENSION_TIMEOUT),
             cwd: None,
             bundled: None,
             available_tools: vec![],
@@ -2965,8 +2965,8 @@ mod tests {
             args: vec!["-classpath".into(), "/path/with spaces/lib.jar".into(), "Main".into()],
             envs: Envs::default(),
             env_keys: vec![],
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
-            timeout: Some(goose::config::DEFAULT_EXTENSION_TIMEOUT),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            timeout: Some(arakan::config::DEFAULT_EXTENSION_TIMEOUT),
             cwd: None,
             bundled: None,
             available_tools: vec![],
@@ -3048,14 +3048,14 @@ mod tests {
     #[test]
     fn test_build_switched_model_config_rebuilds_target_model_settings() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_TEMPERATURE", None::<&str>),
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_TOOLSHIM", None::<&str>),
-            ("GOOSE_TOOLSHIM_OLLAMA_MODEL", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_TEMPERATURE", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_TOOLSHIM", None::<&str>),
+            ("ARAKAN_TOOLSHIM_OLLAMA_MODEL", None::<&str>),
         ]);
 
-        let current_model_config = goose_providers::model::ModelConfig {
+        let current_model_config = arakan_providers::model::ModelConfig {
             model_name: "gpt-4o".to_string(),
             context_limit: Some(128_000),
             temperature: Some(0.25),
@@ -3073,7 +3073,7 @@ mod tests {
 
         let switched =
             build_switched_model_config("openai", "gpt-5.4", &current_model_config).unwrap();
-        let expected = goose_providers::model::ModelConfig::new("gpt-5.4")
+        let expected = arakan_providers::model::ModelConfig::new("gpt-5.4")
             .with_canonical_limits("openai")
             .with_temperature(Some(0.25))
             .with_toolshim(true)
@@ -3092,20 +3092,20 @@ mod tests {
     #[test]
     fn test_build_switched_model_config_detects_effort_suffix_change() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_MAX_TOKENS", None::<&str>),
-            ("GOOSE_TEMPERATURE", None::<&str>),
-            ("GOOSE_CONTEXT_LIMIT", None::<&str>),
-            ("GOOSE_TOOLSHIM", None::<&str>),
-            ("GOOSE_TOOLSHIM_OLLAMA_MODEL", None::<&str>),
-            ("GOOSE_THINKING_EFFORT", None::<&str>),
+            ("ARAKAN_MAX_TOKENS", None::<&str>),
+            ("ARAKAN_TEMPERATURE", None::<&str>),
+            ("ARAKAN_CONTEXT_LIMIT", None::<&str>),
+            ("ARAKAN_TOOLSHIM", None::<&str>),
+            ("ARAKAN_TOOLSHIM_OLLAMA_MODEL", None::<&str>),
+            ("ARAKAN_THINKING_EFFORT", None::<&str>),
         ]);
 
-        let current = goose_providers::model::ModelConfig::new("gpt-5.4-high")
+        let current = arakan_providers::model::ModelConfig::new("gpt-5.4-high")
             .with_canonical_limits("openai");
         assert_eq!(current.model_name, "gpt-5.4");
         assert_eq!(
             current.thinking_effort(),
-            Some(goose_providers::thinking::ThinkingEffort::High)
+            Some(arakan_providers::thinking::ThinkingEffort::High)
         );
 
         let switched = build_switched_model_config("openai", "gpt-5.4", &current).unwrap();
@@ -3117,18 +3117,18 @@ mod tests {
     #[test]
     fn test_split_command_args_windows_paths() {
         assert_eq!(
-            goose::utils::split_command_args(r"C:\tools\mcp.exe --arg value").unwrap(),
+            arakan::utils::split_command_args(r"C:\tools\mcp.exe --arg value").unwrap(),
             vec![r"C:\tools\mcp.exe", "--arg", "value"]
         );
         assert_eq!(
-            goose::utils::split_command_args(r#""C:\Program Files\server\mcp.exe" --arg"#).unwrap(),
+            arakan::utils::split_command_args(r#""C:\Program Files\server\mcp.exe" --arg"#).unwrap(),
             vec![r"C:\Program Files\server\mcp.exe", "--arg"]
         );
     }
 
     #[test]
     fn test_split_command_args_unmatched_quote() {
-        assert!(goose::utils::split_command_args(r#""unmatched"#).is_err());
+        assert!(arakan::utils::split_command_args(r#""unmatched"#).is_err());
     }
 
     #[test_case(
@@ -3139,7 +3139,7 @@ mod tests {
             envs: Envs::default(),
             env_keys: vec![],
             headers: HashMap::new(),
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
             timeout: Some(300),
             socket: None,
             client_id: None,
@@ -3158,7 +3158,7 @@ mod tests {
             envs: Envs::default(),
             env_keys: vec![],
             headers: HashMap::new(),
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
             timeout: Some(300),
             socket: None,
             client_id: None,
@@ -3177,7 +3177,7 @@ mod tests {
             envs: Envs::default(),
             env_keys: vec![],
             headers: HashMap::new(),
-            description: goose::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
+            description: arakan::config::DEFAULT_EXTENSION_DESCRIPTION.to_string(),
             timeout: Some(300),
             socket: None,
             client_id: None,
@@ -3204,16 +3204,16 @@ mod tests {
             .create_session(
                 temp_dir.path().to_path_buf(),
                 "CLI Session".to_string(),
-                goose::session::SessionType::User,
-                GooseMode::Auto,
+                arakan::session::SessionType::User,
+                ArakanMode::Auto,
             )
             .await
             .unwrap();
 
         sm.update(&old.id)
             .provider_name("anthropic")
-            .model_config(goose_providers::model::ModelConfig::new("test-model"))
-            .accumulated_usage(goose_providers::conversation::token_usage::Usage::new(
+            .model_config(arakan_providers::model::ModelConfig::new("test-model"))
+            .accumulated_usage(arakan_providers::conversation::token_usage::Usage::new(
                 Some(100),
                 Some(50),
                 Some(150),
@@ -3226,7 +3226,7 @@ mod tests {
             .await
             .unwrap();
 
-        let mut extension_data = goose::session::ExtensionData::new();
+        let mut extension_data = arakan::session::ExtensionData::new();
         extension_data.set_extension_state("test", "v0", serde_json::json!("marker"));
         sm.update(&old.id)
             .extension_data(extension_data)
@@ -3236,7 +3236,7 @@ mod tests {
 
         let old = sm.get_session(&old.id, false).await.unwrap();
 
-        let new_id = create_successor_session(&sm, &old, GooseMode::Chat)
+        let new_id = create_successor_session(&sm, &old, ArakanMode::Chat)
             .await
             .unwrap();
 
@@ -3248,7 +3248,7 @@ mod tests {
             new_session.model_config.as_ref().map(|m| &m.model_name),
             old.model_config.as_ref().map(|m| &m.model_name)
         );
-        assert_eq!(new_session.goose_mode, GooseMode::Chat);
+        assert_eq!(new_session.arakan_mode, ArakanMode::Chat);
         assert_eq!(new_session.working_dir, old.working_dir);
         assert_eq!(new_session.session_type, old.session_type);
         assert!(new_session.conversation.unwrap().messages().is_empty());
@@ -3278,19 +3278,19 @@ mod tests {
 
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system: &str,
             _messages: &[Message],
             _tools: &[rmcp::model::Tool],
         ) -> std::result::Result<
-            goose::providers::base::MessageStream,
-            goose_providers::errors::ProviderError,
+            arakan::providers::base::MessageStream,
+            arakan_providers::errors::ProviderError,
         > {
-            Ok(goose::providers::base::stream_from_single_message(
+            Ok(arakan::providers::base::stream_from_single_message(
                 Message::assistant().with_text("stub reply"),
                 ProviderUsage::new(
                     "stub".to_string(),
-                    goose_providers::conversation::token_usage::Usage::default(),
+                    arakan_providers::conversation::token_usage::Usage::default(),
                 ),
             ))
         }
@@ -3306,27 +3306,27 @@ mod tests {
             .create_session(
                 data_dir.clone(),
                 "Loading gate test".to_string(),
-                goose::session::SessionType::User,
-                GooseMode::default(),
+                arakan::session::SessionType::User,
+                ArakanMode::default(),
             )
             .await
             .unwrap();
 
-        let services = goose::agents::StateMachineServices::with_config(
-            goose::agents::StateMachineServicesConfig::new(
+        let services = arakan::agents::StateMachineServices::with_config(
+            arakan::agents::StateMachineServicesConfig::new(
                 Arc::new(session_manager),
-                Arc::new(goose::config::PermissionManager::new(data_dir.clone())),
+                Arc::new(arakan::config::PermissionManager::new(data_dir.clone())),
                 None,
                 // Disable background session naming so the test agent starts no
                 // provider-dependent tasks.
                 true,
-                goose::agents::GoosePlatform::GooseCli,
+                arakan::agents::ArakanPlatform::ArakanCli,
             ),
         );
         services
             .update_provider(
                 Arc::new(StubProvider),
-                goose_providers::model::ModelConfig::new("stub-model"),
+                arakan_providers::model::ModelConfig::new("stub-model"),
                 &session.id,
             )
             .await

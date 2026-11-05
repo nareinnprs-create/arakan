@@ -1,15 +1,15 @@
 ---
-title: "Streamlining Detection Development with Goose Recipes"
-description: "A comprehensive guide to using recipes in Goose to streamline security detection development"
+title: "Streamlining Detection Development with Arakan Recipes"
+description: "A comprehensive guide to using recipes in Arakan to streamline security detection development"
 authors:
   - glenn
 ---
 
-![blog cover](goose-recipes-detection-development-cover.png)
+![blog cover](arakan-recipes-detection-development-cover.png)
 
-Creating effective security detections in Panther traditionally requires deep knowledge of detection logic, testing frameworks, and development workflows. The detection engineering team at Block has streamlined this process by building Goose recipes that automate the entire detection creation lifecycle from initial repository set up to pull request creation.
+Creating effective security detections in Panther traditionally requires deep knowledge of detection logic, testing frameworks, and development workflows. The detection engineering team at Block has streamlined this process by building Arakan recipes that automate the entire detection creation lifecycle from initial repository set up to pull request creation.
 
-This blog post explores how to leverage Goose's [recipe](https://goose-docs.ai/docs/guides/recipes/) and [subrecipe](https://goose-docs.ai/docs/guides/recipes/subrecipes) system to create new detections in Panther with minimal manual intervention, ensuring consistency, quality, and adherence to team standards.
+This blog post explores how to leverage Arakan's [recipe](https://arakan-docs.ai/docs/guides/recipes/) and [subrecipe](https://arakan-docs.ai/docs/guides/recipes/subrecipes) system to create new detections in Panther with minimal manual intervention, ensuring consistency, quality, and adherence to team standards.
 
 <!-- truncate -->
 
@@ -69,10 +69,10 @@ The detection creation recipe demonstrates the power of this approach by coordin
 5. [**testing_validator**](#5-testing_validator-quality-assurance) - Comprehensive test execution and validation
 6. [**pr_creator**](#6-pr_creator-automated-pull-request-pipeline) - Pull request creation with proper formatting
 
-### What about .goosehints?
-In our [previous post](https://goose-docs.ai/blog/2025/06/02/goose-panther-mcp), we discussed using [.goosehints](/docs/guides/context-engineering/using-goosehints/) to provide persistent context to the Large Language Model (LLM). We continue to use `.goosehints` to define coding standards and universal preferences that guide LLM behavior.
+### What about .arakanhints?
+In our [previous post](https://arakan-docs.ai/blog/2025/06/02/arakan-panther-mcp), we discussed using [.arakanhints](/docs/guides/context-engineering/using-arakanhints/) to provide persistent context to the Large Language Model (LLM). We continue to use `.arakanhints` to define coding standards and universal preferences that guide LLM behavior.
 
-However, to minimize redundancy and avoid conflicting guidance, we adopted a single reference file, `AGENTS.md`, as the source of truth for all agents. Each agent is directed to consult this file, while still supporting agent-specific instructions through their default context files (e.g. `.goosehints`, `CLAUDE.md` etc.) or rules (e.g. `.cursor/rules/`).
+However, to minimize redundancy and avoid conflicting guidance, we adopted a single reference file, `AGENTS.md`, as the source of truth for all agents. Each agent is directed to consult this file, while still supporting agent-specific instructions through their default context files (e.g. `.arakanhints`, `CLAUDE.md` etc.) or rules (e.g. `.cursor/rules/`).
 
 While these context files are important, they also come with some trade offs and limitations:
 
@@ -173,13 +173,13 @@ Users can control workflow behavior through parameters:
 
 ```shell
 # Fast mode - skip similar rule analysis
-goose run --recipe recipe.yaml --params skip_similar_rules_check=true --rule_description="What you want to detect"
+arakan run --recipe recipe.yaml --params skip_similar_rules_check=true --rule_description="What you want to detect"
 
 # Skip Panther MCP integration
-goose run --recipe recipe.yaml --params skip_panther_mcp=true --rule_description="What you want to detect"
+arakan run --recipe recipe.yaml --params skip_panther_mcp=true --rule_description="What you want to detect"
 
 # Create PR automatically
-goose run --recipe recipe.yaml --params create_pr=true --rule_description="What you want to detect"
+arakan run --recipe recipe.yaml --params create_pr=true --rule_description="What you want to detect"
 ```
 
 ### Runtime Conditions
@@ -508,7 +508,7 @@ This fail-fast approach prevents wasted effort on meaningless subsequent steps.
 ### Basic Usage: Fast Detection Creation 
 ```shell
 # Create a detection without creating a PR or similar rule/Panther MCP analysis
-goose run --recipe recipe.yaml \
+arakan run --recipe recipe.yaml \
   --params skip_similar_rules_check=true \
   --params skip_panther_mcp=true \
   --params rule_description="Create an AWS CloudTrail detection to identify new regions being enabled without any associated errorCodes"
@@ -517,7 +517,7 @@ goose run --recipe recipe.yaml \
 ### Comprehensive Analysis Mode
 ```shell
 # Full workflow with schema/event sampling and automatic PR creation
-goose run --recipe recipe.yaml --interactive \
+arakan run --recipe recipe.yaml --interactive \
   --params skip_similar_rules_check=true \
   --params skip_panther_mcp=false \
   --params create_pr=true \
@@ -575,7 +575,7 @@ For Organizations
 - **Compliance**: Adherence to security and development standards
 
 ## Conclusion
-Goose's recipe and subrecipe system represents a significant advancement in AI-assisted security detection development. By breaking complex workflows into specialized, composable components, teams can achieve:
+Arakan's recipe and subrecipe system represents a significant advancement in AI-assisted security detection development. By breaking complex workflows into specialized, composable components, teams can achieve:
 - **Higher quality detections** through automated testing and validation
 - **Faster development cycles** with intelligent optimization
 - **Better consistency** through standardized processes
@@ -583,7 +583,7 @@ Goose's recipe and subrecipe system represents a significant advancement in AI-a
 
 The detection creation recipe demonstrates how thoughtful architecture and clear separation of concerns can transform a complex, error-prone manual process into a reliable, automated workflow.
 
-Whether you're building your first Goose recipe or looking to optimize existing workflows, the patterns and principles outlined here provide a solid foundation for successful automation.
+Whether you're building your first Arakan recipe or looking to optimize existing workflows, the patterns and principles outlined here provide a solid foundation for successful automation.
 
 ---
 
@@ -610,7 +610,7 @@ Whether you're building your first Goose recipe or looking to optimize existing 
 - Provide **strong examples** that the agent can learn from, reducing reliance on querying the data lake.
 - Maintain a **central reference** (e.g. `AGENTS.md`) for all AI agents:
   - Users may want to contribute outside of your traditional development workflow
-  - Link steps or sections in `.goosehints`, `CLAUDE.md`, `.cursor/rules/*`, etc., back to this file.
+  - Link steps or sections in `.arakanhints`, `CLAUDE.md`, `.cursor/rules/*`, etc., back to this file.
   - Consider having an agent help structure `AGENTS.md` for easier parsing and reuse across agents.
 
 #### Workflow Design
@@ -620,15 +620,15 @@ Whether you're building your first Goose recipe or looking to optimize existing 
 
 <!-- Social Media Meta Tags (edit values as needed) -->
 <head>
-  <meta property="og:title" content="Streamlining Detection Development with Goose Recipes" />
+  <meta property="og:title" content="Streamlining Detection Development with Arakan Recipes" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/07/28/streamlining-detection-development-with-goose-recipes" />
-  <meta property="og:description" content="A comprehensive guide to using recipes in Goose to streamline security detection development" />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/goose-recipes-detection-development-cover.png" />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/goose-recipes-detection-development-cover-cac8a9bea2d090ec2758a0b907bc9da8.png" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Streamlining Detection Development with Goose Recipes" />
-  <meta name="twitter:description" content="A comprehensive guide to using recipes in Goose to streamline security detection development" />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/goose-recipes-detection-development-cover.png" />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/goose-recipes-detection-development-cover-cac8a9bea2d090ec2758a0b907bc9da8.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/07/28/streamlining-detection-development-with-arakan-recipes" />
+  <meta property="og:description" content="A comprehensive guide to using recipes in Arakan to streamline security detection development" />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/arakan-recipes-detection-development-cover.png" />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/arakan-recipes-detection-development-cover-cac8a9bea2d090ec2758a0b907bc9da8.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Streamlining Detection Development with Arakan Recipes" />
+  <meta name="twitter:description" content="A comprehensive guide to using recipes in Arakan to streamline security detection development" />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/arakan-recipes-detection-development-cover.png" />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/arakan-recipes-detection-development-cover-cac8a9bea2d090ec2758a0b907bc9da8.png" />
 </head>

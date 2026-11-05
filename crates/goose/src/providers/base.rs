@@ -1,12 +1,12 @@
 use super::api_client::TlsConfig;
 use anyhow::Result;
 use futures::future::BoxFuture;
-pub use goose_providers::conversation::token_usage::{
+pub use arakan_providers::conversation::token_usage::{
     CostSource, DraftStats, ProviderStats, ProviderUsage, Usage,
 };
 use serde::{Deserialize, Serialize};
 
-pub use goose_providers::api_client::{
+pub use arakan_providers::api_client::{
     DEFAULT_CONNECT_TIMEOUT_SECS, DEFAULT_PROVIDER_TIMEOUT_SECS,
 };
 
@@ -14,7 +14,7 @@ use crate::config::ExtensionConfig;
 
 use std::path::PathBuf;
 
-pub use goose_providers::base::*;
+pub use arakan_providers::base::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ProviderType {
@@ -36,7 +36,7 @@ pub trait ProviderDef: ProviderDescriptor + Send + Sync {
     const SESSION_BOUND: bool = false;
 
     /// Is handed the session's MCP servers and runs the tool loop itself, so
-    /// goose does not start those servers.
+    /// arakan does not start those servers.
     const RUNS_OWN_TOOL_LOOP: bool = false;
 
     fn from_env(

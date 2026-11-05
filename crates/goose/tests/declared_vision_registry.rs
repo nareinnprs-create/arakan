@@ -1,7 +1,7 @@
-use goose::config::declarative_providers::{create_custom_provider, CreateCustomProviderParams};
-use goose::conversation::message::Message;
-use goose::providers::{get_from_registry, refresh_custom_providers};
-use goose_providers::{base::ModelInfo, model::ModelConfig};
+use arakan::config::declarative_providers::{create_custom_provider, CreateCustomProviderParams};
+use arakan::conversation::message::Message;
+use arakan::providers::{get_from_registry, refresh_custom_providers};
+use arakan_providers::{base::ModelInfo, model::ModelConfig};
 use serde_json::json;
 use wiremock::{
     matchers::{method, path},
@@ -12,7 +12,7 @@ use wiremock::{
 async fn persisted_vision_declarations_control_registry_requests() {
     let root = tempfile::tempdir().unwrap();
     let root_path = root.path().to_str().unwrap();
-    let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path))]);
+    let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path))]);
 
     for endpoint in ["chat/completions", "responses"] {
         for (declared, configured, expected) in [
@@ -98,7 +98,7 @@ async fn persisted_vision_declarations_control_registry_requests() {
 async fn catalog_provider_id_resolves_vision_for_renamed_provider() {
     let root = tempfile::tempdir().unwrap();
     let root_path = root.path().to_str().unwrap();
-    let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path))]);
+    let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path))]);
 
     // Only catalogued as fireworks-ai/..., with image input.
     let model_name = "accounts/fireworks/models/deepseek-v4p1-flash";

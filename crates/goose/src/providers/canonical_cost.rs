@@ -26,8 +26,8 @@ use crate::config::declarative_providers::{
     DeclarativeProviderConfig,
 };
 use crate::providers::base::ModelInfo;
-use goose_providers::canonical::{maybe_get_canonical_model, Pricing};
-use goose_providers::conversation::token_usage::{CostSource, ProviderUsage, Usage};
+use arakan_providers::canonical::{maybe_get_canonical_model, Pricing};
+use arakan_providers::conversation::token_usage::{CostSource, ProviderUsage, Usage};
 use std::sync::OnceLock;
 use tracing::warn;
 

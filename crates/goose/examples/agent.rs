@@ -1,13 +1,13 @@
 use dotenvy::dotenv;
 use futures::StreamExt;
-use goose::agents::{
+use arakan::agents::{
     AgentEvent, ExtensionConfig, SessionConfig, StateMachineServices, StateMachineServicesConfig,
 };
-use goose::config::{GooseMode, DEFAULT_EXTENSION_DESCRIPTION, DEFAULT_EXTENSION_TIMEOUT};
-use goose::conversation::message::Message;
-use goose::providers::create;
-use goose::session::session_manager::SessionType;
-use goose_providers::databricks::DATABRICKS_DEFAULT_MODEL;
+use arakan::config::{ArakanMode, DEFAULT_EXTENSION_DESCRIPTION, DEFAULT_EXTENSION_TIMEOUT};
+use arakan::conversation::message::Message;
+use arakan::providers::create;
+use arakan::session::session_manager::SessionType;
+use arakan_providers::databricks::DATABRICKS_DEFAULT_MODEL;
 use std::path::PathBuf;
 
 #[tokio::main]
@@ -16,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
 
     let provider = create("databricks", Vec::new()).await?;
     let model_config =
-        goose::model_config::model_config_from_user_config("databricks", DATABRICKS_DEFAULT_MODEL)?;
+        arakan::model_config::model_config_from_user_config("databricks", DATABRICKS_DEFAULT_MODEL)?;
 
     let services = StateMachineServices::with_config(StateMachineServicesConfig::cli());
 
@@ -26,7 +26,7 @@ async fn main() -> anyhow::Result<()> {
             PathBuf::default(),
             "max-turn-test".to_string(),
             SessionType::Hidden,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await?;
 
@@ -36,7 +36,7 @@ async fn main() -> anyhow::Result<()> {
 
     let config = ExtensionConfig::stdio(
         "developer",
-        "./target/debug/goose",
+        "./target/debug/arakan",
         DEFAULT_EXTENSION_DESCRIPTION,
         DEFAULT_EXTENSION_TIMEOUT,
     )

@@ -50,20 +50,20 @@ export default function ModelsSection({ setView }: ModelsSectionProps) {
         setProvider(providerDisplayName);
       } else {
         // Fallback to original provider lookup
-        const { providerId: gooseProvider } = await acpReadDefaults();
-        if (!gooseProvider) {
+        const { providerId: arakanProvider } = await acpReadDefaults();
+        if (!arakanProvider) {
           setProvider('');
           return;
         }
         try {
-          const providerDetails = await acpGetProviderDetails(gooseProvider);
+          const providerDetails = await acpGetProviderDetails(arakanProvider);
           setProvider(providerDetails.metadata.display_name);
         } catch {
           toastError({
             title: intl.formatMessage(modelAndProviderMessages.unknownProviderTitle),
             msg: intl.formatMessage(modelAndProviderMessages.unknownProviderMsg),
           });
-          setProvider(gooseProvider);
+          setProvider(arakanProvider);
         }
       }
     } catch (error) {

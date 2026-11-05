@@ -1,14 +1,14 @@
 {
-  "name": "@aaif/goose-binary-win32-x64",
+  "name": "@aaif/arakan-binary-win32-x64",
   "version": "1.58.0",
-  "description": "Goose binary for Windows x64",
+  "description": "Arakan binary for Windows x64",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aaif-goose/goose.git"
+    "url": "git+https://github.com/aaif-arakan/arakan.git"
   },
   "keywords": [
-    "goose",
+    "arakan",
     "ai",
     "agent",
     "binary"
@@ -20,9 +20,9 @@
     "x64"
   ],
   "bin": {
-    "goose-binary-win32-x64": "./bin/goose.exe"
+    "arakan-binary-win32-x64": "./bin/arakan.exe"
   },
   "files": [
-    "bin/goose.exe"
+    "bin/arakan.exe"
   ]
 }

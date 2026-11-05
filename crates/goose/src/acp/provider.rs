@@ -16,7 +16,7 @@ use agent_client_protocol_schema::v1::AGENT_METHOD_NAMES;
 use anyhow::{Context, Result};
 use async_stream::try_stream;
 use futures::future::BoxFuture;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
 use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock as RmcpContent, Role, Tool};
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
@@ -34,7 +34,7 @@ use tokio_util::compat::{TokioAsyncReadCompatExt as _, TokioAsyncWriteCompatExt 
 
 use crate::acp::handoff::{build_handoff_context_memo, memo_token_budget, prompt_token_cost};
 use crate::acp::{map_permission_response, PermissionDecision};
-use crate::config::{Config, ExtensionConfig, GooseMode};
+use crate::config::{Config, ExtensionConfig, ArakanMode};
 use crate::conversation::message::{Message, MessageContent, TOOL_META_EXTERNAL_DISPATCH_KEY};
 use crate::permission::permission_confirmation::PrincipalType;
 use crate::permission::{Permission, PermissionConfirmation};
@@ -42,9 +42,9 @@ use crate::providers::base::{MessageStream, PermissionRouting, Provider};
 use crate::subprocess::configure_subprocess;
 use crate::token_counter::create_token_counter;
 use crate::utils::sanitize_unicode_tags;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_providers::thinking::{
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::thinking::{
     ThinkingEffortCapability, ThinkingEffortOption, ThinkingEffortSupport,
 };
 
@@ -71,7 +71,7 @@ pub struct AcpProviderConfig {
     /// provider re-applies this option from the per-completion `ModelConfig`
     /// whenever the active session model changes.
     pub model_config_option_id: Option<String>,
-    pub mode_mapping: HashMap<GooseMode, Vec<String>>,
+    pub mode_mapping: HashMap<ArakanMode, Vec<String>>,
     pub notification_callback: Option<Arc<dyn Fn(SessionNotification) + Send + Sync>>,
 }
 
@@ -273,8 +273,8 @@ impl AcpSessionState {
 
 pub struct AcpProvider {
     name: String,
-    goose_mode: Arc<Mutex<GooseMode>>,
-    mode_mapping: HashMap<GooseMode, Vec<String>>,
+    arakan_mode: Arc<Mutex<ArakanMode>>,
+    mode_mapping: HashMap<ArakanMode, Vec<String>>,
 
     session: Mutex<AcpSession>,
 
@@ -297,7 +297,7 @@ pub struct AcpProvider {
     /// The agent's thinking-effort config option, mirrored from every
     /// config-options payload it sends. `None` means the agent offers no effort
     /// selector for its current model. Its `current` value doubles as the
-    /// redundant-send guard: unlike a goose-side cache of the last applied
+    /// redundant-send guard: unlike a arakan-side cache of the last applied
     /// value, it tracks the agent resetting its own effort (e.g. on a model
     /// switch), so the persisted value is re-applied when that happens.
     effort: AcpEffortState,
@@ -328,12 +328,12 @@ fn spawn_client_loop(fut: impl Future<Output = ()> + Send + 'static) -> JoinHand
 impl AcpProvider {
     pub async fn connect(
         name: String,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
         config: AcpProviderConfig,
     ) -> Result<Self> {
         Self::start(
             name,
-            goose_mode,
+            arakan_mode,
             config,
             Box::new(|cl, rx, init_tx, mut cancel_rx| {
                 Box::pin(async move {
@@ -351,13 +351,13 @@ impl AcpProvider {
     #[doc(hidden)]
     pub async fn connect_with_transport(
         name: String,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
         config: AcpProviderConfig,
         transport: impl agent_client_protocol::ConnectTo<Client> + 'static,
     ) -> Result<Self> {
         Self::start(
             name,
-            goose_mode,
+            arakan_mode,
             config,
             Box::new(move |cl, mut rx, init_tx, mut cancel_rx| {
                 Box::pin(async move {
@@ -378,7 +378,7 @@ impl AcpProvider {
 
     async fn start(
         name: String,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
         config: AcpProviderConfig,
         run: ClientLoopFn,
     ) -> Result<Self> {
@@ -393,14 +393,14 @@ impl AcpProvider {
                 .find(|(opt_id, _)| opt_id == id)
                 .map(|(_, value)| value.clone())
         });
-        let goose_mode_shared = Arc::new(Mutex::new(goose_mode));
+        let arakan_mode_shared = Arc::new(Mutex::new(arakan_mode));
         let pending_tool_updates: Arc<Mutex<HashMap<String, AccumulatedToolCall>>> =
             Arc::new(Mutex::new(HashMap::new()));
         let context_size = Arc::new(AtomicU64::new(0));
         let effort = AcpEffortState::new();
         let client_loop = AcpClientLoop::new(
             config,
-            goose_mode_shared.clone(),
+            arakan_mode_shared.clone(),
             pending_tool_updates.clone(),
             context_size.clone(),
             effort.clone(),
@@ -439,7 +439,7 @@ impl AcpProvider {
 
         Ok(Self {
             name,
-            goose_mode: goose_mode_shared,
+            arakan_mode: arakan_mode_shared,
             mode_mapping,
             session: Mutex::new(session),
             pending_confirmations: Arc::new(TokioMutex::new(HashMap::new())),
@@ -477,7 +477,7 @@ impl AcpProvider {
         })
     }
 
-    pub(crate) async fn send_set_mode(&self, _goose_id: &str, mode_id: String) -> Result<()> {
+    pub(crate) async fn send_set_mode(&self, _arakan_id: &str, mode_id: String) -> Result<()> {
         let session_id = self.acp_session_id();
         let (response_tx, response_rx) = oneshot::channel();
         self.tx
@@ -495,7 +495,7 @@ impl AcpProvider {
 
     pub(crate) async fn send_set_config_option(
         &self,
-        _goose_id: &str,
+        _arakan_id: &str,
         config_id: String,
         value: String,
     ) -> Result<()> {
@@ -558,12 +558,12 @@ impl AcpProvider {
     }
 
     /// The redundant-send guard is the mirrored capability's `current`, not a
-    /// goose-side record of the last sent value: the agent's `SetConfigOption`
+    /// arakan-side record of the last sent value: the agent's `SetConfigOption`
     /// response refreshes `effort_state` before this call returns, and later
     /// refreshes track the agent resetting its own effort.
     async fn set_effort_option(
         &self,
-        goose_id: &str,
+        arakan_id: &str,
         option_id: &str,
         value: String,
     ) -> Result<()> {
@@ -581,7 +581,7 @@ impl AcpProvider {
             }
         }
 
-        self.send_set_config_option(goose_id, option_id.to_string(), value)
+        self.send_set_config_option(arakan_id, option_id.to_string(), value)
             .await
     }
 
@@ -727,7 +727,7 @@ impl Provider for AcpProvider {
     }
 
     async fn get_context_limit(&self, model: &str, override_limit: Option<usize>) -> usize {
-        goose_providers::context_limit::ContextLimitResolver::new(self.get_name())
+        arakan_providers::context_limit::ContextLimitResolver::new(self.get_name())
             .resolve(model, override_limit, || async {
                 let size = self.context_size.load(Ordering::Relaxed);
                 Ok((size > 0).then_some(size as usize))
@@ -735,7 +735,7 @@ impl Provider for AcpProvider {
             .await
     }
 
-    async fn update_mode(&self, session_id: &str, mode: GooseMode) -> Result<(), ProviderError> {
+    async fn update_mode(&self, session_id: &str, mode: ArakanMode) -> Result<(), ProviderError> {
         if let Some(candidates) = self.mode_mapping.get(&mode) {
             let session = self.session.lock().unwrap().clone();
             let mode_str =
@@ -760,7 +760,7 @@ impl Provider for AcpProvider {
             }
         }
 
-        if let Ok(mut guard) = self.goose_mode.lock() {
+        if let Ok(mut guard) = self.arakan_mode.lock() {
             *guard = mode;
         }
         Ok(())
@@ -873,7 +873,7 @@ impl Provider for AcpProvider {
             None
         };
         if claim.include_context && memo.is_none() {
-            // Nothing fit beside this turn's prompt, so the context never left goose. Give
+            // Nothing fit beside this turn's prompt, so the context never left arakan. Give
             // it back rather than marking a handoff that never happened as done — a single
             // oversized turn would otherwise cost the session its whole history.
             handoff_claim_guard.rollback();
@@ -921,12 +921,12 @@ impl Provider for AcpProvider {
             bare_retry_blocks.map(|blocks| (self.tx.as_ref().unwrap().clone(), session_id, blocks));
 
         let pending_confirmations = self.pending_confirmations.clone();
-        let goose_mode = *self
-            .goose_mode
+        let arakan_mode = *self
+            .arakan_mode
             .lock()
-            .map_err(|_| ProviderError::RequestFailed("goose_mode lock poisoned".into()))?;
+            .map_err(|_| ProviderError::RequestFailed("arakan_mode lock poisoned".into()))?;
 
-        let reject_all_tools = goose_mode == GooseMode::Chat;
+        let reject_all_tools = arakan_mode == ArakanMode::Chat;
         let model_name = model_config.model_name.clone();
 
         Ok(Box::pin(try_stream! {
@@ -972,12 +972,12 @@ impl Provider for AcpProvider {
                                 params = params.with_arguments(map);
                             }
                             // external_dispatch tells the agent loop not to redispatch this
-                            // call. goose.acp.kind preserves ACP's stable categorization for
+                            // call. arakan.acp.kind preserves ACP's stable categorization for
                             // downstream consumers (metrics, observability, icon selection)
                             // independent of the display title we put in `name`.
                             let tool_meta = Some(serde_json::json!({
                                 TOOL_META_EXTERNAL_DISPATCH_KEY: true,
-                                "goose.acp.kind": kind,
+                                "arakan.acp.kind": kind,
                             }));
                             let message = Message::assistant().with_tool_request_with_metadata(
                                 id,
@@ -1028,7 +1028,7 @@ impl Provider for AcpProvider {
                     AcpUpdate::PermissionRequest { request, response_tx } => {
                         text_run = None;
                         thought_run = None;
-                        if let Some(decision) = permission_decision_from_mode(goose_mode) {
+                        if let Some(decision) = permission_decision_from_mode(arakan_mode) {
                             if decision.should_record_rejection() {
                                 rejected_tool_calls.insert(request.tool_call.tool_call_id.0.to_string());
                             }
@@ -1140,7 +1140,7 @@ impl Drop for AcpProvider {
 
 struct AcpClientLoop {
     config: AcpProviderConfig,
-    goose_mode: Arc<Mutex<GooseMode>>,
+    arakan_mode: Arc<Mutex<ArakanMode>>,
     prompt_response_tx: Arc<Mutex<Option<mpsc::Sender<AcpUpdate>>>>,
     pending_tool_updates: Arc<Mutex<HashMap<String, AccumulatedToolCall>>>,
     context_size: Arc<AtomicU64>,
@@ -1150,14 +1150,14 @@ struct AcpClientLoop {
 impl AcpClientLoop {
     fn new(
         config: AcpProviderConfig,
-        goose_mode: Arc<Mutex<GooseMode>>,
+        arakan_mode: Arc<Mutex<ArakanMode>>,
         pending_tool_updates: Arc<Mutex<HashMap<String, AccumulatedToolCall>>>,
         context_size: Arc<AtomicU64>,
         effort: AcpEffortState,
     ) -> Self {
         Self {
             config,
-            goose_mode,
+            arakan_mode,
             prompt_response_tx: Arc::new(Mutex::new(None)),
             pending_tool_updates,
             context_size,
@@ -1212,7 +1212,7 @@ impl AcpClientLoop {
     ) -> Result<()> {
         let AcpClientLoop {
             config,
-            goose_mode,
+            arakan_mode,
             prompt_response_tx,
             pending_tool_updates,
             context_size,
@@ -1228,7 +1228,7 @@ impl AcpClientLoop {
                 {
                     let prompt_response_tx = prompt_response_tx.clone();
                     let reverse_modes = reverse_modes.clone();
-                    let goose_mode = goose_mode.clone();
+                    let arakan_mode = arakan_mode.clone();
                     let pending_tool_updates = pending_tool_updates.clone();
                     let context_size = context_size.clone();
                     let session_state = session_state.clone();
@@ -1250,9 +1250,9 @@ impl AcpClientLoop {
                                 if let Some(mode) = resolve_mode(
                                     &reverse_modes,
                                     update.current_mode_id.0.as_ref(),
-                                    &goose_mode,
+                                    &arakan_mode,
                                 ) {
-                                    if let Ok(mut guard) = goose_mode.lock() {
+                                    if let Ok(mut guard) = arakan_mode.lock() {
                                         *guard = mode;
                                     }
                                 }
@@ -1265,9 +1265,9 @@ impl AcpClientLoop {
                                             if let Some(mode) = resolve_mode(
                                                 &reverse_modes,
                                                 sel.current_value.0.as_ref(),
-                                                &goose_mode,
+                                                &arakan_mode,
                                             ) {
-                                                if let Ok(mut guard) = goose_mode.lock() {
+                                                if let Ok(mut guard) = arakan_mode.lock() {
                                                     *guard = mode;
                                                 }
                                             }
@@ -1327,7 +1327,7 @@ impl AcpClientLoop {
                                     // `title` (display) and `kind` (category). We pass `title`
                                     // for renderer affordance, surface `kind` separately via
                                     // tool_meta for stable categorization, and the
-                                    // goose.external_dispatch marker keeps `name` off the
+                                    // arakan.external_dispatch marker keeps `name` off the
                                     // agent loop's routing/auth paths.
                                     let _ = tx.try_send(AcpUpdate::ToolCallStart {
                                         id: id.clone(),
@@ -1438,7 +1438,7 @@ impl AcpClientLoop {
             .connect_with(transport, async move |cx: ConnectionTo<Agent>| {
                 handle_requests(
                     config,
-                    goose_mode,
+                    arakan_mode,
                     cx,
                     rx,
                     prompt_response_tx,
@@ -1480,7 +1480,7 @@ async fn forward_child_stderr(mut stderr: tokio::process::ChildStderr) {
                 }
             }
             Err(e) => {
-                tracing::debug!(target: "goose::acp::child::stderr", error = %e, "stderr read error");
+                tracing::debug!(target: "arakan::acp::child::stderr", error = %e, "stderr read error");
                 break;
             }
         }
@@ -1493,7 +1493,7 @@ fn emit_stderr_line(line: &mut Vec<u8>) {
         return;
     }
     let trimmed = line.strip_suffix(b"\r").unwrap_or(line);
-    tracing::info!(target: "goose::acp::child::stderr", "{}", String::from_utf8_lossy(trimmed));
+    tracing::info!(target: "arakan::acp::child::stderr", "{}", String::from_utf8_lossy(trimmed));
     line.clear();
 }
 
@@ -1544,7 +1544,7 @@ fn acp_method_error(method: &str, error: agent_client_protocol::Error) -> anyhow
 
 async fn handle_requests(
     config: AcpProviderConfig,
-    goose_mode: Arc<Mutex<GooseMode>>,
+    arakan_mode: Arc<Mutex<ArakanMode>>,
     cx: ConnectionTo<Agent>,
     rx: &mut mpsc::Receiver<ClientRequest>,
     prompt_response_tx: Arc<Mutex<Option<mpsc::Sender<AcpUpdate>>>>,
@@ -1605,7 +1605,7 @@ async fn handle_requests(
                             &session_state.effort,
                         )
                         .await?;
-                        apply_session_mode(&config, &goose_mode, &cx, session).await
+                        apply_session_mode(&config, &arakan_mode, &cx, session).await
                     }
                     Err(error) => Err(acp_method_error(AGENT_METHOD_NAMES.session_new, error)),
                 };
@@ -1653,7 +1653,7 @@ async fn handle_requests(
                             &session_state.effort,
                         )
                         .await?;
-                        apply_session_mode(&config, &goose_mode, &cx, session).await
+                        apply_session_mode(&config, &arakan_mode, &cx, session).await
                     }
                     Err(error) => {
                         *session_state.active_id.lock().unwrap() = previous_session_id;
@@ -1700,7 +1700,7 @@ async fn handle_requests(
                 let value_id = agent_client_protocol::schema::v1::SessionConfigValueId::new(value);
                 let req = SetSessionConfigOptionRequest::new(session_id, config_id, value_id);
                 // The agent rebuilds per-model effort levels in this response,
-                // so it is the freshest source after a goose-initiated switch.
+                // so it is the freshest source after a arakan-initiated switch.
                 let result: Result<()> = cx
                     .send_request(req)
                     .block_task()
@@ -1793,11 +1793,11 @@ async fn apply_session_config_options(
 
 async fn apply_session_mode(
     config: &AcpProviderConfig,
-    goose_mode: &Arc<Mutex<GooseMode>>,
+    arakan_mode: &Arc<Mutex<ArakanMode>>,
     cx: &ConnectionTo<Agent>,
     session: NewSessionResponse,
 ) -> Result<NewSessionResponse> {
-    let current_mode = goose_mode.lock().ok().map(|mode| *mode);
+    let current_mode = arakan_mode.lock().ok().map(|mode| *mode);
     let candidates = initial_mode_candidates(config, current_mode);
 
     if let Some(modes) = session.modes.as_ref() {
@@ -1837,7 +1837,7 @@ async fn apply_session_mode(
 
 fn initial_mode_candidates(
     config: &AcpProviderConfig,
-    current_mode: Option<GooseMode>,
+    current_mode: Option<ArakanMode>,
 ) -> Vec<String> {
     current_mode
         .and_then(|mode| config.mode_mapping.get(&mode).cloned())
@@ -2062,7 +2062,7 @@ fn acp_text_update_message(text: TextContent, id: String, created: i64) -> Messa
         .with_id(id)
 }
 
-/// Convert ACP `ToolCallContent` blocks into the rmcp `Content` shape goose's
+/// Convert ACP `ToolCallContent` blocks into the rmcp `Content` shape arakan's
 /// `Message::with_tool_response` consumes. Handles `Content` (text/image/other),
 /// `Diff`, and `Terminal` variants; falls back to a JSON serialization of
 /// `raw_output` when no blocks are present so the renderer always has something.
@@ -2290,8 +2290,8 @@ fn replace_effort_state(
     previous
 }
 
-/// Map a goose effort value onto the agent's advertised vocabulary. Values goose
-/// and the agent share pass through; goose's own enum values map onto their
+/// Map a arakan effort value onto the agent's advertised vocabulary. Values arakan
+/// and the agent share pass through; arakan's own enum values map onto their
 /// closest agent equivalent. Anything else yields `None` so we never send a
 /// value the agent would reject.
 pub(crate) fn map_effort_value(
@@ -2319,7 +2319,7 @@ pub(crate) fn map_effort_value(
     })
 }
 
-/// Resolve the goose-side thinking effort to send to the agent: the session's
+/// Resolve the arakan-side thinking effort to send to the agent: the session's
 /// persisted pick wins, then the global default, each mapped into the agent's
 /// vocabulary. `None` leaves the agent on its own current value. Shared with the
 /// config menu so the advertised selection is the applied one — a persisted pick
@@ -2335,7 +2335,7 @@ pub(super) fn resolve_effort_value(
         .and_then(|value| map_effort_value(capability, &value))
         .or_else(|| {
             Config::global()
-                .get_goose_thinking_effort()
+                .get_arakan_thinking_effort()
                 .and_then(|effort| map_effort_value(capability, &effort.to_string()))
         })
 }
@@ -2343,7 +2343,7 @@ pub(super) fn resolve_effort_value(
 /// Separate a value the agent evaluated and refused from an operational failure.
 /// Only an agent that actually processed the request answers with the JSON-RPC
 /// `invalid_params` code; the client library synthesizes `internal_error` for a
-/// dead subprocess or dropped connection, and goose's own send failures carry no
+/// dead subprocess or dropped connection, and arakan's own send failures carry no
 /// ACP error at all.
 fn effort_option_error(value: &str, error: anyhow::Error) -> ProviderError {
     match error.downcast_ref::<agent_client_protocol::Error>() {
@@ -2357,9 +2357,9 @@ fn effort_option_error(value: &str, error: anyhow::Error) -> ProviderError {
 }
 
 fn reverse_mode_mapping(
-    mode_mapping: &HashMap<GooseMode, Vec<String>>,
-) -> HashMap<String, Vec<GooseMode>> {
-    let mut reverse: HashMap<String, Vec<GooseMode>> = HashMap::new();
+    mode_mapping: &HashMap<ArakanMode, Vec<String>>,
+) -> HashMap<String, Vec<ArakanMode>> {
+    let mut reverse: HashMap<String, Vec<ArakanMode>> = HashMap::new();
     for (mode, ids) in mode_mapping {
         for id in ids {
             reverse.entry(id.clone()).or_default().push(*mode);
@@ -2369,10 +2369,10 @@ fn reverse_mode_mapping(
 }
 
 fn resolve_mode(
-    reverse_modes: &HashMap<String, Vec<GooseMode>>,
+    reverse_modes: &HashMap<String, Vec<ArakanMode>>,
     mode_id: &str,
-    current: &Arc<Mutex<GooseMode>>,
-) -> Option<GooseMode> {
+    current: &Arc<Mutex<ArakanMode>>,
+) -> Option<ArakanMode> {
     let candidates = reverse_modes.get(mode_id)?;
     if candidates.len() == 1 {
         return Some(candidates[0]);
@@ -2385,11 +2385,11 @@ fn resolve_mode(
     }
 }
 
-fn permission_decision_from_mode(goose_mode: GooseMode) -> Option<PermissionDecision> {
-    match goose_mode {
-        GooseMode::Auto => Some(PermissionDecision::AllowOnce),
-        GooseMode::Chat => Some(PermissionDecision::RejectOnce),
-        GooseMode::Approve | GooseMode::SmartApprove => None,
+fn permission_decision_from_mode(arakan_mode: ArakanMode) -> Option<PermissionDecision> {
+    match arakan_mode {
+        ArakanMode::Auto => Some(PermissionDecision::AllowOnce),
+        ArakanMode::Chat => Some(PermissionDecision::RejectOnce),
+        ArakanMode::Approve | ArakanMode::SmartApprove => None,
     }
 }
 
@@ -2539,7 +2539,7 @@ mod tests {
         (
             AcpProvider {
                 name: "acp-test".to_string(),
-                goose_mode: Arc::new(Mutex::new(GooseMode::Auto)),
+                arakan_mode: Arc::new(Mutex::new(ArakanMode::Auto)),
                 mode_mapping: HashMap::new(),
                 session: Mutex::new(AcpSession {
                     id: SessionId::new("test-session"),
@@ -2591,7 +2591,7 @@ mod tests {
         assert_eq!(blocks.len(), 2);
         let memo = prompt_text(&blocks[0]);
         assert!(memo.starts_with(
-            "Conversation context from goose before this ACP provider session was created:"
+            "Conversation context from arakan before this ACP provider session was created:"
         ));
         assert!(memo.contains("[user]: inspect src/lib.rs"));
         assert!(memo.contains("[assistant]: I found the file"));
@@ -2756,7 +2756,7 @@ mod tests {
 
         let (tx, mut rx) = mpsc::channel(1);
         let (provider, model) = test_provider_with_tx(Some(tx));
-        *provider.goose_mode.lock().unwrap() = GooseMode::Chat;
+        *provider.arakan_mode.lock().unwrap() = ArakanMode::Chat;
 
         let messages = vec![Message::user().with_text("inspect src/lib.rs")];
         let mut stream = provider.stream(&model, "", &messages, &[]).await.unwrap();
@@ -2941,7 +2941,7 @@ mod tests {
         let (provider, model) = test_provider();
         assert_eq!(
             provider.get_context_limit(&model.model_name, None).await,
-            goose_providers::model::DEFAULT_CONTEXT_LIMIT
+            arakan_providers::model::DEFAULT_CONTEXT_LIMIT
         );
 
         provider.context_size.store(200_000, Ordering::Relaxed);
@@ -2953,7 +2953,7 @@ mod tests {
 
     #[tokio::test]
     async fn handoff_budget_honors_global_context_limit_override() {
-        let _guard = env_lock::lock_env([("GOOSE_CONTEXT_LIMIT", Some("64"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_CONTEXT_LIMIT", Some("64"))]);
         let (provider, model) = test_provider();
         provider.context_size.store(200_000, Ordering::Relaxed);
         let messages = vec![
@@ -3139,7 +3139,7 @@ mod tests {
 
     #[tokio::test]
     async fn failed_handoff_send_consumes_the_claim() {
-        let _guard = env_lock::lock_env([("GOOSE_CONTEXT_LIMIT", None::<&str>)]);
+        let _guard = env_lock::lock_env([("ARAKAN_CONTEXT_LIMIT", None::<&str>)]);
         let (tx, rx) = mpsc::channel(1);
         drop(rx);
         let (provider, model) = test_provider_with_tx(Some(tx));
@@ -3322,7 +3322,7 @@ mod tests {
 
         assert!(
             provider.claim_handoff_context(&messages).include_context,
-            "context that never left goose must still be handed off later"
+            "context that never left arakan must still be handed off later"
         );
     }
 
@@ -3737,7 +3737,7 @@ mod tests {
     #[test_case("off" => Some("default".to_string()) ; "off maps to the agent default")]
     #[test_case("max" => Some("xhigh".to_string()) ; "max maps to xhigh")]
     #[test_case("medium" => None ; "value the agent does not offer is not forwarded")]
-    fn map_effort_value_maps_goose_values_onto_agent_values(value: &str) -> Option<String> {
+    fn map_effort_value_maps_arakan_values_onto_agent_values(value: &str) -> Option<String> {
         map_effort_value(
             &effort_capability(&["default", "low", "high", "xhigh"], "default"),
             value,
@@ -3922,7 +3922,7 @@ mod tests {
 
     /// A refresh that reverts the agent's own effort (e.g. a model switch
     /// rebuilding per-model levels) must not be masked by a stale record of
-    /// what goose last sent: the persisted value gets re-applied.
+    /// what arakan last sent: the persisted value gets re-applied.
     #[tokio::test]
     async fn apply_effort_if_changed_resends_after_the_agent_resets_its_effort() {
         let (tx, mut rx) = mpsc::channel(1);
@@ -3960,7 +3960,7 @@ mod tests {
     /// current while the client shows the global.
     #[tokio::test]
     async fn apply_effort_if_changed_falls_back_to_the_global_default() {
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("high"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("high"))]);
         let (tx, mut rx) = mpsc::channel(1);
         let provider =
             test_provider_with_effort(tx, Some(effort_capability(&["default", "high"], "default")));
@@ -3981,7 +3981,7 @@ mod tests {
     async fn apply_effort_if_changed_skips_unmapped_value() {
         // Unoffered by the capability below, so the global default never wins
         // and the test doesn't depend on the machine's configured value.
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("medium"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("medium"))]);
         let (tx, mut rx) = mpsc::channel(1);
         let provider =
             test_provider_with_effort(tx, Some(effort_capability(&["default", "high"], "default")));
@@ -4009,7 +4009,7 @@ mod tests {
 
     #[tokio::test]
     async fn apply_effort_if_changed_skips_session_without_a_persisted_value() {
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("medium"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("medium"))]);
         let (tx, mut rx) = mpsc::channel(1);
         let provider =
             test_provider_with_effort(tx, Some(effort_capability(&["default", "high"], "default")));
@@ -4023,7 +4023,7 @@ mod tests {
     }
 
     fn test_acp_config(
-        mode_mapping: HashMap<GooseMode, Vec<String>>,
+        mode_mapping: HashMap<ArakanMode, Vec<String>>,
         session_mode_id: Option<String>,
     ) -> AcpProviderConfig {
         AcpProviderConfig {
@@ -4047,7 +4047,7 @@ mod tests {
         let stopped_in_loop = stopped.clone();
         let start = AcpProvider::start(
             "acp-test".to_string(),
-            GooseMode::Auto,
+            ArakanMode::Auto,
             test_acp_config(HashMap::new(), None),
             Box::new(move |_, _, init_tx, cancel_rx| {
                 Box::pin(async move {
@@ -4072,26 +4072,26 @@ mod tests {
         .unwrap();
     }
 
-    #[test_case(GooseMode::Auto)]
-    #[test_case(GooseMode::Approve)]
-    #[test_case(GooseMode::SmartApprove)]
-    #[test_case(GooseMode::Chat)]
-    fn initial_mode_candidates_empty_when_mode_negotiation_disabled(mode: GooseMode) {
+    #[test_case(ArakanMode::Auto)]
+    #[test_case(ArakanMode::Approve)]
+    #[test_case(ArakanMode::SmartApprove)]
+    #[test_case(ArakanMode::Chat)]
+    fn initial_mode_candidates_empty_when_mode_negotiation_disabled(mode: ArakanMode) {
         let config = test_acp_config(HashMap::new(), None);
         assert!(initial_mode_candidates(&config, Some(mode)).is_empty());
     }
 
     #[test]
     fn initial_mode_candidates_prefer_mapping_then_fallback() {
-        let mapping = HashMap::from([(GooseMode::Auto, vec!["bypassPermissions".to_string()])]);
+        let mapping = HashMap::from([(ArakanMode::Auto, vec!["bypassPermissions".to_string()])]);
         let config = test_acp_config(mapping, Some("default".to_string()));
 
         assert_eq!(
-            initial_mode_candidates(&config, Some(GooseMode::Auto)),
+            initial_mode_candidates(&config, Some(ArakanMode::Auto)),
             vec!["bypassPermissions".to_string()]
         );
         assert_eq!(
-            initial_mode_candidates(&config, Some(GooseMode::Chat)),
+            initial_mode_candidates(&config, Some(ArakanMode::Chat)),
             vec!["default".to_string()]
         );
     }
@@ -4152,23 +4152,23 @@ mod tests {
         let (provider, _) = test_provider_with_tx(Some(tx));
 
         provider
-            .update_mode("session", GooseMode::Chat)
+            .update_mode("session", ArakanMode::Chat)
             .await
             .unwrap();
 
         assert!(rx.try_recv().is_err());
-        assert_eq!(*provider.goose_mode.lock().unwrap(), GooseMode::Chat);
+        assert_eq!(*provider.arakan_mode.lock().unwrap(), ArakanMode::Chat);
     }
 
     #[tokio::test]
     async fn update_mode_with_mapping_sends_set_mode() {
         let (tx, mut rx) = mpsc::channel(1);
         let (mut provider, _) = test_provider_with_tx(Some(tx));
-        provider.mode_mapping = HashMap::from([(GooseMode::Chat, vec!["plan".to_string()])]);
+        provider.mode_mapping = HashMap::from([(ArakanMode::Chat, vec!["plan".to_string()])]);
 
         let handle = tokio::spawn(async move {
             provider
-                .update_mode("session", GooseMode::Chat)
+                .update_mode("session", ArakanMode::Chat)
                 .await
                 .unwrap();
             provider
@@ -4187,7 +4187,7 @@ mod tests {
         }
 
         let provider = handle.await.unwrap();
-        assert_eq!(*provider.goose_mode.lock().unwrap(), GooseMode::Chat);
+        assert_eq!(*provider.arakan_mode.lock().unwrap(), ArakanMode::Chat);
     }
 
     #[tokio::test]
@@ -4195,7 +4195,7 @@ mod tests {
         let (tx, mut rx) = mpsc::channel(1);
         let (mut provider, _) = test_provider_with_tx(Some(tx));
         provider.mode_mapping = HashMap::from([(
-            GooseMode::Auto,
+            ArakanMode::Auto,
             vec!["full-access".to_string(), "agent-full-access".to_string()],
         )]);
         provider.session.lock().unwrap().response = NewSessionResponse::new("test-session").modes(
@@ -4204,7 +4204,7 @@ mod tests {
 
         let handle = tokio::spawn(async move {
             provider
-                .update_mode("session", GooseMode::Auto)
+                .update_mode("session", ArakanMode::Auto)
                 .await
                 .unwrap();
             provider
@@ -4223,22 +4223,22 @@ mod tests {
         }
 
         let provider = handle.await.unwrap();
-        assert_eq!(*provider.goose_mode.lock().unwrap(), GooseMode::Auto);
+        assert_eq!(*provider.arakan_mode.lock().unwrap(), ArakanMode::Auto);
     }
 
     #[tokio::test]
     async fn update_mode_errors_when_no_candidate_offered() {
         let (tx, mut rx) = mpsc::channel(1);
         let (mut provider, _) = test_provider_with_tx(Some(tx));
-        provider.mode_mapping = HashMap::from([(GooseMode::Chat, vec!["read-only".to_string()])]);
+        provider.mode_mapping = HashMap::from([(ArakanMode::Chat, vec!["read-only".to_string()])]);
         provider.session.lock().unwrap().response = NewSessionResponse::new("test-session")
             .modes(mode_state("agent", &["agent", "agent-full-access"]));
 
-        let result = provider.update_mode("session", GooseMode::Chat).await;
+        let result = provider.update_mode("session", ArakanMode::Chat).await;
 
         assert!(result.is_err());
         assert!(rx.try_recv().is_err());
-        assert_eq!(*provider.goose_mode.lock().unwrap(), GooseMode::Auto);
+        assert_eq!(*provider.arakan_mode.lock().unwrap(), ArakanMode::Auto);
     }
 
     #[tokio::test]
@@ -4395,63 +4395,63 @@ mod tests {
         assert!(filtered.is_empty());
     }
 
-    #[test_case(GooseMode::Auto => Some(PermissionDecision::AllowOnce) ; "auto allows")]
-    #[test_case(GooseMode::Chat => Some(PermissionDecision::RejectOnce) ; "chat rejects")]
-    #[test_case(GooseMode::Approve => None ; "approve defers")]
-    #[test_case(GooseMode::SmartApprove => None ; "smart_approve defers")]
-    fn test_permission_decision_from_mode(mode: GooseMode) -> Option<PermissionDecision> {
+    #[test_case(ArakanMode::Auto => Some(PermissionDecision::AllowOnce) ; "auto allows")]
+    #[test_case(ArakanMode::Chat => Some(PermissionDecision::RejectOnce) ; "chat rejects")]
+    #[test_case(ArakanMode::Approve => None ; "approve defers")]
+    #[test_case(ArakanMode::SmartApprove => None ; "smart_approve defers")]
+    fn test_permission_decision_from_mode(mode: ArakanMode) -> Option<PermissionDecision> {
         permission_decision_from_mode(mode)
     }
 
     #[test_case(
         HashMap::from([
-            (GooseMode::Auto, vec!["yolo".to_string()]),
-            (GooseMode::Approve, vec!["default".to_string()]),
-            (GooseMode::SmartApprove, vec!["auto_edit".to_string()]),
-            (GooseMode::Chat, vec!["plan".to_string()]),
+            (ArakanMode::Auto, vec!["yolo".to_string()]),
+            (ArakanMode::Approve, vec!["default".to_string()]),
+            (ArakanMode::SmartApprove, vec!["auto_edit".to_string()]),
+            (ArakanMode::Chat, vec!["plan".to_string()]),
         ]),
         HashMap::from([
-            ("yolo".to_string(), vec![GooseMode::Auto]),
-            ("default".to_string(), vec![GooseMode::Approve]),
-            ("auto_edit".to_string(), vec![GooseMode::SmartApprove]),
-            ("plan".to_string(), vec![GooseMode::Chat]),
+            ("yolo".to_string(), vec![ArakanMode::Auto]),
+            ("default".to_string(), vec![ArakanMode::Approve]),
+            ("auto_edit".to_string(), vec![ArakanMode::SmartApprove]),
+            ("plan".to_string(), vec![ArakanMode::Chat]),
         ])
         ; "gemini provider mapping"
     )]
     #[test_case(
         HashMap::from([
-            (GooseMode::Auto, vec!["bypassPermissions".to_string()]),
-            (GooseMode::Approve, vec!["default".to_string()]),
-            (GooseMode::SmartApprove, vec!["acceptEdits".to_string()]),
-            (GooseMode::Chat, vec!["plan".to_string()]),
+            (ArakanMode::Auto, vec!["bypassPermissions".to_string()]),
+            (ArakanMode::Approve, vec!["default".to_string()]),
+            (ArakanMode::SmartApprove, vec!["acceptEdits".to_string()]),
+            (ArakanMode::Chat, vec!["plan".to_string()]),
         ]),
         HashMap::from([
-            ("bypassPermissions".to_string(), vec![GooseMode::Auto]),
-            ("default".to_string(), vec![GooseMode::Approve]),
-            ("acceptEdits".to_string(), vec![GooseMode::SmartApprove]),
-            ("plan".to_string(), vec![GooseMode::Chat]),
+            ("bypassPermissions".to_string(), vec![ArakanMode::Auto]),
+            ("default".to_string(), vec![ArakanMode::Approve]),
+            ("acceptEdits".to_string(), vec![ArakanMode::SmartApprove]),
+            ("plan".to_string(), vec![ArakanMode::Chat]),
         ])
         ; "claude provider mapping"
     )]
     #[test_case(
         HashMap::from([
-            (GooseMode::Auto, vec!["full-access".to_string(), "agent-full-access".to_string()]),
-            (GooseMode::Approve, vec!["read-only".to_string()]),
-            (GooseMode::SmartApprove, vec!["auto".to_string(), "agent".to_string()]),
-            (GooseMode::Chat, vec!["read-only".to_string()]),
+            (ArakanMode::Auto, vec!["full-access".to_string(), "agent-full-access".to_string()]),
+            (ArakanMode::Approve, vec!["read-only".to_string()]),
+            (ArakanMode::SmartApprove, vec!["auto".to_string(), "agent".to_string()]),
+            (ArakanMode::Chat, vec!["read-only".to_string()]),
         ]),
         HashMap::from([
-            ("full-access".to_string(), vec![GooseMode::Auto]),
-            ("agent-full-access".to_string(), vec![GooseMode::Auto]),
-            ("read-only".to_string(), vec![GooseMode::Approve, GooseMode::Chat]),
-            ("auto".to_string(), vec![GooseMode::SmartApprove]),
-            ("agent".to_string(), vec![GooseMode::SmartApprove]),
+            ("full-access".to_string(), vec![ArakanMode::Auto]),
+            ("agent-full-access".to_string(), vec![ArakanMode::Auto]),
+            ("read-only".to_string(), vec![ArakanMode::Approve, ArakanMode::Chat]),
+            ("auto".to_string(), vec![ArakanMode::SmartApprove]),
+            ("agent".to_string(), vec![ArakanMode::SmartApprove]),
         ])
         ; "codex candidates for both bridge generations"
     )]
     fn test_reverse_mode_mapping(
-        forward: HashMap<GooseMode, Vec<String>>,
-        expected: HashMap<String, Vec<GooseMode>>,
+        forward: HashMap<ArakanMode, Vec<String>>,
+        expected: HashMap<String, Vec<ArakanMode>>,
     ) {
         let result = reverse_mode_mapping(&forward);
         assert_eq!(result.len(), expected.len());
@@ -4507,43 +4507,43 @@ mod tests {
         resolve_model_info("test", &response)
     }
 
-    fn duplicate_read_only_reverse_modes() -> HashMap<String, Vec<GooseMode>> {
+    fn duplicate_read_only_reverse_modes() -> HashMap<String, Vec<ArakanMode>> {
         HashMap::from([
-            ("full-access".to_string(), vec![GooseMode::Auto]),
+            ("full-access".to_string(), vec![ArakanMode::Auto]),
             (
                 "read-only".to_string(),
-                vec![GooseMode::Approve, GooseMode::Chat],
+                vec![ArakanMode::Approve, ArakanMode::Chat],
             ),
-            ("auto".to_string(), vec![GooseMode::SmartApprove]),
+            ("auto".to_string(), vec![ArakanMode::SmartApprove]),
         ])
     }
 
     #[test_case(
-        "full-access", GooseMode::Auto, Some(GooseMode::Auto)
+        "full-access", ArakanMode::Auto, Some(ArakanMode::Auto)
         ; "unique mapping returns the only candidate"
     )]
     #[test_case(
-        "read-only", GooseMode::Approve, Some(GooseMode::Approve)
+        "read-only", ArakanMode::Approve, Some(ArakanMode::Approve)
         ; "duplicate prefers current when current is Approve"
     )]
     #[test_case(
-        "read-only", GooseMode::Chat, Some(GooseMode::Chat)
+        "read-only", ArakanMode::Chat, Some(ArakanMode::Chat)
         ; "duplicate prefers current when current is Chat"
     )]
     #[test_case(
-        "read-only", GooseMode::Auto, Some(GooseMode::Approve)
+        "read-only", ArakanMode::Auto, Some(ArakanMode::Approve)
         ; "duplicate falls back to first when current not in candidates"
     )]
     #[test_case(
-        "unknown-id", GooseMode::Auto, None
+        "unknown-id", ArakanMode::Auto, None
         ; "unknown mode id returns None"
     )]
-    fn test_resolve_mode(mode_id: &str, current: GooseMode, expected: Option<GooseMode>) {
+    fn test_resolve_mode(mode_id: &str, current: ArakanMode, expected: Option<ArakanMode>) {
         let reverse_modes = duplicate_read_only_reverse_modes();
         let current = Arc::new(Mutex::new(current));
         let result = resolve_mode(&reverse_modes, mode_id, &current);
-        if mode_id == "read-only" && expected == Some(GooseMode::Approve) {
-            assert!(result == Some(GooseMode::Approve) || result == Some(GooseMode::Chat));
+        if mode_id == "read-only" && expected == Some(ArakanMode::Approve) {
+            assert!(result == Some(ArakanMode::Approve) || result == Some(ArakanMode::Chat));
         } else {
             assert_eq!(result, expected);
         }
@@ -4752,7 +4752,7 @@ mod tests {
         for (kind, expected) in cases {
             let tool_meta = serde_json::json!({
                 TOOL_META_EXTERNAL_DISPATCH_KEY: true,
-                "goose.acp.kind": kind,
+                "arakan.acp.kind": kind,
             });
             assert_eq!(
                 tool_meta[TOOL_META_EXTERNAL_DISPATCH_KEY],
@@ -4760,9 +4760,9 @@ mod tests {
                 "external_dispatch marker missing for kind={kind:?}"
             );
             assert_eq!(
-                tool_meta["goose.acp.kind"],
+                tool_meta["arakan.acp.kind"],
                 serde_json::Value::String(expected.to_string()),
-                "goose.acp.kind serialized wrong for kind={kind:?}"
+                "arakan.acp.kind serialized wrong for kind={kind:?}"
             );
         }
     }

@@ -94,7 +94,7 @@ fn long_lived_spawn_sender() -> io::Result<mpsc::Sender<LongLivedSpawnRequest>> 
     match SENDER.get_or_init(|| {
         let (sender, receiver) = mpsc::channel::<LongLivedSpawnRequest>();
         std::thread::Builder::new()
-            .name("goose-extension-spawner".to_owned())
+            .name("arakan-extension-spawner".to_owned())
             .spawn(move || {
                 while let Ok(mut request) = receiver.recv() {
                     let _runtime_guard = request.runtime.enter();

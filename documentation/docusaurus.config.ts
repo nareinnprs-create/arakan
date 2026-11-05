@@ -15,20 +15,20 @@ type SidebarItem = {
 };
 
 const config: Config = {
-  title: "goose | Your open source AI agent",
+  title: "arakan | Your open source AI agent",
   tagline: "your local AI agent, automating engineering tasks seamlessly",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
-  url: "https://goose-docs.ai/",
+  url: "https://arakan-docs.ai/",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: process.env.TARGET_PATH || "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "aaif-goose", // Usually your GitHub org/user name.
-  projectName: "goose", // Usually your repo name.
+  organizationName: "aaif-arakan", // Usually your GitHub org/user name.
+  projectName: "arakan", // Usually your repo name.
 
   onBrokenLinks: "throw",
 
@@ -164,8 +164,8 @@ const config: Config = {
             to: "/docs/gdk/reference",
           },
           {
-            from: "/docs/getting-started/using-goose-free",
-            to: "/docs/getting-started/providers#using-goose-for-free",
+            from: "/docs/getting-started/using-arakan-free",
+            to: "/docs/getting-started/providers#using-arakan-for-free",
           },
           {
             from: "/v1/docs/getting-started/providers",
@@ -200,7 +200,7 @@ const config: Config = {
             to: "/docs/mcp/computer-controller-mcp",
           },
           {
-            from: "/docs/guides/managing-goose-sessions",
+            from: "/docs/guides/managing-arakan-sessions",
             to: "/docs/guides/sessions/session-management",
           },
           {
@@ -208,7 +208,7 @@ const config: Config = {
             to: "/docs/guides/sessions/smart-context-management",
           },
           {
-            from: "/docs/guides/share-goose-sessions",
+            from: "/docs/guides/share-arakan-sessions",
             to: "/docs/guides/recipes/session-recipes",
           },
           {
@@ -236,8 +236,8 @@ const config: Config = {
             to: "/docs/guides/managing-tools/adjust-tool-output",
           },
           {
-            from: "/docs/guides/goose-in-docker",
-            to: "/docs/tutorials/goose-in-docker",
+            from: "/docs/guides/arakan-in-docker",
+            to: "/docs/tutorials/arakan-in-docker",
           },
           {
             from: "/docs/guides/multi-model/creating-plans",
@@ -272,12 +272,12 @@ const config: Config = {
             to: "/docs/guides/context-engineering/prompt-templates",
           },
           {
-            from: "/docs/guides/goose-permissions",
-            to: "/docs/guides/managing-tools/goose-permissions",
+            from: "/docs/guides/arakan-permissions",
+            to: "/docs/guides/managing-tools/arakan-permissions",
           },
           {
-            from: "/docs/guides/using-goosehints",
-            to: "/docs/guides/context-engineering/using-goosehints",
+            from: "/docs/guides/using-arakanhints",
+            to: "/docs/guides/context-engineering/using-arakanhints",
           },
           {
             from: "/docs/guides/managing-tools/hooks",
@@ -456,7 +456,7 @@ const config: Config = {
     navbar: {
       title: "",
       logo: {
-        alt: "goose Logo", // TODO: replace logo assets with AAIF branding
+        alt: "arakan Logo", // TODO: replace logo assets with AAIF branding
         src: "img/logo_light.png",
         srcDark: "img/logo_dark.png",
       },
@@ -488,7 +488,7 @@ const config: Config = {
           position: "right",
         },
         {
-          href: "https://github.com/aaif-goose/goose",
+          href: "https://github.com/aaif-arakan/arakan",
           label: "GitHub",
           position: "right",
         },
@@ -500,7 +500,7 @@ const config: Config = {
           title: "Quick Links",
           items: [
             {
-              label: "Install goose",
+              label: "Install arakan",
               to: "docs/getting-started/installation",
             },
             {
@@ -526,15 +526,15 @@ const config: Config = {
             },
             {
               label: "YouTube",
-              href: "https://www.youtube.com/@goose-oss",
+              href: "https://www.youtube.com/@arakan-oss",
             },
             {
               label: "LinkedIn",
-              href: "https://www.linkedin.com/company/goose-oss",
+              href: "https://www.linkedin.com/company/arakan-oss",
             },
             {
               label: "Twitter / X",
-              href: "https://x.com/goose_oss",
+              href: "https://x.com/arakan_oss",
             },
             {
               label: "BlueSky",
@@ -555,7 +555,7 @@ const config: Config = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/aaif-goose/goose",
+              href: "https://github.com/aaif-arakan/arakan",
             },
           ],
         },

@@ -62,7 +62,7 @@ fn default_tool_title(tool_name: &str, arguments: Option<&serde_json::Value>) ->
     }
 }
 
-pub(crate) fn goose_tool_call_meta(tool_request: &ToolRequest) -> Option<Meta> {
+pub(crate) fn arakan_tool_call_meta(tool_request: &ToolRequest) -> Option<Meta> {
     let tool_call = tool_request.tool_call.as_ref().ok()?;
     let tool_name = tool_call.name.to_string();
     let extension_name = tool_request
@@ -79,14 +79,14 @@ pub(crate) fn goose_tool_call_meta(tool_request: &ToolRequest) -> Option<Meta> {
         );
     }
 
-    let mut goose_meta = serde_json::Map::new();
-    goose_meta.insert(
+    let mut arakan_meta = serde_json::Map::new();
+    arakan_meta.insert(
         "toolCall".to_string(),
         serde_json::Value::Object(tool_call_meta),
     );
 
     let mut meta = serde_json::Map::new();
-    meta.insert("goose".to_string(), serde_json::Value::Object(goose_meta));
+    meta.insert("arakan".to_string(), serde_json::Value::Object(arakan_meta));
     Some(meta)
 }
 
@@ -102,7 +102,7 @@ fn build_initial_tool_call(tool_request: &ToolRequest, include_generated_title: 
         .and_then(|tc| tc.arguments.as_ref())
         .map(|a| serde_json::Value::Object(a.clone()));
     let default_tool_call_title = default_tool_title(&tool_name, args_value.as_ref());
-    let goose_meta = goose_tool_call_meta(tool_request);
+    let arakan_meta = arakan_tool_call_meta(tool_request);
 
     let initial_title = if include_generated_title {
         tool_request
@@ -119,7 +119,7 @@ fn build_initial_tool_call(tool_request: &ToolRequest, include_generated_title: 
         tool_call = tool_call.raw_input(args);
     }
 
-    tool_call.meta(goose_meta)
+    tool_call.meta(arakan_meta)
 }
 
 pub(crate) fn build_initial_tool_call_with_message_meta(
@@ -215,7 +215,7 @@ fn extract_tool_locations_from_request(tool_request: &ToolRequest) -> Vec<ToolCa
 pub(crate) fn tool_response_meta(tool_response: &ToolResponse) -> Option<Meta> {
     let tool_result = tool_response.tool_result.as_ref().ok()?;
     let result_meta = tool_result.meta.as_ref()?;
-    let mut goose_meta = result_meta
+    let mut arakan_meta = result_meta
         .0
         .get(TRUSTED_TOOL_UPDATE_META_KEY)
         .and_then(serde_json::Value::as_object)
@@ -227,14 +227,14 @@ pub(crate) fn tool_response_meta(tool_response: &ToolResponse) -> Option<Meta> {
         .get("subagent_session_id")
         .and_then(serde_json::Value::as_str)
     {
-        goose_meta.insert("subagentSessionId".to_string(), subagent_id.into());
+        arakan_meta.insert("subagentSessionId".to_string(), subagent_id.into());
     }
 
-    if goose_meta.is_empty() {
+    if arakan_meta.is_empty() {
         return None;
     }
     let mut meta_map = serde_json::Map::new();
-    meta_map.insert("goose".to_string(), serde_json::Value::Object(goose_meta));
+    meta_map.insert("arakan".to_string(), serde_json::Value::Object(arakan_meta));
     Some(meta_map)
 }
 
@@ -416,7 +416,7 @@ mod tests {
                 id: "req_1".to_string(),
                 tool_call: Ok(CallToolRequestParams::new("edit").with_arguments(arguments.clone())),
                 metadata: None,
-                tool_meta: Some(serde_json::json!({"goose_extension": "developer"})),
+                tool_meta: Some(serde_json::json!({"arakan_extension": "developer"})),
             };
 
             let tool_call = build_initial_tool_call(&request, false);
@@ -428,7 +428,7 @@ mod tests {
                 Some(serde_json::Value::Object(arguments))
             );
             assert_eq!(
-                tool_call.meta.as_ref().and_then(|meta| meta.get("goose")),
+                tool_call.meta.as_ref().and_then(|meta| meta.get("arakan")),
                 Some(&serde_json::json!({
                     "toolCall": {
                         "toolName": "edit",
@@ -510,7 +510,7 @@ mod tests {
 
             let tool_call = build_initial_tool_call_with_message_meta(&request, &message, false);
             assert_eq!(
-                tool_call.meta.as_ref().and_then(|meta| meta.get("goose")),
+                tool_call.meta.as_ref().and_then(|meta| meta.get("arakan")),
                 Some(&serde_json::json!({
                     "created": 1_700_000_000,
                     "messageId": "msg_live",
@@ -529,7 +529,7 @@ mod tests {
                 limited_tool_call
                     .meta
                     .as_ref()
-                    .and_then(|meta| meta.get("goose")),
+                    .and_then(|meta| meta.get("arakan")),
                 Some(&serde_json::json!({
                     "created": 1_700_000_000,
                     "messageId": "msg_live",
@@ -578,22 +578,22 @@ mod tests {
         }
     }
 
-    mod goose_tool_call_meta {
+    mod arakan_tool_call_meta {
         use super::*;
 
         #[test]
-        fn prefers_goose_extension_metadata_over_name_prefix() {
+        fn prefers_arakan_extension_metadata_over_name_prefix() {
             let request = ToolRequest {
                 id: "req_1".to_string(),
                 tool_call: Ok(CallToolRequestParams::new("other__query-docs")),
                 metadata: None,
-                tool_meta: Some(serde_json::json!({"goose_extension": "context7"})),
+                tool_meta: Some(serde_json::json!({"arakan_extension": "context7"})),
             };
 
-            let meta = goose_tool_call_meta(&request).expect("expected metadata");
+            let meta = arakan_tool_call_meta(&request).expect("expected metadata");
 
             assert_eq!(
-                meta.get("goose"),
+                meta.get("arakan"),
                 Some(&serde_json::json!({
                     "toolCall": {
                         "toolName": "other__query-docs",
@@ -671,7 +671,7 @@ mod tests {
         #[test]
         fn accepts_unprefixed_developer_tool_from_metadata() {
             let mut request = request("write", serde_json::json!({"path": "/tmp/f.txt"}));
-            request.tool_meta = Some(serde_json::json!({"goose_extension": "developer"}));
+            request.tool_meta = Some(serde_json::json!({"arakan_extension": "developer"}));
 
             assert_eq!(
                 locations(&request),
@@ -734,14 +734,14 @@ mod tests {
             let meta = tool_response_meta(&response).expect("expected subagent metadata");
             assert_eq!(
                 serde_json::Value::Object(meta),
-                serde_json::json!({"goose": {"subagentSessionId": "child-session"}}),
+                serde_json::json!({"arakan": {"subagentSessionId": "child-session"}}),
             );
         }
 
         #[test]
-        fn ignores_untrusted_goose_meta() {
+        fn ignores_untrusted_arakan_meta() {
             let response = response_with_meta(Some(serde_json::json!({
-                "goose": {
+                "arakan": {
                     "mcpApp": {
                         "resourceUri": "ui://spoofed/app",
                     },
@@ -755,7 +755,7 @@ mod tests {
         fn preserves_trusted_app_meta_alongside_subagent_session() {
             let response = response_with_meta(Some(serde_json::json!({
                 "subagent_session_id": "child-session",
-                "goose": {
+                "arakan": {
                     "mcpApp": {
                         "resourceUri": "ui://spoofed/app",
                     },
@@ -771,7 +771,7 @@ mod tests {
 
             let extracted = tool_response_meta(&response).expect("expected trusted meta");
             assert_eq!(
-                extracted.get("goose"),
+                extracted.get("arakan"),
                 Some(&serde_json::json!({
                     "subagentSessionId": "child-session",
                     "mcpApp": {
@@ -802,7 +802,7 @@ mod tests {
                 ])),
             ),
             metadata: None,
-            tool_meta: Some(serde_json::json!({"goose_extension": "developer"})),
+            tool_meta: Some(serde_json::json!({"arakan_extension": "developer"})),
         }
     }
 

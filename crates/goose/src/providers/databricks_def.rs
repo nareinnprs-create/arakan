@@ -1,9 +1,9 @@
 use anyhow::Result;
 use futures::future::BoxFuture;
-use goose_providers::api_client::TlsConfig;
-use goose_providers::base::ProviderDescriptor;
-use goose_providers::databricks::DatabricksProvider;
-use goose_providers::databricks_auth::{
+use arakan_providers::api_client::TlsConfig;
+use arakan_providers::base::ProviderDescriptor;
+use arakan_providers::databricks::DatabricksProvider;
+use arakan_providers::databricks_auth::{
     DatabricksAuth, DatabricksOauthTokenProvider, DatabricksRefreshHook,
     DatabricksSessionIdProvider, DatabricksTokenResolver,
 };
@@ -15,7 +15,7 @@ use crate::providers::base::ProviderDef;
 pub struct DatabricksProviderDef;
 
 impl ProviderDescriptor for DatabricksProviderDef {
-    fn metadata() -> goose_providers::base::ProviderMetadata {
+    fn metadata() -> arakan_providers::base::ProviderMetadata {
         DatabricksProvider::metadata().with_setup(
             crate::providers::catalog::ProviderSetupMetadata::new(
                 crate::providers::catalog::ProviderSetupCategory::Model,
@@ -94,7 +94,7 @@ fn load_host(config: &Config) -> Result<String> {
 
 fn resolve_instance_id() -> Option<String> {
     let enabled = Config::global()
-        .get_param::<bool>("GOOSE_DATABRICKS_CLIENT_REQUEST_ID")
+        .get_param::<bool>("ARAKAN_DATABRICKS_CLIENT_REQUEST_ID")
         .unwrap_or(false);
     enabled.then(|| crate::instance_id::get_instance_id().to_string())
 }

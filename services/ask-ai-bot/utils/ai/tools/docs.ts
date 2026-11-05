@@ -17,7 +17,7 @@ export interface DocSection {
 }
 
 const stopWords = new Set(
-  "a an and are can do does for goose how i in is it me my of on the to what with you".split(
+  "a an and are can do does for arakan how i in is it me my of on the to what with you".split(
     " ",
   ),
 );
@@ -71,7 +71,7 @@ class DocsIndex {
         segments.at(-1) === segments.at(-2))
     )
       segments.pop();
-    const webUrl = `https://goose-docs.ai/docs/${slug ? slug.replace(/^\//, "") : segments.join("/")}`;
+    const webUrl = `https://arakan-docs.ai/docs/${slug ? slug.replace(/^\//, "") : segments.join("/")}`;
     const versionNote =
       markdown
         .match(

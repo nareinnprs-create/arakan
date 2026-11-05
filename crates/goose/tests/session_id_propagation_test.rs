@@ -1,9 +1,9 @@
-use goose::conversation::message::Message;
-use goose::providers::api_client::{ApiClient, AuthMethod};
-use goose::providers::base::Provider;
-use goose::providers::openai::OpenAiProviderBuilder;
-use goose::session_context::{session_id_request_builder, SESSION_ID_HEADER};
-use goose_providers::model::ModelConfig;
+use arakan::conversation::message::Message;
+use arakan::providers::api_client::{ApiClient, AuthMethod};
+use arakan::providers::base::Provider;
+use arakan::providers::openai::OpenAiProviderBuilder;
+use arakan::session_context::{session_id_request_builder, SESSION_ID_HEADER};
+use arakan_providers::model::ModelConfig;
 use serde_json::json;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -45,7 +45,7 @@ fn create_test_provider(mock_server_url: &str) -> Box<dyn Provider> {
     .with_request_builder(session_id_request_builder());
     Box::new(
         OpenAiProviderBuilder::new(api_client)
-            .session_id_provider(Arc::new(goose::session_context::current_session_id))
+            .session_id_provider(Arc::new(arakan::session_context::current_session_id))
             .build(),
     )
 }
@@ -156,7 +156,7 @@ async fn make_request_with_model(
     model_config: ModelConfig,
 ) {
     let message = Message::user().with_text("test message");
-    let _ = goose::session_context::with_session_id(
+    let _ = arakan::session_context::with_session_id(
         Some(session_id.to_string()),
         provider.complete(
             &model_config,

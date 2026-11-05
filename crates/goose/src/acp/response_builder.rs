@@ -1,5 +1,5 @@
 use crate::agents::{ExtensionLoadResult, StateMachineServices};
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::providers::inventory::{ProviderInventoryEntry, ProviderInventoryService};
 use crate::session::session_manager::SessionUsageTotals;
 use crate::session::Session;
@@ -10,8 +10,8 @@ use agent_client_protocol::schema::v1::{
     SessionModeId, SessionModeState, SessionNotification, SessionUpdate, UnstructuredCommandInput,
 };
 use agent_client_protocol::{Client, ConnectionTo};
-use goose_providers::model::ModelConfig;
-use goose_providers::thinking::{ThinkingEffort, ThinkingEffortCapability, ThinkingEffortSupport};
+use arakan_providers::model::ModelConfig;
+use arakan_providers::thinking::{ThinkingEffort, ThinkingEffortCapability, ThinkingEffortSupport};
 use serde::Serialize;
 use strum::{EnumMessage, VariantNames};
 
@@ -120,7 +120,7 @@ pub(super) struct ModelOption {
 
 /// The currently selected model and the set of available models for a session.
 ///
-/// Replaces the removed `SessionModelState` ACP schema type; goose now surfaces
+/// Replaces the removed `SessionModelState` ACP schema type; arakan now surfaces
 /// model selection through the generic session config option API.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct ModelSelection {
@@ -215,16 +215,16 @@ pub(super) fn should_refresh_inventory_for_session_init(entry: &ProviderInventor
 }
 
 pub(super) fn build_mode_state(
-    current_mode: GooseMode,
+    current_mode: ArakanMode,
 ) -> Result<SessionModeState, agent_client_protocol::Error> {
-    let mut available = Vec::with_capacity(GooseMode::VARIANTS.len());
-    for &name in GooseMode::VARIANTS {
-        let goose_mode: GooseMode = name.parse().map_err(|_| {
+    let mut available = Vec::with_capacity(ArakanMode::VARIANTS.len());
+    for &name in ArakanMode::VARIANTS {
+        let arakan_mode: ArakanMode = name.parse().map_err(|_| {
             agent_client_protocol::Error::internal_error() // impossible but satisfy linters
-                .data(format!("Failed to parse GooseMode variant: {}", name))
+                .data(format!("Failed to parse ArakanMode variant: {}", name))
         })?;
         let mut mode = SessionMode::new(SessionModeId::new(name), name);
-        mode.description = goose_mode.get_message().map(Into::into);
+        mode.description = arakan_mode.get_message().map(Into::into);
         available.push(mode);
     }
     Ok(SessionModeState::new(
@@ -233,7 +233,7 @@ pub(super) fn build_mode_state(
     ))
 }
 
-/// The provider decides whether goose owns the effort menu; a session without a
+/// The provider decides whether arakan owns the effort menu; a session without a
 /// live provider keeps the model-name based path.
 pub(super) async fn agent_thinking_effort_support(
     services: &StateMachineServices,
@@ -250,7 +250,7 @@ pub(super) async fn build_session_setup_config(
     session: &Session,
     effort_support: &ThinkingEffortSupport,
 ) -> Result<(SessionModeState, Option<Vec<SessionConfigOption>>), agent_client_protocol::Error> {
-    let mode_state = build_mode_state(session.goose_mode)?;
+    let mode_state = build_mode_state(session.arakan_mode)?;
 
     let (Some(provider_name), Some(model_config)) = (
         session.provider_name.as_deref(),
@@ -336,7 +336,7 @@ pub(super) fn build_config_options(
 /// A provider that manages its own reasoning decides the menu: it mirrors the
 /// agent's effort selector verbatim, or honestly offers nothing when the agent
 /// has no such knob for the current model. Only providers that leave effort to
-/// goose fall back to the model-name based values, which the ACP sentinel model
+/// arakan fall back to the model-name based values, which the ACP sentinel model
 /// name can never satisfy.
 fn build_thinking_effort_choices(
     model_config: &ModelConfig,
@@ -373,9 +373,9 @@ fn build_thinking_effort_choices(
     }
 }
 
-/// The goose-side value that will actually be sent wins — `resolve_effort_value`
+/// The arakan-side value that will actually be sent wins — `resolve_effort_value`
 /// is shared with the provider's send path — then whatever the agent currently
-/// has, which is what it keeps when goose sends nothing.
+/// has, which is what it keeps when arakan sends nothing.
 fn capability_thinking_effort_value(
     capability: &ThinkingEffortCapability,
     model_config: &ModelConfig,
@@ -414,7 +414,7 @@ fn current_thinking_effort_value(model_config: &ModelConfig) -> String {
 
     let configured = model_config
         .thinking_effort()
-        .or_else(|| Config::global().get_goose_thinking_effort());
+        .or_else(|| Config::global().get_arakan_thinking_effort());
     if model_config.is_glm_5_3_reasoning_model() || model_config.is_kimi_k3_reasoning_model() {
         return match configured {
             Some(ThinkingEffort::Off | ThinkingEffort::Low) => ThinkingEffort::Low,
@@ -488,11 +488,11 @@ pub(super) fn send_session_setup_notifications(
     session: &Session,
     totals: &SessionUsageTotals,
     context_limit: usize,
-    supports_goose_custom_notifications: bool,
+    supports_arakan_custom_notifications: bool,
 ) -> Result<(), agent_client_protocol::Error> {
     let session_id = SessionId::new(session.id.clone());
     let updates = build_usage_updates(session, totals, context_limit);
-    if supports_goose_custom_notifications {
+    if supports_arakan_custom_notifications {
         cx.send_notification(updates.custom)?;
     }
     cx.send_notification(SessionNotification::new(
@@ -510,7 +510,7 @@ mod tests {
     use super::super::provider::THINKING_EFFORT_PARAM;
     use super::*;
     use agent_client_protocol::schema::v1::SessionConfigKind;
-    use goose_providers::thinking::ThinkingEffortOption;
+    use arakan_providers::thinking::ThinkingEffortOption;
     use test_case::test_case;
 
     fn model_selection(current: &str, models: &[&str]) -> ModelSelection {
@@ -572,7 +572,7 @@ mod tests {
     }
 
     #[test_case(
-        GooseMode::Auto
+        ArakanMode::Auto
         => Ok(SessionModeState::new(
             SessionModeId::new("auto"),
             vec![
@@ -589,7 +589,7 @@ mod tests {
         ; "auto mode"
     )]
     #[test_case(
-        GooseMode::Approve
+        ArakanMode::Approve
         => Ok(SessionModeState::new(
             SessionModeId::new("approve"),
             vec![
@@ -606,7 +606,7 @@ mod tests {
         ; "approve mode"
     )]
     fn test_build_mode_state(
-        current_mode: GooseMode,
+        current_mode: ArakanMode,
     ) -> Result<SessionModeState, agent_client_protocol::Error> {
         build_mode_state(current_mode)
     }
@@ -655,7 +655,7 @@ mod tests {
     }
 
     #[test_case(
-        build_mode_state(GooseMode::Auto).unwrap(),
+        build_mode_state(ArakanMode::Auto).unwrap(),
         "openai",
         vec![
             SessionConfigSelectOption::new("anthropic", "anthropic"),
@@ -696,7 +696,7 @@ mod tests {
         ; "auto mode with multiple models"
     )]
     #[test_case(
-        build_mode_state(GooseMode::Approve).unwrap(),
+        build_mode_state(ArakanMode::Approve).unwrap(),
         "openai",
         vec![SessionConfigSelectOption::new("openai", "openai")],
         model_selection("only-model", &["only-model"])
@@ -750,7 +750,7 @@ mod tests {
 
     #[test]
     fn test_build_config_options_uses_current_thinking_effort() {
-        let mode_state = build_mode_state(GooseMode::Auto).unwrap();
+        let mode_state = build_mode_state(ArakanMode::Auto).unwrap();
         let model_state = model_selection("claude-sonnet-4", &["claude-sonnet-4"]);
         let model_config = ModelConfig::new("claude-sonnet-4").with_merged_request_params(
             std::collections::HashMap::from([(
@@ -781,7 +781,7 @@ mod tests {
 
     #[test]
     fn test_build_config_options_masks_non_reasoning_thinking_effort() {
-        let mode_state = build_mode_state(GooseMode::Auto).unwrap();
+        let mode_state = build_mode_state(ArakanMode::Auto).unwrap();
         let model_state = model_selection("gpt-4", &["gpt-4"]);
         let mut model_config =
             ModelConfig::new("gpt-4").with_merged_request_params(std::collections::HashMap::from(
@@ -815,11 +815,11 @@ mod tests {
         );
     }
 
-    #[test_case("catalog.schema.goose-glm-5-3" ; "glm 5.3")]
-    #[test_case("catalog.schema.goose-kimi-k3" ; "kimi k3")]
+    #[test_case("catalog.schema.arakan-glm-5-3" ; "glm 5.3")]
+    #[test_case("catalog.schema.arakan-kimi-k3" ; "kimi k3")]
     fn test_build_config_options_offers_always_on_effort_levels(model_name: &str) {
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", None::<&str>)]);
-        let mode_state = build_mode_state(GooseMode::Auto).unwrap();
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", None::<&str>)]);
+        let mode_state = build_mode_state(ArakanMode::Auto).unwrap();
         let model_state = model_selection(model_name, &[model_name]);
         let options = build_config_options(
             &mode_state,
@@ -870,7 +870,7 @@ mod tests {
         persisted_effort: Option<&str>,
         effort_support: &ThinkingEffortSupport,
     ) -> (String, Vec<SessionConfigSelectOption>) {
-        let mode_state = build_mode_state(GooseMode::Auto).unwrap();
+        let mode_state = build_mode_state(ArakanMode::Auto).unwrap();
         let model_state = model_selection(model_name, &[model_name]);
         let mut model_config = ModelConfig::new(model_name);
         if let Some(effort) = persisted_effort {
@@ -938,7 +938,7 @@ mod tests {
     fn test_build_config_options_effort_current_value(persisted: Option<&str>) -> String {
         // Unoffered by the capability below, so the global default never wins
         // and the test doesn't depend on the machine's configured value.
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("medium"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("medium"))]);
         let support = ThinkingEffortSupport::Options(effort_capability(
             &["default", "low", "high", "xhigh"],
             "low",
@@ -949,7 +949,7 @@ mod tests {
 
     #[test]
     fn test_build_config_options_effort_falls_back_to_the_global_default() {
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("high"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("high"))]);
         let support =
             ThinkingEffortSupport::Options(effort_capability(&["default", "high"], "default"));
 

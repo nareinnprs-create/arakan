@@ -381,7 +381,7 @@ async fn execute_with_slots(
     let _stop_on_drop = stop_worker.clone().drop_guard();
     let worker_dispatch = dispatch.clone();
     let (sender, receiver) = tokio::sync::oneshot::channel();
-    std::thread::Builder::new().name("goose-javascript".into()).spawn(move || {
+    std::thread::Builder::new().name("arakan-javascript".into()).spawn(move || {
         // The worker retains its slot even if the caller stops waiting for it.
         let _permit = permit;
         let result = tokio::runtime::Builder::new_current_thread().enable_all().build()

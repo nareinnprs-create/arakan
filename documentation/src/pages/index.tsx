@@ -4,7 +4,7 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 
 import styles from "./index.module.css";
-import { GooseLogo } from "../components/GooseLogo";
+import { ArakanLogo } from "../components/ArakanLogo";
 
 function HeroSection() {
   return (
@@ -14,19 +14,19 @@ function HeroSection() {
           Open Source · Apache 2.0 · Agentic AI Foundation
         </div>
         <div className={styles.heroLogo}>
-          <GooseLogo />
+          <ArakanLogo />
         </div>
         <p className={styles.heroSubtitle}>
-          Your open source AI agent. Use goose on desktop or in the terminal, or
+          Your open source AI agent. Use arakan on desktop or in the terminal, or
           build agents into your own applications with the{" "}
-          <Link to="/docs/gdk/">goose Development Kit (GDK)</Link>.
+          <Link to="/docs/gdk/">arakan Development Kit (GDK)</Link>.
         </p>
         <div className={styles.heroActions}>
           <Link
             className="button button--primary button--lg"
             to="docs/getting-started/installation"
           >
-            Install goose
+            Install arakan
           </Link>
           <Link
             className={`button button--outline button--lg ${styles.secondaryButton}`}
@@ -92,9 +92,9 @@ function FeaturesSection() {
   return (
     <section className={styles.section}>
       <div className={styles.container}>
-        <h2 className={styles.sectionTitle}>What goose does</h2>
+        <h2 className={styles.sectionTitle}>What arakan does</h2>
         <p className={styles.sectionSubtitle}>
-          goose is a general-purpose AI agent that runs on your machine. Not
+          arakan is a general-purpose AI agent that runs on your machine. Not
           just for code — use it for research, writing, automation, data
           analysis, or anything you need to get done.
         </p>
@@ -112,12 +112,12 @@ function FeaturesSection() {
           />
           <FeatureCard
             icon="🛠️"
-            title="goose Development Kit (GDK)"
+            title="arakan Development Kit (GDK)"
             description={
               <p>
                 Build agents that run across native apps, servers, and the
                 browser, and resume from saved state. Use the runtime components
-                behind goose, with control over models, tools, and agent
+                behind arakan, with control over models, tools, and agent
                 behavior. <Link to="/docs/gdk/">Explore GDK</Link>.
               </p>
             }
@@ -153,7 +153,7 @@ function FeaturesSection() {
             title="MCP Apps"
             description={
               <p>
-                Extensions can render interactive UIs directly inside goose
+                Extensions can render interactive UIs directly inside arakan
                 Desktop — buttons, forms, visualizations. A new way to build{" "}
                 <Link to="/docs/tutorials/building-mcp-apps">
                   agent-powered tools
@@ -204,7 +204,7 @@ function StandardsSection() {
             <p>
               <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">MCP</a>{" "}
               is the open standard for connecting AI agents to tools and data
-              sources. goose was one of the earliest adopters and has one of the
+              sources. arakan was one of the earliest adopters and has one of the
               deepest integrations in the ecosystem — with 70+ documented
               extensions and growing.
             </p>
@@ -214,16 +214,16 @@ function StandardsSection() {
             <h3>Agent Client Protocol</h3>
             <p>
               <a href="https://agentclientprotocol.com/" target="_blank" rel="noopener">ACP</a>{" "}
-              is a standard for communicating with coding agents. goose works as
+              is a standard for communicating with coding agents. arakan works as
               an ACP server — connect from Zed, JetBrains, or VS Code — and can
               use ACP agents like Claude Code and Codex as providers.
             </p>
-            <Link to="/docs/guides/zed">Set up goose in Zed →</Link>
+            <Link to="/docs/guides/zed">Set up arakan in Zed →</Link>
           </div>
           <div className={styles.standardCard}>
             <h3>Agentic AI Foundation</h3>
             <p>
-              goose is part of the{" "}
+              arakan is part of the{" "}
               <a href="https://aaif.io/" target="_blank" rel="noopener">
                 Agentic AI Foundation
               </a>{" "}
@@ -264,14 +264,14 @@ function CommunitySection() {
             </p>
           </a>
           <a
-            href="https://github.com/aaif-goose/goose"
+            href="https://github.com/aaif-arakan/arakan"
             target="_blank"
             rel="noopener"
             className={styles.communityCard}
           >
             <h3>🐙 GitHub</h3>
             <p>
-              Star, fork, file issues, contribute code. goose is built in the
+              Star, fork, file issues, contribute code. arakan is built in the
               open.
             </p>
           </a>
@@ -317,7 +317,7 @@ function InstallSection() {
             </div>
             <pre className={styles.terminalBody}>
               <code>
-{`curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | bash`}
+{`curl -fsSL https://github.com/aaif-arakan/arakan/releases/download/stable/download_cli.sh | bash`}
               </code>
             </pre>
           </div>
@@ -331,12 +331,12 @@ function VideoSection() {
   return (
     <section className={styles.section}>
       <div className={styles.container}>
-        <h2 className={styles.sectionTitle}>See goose in action</h2>
+        <h2 className={styles.sectionTitle}>See arakan in action</h2>
         <div className={styles.videoWrapper}>
           <iframe
             src="https://www.youtube.com/embed/D-DpDunrbpo"
             className={styles.video}
-            title="vibe coding with goose"
+            title="vibe coding with arakan"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
@@ -348,7 +348,7 @@ function VideoSection() {
 
 export default function Home(): ReactNode {
   return (
-    <Layout description="Your open source AI agent. Use goose on desktop or in the terminal, or build agents into your own applications with the goose Development Kit (GDK).">
+    <Layout description="Your open source AI agent. Use arakan on desktop or in the terminal, or build agents into your own applications with the arakan Development Kit (GDK).">
       <HeroSection />
       <main>
         <FeaturesSection />

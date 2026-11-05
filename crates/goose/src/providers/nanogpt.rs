@@ -6,11 +6,11 @@ use crate::conversation::message::Message;
 use anyhow::Result;
 use async_trait::async_trait;
 use futures::future::BoxFuture;
-use goose_providers::errors::ProviderError;
-use goose_providers::formats::openai::create_request;
-use goose_providers::images::ImageFormat;
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::formats::openai::create_request;
+use arakan_providers::images::ImageFormat;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::Tool;
 
 pub const NANOGPT_PROVIDER_NAME: &str = "nano-gpt";
@@ -39,7 +39,7 @@ impl NanoGptProvider {
             AuthMethod::BearerToken(api_key.to_string()),
             tls_config,
         )?
-        .with_header("x-client", "goose")
+        .with_header("x-client", "arakan")
     }
 
     async fn check_subscription(
@@ -87,7 +87,7 @@ impl NanoGptProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for NanoGptProvider {
+impl arakan_providers::base::ProviderDescriptor for NanoGptProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             NANOGPT_PROVIDER_NAME,
@@ -215,7 +215,7 @@ impl Provider for NanoGptProvider {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use goose_providers::base::ProviderDescriptor as _;
+    use arakan_providers::base::ProviderDescriptor as _;
 
     #[test]
     fn test_metadata() {

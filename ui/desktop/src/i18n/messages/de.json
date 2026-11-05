@@ -18,7 +18,7 @@
     "defaultMessage": "Delete \"{name}\"? This cannot be undone."
   },
   "appsView.description": {
-    "defaultMessage": "Anwendungen von Ihren MCP-Servern und Apps, die goose selbst erstellt hat. Sie können über die Chat-Oberfläche neue Apps anfordern, die dann hier erscheinen."
+    "defaultMessage": "Anwendungen von Ihren MCP-Servern und Apps, die arakan selbst erstellt hat. Sie können über die Chat-Oberfläche neue Apps anfordern, die dann hier erscheinen."
   },
   "appsView.errorLoading": {
     "defaultMessage": "Fehler beim Laden der Apps: {error}"
@@ -36,7 +36,7 @@
     "defaultMessage": "Apps werden geladen..."
   },
   "appsView.noAppsDescription": {
-    "defaultMessage": "Öffnen Sie einen Chat und bitten Sie goose um die gewünschte App. goose kann eine für Sie erstellen, die dann hier erscheint. Oder wenn jemand eine App geteilt hat, können Sie sie über die Schaltfläche oben importieren."
+    "defaultMessage": "Öffnen Sie einen Chat und bitten Sie arakan um die gewünschte App. arakan kann eine für Sie erstellen, die dann hier erscheint. Oder wenn jemand eine App geteilt hat, können Sie sie über die Schaltfläche oben importieren."
   },
   "appsView.noAppsTitle": {
     "defaultMessage": "Keine Apps verfügbar"
@@ -75,7 +75,7 @@
     "defaultMessage": "Anmeldeinformation gelöscht"
   },
   "authSettings.description": {
-    "defaultMessage": "Verwalten Sie die lokal von goose gespeicherten Anbieter-Anmeldeinformationen."
+    "defaultMessage": "Verwalten Sie die lokal von arakan gespeicherten Anbieter-Anmeldeinformationen."
   },
   "authSettings.empty": {
     "defaultMessage": "Es wurden keine lokal gespeicherten Anbieter-Anmeldeinformationen gefunden."
@@ -162,10 +162,10 @@
     "defaultMessage": "Starten"
   },
   "chat.notification.taskComplete.body": {
-    "defaultMessage": "Klicken Sie hier, um Goose wieder in den Vordergrund zu holen."
+    "defaultMessage": "Klicken Sie hier, um Arakan wieder in den Vordergrund zu holen."
   },
   "chat.notification.taskComplete.title": {
-    "defaultMessage": "Goose hat die Aufgabe abgeschlossen."
+    "defaultMessage": "Arakan hat die Aufgabe abgeschlossen."
   },
   "chatInput.dictationError": {
     "defaultMessage": "Diktierfehler"
@@ -213,13 +213,13 @@
     "defaultMessage": "Warten auf das Speichern der Bilder..."
   },
   "chatSettings.modeDescription": {
-    "defaultMessage": "Wählen Sie den Standardmodus, den Goose für neue Sitzungen verwendet. Bestehende Sitzungen behalten ihren aktuellen Modus bei."
+    "defaultMessage": "Wählen Sie den Standardmodus, den Arakan für neue Sitzungen verwendet. Bestehende Sitzungen behalten ihren aktuellen Modus bei."
   },
   "chatSettings.modeTitle": {
     "defaultMessage": "Standardmodus"
   },
   "chatSettings.responseStylesDescription": {
-    "defaultMessage": "Wählen Sie, wie Goose seine Antworten formatieren und gestalten soll"
+    "defaultMessage": "Wählen Sie, wie Arakan seine Antworten formatieren und gestalten soll"
   },
   "chatSettings.responseStylesTitle": {
     "defaultMessage": "Antwortstile"
@@ -240,10 +240,10 @@
     "defaultMessage": "Konfigurationseditor"
   },
   "configSettings.description": {
-    "defaultMessage": "Bearbeiten Sie Ihre goose-Konfigurationseinstellungen"
+    "defaultMessage": "Bearbeiten Sie Ihre arakan-Konfigurationseinstellungen"
   },
   "configSettings.descriptionWithProvider": {
-    "defaultMessage": "Bearbeiten Sie Ihre goose-Konfigurationseinstellungen (aktuelle Einstellungen für {provider})"
+    "defaultMessage": "Bearbeiten Sie Ihre arakan-Konfigurationseinstellungen (aktuelle Einstellungen für {provider})"
   },
   "configSettings.done": {
     "defaultMessage": "Fertig"
@@ -315,7 +315,7 @@
     "defaultMessage": "Max. Durchgänge"
   },
   "conversationLimitsDropdown.maxTurnsDescription": {
-    "defaultMessage": "Maximale Anzahl an Agentendurchgängen, bevor Goose eine Benutzereingabe anfordert"
+    "defaultMessage": "Maximale Anzahl an Agentendurchgängen, bevor Arakan eine Benutzereingabe anfordert"
   },
   "costTracker.costUnavailable": {
     "defaultMessage": "Kostendaten für {model} nicht verfügbar ({inputTokens} Eingabe, {outputTokens} Ausgabe-Token)"
@@ -771,7 +771,7 @@
     "defaultMessage": "{name}-Einstellungen bearbeiten"
   },
   "defaultCardButtons.getStarted": {
-    "defaultMessage": "Loslegen mit goose!"
+    "defaultMessage": "Loslegen mit arakan!"
   },
   "defaultProviderSetupForm.apiHostLabel": {
     "defaultMessage": "API-Host"
@@ -912,7 +912,7 @@
     "defaultMessage": "Pfad eingeben"
   },
   "dirSwitcher.enterPathPlaceholder": {
-    "defaultMessage": "Absoluten Pfad eingeben (z. B. /home/goose/workspace)"
+    "defaultMessage": "Absoluten Pfad eingeben (z. B. /home/arakan/workspace)"
   },
   "dirSwitcher.enterPathInvalid": {
     "defaultMessage": "Arbeitsverzeichnis muss ein absoluter Pfad sein"
@@ -951,7 +951,7 @@
     "defaultMessage": "Die Informationsanfrage wurde abgebrochen."
   },
   "elicitationRequest.defaultMessage": {
-    "defaultMessage": "Goose benötigt einige Informationen von Ihnen."
+    "defaultMessage": "Arakan benötigt einige Informationen von Ihnen."
   },
   "elicitationRequest.expired": {
     "defaultMessage": "Diese Anfrage ist abgelaufen. Die Erweiterung muss erneut nachfragen."
@@ -996,7 +996,7 @@
     "defaultMessage": "Ein Fehler ist aufgetreten."
   },
   "errorBoundary.errorWithVersion": {
-    "defaultMessage": "In Goose v{version} ist ein Fehler aufgetreten."
+    "defaultMessage": "In Arakan v{version} ist ein Fehler aufgetreten."
   },
   "errorBoundary.heading": {
     "defaultMessage": "Honk!"
@@ -1080,7 +1080,7 @@
     "defaultMessage": "OK"
   },
   "extensionInstallModal.policyErrorMessage": {
-    "defaultMessage": "The extension allowlist policy could not be retrieved. Extension installation is blocked until the policy is available. Contact your administrator to check the GOOSE_ALLOWLIST configuration."
+    "defaultMessage": "The extension allowlist policy could not be retrieved. Extension installation is blocked until the policy is available. Contact your administrator to check the ARAKAN_ALLOWLIST configuration."
   },
   "extensionInstallModal.policyErrorTitle": {
     "defaultMessage": "Extension Policy Unavailable"
@@ -1185,7 +1185,7 @@
     "defaultMessage": "Hier aktivierte Erweiterungen werden als Standard für neue Chats verwendet. Sie können aktive Erweiterungen auch während eines Chats umschalten."
   },
   "extensionsView.description": {
-    "defaultMessage": "Diese Erweiterungen nutzen das Model Context Protocol (MCP). Sie können die Fähigkeiten von Goose mit drei Hauptkomponenten erweitern: Prompts, Ressourcen und Tools. {searchShortcut} zum Suchen."
+    "defaultMessage": "Diese Erweiterungen nutzen das Model Context Protocol (MCP). Sie können die Fähigkeiten von Arakan mit drei Hauptkomponenten erweitern: Prompts, Ressourcen und Tools. {searchShortcut} zum Suchen."
   },
   "extensionsView.heading": {
     "defaultMessage": "Erweiterungen"
@@ -1203,19 +1203,19 @@
     "defaultMessage": "AA:BB:CC:... oder sha256/base64"
   },
   "externalBackendSection.description": {
-    "defaultMessage": "Standardmäßig startet goose einen Server für Sie. Verwenden Sie dies, um eine Verbindung zu einem externen goose-Server herzustellen"
+    "defaultMessage": "Standardmäßig startet arakan einen Server für Sie. Verwenden Sie dies, um eine Verbindung zu einem externen arakan-Server herzustellen"
   },
   "externalBackendSection.fingerprintRequiresHttps": {
     "defaultMessage": "Certificate fingerprint requires an https URL"
   },
   "externalBackendSection.restartNote": {
-    "defaultMessage": "Änderungen werden erst nach einem Neustart von Goose wirksam. Neue Chat-Fenster verbinden sich mit dem externen Server."
+    "defaultMessage": "Änderungen werden erst nach einem Neustart von Arakan wirksam. Neue Chat-Fenster verbinden sich mit dem externen Server."
   },
   "externalBackendSection.secretKey": {
     "defaultMessage": "Geheimer Schlüssel"
   },
   "externalBackendSection.secretKeyHelp": {
-    "defaultMessage": "Der auf dem Goose-Server konfigurierte geheime Schlüssel (GOOSE_SERVER__SECRET_KEY)"
+    "defaultMessage": "Der auf dem Arakan-Server konfigurierte geheime Schlüssel (ARAKAN_SERVER__SECRET_KEY)"
   },
   "externalBackendSection.secretKeyPlaceholder": {
     "defaultMessage": "Geben Sie den geheimen Schlüssel des Servers ein"
@@ -1224,10 +1224,10 @@
     "defaultMessage": "Server-URL"
   },
   "externalBackendSection.serverUrlHelp": {
-    "defaultMessage": "Enter the HTTP(S) base URL. Goose checks /status and connects to /acp under this base."
+    "defaultMessage": "Enter the HTTP(S) base URL. Arakan checks /status and connects to /acp under this base."
   },
   "externalBackendSection.title": {
-    "defaultMessage": "Goose-Server"
+    "defaultMessage": "Arakan-Server"
   },
   "externalBackendSection.urlBaseError": {
     "defaultMessage": "URL must be the backend base URL before /acp, without query parameters or fragments"
@@ -1242,7 +1242,7 @@
     "defaultMessage": "Externen Server verwenden"
   },
   "externalBackendSection.useExternalServerDescription": {
-    "defaultMessage": "Verbindung zu einem anderswo laufenden goose-Server herstellen (erfordert Neustart der App)"
+    "defaultMessage": "Verbindung zu einem anderswo laufenden arakan-Server herstellen (erfordert Neustart der App)"
   },
   "externalBackendSection.workingDir": {
     "defaultMessage": "Remote-Arbeitsverzeichnis (optional)"
@@ -1251,70 +1251,70 @@
     "defaultMessage": "Absoluter Pfad auf dem externen Backend. Leer lassen, um das lokale Arbeitsverzeichnis zu senden."
   },
   "externalBackendSection.workingDirPlaceholder": {
-    "defaultMessage": "/home/goose/workspace"
+    "defaultMessage": "/home/arakan/workspace"
   },
-  "goosehintsModal.close": {
+  "arakanhintsModal.close": {
     "defaultMessage": "Schließen"
   },
-  "goosehintsModal.developer": {
+  "arakanhintsModal.developer": {
     "defaultMessage": "Entwickler"
   },
-  "goosehintsModal.dialogDescription": {
-    "defaultMessage": "Stellen Sie zusätzlichen Kontext zu Ihrem Projekt bereit, um die Kommunikation mit Goose zu verbessern"
+  "arakanhintsModal.dialogDescription": {
+    "defaultMessage": "Stellen Sie zusätzlichen Kontext zu Ihrem Projekt bereit, um die Kommunikation mit Arakan zu verbessern"
   },
-  "goosehintsModal.dialogTitle": {
-    "defaultMessage": "Projekt-Hinweise konfigurieren (.goosehints)"
+  "arakanhintsModal.dialogTitle": {
+    "defaultMessage": "Projekt-Hinweise konfigurieren (.arakanhints)"
   },
-  "goosehintsModal.errorReading": {
-    "defaultMessage": "Fehler beim Lesen der .goosehints-Datei: {error}"
+  "arakanhintsModal.errorReading": {
+    "defaultMessage": "Fehler beim Lesen der .arakanhints-Datei: {error}"
   },
-  "goosehintsModal.failedToAccess": {
-    "defaultMessage": "Zugriff auf die .goosehints-Datei fehlgeschlagen"
+  "arakanhintsModal.failedToAccess": {
+    "defaultMessage": "Zugriff auf die .arakanhints-Datei fehlgeschlagen"
   },
-  "goosehintsModal.failedToSave": {
-    "defaultMessage": "Speichern der .goosehints-Datei fehlgeschlagen"
+  "arakanhintsModal.failedToSave": {
+    "defaultMessage": "Speichern der .arakanhints-Datei fehlgeschlagen"
   },
-  "goosehintsModal.fileCreating": {
-    "defaultMessage": "Neue .goosehints-Datei wird erstellt unter: {filePath}"
+  "arakanhintsModal.fileCreating": {
+    "defaultMessage": "Neue .arakanhints-Datei wird erstellt unter: {filePath}"
   },
-  "goosehintsModal.fileFound": {
-    "defaultMessage": ".goosehints-Datei gefunden unter: {filePath}"
+  "arakanhintsModal.fileFound": {
+    "defaultMessage": ".arakanhints-Datei gefunden unter: {filePath}"
   },
-  "goosehintsModal.helpText1": {
-    "defaultMessage": ".goosehints ist eine Textdatei, mit der zusätzlicher Kontext zu Ihrem Projekt bereitgestellt und die Kommunikation mit Goose verbessert wird."
+  "arakanhintsModal.helpText1": {
+    "defaultMessage": ".arakanhints ist eine Textdatei, mit der zusätzlicher Kontext zu Ihrem Projekt bereitgestellt und die Kommunikation mit Arakan verbessert wird."
   },
-  "goosehintsModal.helpText2": {
-    "defaultMessage": "Bitte stellen Sie sicher, dass die Erweiterung {bold} auf der Erweiterungsseite aktiviert ist. Diese Erweiterung ist erforderlich, um .goosehints zu verwenden. Sie müssen Ihre Sitzung neu starten, damit Aktualisierungen an .goosehints wirksam werden."
+  "arakanhintsModal.helpText2": {
+    "defaultMessage": "Bitte stellen Sie sicher, dass die Erweiterung {bold} auf der Erweiterungsseite aktiviert ist. Diese Erweiterung ist erforderlich, um .arakanhints zu verwenden. Sie müssen Ihre Sitzung neu starten, damit Aktualisierungen an .arakanhints wirksam werden."
   },
-  "goosehintsModal.helpText3": {
+  "arakanhintsModal.helpText3": {
     "defaultMessage": "Weitere Informationen finden Sie unter {link}."
   },
-  "goosehintsModal.helpTextLink": {
-    "defaultMessage": ".goosehints verwenden"
+  "arakanhintsModal.helpTextLink": {
+    "defaultMessage": ".arakanhints verwenden"
   },
-  "goosehintsModal.placeholder": {
+  "arakanhintsModal.placeholder": {
     "defaultMessage": "Projekt-Hinweise hier eingeben..."
   },
-  "goosehintsModal.save": {
+  "arakanhintsModal.save": {
     "defaultMessage": "Speichern"
   },
-  "goosehintsModal.savedSuccessfully": {
+  "arakanhintsModal.savedSuccessfully": {
     "defaultMessage": "Erfolgreich gespeichert"
   },
-  "goosehintsModal.saving": {
+  "arakanhintsModal.saving": {
     "defaultMessage": "Wird gespeichert..."
   },
-  "goosehintsSection.configure": {
+  "arakanhintsSection.configure": {
     "defaultMessage": "Konfigurieren"
   },
-  "goosehintsSection.description": {
-    "defaultMessage": "Konfigurieren Sie die .goosehints-Datei Ihres Projekts, um Goose zusätzlichen Kontext bereitzustellen"
+  "arakanhintsSection.description": {
+    "defaultMessage": "Konfigurieren Sie die .arakanhints-Datei Ihres Projekts, um Arakan zusätzlichen Kontext bereitzustellen"
   },
-  "goosehintsSection.title": {
-    "defaultMessage": "Projekt-Hinweise (.goosehints)"
+  "arakanhintsSection.title": {
+    "defaultMessage": "Projekt-Hinweise (.arakanhints)"
   },
-  "groupedExtensionLoadingToast.askGoose": {
-    "defaultMessage": "goose fragen"
+  "groupedExtensionLoadingToast.askArakan": {
+    "defaultMessage": "arakan fragen"
   },
   "groupedExtensionLoadingToast.collapseDetails": {
     "defaultMessage": "Details einklappen"
@@ -1434,7 +1434,7 @@
     "defaultMessage": "Hugging Face"
   },
   "imagePreview.altText": {
-    "defaultMessage": "goose-Bild"
+    "defaultMessage": "arakan-Bild"
   },
   "imagePreview.clickToCollapse": {
     "defaultMessage": "Zum Einklappen klicken"
@@ -1449,10 +1449,10 @@
     "defaultMessage": "Abbrechen"
   },
   "importRecipeForm.deeplinkHint": {
-    "defaultMessage": "Fügen Sie einen Recipe-Deeplink ein, der mit „goose://recipe?config=“ beginnt"
+    "defaultMessage": "Fügen Sie einen Recipe-Deeplink ein, der mit „arakan://recipe?config=“ beginnt"
   },
   "importRecipeForm.deeplinkPlaceholder": {
-    "defaultMessage": "Fügen Sie hier Ihren goose://recipe?config=...-Deeplink ein"
+    "defaultMessage": "Fügen Sie hier Ihren arakan://recipe?config=...-Deeplink ein"
   },
   "importRecipeForm.example": {
     "defaultMessage": "Beispiel"
@@ -1482,7 +1482,7 @@
     "defaultMessage": "Recipe-Datei"
   },
   "importRecipeForm.reviewWarning": {
-    "defaultMessage": "Stellen Sie sicher, dass Sie den Inhalt von Recipe-Dateien überprüfen, bevor Sie sie zu Ihrer goose-Oberfläche hinzufügen."
+    "defaultMessage": "Stellen Sie sicher, dass Sie den Inhalt von Recipe-Dateien überprüfen, bevor Sie sie zu Ihrer arakan-Oberfläche hinzufügen."
   },
   "importRecipeForm.schemaDescription": {
     "defaultMessage": "Ihre YAML- oder JSON-Datei sollte dieser Struktur folgen. Erforderliche Felder sind: title, description und entweder instructions oder prompt."
@@ -1593,13 +1593,13 @@
     "defaultMessage": "Anwendungstastenkürzel"
   },
   "keyboardShortcuts.categoryApplicationDescription": {
-    "defaultMessage": "Diese Tastenkürzel funktionieren, wenn Goose die aktive Anwendung ist"
+    "defaultMessage": "Diese Tastenkürzel funktionieren, wenn Arakan die aktive Anwendung ist"
   },
   "keyboardShortcuts.categoryGlobal": {
     "defaultMessage": "Globale Tastenkürzel"
   },
   "keyboardShortcuts.categoryGlobalDescription": {
-    "defaultMessage": "Diese Tastenkürzel funktionieren systemweit, auch wenn Goose nicht im Fokus ist"
+    "defaultMessage": "Diese Tastenkürzel funktionieren systemweit, auch wenn Arakan nicht im Fokus ist"
   },
   "keyboardShortcuts.categorySearch": {
     "defaultMessage": "Such-Tastenkürzel"
@@ -1641,10 +1641,10 @@
     "defaultMessage": "Rückwärts suchen"
   },
   "keyboardShortcuts.focusWindowDescription": {
-    "defaultMessage": "Goose-Fenster von überall in den Vordergrund holen"
+    "defaultMessage": "Arakan-Fenster von überall in den Vordergrund holen"
   },
   "keyboardShortcuts.focusWindowLabel": {
-    "defaultMessage": "Goose-Fenster fokussieren"
+    "defaultMessage": "Arakan-Fenster fokussieren"
   },
   "keyboardShortcuts.loading": {
     "defaultMessage": "Wird geladen..."
@@ -1656,7 +1656,7 @@
     "defaultMessage": "Neuer Chat"
   },
   "keyboardShortcuts.newChatWindowDescription": {
-    "defaultMessage": "Ein neues Goose-Fenster öffnen"
+    "defaultMessage": "Ein neues Arakan-Fenster öffnen"
   },
   "keyboardShortcuts.newChatWindowLabel": {
     "defaultMessage": "Neues Chat-Fenster"
@@ -1695,7 +1695,7 @@
     "defaultMessage": "Auf Standard zurücksetzen"
   },
   "keyboardShortcuts.restartDescription": {
-    "defaultMessage": "Änderungen an Anwendungstastenkürzeln (wie Neuer Chat, Einstellungen usw.) erfordern einen Neustart von Goose, um wirksam zu werden. Globale Tastenkürzel (Fenster fokussieren, Schnellstart) funktionieren sofort."
+    "defaultMessage": "Änderungen an Anwendungstastenkürzeln (wie Neuer Chat, Einstellungen usw.) erfordern einen Neustart von Arakan, um wirksam zu werden. Globale Tastenkürzel (Fenster fokussieren, Schnellstart) funktionieren sofort."
   },
   "keyboardShortcuts.restartRequired": {
     "defaultMessage": "Neustart erforderlich"
@@ -1725,7 +1725,7 @@
     "defaultMessage": "Navigation umschalten"
   },
   "launcher.placeholder": {
-    "defaultMessage": "Frag goose irgendetwas..."
+    "defaultMessage": "Frag arakan irgendetwas..."
   },
   "liveVoice.connecting": {
     "defaultMessage": "Connecting Live voice"
@@ -1752,31 +1752,31 @@
     "defaultMessage": "Unmute microphone"
   },
   "liveVoiceSettings.description": {
-    "defaultMessage": "Führe ein Echtzeit-Sprachgespräch mit Goose"
+    "defaultMessage": "Führe ein Echtzeit-Sprachgespräch mit Arakan"
   },
   "liveVoiceSettings.title": {
     "defaultMessage": "Live-Sprachmodus"
   },
-  "loadingGoose.compacting": {
-    "defaultMessage": "goose komprimiert die Unterhaltung..."
+  "loadingArakan.compacting": {
+    "defaultMessage": "arakan komprimiert die Unterhaltung..."
   },
-  "loadingGoose.idle": {
-    "defaultMessage": "goose arbeitet daran…"
+  "loadingArakan.idle": {
+    "defaultMessage": "arakan arbeitet daran…"
   },
-  "loadingGoose.loadingConversation": {
+  "loadingArakan.loadingConversation": {
     "defaultMessage": "Unterhaltung wird geladen..."
   },
-  "loadingGoose.restartingAgent": {
+  "loadingArakan.restartingAgent": {
     "defaultMessage": "Sitzung wird neu gestartet..."
   },
-  "loadingGoose.streaming": {
-    "defaultMessage": "goose arbeitet daran…"
+  "loadingArakan.streaming": {
+    "defaultMessage": "arakan arbeitet daran…"
   },
-  "loadingGoose.thinking": {
-    "defaultMessage": "goose denkt nach…"
+  "loadingArakan.thinking": {
+    "defaultMessage": "arakan denkt nach…"
   },
-  "loadingGoose.waiting": {
-    "defaultMessage": "goose wartet…"
+  "loadingArakan.waiting": {
+    "defaultMessage": "arakan wartet…"
   },
   "localInferenceSettings.deleteConfirm": {
     "defaultMessage": "Dieses Modell löschen? Sie können es später erneut herunterladen."
@@ -2418,7 +2418,7 @@
     "defaultMessage": "Der Server startet möglicherweise gerade oder ist vorübergehend nicht verfügbar."
   },
   "onboardingGuard.checkProviderErrorTitle": {
-    "defaultMessage": "Verbindung zum Goose-Server nicht möglich"
+    "defaultMessage": "Verbindung zum Arakan-Server nicht möglich"
   },
   "onboardingGuard.retry": {
     "defaultMessage": "Erneut versuchen"
@@ -2427,10 +2427,10 @@
     "defaultMessage": "Ihr lokaler KI-Agent. Verbinden Sie einen KI-Modellanbieter, um zu beginnen."
   },
   "onboardingGuard.welcomeTitle": {
-    "defaultMessage": "Willkommen bei goose"
+    "defaultMessage": "Willkommen bei arakan"
   },
   "onboardingSuccess.allSet": {
-    "defaultMessage": "Sie können jetzt mit goose loslegen."
+    "defaultMessage": "Sie können jetzt mit arakan loslegen."
   },
   "onboardingSuccess.connectedTo": {
     "defaultMessage": "Verbunden mit {providerName}"
@@ -2445,7 +2445,7 @@
     "defaultMessage": "Lokales Modell bereit"
   },
   "onboardingSuccess.privacyDescription": {
-    "defaultMessage": "Anonyme Nutzungsdaten helfen, goose zu verbessern. Wir erfassen niemals Ihre Konversationen, Ihren Code oder Ihre persönlichen Daten."
+    "defaultMessage": "Anonyme Nutzungsdaten helfen, arakan zu verbessern. Wir erfassen niemals Ihre Konversationen, Ihren Code oder Ihre persönlichen Daten."
   },
   "onboardingSuccess.privacyTitle": {
     "defaultMessage": "Datenschutz"
@@ -2613,10 +2613,10 @@
     "defaultMessage": "Sitzungsmetriken (Dauer, Anzahl der Interaktionen, Token-Nutzung)"
   },
   "privacyInfoModal.collectVersion": {
-    "defaultMessage": "goose-Version und Installationsmethode"
+    "defaultMessage": "arakan-Version und Installationsmethode"
   },
   "privacyInfoModal.description": {
-    "defaultMessage": "Anonyme Nutzungsdaten helfen uns zu verstehen, wie goose genutzt wird, und Verbesserungsbereiche zu identifizieren."
+    "defaultMessage": "Anonyme Nutzungsdaten helfen uns zu verstehen, wie arakan genutzt wird, und Verbesserungsbereiche zu identifizieren."
   },
   "privacyInfoModal.neverCollect": {
     "defaultMessage": "Wir erfassen niemals Ihre Konversationen, Ihren Code, Tool-Argumente, Fehlermeldungen oder persönliche Daten. Sie können diese Einstellung jederzeit in den Einstellungen ändern."
@@ -2688,7 +2688,7 @@
     "defaultMessage": "Prompt konnte nicht gespeichert werden"
   },
   "promptsSettings.promptEditingDescription": {
-    "defaultMessage": "Passen Sie die Prompts an, die das Verhalten von goose in verschiedenen Kontexten definieren. Diese Prompts verwenden die Jinja2-Templating-Syntax. Seien Sie vorsichtig beim Ändern von Template-Variablen, da fehlerhafte Änderungen die Funktionalität beeinträchtigen können. Bitte teilen Sie etwaige Verbesserungen mit der Community."
+    "defaultMessage": "Passen Sie die Prompts an, die das Verhalten von arakan in verschiedenen Kontexten definieren. Diese Prompts verwenden die Jinja2-Templating-Syntax. Seien Sie vorsichtig beim Ändern von Template-Variablen, da fehlerhafte Änderungen die Funktionalität beeinträchtigen können. Bitte teilen Sie etwaige Verbesserungen mit der Community."
   },
   "promptsSettings.promptEditingTitle": {
     "defaultMessage": "Prompt-Bearbeitung"
@@ -2778,7 +2778,7 @@
     "defaultMessage": "Anmeldung läuft..."
   },
   "providerConfigurationModal.addApiKeyDescription": {
-    "defaultMessage": "Fügen Sie Ihre API-Schlüssel für diesen Anbieter hinzu, um ihn in goose zu integrieren"
+    "defaultMessage": "Fügen Sie Ihre API-Schlüssel für diesen Anbieter hinzu, um ihn in arakan zu integrieren"
   },
   "providerConfigurationModal.browserWindowHint": {
     "defaultMessage": "Es öffnet sich ein Browserfenster, in dem Sie die Anmeldung abschließen können."
@@ -2814,7 +2814,7 @@
     "defaultMessage": "Fehler"
   },
   "providerConfigurationModal.externalSetupIntro": {
-    "defaultMessage": "Dieser Anbieter wird außerhalb von goose konfiguriert. Befolgen Sie diese Schritte:"
+    "defaultMessage": "Dieser Anbieter wird außerhalb von arakan konfiguriert. Befolgen Sie diese Schritte:"
   },
   "providerConfigurationModal.goBack": {
     "defaultMessage": "Zurück"
@@ -2898,7 +2898,7 @@
     "defaultMessage": "Anbieter werden geladen..."
   },
   "providerSettings.onboardingDescription": {
-    "defaultMessage": "Wählen Sie einen KI-Modellanbieter aus, um mit goose zu beginnen. Sie benötigen API-Schlüssel, die von jedem Anbieter generiert werden und die verschlüsselt und lokal gespeichert werden. Sie können Ihren Anbieter jederzeit in den Einstellungen ändern."
+    "defaultMessage": "Wählen Sie einen KI-Modellanbieter aus, um mit arakan zu beginnen. Sie benötigen API-Schlüssel, die von jedem Anbieter generiert werden und die verschlüsselt und lokal gespeichert werden. Sie können Ihren Anbieter jederzeit in den Einstellungen ändern."
   },
   "providerSettings.otherProviders": {
     "defaultMessage": "Andere Anbieter"
@@ -3471,7 +3471,7 @@
     "defaultMessage": "Deep-Link"
   },
   "scheduleModal.deepLinkPlaceholder": {
-    "defaultMessage": "goose://recipe-Link hier einfügen..."
+    "defaultMessage": "arakan://recipe-Link hier einfügen..."
   },
   "scheduleModal.editSchedule": {
     "defaultMessage": "Zeitplan bearbeiten"
@@ -3486,7 +3486,7 @@
     "defaultMessage": "Die ausgewählte Datei konnte nicht gelesen werden."
   },
   "scheduleModal.invalidDeepLink": {
-    "defaultMessage": "Ungültiger Deep-Link. Bitte verwenden Sie einen goose://recipe-Link."
+    "defaultMessage": "Ungültiger Deep-Link. Bitte verwenden Sie einen arakan://recipe-Link."
   },
   "scheduleModal.invalidFileType": {
     "defaultMessage": "Ungültiger Dateityp: Bitte wählen Sie eine YAML-Datei (.yaml oder .yml)"
@@ -3828,7 +3828,7 @@
     "defaultMessage": "Chatverlauf"
   },
   "sessions.chatHistoryDesc": {
-    "defaultMessage": "Sehen und durchsuchen Sie Ihre vergangenen Unterhaltungen mit Goose. {shortcut} zum Suchen."
+    "defaultMessage": "Sehen und durchsuchen Sie Ihre vergangenen Unterhaltungen mit Arakan. {shortcut} zum Suchen."
   },
   "sessions.close": {
     "defaultMessage": "Schließen"
@@ -3921,7 +3921,7 @@
     "defaultMessage": "Sitzungsbeschreibung erfolgreich aktualisiert"
   },
   "settings.appearance.description": {
-    "defaultMessage": "Konfigurieren Sie, wie goose auf Ihrem System angezeigt wird"
+    "defaultMessage": "Konfigurieren Sie, wie arakan auf Ihrem System angezeigt wird"
   },
   "settings.appearance.title": {
     "defaultMessage": "Darstellung"
@@ -3936,13 +3936,13 @@
     "defaultMessage": "Kostenverfolgung"
   },
   "settings.dockIcon.description": {
-    "defaultMessage": "goose im Dock anzeigen"
+    "defaultMessage": "arakan im Dock anzeigen"
   },
   "settings.dockIcon.title": {
     "defaultMessage": "Dock-Symbol"
   },
   "settings.help.description": {
-    "defaultMessage": "Helfen Sie uns, goose zu verbessern, indem Sie Probleme melden oder neue Funktionen anfordern"
+    "defaultMessage": "Helfen Sie uns, arakan zu verbessern, indem Sie Probleme melden oder neue Funktionen anfordern"
   },
   "settings.help.reportBug": {
     "defaultMessage": "Fehler melden"
@@ -3954,7 +3954,7 @@
     "defaultMessage": "Hilfe & Feedback"
   },
   "settings.language.description": {
-    "defaultMessage": "Wählen Sie die Anzeigesprache für goose"
+    "defaultMessage": "Wählen Sie die Anzeigesprache für arakan"
   },
   "settings.language.english": {
     "defaultMessage": "English"
@@ -4011,7 +4011,7 @@
     "defaultMessage": "Chinesisch (traditionell)"
   },
   "settings.menuBarIcon.description": {
-    "defaultMessage": "goose in der Menüleiste anzeigen"
+    "defaultMessage": "arakan in der Menüleiste anzeigen"
   },
   "settings.menuBarIcon.title": {
     "defaultMessage": "Menüleisten-Symbol"
@@ -4032,7 +4032,7 @@
     "defaultMessage": "Klicken Sie auf Benachrichtigungen"
   },
   "settings.notifications.modal.macStep3": {
-    "defaultMessage": "Suchen und wählen Sie goose in der Anwendungsliste aus"
+    "defaultMessage": "Suchen und wählen Sie arakan in der Anwendungsliste aus"
   },
   "settings.notifications.modal.macStep4": {
     "defaultMessage": "Aktivieren Sie Benachrichtigungen und passen Sie die Einstellungen nach Wunsch an"
@@ -4050,7 +4050,7 @@
     "defaultMessage": "Gehen Sie zu System > Benachrichtigungen"
   },
   "settings.notifications.modal.winStep3": {
-    "defaultMessage": "Suchen und wählen Sie goose in der Anwendungsliste aus"
+    "defaultMessage": "Suchen und wählen Sie arakan in der Anwendungsliste aus"
   },
   "settings.notifications.modal.winStep4": {
     "defaultMessage": "Schalten Sie Benachrichtigungen ein und passen Sie die Einstellungen nach Wunsch an"
@@ -4059,7 +4059,7 @@
     "defaultMessage": "Einstellungen öffnen"
   },
   "settings.notifications.task.description": {
-    "defaultMessage": "Benachrichtigen, wenn Goose eine Aufgabe abschließt, während sich das Fenster im Hintergrund befindet"
+    "defaultMessage": "Benachrichtigen, wenn Arakan eine Aufgabe abschließt, während sich das Fenster im Hintergrund befindet"
   },
   "settings.notifications.task.title": {
     "defaultMessage": "Benachrichtigungen bei Aufgabenabschluss"
@@ -4068,19 +4068,19 @@
     "defaultMessage": "Benachrichtigungen"
   },
   "settings.preventSleep.description": {
-    "defaultMessage": "Halten Sie Ihren Computer wach, während goose eine Aufgabe ausführt (der Bildschirm kann sich weiterhin sperren)"
+    "defaultMessage": "Halten Sie Ihren Computer wach, während arakan eine Aufgabe ausführt (der Bildschirm kann sich weiterhin sperren)"
   },
   "settings.preventSleep.title": {
     "defaultMessage": "Energiesparmodus verhindern"
   },
   "settings.theme.description": {
-    "defaultMessage": "Passen Sie das Erscheinungsbild von goose an"
+    "defaultMessage": "Passen Sie das Erscheinungsbild von arakan an"
   },
   "settings.theme.title": {
     "defaultMessage": "Design"
   },
   "settings.updates.description": {
-    "defaultMessage": "Suchen und installieren Sie Updates, damit goose stets optimal läuft"
+    "defaultMessage": "Suchen und installieren Sie Updates, damit arakan stets optimal läuft"
   },
   "settings.updates.title": {
     "defaultMessage": "Updates"
@@ -4161,7 +4161,7 @@
     "defaultMessage": "Keine passenden Skills gefunden"
   },
   "skillsView.noSkillsDescription": {
-    "defaultMessage": "Skills werden aus SKILL.md-Dateien in ~/.config/agents/skills/, .goose/skills/ oder anderen unterstützten Verzeichnissen geladen."
+    "defaultMessage": "Skills werden aus SKILL.md-Dateien in ~/.config/agents/skills/, .arakan/skills/ oder anderen unterstützten Verzeichnissen geladen."
   },
   "skillsView.noSkillsInstalled": {
     "defaultMessage": "Keine Skills installiert"
@@ -4170,7 +4170,7 @@
     "defaultMessage": "Skills durchsuchen..."
   },
   "skillsView.skillsDescription": {
-    "defaultMessage": "Zeigen Sie installierte Skills an, die die Fähigkeiten von Goose erweitern. {shortcut} zum Suchen."
+    "defaultMessage": "Zeigen Sie installierte Skills an, die die Fähigkeiten von Arakan erweitern. {shortcut} zum Suchen."
   },
   "skillsView.skillsTitle": {
     "defaultMessage": "Skills"
@@ -4419,10 +4419,10 @@
     "defaultMessage": "Anderen Anbieter verwenden"
   },
   "telemetryConsentPrompt.description": {
-    "defaultMessage": "Möchten Sie anonyme Nutzungsdaten teilen, um goose zu verbessern? Wir erfassen niemals Ihre Unterhaltungen, Ihren Code oder Ihre persönlichen Daten."
+    "defaultMessage": "Möchten Sie anonyme Nutzungsdaten teilen, um arakan zu verbessern? Wir erfassen niemals Ihre Unterhaltungen, Ihren Code oder Ihre persönlichen Daten."
   },
   "telemetryConsentPrompt.heading": {
-    "defaultMessage": "Helfen Sie, goose zu verbessern"
+    "defaultMessage": "Helfen Sie, arakan zu verbessern"
   },
   "telemetryConsentPrompt.learnMore": {
     "defaultMessage": "Mehr erfahren"
@@ -4449,7 +4449,7 @@
     "defaultMessage": "Datenschutz"
   },
   "telemetrySettings.toggleDescription": {
-    "defaultMessage": "Helfen Sie, goose zu verbessern, indem Sie anonyme Nutzungsstatistiken teilen."
+    "defaultMessage": "Helfen Sie, arakan zu verbessern, indem Sie anonyme Nutzungsstatistiken teilen."
   },
   "telemetrySettings.toggleLabel": {
     "defaultMessage": "Anonyme Nutzungsdaten"
@@ -4529,14 +4529,14 @@
   "toolConfirmation.allowToolCallWithName": {
     "defaultMessage": "{toolName} erlauben?"
   },
-  "toolConfirmation.gooseWouldLikeToCallWithName": {
-    "defaultMessage": "Goose möchte {toolName} aufrufen. Erlauben?"
+  "toolConfirmation.arakanWouldLikeToCallWithName": {
+    "defaultMessage": "Arakan möchte {toolName} aufrufen. Erlauben?"
   },
   "updateSection.autoDownload": {
-    "defaultMessage": "Goose lädt das Update im Hintergrund herunter und installiert es beim nächsten Beenden oder Neustart."
+    "defaultMessage": "Arakan lädt das Update im Hintergrund herunter und installiert es beim nächsten Beenden oder Neustart."
   },
   "updateSection.autoDownloadDisabledByEnv": {
-    "defaultMessage": "Automatische Downloads sind über die Umgebungsvariable GOOSE_DISABLE_AUTO_DOWNLOAD deaktiviert."
+    "defaultMessage": "Automatische Downloads sind über die Umgebungsvariable ARAKAN_DISABLE_AUTO_DOWNLOAD deaktiviert."
   },
   "updateSection.autoDownloadDisabledNote": {
     "defaultMessage": "Automatischer Download ist deaktiviert. Klicken Sie auf \"Jetzt herunterladen\", um manuell herunterzuladen."
@@ -4554,7 +4554,7 @@
     "defaultMessage": "Automatische Update-Downloads deaktivieren"
   },
   "updateSection.disableAutoDownloadDesc": {
-    "defaultMessage": "Wenn aktiviert, benachrichtigt Goose Sie über neue Versionen, lädt sie aber nicht automatisch herunter."
+    "defaultMessage": "Wenn aktiviert, benachrichtigt Arakan Sie über neue Versionen, lädt sie aber nicht automatisch herunter."
   },
   "updateSection.downloadNow": {
     "defaultMessage": "Jetzt herunterladen"
@@ -4830,7 +4830,7 @@
     "defaultMessage": "Agentenschleife"
   },
   "contextXray.providerManagesContext": {
-    "defaultMessage": "{provider} führt einen eigenen Gesprächsverlauf und erhält von goose nur den neuesten Prompt, daher gibt es keine Anfrage aufzuschlüsseln."
+    "defaultMessage": "{provider} führt einen eigenen Gesprächsverlauf und erhält von arakan nur den neuesten Prompt, daher gibt es keine Anfrage aufzuschlüsseln."
   },
   "contextXray.autoCompactionPending": {
     "defaultMessage": "Auto-Verdichtungsschwelle überschritten: Das Gespräch wird verdichtet, bevor die nächste Anfrage gesendet wird."

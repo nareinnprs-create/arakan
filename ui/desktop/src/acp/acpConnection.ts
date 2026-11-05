@@ -1,24 +1,24 @@
-import { DEFAULT_GOOSE_MCP_HOST_CAPABILITIES } from '@aaif/goose-acp-client';
+import { DEFAULT_ARAKAN_MCP_HOST_CAPABILITIES } from '@aaif/arakan-acp-client';
 import { methods, PROTOCOL_VERSION, type InitializeResponse } from '@agentclientprotocol/sdk';
 import { createWebSocketStream } from '@agentclientprotocol/sdk/experimental/ws-client';
 import packageJson from '../../package.json';
-import { GOOSE_SERVE_EXITED_USER_MESSAGE } from '../gooseServeLeaseRegistry';
+import { ARAKAN_SERVE_EXITED_USER_MESSAGE } from '../arakanServeLeaseRegistry';
 import {
-  handleAcpGooseSessionNotification,
+  handleAcpArakanSessionNotification,
   handleAcpProviderDeviceCodeNotification,
   handleAcpSessionNotification,
 } from './chatNotifications';
 import { requestAcpElicitation } from './elicitationRequests';
 import {
-  connectGooseAcpClient,
-  type GooseAcpCallbacks,
-  type GooseAcpClient,
-} from './gooseAcpClient';
+  connectArakanAcpClient,
+  type ArakanAcpCallbacks,
+  type ArakanAcpClient,
+} from './arakanAcpClient';
 import { requestAcpPermission } from './permissionRequests';
 import { requestAcpRecipeParams } from './recipeParamRequests';
 
 type AcpConnection = {
-  client: GooseAcpClient;
+  client: ArakanAcpClient;
   initializeResponse: InitializeResponse;
 };
 
@@ -35,7 +35,7 @@ let connectionGeneration = 0;
 let recovering = false;
 const recoveryListeners = new Set<AcpRecoveryListener>();
 
-export async function getAcpClient(): Promise<GooseAcpClient> {
+export async function getAcpClient(): Promise<ArakanAcpClient> {
   return (await getConnection()).client;
 }
 
@@ -84,7 +84,7 @@ function recoverConnection(immediate: boolean): void {
   const generation = connectionGeneration;
   const recoveryAttempt = immediate
     ? openConnection(generation).catch((error) => {
-        if (generation !== connectionGeneration || isGooseServeExitedError(error)) {
+        if (generation !== connectionGeneration || isArakanServeExitedError(error)) {
           throw error;
         }
         return retryWithBackoff(generation);
@@ -136,7 +136,7 @@ async function openConnection(generation: number): Promise<AcpConnection> {
 
   // Electron treats an explicitly passed undefined protocol as a subprotocol.
   const stream = createWebSocketStream(wsUrl, { protocols: [] });
-  const client = connectGooseAcpClient(stream, createClientCallbacks());
+  const client = connectArakanAcpClient(stream, createClientCallbacks());
 
   try {
     const initializeResponse = await withTimeout(
@@ -145,8 +145,8 @@ async function openConnection(generation: number): Promise<AcpConnection> {
         clientCapabilities: {
           elicitation: { form: {} },
           _meta: {
-            goose: {
-              mcpHostCapabilities: DEFAULT_GOOSE_MCP_HOST_CAPABILITIES,
+            arakan: {
+              mcpHostCapabilities: DEFAULT_ARAKAN_MCP_HOST_CAPABILITIES,
               customNotifications: true,
               recipeParameterRequests: true,
             },
@@ -195,7 +195,7 @@ async function retryWithBackoff(generation: number): Promise<AcpConnection> {
     try {
       return await openConnection(generation);
     } catch (error) {
-      if (generation !== connectionGeneration || isGooseServeExitedError(error)) {
+      if (generation !== connectionGeneration || isArakanServeExitedError(error)) {
         throw error;
       }
     }
@@ -204,21 +204,21 @@ async function retryWithBackoff(generation: number): Promise<AcpConnection> {
   throw new Error('ACP connection attempt is no longer current');
 }
 
-function isGooseServeExitedError(error: unknown): boolean {
-  return error instanceof Error && error.message.includes(GOOSE_SERVE_EXITED_USER_MESSAGE);
+function isArakanServeExitedError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes(ARAKAN_SERVE_EXITED_USER_MESSAGE);
 }
 
 function delay(delayMs: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
-function createClientCallbacks(): GooseAcpCallbacks {
+function createClientCallbacks(): ArakanAcpCallbacks {
   return {
     requestPermission: requestAcpPermission,
     createElicitation: requestAcpElicitation,
     unstable_sessionRecipeRequestParams: requestAcpRecipeParams,
     sessionUpdate: handleAcpSessionNotification,
-    unstable_sessionUpdate: handleAcpGooseSessionNotification,
+    unstable_sessionUpdate: handleAcpArakanSessionNotification,
     unstable_providerDeviceCode: handleAcpProviderDeviceCodeNotification,
   };
 }

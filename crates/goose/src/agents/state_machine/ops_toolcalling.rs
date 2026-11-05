@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use futures::{FutureExt, StreamExt};
-use goose_agent::post_tool_call_hook::PostToolCallHook;
-use goose_agent::tool_call_state::request_executable;
+use arakan_agent::post_tool_call_hook::PostToolCallHook;
+use arakan_agent::tool_call_state::request_executable;
 use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, ErrorData, Role, Tool};
 
 use crate::agents::extension::ExtensionInfo;
@@ -19,13 +19,13 @@ use crate::agents::state_machine::ops_skills::LOAD_SKILL_TOOL_NAME;
 use crate::agents::state_machine::post_tool_hook::run_post_tool_call_hook;
 use crate::agents::state_machine::{
     applied, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter,
-    GooseEffect, Operation, OperationResult, SlashCommand,
+    ArakanEffect, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::tool_execution::{
     tool_stream, ToolCallResult, ToolStreamItem, CHAT_MODE_TOOL_SKIPPED_RESPONSE,
 };
 use crate::agents::AgentEvent;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{
     ActionRequiredData, Message, MessageContent, ProviderMetadata, ToolRequest, ToolResponse,
 };
@@ -81,7 +81,7 @@ fn platform_notification(result: &CallToolResult) -> Option<rmcp::model::ServerN
 
 pub(super) fn tool_span(tool_name: &str, tool_call_id: &str, session_id: &str) -> tracing::Span {
     tracing::info_span!(
-        target: "goose::state_machine",
+        target: "arakan::state_machine",
         "execute_tool",
         "gen_ai.operation.name" = "execute_tool",
         "gen_ai.tool.name" = %tool_name,
@@ -328,11 +328,6 @@ impl ToolExecutionOperation {
                 )
                 .await;
             let result = result.unwrap_or_else(|error| {
-                #[cfg(feature = "telemetry")]
-                crate::posthog::emit_error(
-                    "tool_execution_failed",
-                    &format!("{}: {}", tool_call.name, error),
-                );
                 ToolCallResult::from(Err(error))
             });
             let result = self
@@ -355,7 +350,7 @@ impl ToolExecutionOperation {
         conversation: &Conversation,
         message: String,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let command = messages_since_kickoff(conversation)?
             .first()
             .cloned()
@@ -387,7 +382,7 @@ impl ToolExecutionOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let prompts = self
             .lease(session)
             .await?
@@ -430,7 +425,7 @@ impl ToolExecutionOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let params: Vec<_> = command.params_str.split_whitespace().collect();
         let Some(prompt_name) = params.first() else {
             return Self::command_response(
@@ -586,7 +581,7 @@ pub(super) fn call_will_not_run(
     request: &ToolRequest,
 ) -> Result<bool> {
     let messages = messages_since_kickoff(conversation)?;
-    Ok(session.goose_mode == GooseMode::Chat
+    Ok(session.arakan_mode == ArakanMode::Chat
         || !request_was_advertised(messages, request)
         || final_output_called_with_other_tools(session, messages, request))
 }
@@ -727,7 +722,7 @@ fn extension_prompt_parts(extensions: &[ExtensionInfo]) -> Vec<(String, String)>
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for ToolExecutionOperation {
+impl Operation<Session, ArakanEffect> for ToolExecutionOperation {
     fn name(&self) -> &'static str {
         "tool_execution"
     }
@@ -737,7 +732,7 @@ impl Operation<Session, GooseEffect> for ToolExecutionOperation {
         _session: &Session,
         _conversation: &Conversation,
         emit: &Emitter,
-    ) -> Vec<GooseEffect> {
+    ) -> Vec<ArakanEffect> {
         let (actions, response) = self.take_batch();
         if let Some(response) = &response {
             emit.emit(AgentEvent::Message(response.user_visible_content()));
@@ -745,7 +740,7 @@ impl Operation<Session, GooseEffect> for ToolExecutionOperation {
         actions
             .into_iter()
             .chain(response)
-            .map(GooseEffect::from)
+            .map(ArakanEffect::from)
             .collect()
     }
 
@@ -755,7 +750,7 @@ impl Operation<Session, GooseEffect> for ToolExecutionOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         match command.command {
             "prompts" => {
                 self.list_prompts(command, session, conversation, emit)
@@ -825,7 +820,7 @@ impl Operation<Session, GooseEffect> for ToolExecutionOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let messages = messages_since_kickoff(conversation)?;
         let mut pending = pending_advertised_tool_requests(messages);
         if pending.is_empty() {
@@ -890,7 +885,7 @@ impl Operation<Session, GooseEffect> for ToolExecutionOperation {
             return not_applicable();
         }
 
-        if session.goose_mode == GooseMode::Chat {
+        if session.arakan_mode == ArakanMode::Chat {
             let mut response = Message::user();
             for (request, disposition) in &pending {
                 let result = match disposition {
@@ -987,14 +982,14 @@ impl Operation<Session, GooseEffect> for ToolExecutionOperation {
         let (actions, response) = self.take_batch();
         let response = response.ok_or_else(|| anyhow!("tool batch produced no responses"))?;
         emit.emit(AgentEvent::Message(response.user_visible_content()));
-        applied(actions.into_iter().chain([response]).map(GooseEffect::from))
+        applied(actions.into_iter().chain([response]).map(ArakanEffect::from))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use goose_agent::tool_call_state::EXECUTABLE_KEY;
+    use arakan_agent::tool_call_state::EXECUTABLE_KEY;
 
     #[test]
     fn extension_prompt_parts_render_one_block_per_extension() {

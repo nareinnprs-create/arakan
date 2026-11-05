@@ -17,7 +17,7 @@ use crate::agents::session_runtime::{Attachment, SessionRuntime};
 use crate::agents::state_machine::ops_recipe;
 use crate::agents::state_machine::{
     has_unapplied_tool_confirmation_response, pending_tool_confirmations,
-    persist_tool_confirmation_decision, run_goose, AutoEffortOperation, Emitter, GooseEffect,
+    persist_tool_confirmation_decision, run_arakan, AutoEffortOperation, Emitter, ArakanEffect,
     Operation, StateMachine, SteerQueue,
 };
 use crate::agents::state_machine_builder::{build_state_machine, StateMachineConfig};
@@ -27,7 +27,7 @@ use crate::agents::types::{
 };
 use crate::agents::AgentEvent;
 use crate::config::permission::PermissionManager;
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::conversation::message::{ActionRequiredData, Message, MessageContent};
 use crate::permission::permission_inspector::PermissionInspector;
 use crate::permission::{Permission, PermissionConfirmation};
@@ -39,11 +39,11 @@ use crate::security::security_inspector::SecurityInspector;
 use crate::session::{Session, SessionManager};
 use crate::tool_inspection::ToolInspectionManager;
 use crate::tool_monitor::RepetitionInspector;
-use goose_agent::stop_hook::DEFAULT_DENY_LIMIT;
-use goose_providers::api_client::{ApiClient, AuthMethod};
-use goose_providers::errors::ProviderError;
-use goose_providers::thinking::{ThinkingEffort, ThinkingEffortSupport};
-use goose_providers::typesafe::{TypeSafeProvider, TYPESAFE_DEFAULT_HOST, TYPESAFE_DEFAULT_MODEL};
+use arakan_agent::stop_hook::DEFAULT_DENY_LIMIT;
+use arakan_providers::api_client::{ApiClient, AuthMethod};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::thinking::{ThinkingEffort, ThinkingEffortSupport};
+use arakan_providers::typesafe::{TypeSafeProvider, TYPESAFE_DEFAULT_HOST, TYPESAFE_DEFAULT_MODEL};
 use rmcp::model::{ElicitationAction, Tool};
 use serde_json::Value;
 use tokio::sync::mpsc;
@@ -60,7 +60,7 @@ const AUTO_EFFORTS: [ThinkingEffort; 5] = [
 
 pub(super) fn available_auto_efforts(
     provider_name: &str,
-    model_config: &goose_providers::model::ModelConfig,
+    model_config: &arakan_providers::model::ModelConfig,
     support: ThinkingEffortSupport,
 ) -> Vec<ThinkingEffort> {
     let applied_as_selected = |effort: &ThinkingEffort, applied: Option<String>| match effort {
@@ -73,7 +73,7 @@ pub(super) fn available_auto_efforts(
 
     match support {
         ThinkingEffortSupport::Unspecified
-            if provider_name == goose_providers::openai::OPEN_AI_PROVIDER_NAME
+            if provider_name == arakan_providers::openai::OPEN_AI_PROVIDER_NAME
                 && model_config.is_openai_reasoning_model() =>
         {
             AUTO_EFFORTS
@@ -81,7 +81,7 @@ pub(super) fn available_auto_efforts(
                 .filter(|effort| {
                     applied_as_selected(
                         effort,
-                        goose_providers::formats::openai::openai_reasoning_effort_for_thinking(
+                        arakan_providers::formats::openai::openai_reasoning_effort_for_thinking(
                             &model_config.model_name,
                             *effort,
                         ),
@@ -90,15 +90,15 @@ pub(super) fn available_auto_efforts(
                 .collect()
         }
         ThinkingEffortSupport::Unspecified
-            if provider_name == goose_providers::formats::anthropic::ANTHROPIC_PROVIDER_NAME
+            if provider_name == arakan_providers::formats::anthropic::ANTHROPIC_PROVIDER_NAME
                 && model_config.is_reasoning_model() =>
         {
-            let always_on = goose_providers::canonical::maybe_get_canonical_model(
+            let always_on = arakan_providers::canonical::maybe_get_canonical_model(
                 provider_name,
                 &model_config.model_name,
             )
             .and_then(|model| model.thinking_mode)
-                == Some(goose_providers::canonical::ThinkingMode::AlwaysOnAdaptive);
+                == Some(arakan_providers::canonical::ThinkingMode::AlwaysOnAdaptive);
             AUTO_EFFORTS
                 .into_iter()
                 .filter(|effort| !always_on || *effort != ThinkingEffort::Off)
@@ -122,39 +122,39 @@ pub struct TurnSettings {
     pub compaction_token_limit: usize,
     /// `None` derives it from the context limit.
     pub tool_call_cutoff: Option<usize>,
-    pub auto_effort: Option<Arc<dyn Operation<Session, GooseEffect>>>,
-    pub context_relevance: Option<Arc<dyn goose_providers::decision::DecisionProvider>>,
+    pub auto_effort: Option<Arc<dyn Operation<Session, ArakanEffect>>>,
+    pub context_relevance: Option<Arc<dyn arakan_providers::decision::DecisionProvider>>,
 }
 
 impl TurnSettings {
     pub fn from_config(
         provider: &dyn Provider,
-        model_config: &goose_providers::model::ModelConfig,
+        model_config: &arakan_providers::model::ModelConfig,
     ) -> Self {
         let config = Config::global();
         Self {
             max_turns: config.default_max_turns(),
             retry_timeout: std::time::Duration::from_secs(
                 config
-                    .get_param::<u64>("GOOSE_RECIPE_RETRY_TIMEOUT_SECONDS")
+                    .get_param::<u64>("ARAKAN_RECIPE_RETRY_TIMEOUT_SECONDS")
                     .unwrap_or(DEFAULT_RETRY_TIMEOUT_SECONDS),
             ),
             on_failure_timeout: std::time::Duration::from_secs(
                 config
-                    .get_param::<u64>("GOOSE_RECIPE_ON_FAILURE_TIMEOUT_SECONDS")
+                    .get_param::<u64>("ARAKAN_RECIPE_ON_FAILURE_TIMEOUT_SECONDS")
                     .unwrap_or(DEFAULT_ON_FAILURE_TIMEOUT_SECONDS),
             ),
             stop_hook_block_cap: config
-                .get_param::<u32>("GOOSE_STOP_HOOK_BLOCK_CAP")
+                .get_param::<u32>("ARAKAN_STOP_HOOK_BLOCK_CAP")
                 .unwrap_or(DEFAULT_DENY_LIMIT),
             tool_pair_summarization: crate::context_mgmt::tool_pair_summarization_enabled(),
             compaction_threshold: config
-                .get_param::<f64>("GOOSE_AUTO_COMPACT_THRESHOLD")
+                .get_param::<f64>("ARAKAN_AUTO_COMPACT_THRESHOLD")
                 .unwrap_or(crate::context_mgmt::DEFAULT_COMPACTION_THRESHOLD),
             compaction_token_limit: config
-                .get_param::<usize>("GOOSE_AUTO_COMPACT_TOKEN_LIMIT")
+                .get_param::<usize>("ARAKAN_AUTO_COMPACT_TOKEN_LIMIT")
                 .unwrap_or(crate::context_mgmt::DEFAULT_AUTO_COMPACT_TOKEN_LIMIT),
-            tool_call_cutoff: config.get_param::<usize>("GOOSE_TOOL_CALL_CUTOFF").ok(),
+            tool_call_cutoff: config.get_param::<usize>("ARAKAN_TOOL_CALL_CUTOFF").ok(),
             auto_effort: auto_effort_from_config(provider, model_config),
             context_relevance: crate::agents::state_machine_builder::context_relevance_provider(
                 config, provider,
@@ -165,11 +165,11 @@ impl TurnSettings {
 
 fn auto_effort_from_config(
     provider: &dyn Provider,
-    model_config: &goose_providers::model::ModelConfig,
-) -> Option<Arc<dyn Operation<Session, GooseEffect>>> {
+    model_config: &arakan_providers::model::ModelConfig,
+) -> Option<Arc<dyn Operation<Session, ArakanEffect>>> {
     let config = Config::global();
     if !config
-        .get_param::<bool>("GOOSE_AUTO_EFFORT_ENABLED")
+        .get_param::<bool>("ARAKAN_AUTO_EFFORT_ENABLED")
         .unwrap_or(false)
     {
         return None;
@@ -214,9 +214,9 @@ fn provider_creation_error(error: anyhow::Error, context: impl fmt::Display) -> 
 }
 
 fn normalize_legacy_provider_thinking_effort(
-    mut model_config: goose_providers::model::ModelConfig,
+    mut model_config: arakan_providers::model::ModelConfig,
     effort_support: &ThinkingEffortSupport,
-) -> goose_providers::model::ModelConfig {
+) -> arakan_providers::model::ModelConfig {
     let has_raw_effort = model_config
         .request_params
         .as_ref()
@@ -231,20 +231,20 @@ fn normalize_legacy_provider_thinking_effort(
     if let Some(params) = model_config.request_params.as_mut() {
         params.remove("thinking_effort");
     }
-    model_config.with_default_thinking_effort(Config::global().get_goose_thinking_effort())
+    model_config.with_default_thinking_effort(Config::global().get_arakan_thinking_effort())
 }
 
 #[derive(Clone, Debug)]
-pub enum GoosePlatform {
-    GooseDesktop,
-    GooseCli,
+pub enum ArakanPlatform {
+    ArakanDesktop,
+    ArakanCli,
 }
 
-impl fmt::Display for GoosePlatform {
+impl fmt::Display for ArakanPlatform {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            GoosePlatform::GooseCli => write!(f, "goose-cli"),
-            GoosePlatform::GooseDesktop => write!(f, "goose-desktop"),
+            ArakanPlatform::ArakanCli => write!(f, "arakan-cli"),
+            ArakanPlatform::ArakanDesktop => write!(f, "arakan-desktop"),
         }
     }
 }
@@ -255,7 +255,7 @@ pub struct StateMachineServicesConfig {
     pub permission_manager: Arc<PermissionManager>,
     pub scheduler_service: Option<Arc<dyn SchedulerTrait>>,
     pub disable_session_naming: bool,
-    pub goose_platform: GoosePlatform,
+    pub arakan_platform: ArakanPlatform,
     pub elicitation_handler: Option<crate::agents::mcp_client::ElicitationHandler>,
     pub mcp_protocol_version: Option<rmcp::model::ProtocolVersion>,
     pub providers: Arc<ProviderManager>,
@@ -275,9 +275,9 @@ impl StateMachineServicesConfig {
             PermissionManager::instance(),
             None,
             Config::global()
-                .get_goose_disable_session_naming()
+                .get_arakan_disable_session_naming()
                 .unwrap_or(false),
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         )
     }
 
@@ -286,19 +286,19 @@ impl StateMachineServicesConfig {
         permission_manager: Arc<PermissionManager>,
         scheduler_service: Option<Arc<dyn SchedulerTrait>>,
         disable_session_naming: bool,
-        goose_platform: GoosePlatform,
+        arakan_platform: ArakanPlatform,
     ) -> Self {
         Self {
             session_manager,
             permission_manager,
             scheduler_service,
             disable_session_naming,
-            goose_platform,
+            arakan_platform,
             elicitation_handler: None,
             mcp_protocol_version: None,
             providers: Arc::default(),
             max_sessions: Config::global()
-                .get_goose_max_active_agents()
+                .get_arakan_max_active_agents()
                 .unwrap_or(DEFAULT_MAX_SESSIONS),
             turn_settings: None,
             hooks: None,
@@ -313,7 +313,7 @@ pub struct StateMachineServices {
     pub permission_manager: Arc<PermissionManager>,
     pub providers: Arc<ProviderManager>,
     pub scheduler: Option<Arc<dyn SchedulerTrait>>,
-    pub goose_platform: GoosePlatform,
+    pub arakan_platform: ArakanPlatform,
     pub disable_session_naming: bool,
     pub runtime: SessionRuntime,
 
@@ -344,7 +344,7 @@ fn agent_visible_message_text(message: &Message) -> String {
 
 impl StateMachineServices {
     pub fn with_config(config: StateMachineServicesConfig) -> Arc<Self> {
-        let mut default_client = ClientContext::new(&config.goose_platform, None);
+        let mut default_client = ClientContext::new(&config.arakan_platform, None);
         default_client.capabilities.elicitation_handler = config.elicitation_handler;
         default_client.capabilities.protocol_version = config.mcp_protocol_version;
         let services = Arc::new(Self {
@@ -363,7 +363,7 @@ impl StateMachineServices {
             permission_manager: config.permission_manager,
             providers: config.providers,
             scheduler: config.scheduler_service,
-            goose_platform: config.goose_platform,
+            arakan_platform: config.arakan_platform,
             disable_session_naming: config.disable_session_naming,
             runtime: SessionRuntime::new(config.max_sessions),
             hook_manager: config.hooks.unwrap_or_else(|| {
@@ -559,7 +559,7 @@ impl StateMachineServices {
         tool_inspection_manager.add_inspector(Box::new(SecurityInspector::new()));
         tool_inspection_manager.add_inspector(Box::new(EgressInspector::new()));
 
-        // Add adversary inspector (LLM-based review, enabled by ~/.config/goose/adversary.md)
+        // Add adversary inspector (LLM-based review, enabled by ~/.config/arakan/adversary.md)
         tool_inspection_manager.add_inspector(Box::new(AdversaryInspector::new(
             providers.clone(),
             session_manager.clone(),
@@ -586,7 +586,7 @@ impl StateMachineServices {
     pub async fn model_config_for_session(
         &self,
         session_id: &str,
-    ) -> Result<goose_providers::model::ModelConfig> {
+    ) -> Result<arakan_providers::model::ModelConfig> {
         let session = self.session_manager.get_session(session_id, false).await?;
         crate::agents::provider_manager::model_config_for(&session)
     }
@@ -594,7 +594,7 @@ impl StateMachineServices {
     pub(super) async fn effective_model_config_for_session(
         &self,
         session_id: &str,
-    ) -> Result<goose_providers::model::ModelConfig> {
+    ) -> Result<arakan_providers::model::ModelConfig> {
         let model_config = self.model_config_for_session(session_id).await?;
         let provider_name = self.provider(session_id).await?.get_name().to_string();
         match crate::providers::get_from_registry(&provider_name).await {
@@ -723,12 +723,12 @@ impl StateMachineServices {
     pub(super) async fn create_state_machine(
         self: &Arc<Self>,
         provider: Arc<dyn Provider>,
-        model_config: goose_providers::model::ModelConfig,
+        model_config: arakan_providers::model::ModelConfig,
         context_limit: usize,
         session_config: SessionConfig,
         cancel: CancellationToken,
         steer_queue: SteerQueue,
-    ) -> StateMachine<'_, Session, GooseEffect> {
+    ) -> StateMachine<'_, Session, ArakanEffect> {
         let extension_lease = self
             .runtime
             .confirmations
@@ -750,13 +750,13 @@ impl StateMachineServices {
     pub(super) async fn create_state_machine_with_lease(
         self: &Arc<Self>,
         provider: Arc<dyn Provider>,
-        model_config: goose_providers::model::ModelConfig,
+        model_config: arakan_providers::model::ModelConfig,
         context_limit: usize,
         session_config: SessionConfig,
         cancel: CancellationToken,
         steer_queue: SteerQueue,
         extension_lease: Arc<StdMutex<Option<Arc<ExtensionLease>>>>,
-    ) -> StateMachine<'_, Session, GooseEffect> {
+    ) -> StateMachine<'_, Session, ArakanEffect> {
         let settings = match &self.turn_settings {
             Some(settings) => settings.clone(),
             None => TurnSettings::from_config(provider.as_ref(), &model_config),
@@ -1124,7 +1124,7 @@ impl StateMachineServices {
                 let result = {
                     let run = crate::session_context::with_session_id(
                         Some(session_id.clone()),
-                        run_goose(
+                        run_arakan(
                             &machine,
                             session_manager.as_ref(),
                             &self.hook_manager,
@@ -1157,7 +1157,7 @@ impl StateMachineServices {
     pub async fn update_provider(
         &self,
         provider: Arc<dyn Provider>,
-        model_config: goose_providers::model::ModelConfig,
+        model_config: arakan_providers::model::ModelConfig,
         session_id: &str,
     ) -> Result<()> {
         let provider_name = provider.get_name().to_string();
@@ -1170,7 +1170,7 @@ impl StateMachineServices {
         &self,
         session_id: &str,
         provider_name: &str,
-        model_config: goose_providers::model::ModelConfig,
+        model_config: arakan_providers::model::ModelConfig,
     ) -> Result<()> {
         let mut session = self.session_manager.get_session(session_id, false).await?;
         let registry_entry = crate::providers::get_from_registry(provider_name)
@@ -1222,7 +1222,7 @@ impl StateMachineServices {
             .context("Failed to persist provider config to session")
     }
 
-    pub async fn update_goose_mode(&self, mode: GooseMode, session_id: &str) -> Result<()> {
+    pub async fn update_arakan_mode(&self, mode: ArakanMode, session_id: &str) -> Result<()> {
         if let Ok(provider) = self.provider(session_id).await {
             provider
                 .update_mode(session_id, mode)
@@ -1232,10 +1232,10 @@ impl StateMachineServices {
         self.session_manager
             .clone()
             .update(session_id)
-            .goose_mode(mode)
+            .arakan_mode(mode)
             .apply()
             .await
-            .context("Failed to persist goose_mode to session")
+            .context("Failed to persist arakan_mode to session")
     }
 
     /// Apply a thinking-effort selection. `effort` is the raw option value: a
@@ -1294,7 +1294,7 @@ impl StateMachineServices {
                 .map_err(|e| anyhow!("Could not configure agent: {}", e))?,
             None => {
                 let model_name = config
-                    .get_goose_model()
+                    .get_arakan_model()
                     .ok()
                     .ok_or_else(|| anyhow!("Could not configure agent: missing model"))?;
                 crate::model_config::model_config_from_user_config(&provider_name, &model_name)
@@ -1326,7 +1326,7 @@ impl StateMachineServices {
         }
 
         let fallback_provider_name = config
-            .get_goose_provider()
+            .get_arakan_provider()
             .ok()
             .filter(|name| name != &provider_name)
             .ok_or_else(|| {
@@ -1343,7 +1343,7 @@ impl StateMachineServices {
         );
 
         let fallback_model_name = config
-            .get_goose_model()
+            .get_arakan_model()
             .ok()
             .ok_or_else(|| anyhow!("Could not configure fallback provider: missing model"))?;
         let fallback_model_config = crate::model_config::model_config_from_user_config(
@@ -1401,14 +1401,14 @@ mod tests {
         use std::sync::Arc;
         use tempfile::TempDir;
 
-        use goose_test_support::mcp::McpFixtureServer;
+        use arakan_test_support::mcp::McpFixtureServer;
         use rmcp::ServiceExt;
         use tokio::sync::Barrier;
 
         use crate::agents::extension::ExtensionConfig;
-        use crate::agents::{GoosePlatform, StateMachineServices, StateMachineServicesConfig};
+        use crate::agents::{ArakanPlatform, StateMachineServices, StateMachineServicesConfig};
         use crate::config::permission::PermissionManager;
-        use crate::config::GooseMode;
+        use crate::config::ArakanMode;
         use crate::session::{EnabledExtensionsState, ExtensionState, SessionManager, SessionType};
 
         fn test_services(temp_dir: &TempDir, max_sessions: usize) -> Arc<StateMachineServices> {
@@ -1417,7 +1417,7 @@ mod tests {
                 PermissionManager::instance(),
                 None,
                 true,
-                GoosePlatform::GooseDesktop,
+                ArakanPlatform::ArakanDesktop,
             );
             config.max_sessions = max_sessions;
             StateMachineServices::with_config(config)
@@ -1457,7 +1457,7 @@ mod tests {
                     temp_dir.path().to_path_buf(),
                     "fixture".to_string(),
                     SessionType::User,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await
                 .unwrap();
@@ -1525,7 +1525,7 @@ mod tests {
 
         fn attachment(name: &str) -> crate::agents::Attachment {
             let mut client = crate::agents::extension_manager::ClientContext::new(
-                &GoosePlatform::GooseDesktop,
+                &ArakanPlatform::ArakanDesktop,
                 None,
             );
             client.name = name.to_string();
@@ -1665,7 +1665,7 @@ mod tests {
     use crate::plugins::discovery::{DiscoveredPlugin, PluginScope};
     use crate::providers::base::{stream_from_single_message, MessageStream, ModelInfo};
     use crate::session::session_manager::SessionType;
-    use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
+    use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
     use rmcp::model::Tool;
     use std::path::PathBuf;
     use std::sync::atomic::{AtomicUsize, Ordering};
@@ -1732,7 +1732,7 @@ mod tests {
 
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system_prompt: &str,
             _messages: &[Message],
             _tools: &[Tool],
@@ -1758,14 +1758,14 @@ mod tests {
             Arc::new(PermissionManager::new(temp_dir.path().join("permissions"))),
             None,
             true,
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         ));
         let session = session_manager
             .create_session(
                 temp_dir.path().to_path_buf(),
                 "session-context".to_string(),
                 SessionType::Hidden,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -1773,7 +1773,7 @@ mod tests {
         services
             .update_provider(
                 provider.clone(),
-                goose_providers::model::ModelConfig::new("mock-model"),
+                arakan_providers::model::ModelConfig::new("mock-model"),
                 &session.id,
             )
             .await
@@ -1875,14 +1875,14 @@ mod tests {
             Arc::new(PermissionManager::new(data_path)),
             None,
             false,
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         ));
         let session = session_manager
             .create_session(
                 std::env::current_dir().unwrap(),
                 "otel-tool-span".to_string(),
                 SessionType::Hidden,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -1930,7 +1930,7 @@ mod tests {
         }
         async fn stream(
             &self,
-            _: &goose_providers::model::ModelConfig,
+            _: &arakan_providers::model::ModelConfig,
             _: &str,
             _: &[crate::conversation::message::Message],
             _: &[rmcp::model::Tool],
@@ -1960,7 +1960,7 @@ mod tests {
         services
             .update_provider(
                 provider.clone(),
-                goose_providers::model::ModelConfig::new("test-model"),
+                arakan_providers::model::ModelConfig::new("test-model"),
                 &session.id,
             )
             .await
@@ -2029,9 +2029,9 @@ mod tests {
         fn thinking_effort_support(&self) -> ThinkingEffortSupport {
             if self.applies_effort {
                 ThinkingEffortSupport::Options(
-                    goose_providers::thinking::ThinkingEffortCapability {
+                    arakan_providers::thinking::ThinkingEffortCapability {
                         option_id: "effort".to_string(),
-                        values: vec![goose_providers::thinking::ThinkingEffortOption {
+                        values: vec![arakan_providers::thinking::ThinkingEffortOption {
                             value: "default".to_string(),
                             label: "Default".to_string(),
                         }],
@@ -2044,7 +2044,7 @@ mod tests {
         }
         async fn stream(
             &self,
-            _: &goose_providers::model::ModelConfig,
+            _: &arakan_providers::model::ModelConfig,
             _: &str,
             _: &[crate::conversation::message::Message],
             _: &[rmcp::model::Tool],
@@ -2064,7 +2064,7 @@ mod tests {
         }
         async fn apply_model_selection(
             &self,
-            model_config: &goose_providers::model::ModelConfig,
+            model_config: &arakan_providers::model::ModelConfig,
         ) -> Result<(), ProviderError> {
             self.model_selections
                 .lock()
@@ -2087,7 +2087,7 @@ mod tests {
         services
             .update_provider(
                 provider.clone(),
-                goose_providers::model::ModelConfig::new("mock-model"),
+                arakan_providers::model::ModelConfig::new("mock-model"),
                 &session.id,
             )
             .await
@@ -2120,8 +2120,8 @@ mod tests {
         let provider_root = TempDir::new().unwrap();
         let provider_root_path = provider_root.path().display().to_string();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", Some(provider_root_path.as_str())),
-            ("GOOSE_TOOLSHIM", None),
+            ("ARAKAN_PATH_ROOT", Some(provider_root_path.as_str())),
+            ("ARAKAN_TOOLSHIM", None),
         ]);
 
         let config = crate::config::declarative_providers::create_custom_provider(
@@ -2150,7 +2150,7 @@ mod tests {
         services
             .update_provider(
                 provider,
-                goose_providers::model::ModelConfig::new("test-model"),
+                arakan_providers::model::ModelConfig::new("test-model"),
                 &session.id,
             )
             .await
@@ -2206,11 +2206,11 @@ mod tests {
 
     #[tokio::test]
     async fn update_provider_replaces_harness_only_effort_for_legacy_provider() {
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("high"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("high"))]);
         let (services, session, _data_dir) = tracing_test_agent_and_session().await;
         let provider = Arc::new(EffortProvider::new(EffortOutcome::Unhandled));
         let model_config =
-            goose_providers::model::ModelConfig::new("mock-model").with_merged_request_params(
+            arakan_providers::model::ModelConfig::new("mock-model").with_merged_request_params(
                 HashMap::from([("thinking_effort".to_string(), serde_json::json!("default"))]),
             );
 
@@ -2229,11 +2229,11 @@ mod tests {
 
     #[tokio::test]
     async fn update_provider_preserves_harness_only_effort_for_managed_provider() {
-        let _guard = env_lock::lock_env([("GOOSE_THINKING_EFFORT", Some("high"))]);
+        let _guard = env_lock::lock_env([("ARAKAN_THINKING_EFFORT", Some("high"))]);
         let (services, session, _data_dir) = tracing_test_agent_and_session().await;
         let provider = Arc::new(EffortProvider::new(EffortOutcome::Applied));
         let model_config =
-            goose_providers::model::ModelConfig::new("mock-model").with_merged_request_params(
+            arakan_providers::model::ModelConfig::new("mock-model").with_merged_request_params(
                 HashMap::from([("thinking_effort".to_string(), serde_json::json!("default"))]),
             );
 
@@ -2483,7 +2483,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
     impl crate::providers::base::Provider for CountingTextProvider {
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system_prompt: &str,
             _messages: &[Message],
             _tools: &[Tool],
@@ -2505,7 +2505,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
     impl crate::providers::base::Provider for ChunkedTextProvider {
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system_prompt: &str,
             _messages: &[Message],
             _tools: &[Tool],
@@ -2547,7 +2547,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
     impl crate::providers::base::Provider for OutputLimitMarkerProvider {
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system_prompt: &str,
             _messages: &[Message],
             _tools: &[Tool],
@@ -2582,7 +2582,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
     impl crate::providers::base::Provider for RefusingProvider {
         async fn stream(
             &self,
-            _model_config: &goose_providers::model::ModelConfig,
+            _model_config: &arakan_providers::model::ModelConfig,
             _system_prompt: &str,
             _messages: &[Message],
             _tools: &[Tool],
@@ -2665,7 +2665,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
             permission_manager,
             None,
             true,
-            GoosePlatform::GooseCli,
+            ArakanPlatform::ArakanCli,
         );
         config.hooks = Some(hook_manager);
         config.turn_settings = turn_settings;
@@ -2675,13 +2675,13 @@ echo start >> "$PLUGIN_ROOT/hook.log"
                 PathBuf::default(),
                 "test".to_string(),
                 SessionType::Hidden,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await?;
         services
             .update_provider(
                 provider,
-                goose_providers::model::ModelConfig::new("mock-model"),
+                arakan_providers::model::ModelConfig::new("mock-model"),
                 &session.id,
             )
             .await?;
@@ -2701,7 +2701,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
                 stop_hook_block_cap,
                 ..TurnSettings::from_config(
                     provider.as_ref(),
-                    &goose_providers::model::ModelConfig::new("stop-hook-test"),
+                    &arakan_providers::model::ModelConfig::new("stop-hook-test"),
                 )
             }),
         )
@@ -2863,7 +2863,7 @@ echo start >> "$PLUGIN_ROOT/hook.log"
                     content,
                     MessageContent::SystemNotification(notification)
                         if notification.msg.contains("more than 2 consecutive times")
-                            && notification.msg.contains("GOOSE_STOP_HOOK_BLOCK_CAP")
+                            && notification.msg.contains("ARAKAN_STOP_HOOK_BLOCK_CAP")
                 )
             })
         }));

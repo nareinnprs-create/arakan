@@ -6,7 +6,7 @@ const DEFAULT_LARGE_TEXT_THRESHOLD: usize = 200_000;
 
 pub(crate) fn max_tool_response_size() -> usize {
     Config::global()
-        .get_param::<usize>("GOOSE_MAX_TOOL_RESPONSE_SIZE")
+        .get_param::<usize>("ARAKAN_MAX_TOOL_RESPONSE_SIZE")
         .unwrap_or(DEFAULT_LARGE_TEXT_THRESHOLD)
 }
 
@@ -67,7 +67,7 @@ pub fn process_tool_response(
 /// Write large text content to a temporary file
 fn write_large_text_to_file(content: &str) -> Result<String, std::io::Error> {
     let mut file = tempfile::Builder::new()
-        .prefix("goose_mcp_response_")
+        .prefix("arakan_mcp_response_")
         .suffix(".txt")
         .tempfile()?;
     file.write_all(content.as_bytes())?;

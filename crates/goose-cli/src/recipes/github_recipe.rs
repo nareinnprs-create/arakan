@@ -1,11 +1,11 @@
 use anyhow::{anyhow, Result};
 use console::style;
-use goose::recipe::template_recipe::parse_recipe_content;
-use goose::recipe::RECIPE_FILE_EXTENSIONS;
+use arakan::recipe::template_recipe::parse_recipe_content;
+use arakan::recipe::RECIPE_FILE_EXTENSIONS;
 use serde::{Deserialize, Serialize};
 
-use goose::recipe::read_recipe_file_content::RecipeFile;
-use goose::subprocess::{git_command, SubprocessExt};
+use arakan::recipe::read_recipe_file_content::RecipeFile;
+use arakan::subprocess::{git_command, SubprocessExt};
 use std::env;
 use std::fs;
 
@@ -29,7 +29,7 @@ pub enum RecipeSource {
     GitHub,
 }
 
-pub const GOOSE_RECIPE_GITHUB_REPO_CONFIG_KEY: &str = "GOOSE_RECIPE_GITHUB_REPO";
+pub const ARAKAN_RECIPE_GITHUB_REPO_CONFIG_KEY: &str = "ARAKAN_RECIPE_GITHUB_REPO";
 pub fn retrieve_recipe_from_github(
     recipe_name: &str,
     recipe_repo_full_name: &str,
@@ -283,7 +283,7 @@ fn discover_github_recipes(repo: &str) -> Result<Vec<RecipeInfo>> {
         .args(["api", &format!("repos/{}/contents", repo)])
         .set_no_window()
         .output()
-        .map_err(|e| anyhow!("Failed to fetch repository contents using 'gh api' command (executed when GOOSE_RECIPE_GITHUB_REPO is configured). This requires GitHub CLI (gh) to be installed and authenticated. Error: {}", e))?;
+        .map_err(|e| anyhow!("Failed to fetch repository contents using 'gh api' command (executed when ARAKAN_RECIPE_GITHUB_REPO is configured). This requires GitHub CLI (gh) to be installed and authenticated. Error: {}", e))?;
 
     if !output.status.success() {
         let error_msg = String::from_utf8_lossy(&output.stderr);
@@ -406,7 +406,7 @@ mod tests {
 
     #[test]
     fn local_repo_path_includes_owner_to_avoid_collisions() {
-        let parent = Path::new("goose-recipes");
+        let parent = Path::new("arakan-recipes");
         let first = get_local_repo_path(parent, "owner-one/shared").unwrap();
         let second = get_local_repo_path(parent, "owner-two/shared").unwrap();
 
@@ -417,7 +417,7 @@ mod tests {
 
     #[test]
     fn temp_child_name_keeps_recipe_downloads_under_temp_dir() {
-        let parent = Path::new("goose-recipes");
+        let parent = Path::new("arakan-recipes");
         let child = temp_child_name("../outside").unwrap();
         let output_dir = parent.join(&child);
 
@@ -427,7 +427,7 @@ mod tests {
 
     #[test]
     fn temp_child_path_rejects_reserved_components() {
-        let parent = Path::new("goose-recipes");
+        let parent = Path::new("arakan-recipes");
 
         for name in [
             ".",
@@ -447,7 +447,7 @@ mod tests {
 
     #[test]
     fn temp_child_path_preserves_safe_recipe_names() {
-        let parent = Path::new("goose-recipes");
+        let parent = Path::new("arakan-recipes");
 
         for (name, child) in [
             ("daily-report", "daily-report"),

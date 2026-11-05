@@ -7,10 +7,10 @@ use agent_client_protocol::schema::v1::{
 };
 use agent_client_protocol::schema::ProtocolVersion;
 use agent_client_protocol::{on_receive_request, Agent as SacpAgent, ByteStreams};
-use goose::acp::{AcpProvider, AcpProviderConfig};
-use goose::config::GooseMode;
-use goose::providers::base::Provider;
-use goose_providers::thinking::ThinkingEffortSupport;
+use arakan::acp::{AcpProvider, AcpProviderConfig};
+use arakan::config::ArakanMode;
+use arakan::providers::base::Provider;
+use arakan_providers::thinking::ThinkingEffortSupport;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tokio::sync::Notify;
@@ -103,7 +103,7 @@ async fn bootstrap_config_option_response_refreshes_the_effort_mirror() {
 
     let provider = AcpProvider::connect_with_transport(
         "scripted-acp".to_string(),
-        GooseMode::default(),
+        ArakanMode::default(),
         config,
         ByteStreams::new(client_write.compat_write(), client_read.compat()),
     )
@@ -170,7 +170,7 @@ async fn new_session_preserves_pre_response_effort_update() {
 
     let provider = AcpProvider::connect_with_transport(
         "scripted-acp".to_string(),
-        GooseMode::default(),
+        ArakanMode::default(),
         AcpProviderConfig {
             command: "unused".into(),
             args: vec![],
@@ -292,7 +292,7 @@ async fn loaded_session_refreshes_the_effort_mirror() {
 
     let provider = AcpProvider::connect_with_transport(
         "scripted-acp".to_string(),
-        GooseMode::default(),
+        ArakanMode::default(),
         config,
         ByteStreams::new(client_write.compat_write(), client_read.compat()),
     )

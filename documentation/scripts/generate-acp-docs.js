@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const SCHEMA_FILE = path.join(ROOT, 'crates', 'goose', 'acp-schema.json');
-const META_FILE = path.join(ROOT, 'crates', 'goose', 'acp-meta.json');
+const SCHEMA_FILE = path.join(ROOT, 'crates', 'arakan', 'acp-schema.json');
+const META_FILE = path.join(ROOT, 'crates', 'arakan', 'acp-meta.json');
 const OUTPUT_FILE = path.join(
   ROOT,
   'documentation',
@@ -228,7 +228,7 @@ function renderSchema(name, schema) {
   return lines.join('\n');
 }
 
-function renderDocumentation(schemas, meta, gooseVersion = 'Preview') {
+function renderDocumentation(schemas, meta, arakanVersion = 'Preview') {
   if (!schemas.$defs || typeof schemas.$defs !== 'object') {
     throw new Error('Schema document is missing $defs');
   }
@@ -239,19 +239,19 @@ function renderDocumentation(schemas, meta, gooseVersion = 'Preview') {
 
   const output = [
     '---',
-    'title: goose ACP Reference',
-    'sidebar_label: goose extensions',
+    'title: arakan ACP Reference',
+    'sidebar_label: arakan extensions',
     'displayed_sidebar: gdkSidebar',
     'sidebar_position: 2',
     '---',
     '',
-    '# goose ACP Reference',
+    '# arakan ACP Reference',
     '',
-    'This reference documents goose-specific Agent Client Protocol methods. Standard ACP methods are documented by the [Agent Client Protocol specification](https://agentclientprotocol.com/).',
+    'This reference documents arakan-specific Agent Client Protocol methods. Standard ACP methods are documented by the [Agent Client Protocol specification](https://agentclientprotocol.com/).',
     '',
-    `**goose version:** ${code(gooseVersion)}`,
+    `**arakan version:** ${code(arakanVersion)}`,
     '',
-    '> This file is generated from `crates/goose/acp-schema.json` and `crates/goose/acp-meta.json`. Do not edit it manually.',
+    '> This file is generated from `crates/arakan/acp-schema.json` and `crates/arakan/acp-meta.json`. Do not edit it manually.',
     '',
     '## Client-to-agent requests',
     '',
@@ -273,7 +273,7 @@ function main() {
   const args = process.argv.slice(2);
   if (args.length !== 0 && args.length !== 3 && args.length !== 4) {
     throw new Error(
-      'Usage: generate-acp-docs.js [schema-file meta-file output-file [goose-version]]'
+      'Usage: generate-acp-docs.js [schema-file meta-file output-file [arakan-version]]'
     );
   }
 
@@ -281,11 +281,11 @@ function main() {
     schemaFile = SCHEMA_FILE,
     metaFile = META_FILE,
     outputFile = OUTPUT_FILE,
-    gooseVersion = 'Preview',
+    arakanVersion = 'Preview',
   ] = args;
   const schemas = JSON.parse(fs.readFileSync(schemaFile, 'utf8'));
   const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
-  const output = renderDocumentation(schemas, meta, gooseVersion);
+  const output = renderDocumentation(schemas, meta, arakanVersion);
   fs.mkdirSync(path.dirname(outputFile), {recursive: true});
   fs.writeFileSync(outputFile, output);
   console.log(`[generate-acp-docs] Generated: ${outputFile}`);

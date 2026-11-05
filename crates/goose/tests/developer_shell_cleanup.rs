@@ -1,6 +1,6 @@
 #![cfg(any(unix, windows))]
 
-use goose::agents::platform_extensions::developer::shell::{ShellOutput, ShellParams, ShellTool};
+use arakan::agents::platform_extensions::developer::shell::{ShellOutput, ShellParams, ShellTool};
 use rmcp::model::CallToolResult;
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
@@ -9,8 +9,8 @@ use std::time::{Duration, Instant};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::AbortOnDropHandle;
 
-const HELPER_ENV: &str = "GOOSE_SHELL_CLEANUP_HELPER";
-const HELPER_ARG: &str = "--goose-shell-cleanup-helper";
+const HELPER_ENV: &str = "ARAKAN_SHELL_CLEANUP_HELPER";
+const HELPER_ARG: &str = "--arakan-shell-cleanup-helper";
 const WAIT: Duration = Duration::from_secs(10);
 const LIFETIME: Duration = Duration::from_secs(30);
 
@@ -240,7 +240,7 @@ fn shell_env() -> env_lock::EnvGuard<'static> {
     let shell = "sh";
     #[cfg(windows)]
     let shell = "cmd";
-    env_lock::lock_env([("GOOSE_SHELL", Some(shell)), (HELPER_ENV, Some("1"))])
+    env_lock::lock_env([("ARAKAN_SHELL", Some(shell)), (HELPER_ENV, Some("1"))])
 }
 
 fn invoke(

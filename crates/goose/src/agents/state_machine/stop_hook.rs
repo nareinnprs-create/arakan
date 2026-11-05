@@ -1,6 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::stop_hook::{StopHook, StopHookDecision};
+use arakan_agent::stop_hook::{StopHook, StopHookDecision};
 use rmcp::model::Role;
 
 use crate::conversation::message::{Message, SystemNotificationType};
@@ -29,16 +29,16 @@ pub fn deny_limit_warning(limit: u32) -> Message {
         format!(
             "Stop hooks blocked the turn from ending more than {limit} consecutive times \
              \u{2014} overriding and ending turn to avoid an infinite loop. Set \
-             GOOSE_STOP_HOOK_BLOCK_CAP to raise this limit."
+             ARAKAN_STOP_HOOK_BLOCK_CAP to raise this limit."
         ),
     )
 }
 
-pub struct GooseStopHook {
+pub struct ArakanStopHook {
     hook_manager: HookManager,
 }
 
-impl GooseStopHook {
+impl ArakanStopHook {
     pub fn new(hook_manager: HookManager) -> Self {
         Self { hook_manager }
     }
@@ -58,7 +58,7 @@ impl GooseStopHook {
 }
 
 #[async_trait]
-impl StopHook<Session> for GooseStopHook {
+impl StopHook<Session> for ArakanStopHook {
     async fn on_stop(
         &self,
         session: &Session,

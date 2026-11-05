@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
-use goose::recipe::{Recipe, SubRecipe};
+use arakan::recipe::{Recipe, SubRecipe};
 
 use crate::cli::InputConfig;
 use crate::recipes::print_recipe::print_recipe_info;
@@ -104,8 +104,8 @@ mod tests {
 
         assert!(settings.is_some());
         let settings = settings.unwrap();
-        assert_eq!(settings.goose_provider, Some("test_provider".to_string()));
-        assert_eq!(settings.goose_model, Some("test_model".to_string()));
+        assert_eq!(settings.arakan_provider, Some("test_provider".to_string()));
+        assert_eq!(settings.arakan_model, Some("test_model".to_string()));
         assert_eq!(settings.temperature, Some(0.7));
 
         assert!(sub_recipes.is_some());
@@ -172,8 +172,8 @@ mod tests {
 
         assert!(settings.is_some());
         let settings = settings.unwrap();
-        assert_eq!(settings.goose_provider, Some("test_provider".to_string()));
-        assert_eq!(settings.goose_model, Some("test_model".to_string()));
+        assert_eq!(settings.arakan_provider, Some("test_provider".to_string()));
+        assert_eq!(settings.arakan_model, Some("test_model".to_string()));
         assert_eq!(settings.temperature, Some(0.7));
 
         assert!(sub_recipes.is_some());
@@ -233,8 +233,8 @@ parameters:
   input_type: string
   requirement: required
 settings:
-  goose_provider: test_provider
-  goose_model: test_model
+  arakan_provider: test_provider
+  arakan_model: test_model
   temperature: 0.7
 sub_recipes:
 - path: existing_sub_recipe.yaml

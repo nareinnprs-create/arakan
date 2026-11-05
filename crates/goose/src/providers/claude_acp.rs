@@ -7,7 +7,7 @@ use crate::acp::{
     extension_configs_to_mcp_servers, AcpProvider, AcpProviderConfig, ACP_CURRENT_MODEL,
 };
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::providers::base::{
     current_working_dir, ProviderDef, ProviderDescriptor, ProviderMetadata,
 };
@@ -19,12 +19,12 @@ pub(crate) const CLAUDE_ACP_BINARY: &str = "claude-agent-acp";
 
 pub struct ClaudeAcpProvider;
 
-impl goose_providers::base::ProviderDescriptor for ClaudeAcpProvider {
+impl arakan_providers::base::ProviderDescriptor for ClaudeAcpProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             CLAUDE_ACP_PROVIDER_NAME,
             "Claude Code ACP",
-            "Use goose with your Claude Code subscription via the claude-agent-acp adapter.",
+            "Use arakan with your Claude Code subscription via the claude-agent-acp adapter.",
             ACP_CURRENT_MODEL,
             vec![],
             CLAUDE_ACP_DOC_URL,
@@ -69,17 +69,17 @@ impl ProviderDef for ClaudeAcpProvider {
             let resolved_command = SearchPaths::builder()
                 .with_npm()
                 .resolve(CLAUDE_ACP_BINARY)?;
-            let goose_mode = config.resolve_goose_mode()?;
+            let arakan_mode = config.resolve_arakan_mode()?;
 
             let mode_mapping = HashMap::from([
                 // Closest to "autonomous": bypassPermissions skips confirmations.
-                (GooseMode::Auto, vec!["bypassPermissions".to_string()]),
+                (ArakanMode::Auto, vec!["bypassPermissions".to_string()]),
                 // Claude Code's default matches "ask before risky actions".
-                (GooseMode::Approve, vec!["default".to_string()]),
+                (ArakanMode::Approve, vec!["default".to_string()]),
                 // acceptEdits auto-accepts file edits but still prompts for risky ops.
-                (GooseMode::SmartApprove, vec!["acceptEdits".to_string()]),
+                (ArakanMode::SmartApprove, vec!["acceptEdits".to_string()]),
                 // Plan mode disables tool execution, aligning with chat-only intent.
-                (GooseMode::Chat, vec!["plan".to_string()]),
+                (ArakanMode::Chat, vec!["plan".to_string()]),
             ]);
 
             let provider_config = AcpProviderConfig {
@@ -90,7 +90,7 @@ impl ProviderDef for ClaudeAcpProvider {
                 env_remove: vec!["CLAUDECODE".to_string()],
                 work_dir: working_dir,
                 mcp_servers: extension_configs_to_mcp_servers(&extensions),
-                session_mode_id: mode_mapping[&goose_mode].first().cloned(),
+                session_mode_id: mode_mapping[&arakan_mode].first().cloned(),
                 session_config_options: vec![],
                 // claude-agent-acp advertises the model as a "model" select
                 // config option and applies session/set_config_option for it
@@ -101,7 +101,7 @@ impl ProviderDef for ClaudeAcpProvider {
             };
 
             let metadata = Self::metadata();
-            AcpProvider::connect(metadata.name, goose_mode, provider_config).await
+            AcpProvider::connect(metadata.name, arakan_mode, provider_config).await
         })
     }
 }

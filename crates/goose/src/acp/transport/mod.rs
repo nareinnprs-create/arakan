@@ -19,8 +19,8 @@ use crate::acp::server::LazyAcpConnection;
 use crate::acp::server_factory::AcpServer;
 
 // The upstream ACP HTTP server only supports exact origin allowlists for
-// WebSocket upgrades; Goose applies its richer loopback predicate before this.
-const UPSTREAM_WS_ALLOWED_ORIGIN: &str = "http://goose.local";
+// WebSocket upgrades; Arakan applies its richer loopback predicate before this.
+const UPSTREAM_WS_ALLOWED_ORIGIN: &str = "http://arakan.local";
 const OPAQUE_ORIGIN: &str = "null";
 const FILE_ORIGIN: &str = "file://";
 
@@ -172,7 +172,7 @@ fn acp_cors_layer(policy: AcpOriginPolicy) -> CorsLayer {
 }
 
 /// CORS for the auxiliary routes (`/health`, `/status`, MCP app proxy) served by
-/// `goose serve`. This allows the `x-secret-key` auth header the proxy routes
+/// `arakan serve`. This allows the `x-secret-key` auth header the proxy routes
 /// rely on.
 fn aux_cors_layer() -> CorsLayer {
     CorsLayer::new()
@@ -211,7 +211,7 @@ fn create_acp_router_with_policy(
 }
 
 /// The bare ACP HTTP/WebSocket router (POST/GET/DELETE on `/acp`), without auth
-/// or goose-specific auxiliary routes.
+/// or arakan-specific auxiliary routes.
 pub fn create_acp_router(server: Arc<AcpServer>) -> Router {
     create_acp_router_with_policy(server, AcpOriginPolicy::loopback(), None)
 }
@@ -220,7 +220,7 @@ async fn health() -> &'static str {
     "ok"
 }
 
-/// The full standalone ACP server router used by `goose serve`: ACP transport,
+/// The full standalone ACP server router used by `arakan serve`: ACP transport,
 /// optional token auth, health/status endpoints, and the MCP app proxy.
 pub fn create_router(
     server: Arc<AcpServer>,

@@ -1,14 +1,14 @@
 export const configLabels: Record<string, string> = {
-  // goose settings
-  GOOSE_PROVIDER: 'Provider',
-  GOOSE_MODEL: 'Model',
-  GOOSE_TEMPERATURE: 'Temperature',
-  GOOSE_MODE: 'Mode',
-  GOOSE_TOOLSHIM: 'Tool Shim',
-  GOOSE_TOOLSHIM_OLLAMA_MODEL: 'Tool Shim Ollama Model',
-  GOOSE_CLI_MIN_PRIORITY: 'CLI Min Priority',
-  GOOSE_ALLOWLIST: 'Allow List',
-  GOOSE_RECIPE_GITHUB_REPO: 'Recipe GitHub Repo',
+  // arakan settings
+  ARAKAN_PROVIDER: 'Provider',
+  ARAKAN_MODEL: 'Model',
+  ARAKAN_TEMPERATURE: 'Temperature',
+  ARAKAN_MODE: 'Mode',
+  ARAKAN_TOOLSHIM: 'Tool Shim',
+  ARAKAN_TOOLSHIM_OLLAMA_MODEL: 'Tool Shim Ollama Model',
+  ARAKAN_CLI_MIN_PRIORITY: 'CLI Min Priority',
+  ARAKAN_ALLOWLIST: 'Allow List',
+  ARAKAN_RECIPE_GITHUB_REPO: 'Recipe GitHub Repo',
 
   // security settings
   SECURITY_PROMPT_ENABLED: 'Prompt Injection Detection Enabled',

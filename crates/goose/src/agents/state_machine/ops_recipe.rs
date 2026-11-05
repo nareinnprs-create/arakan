@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use goose_agent::post_tool_call_hook::PostToolCallHook;
+use arakan_agent::post_tool_call_hook::PostToolCallHook;
 use rmcp::model::{CallToolResult, ContentBlock, ErrorCode, ErrorData, Tool};
 use tracing_futures::Instrument;
 
@@ -19,11 +19,11 @@ use crate::agents::state_machine::ops_toolcalling::{
 use crate::agents::state_machine::post_tool_hook::run_post_tool_call_hook;
 use crate::agents::state_machine::{
     applied, ends_turn, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect,
-    Emitter, GooseEffect, Operation, OperationResult, SlashCommand,
+    Emitter, ArakanEffect, Operation, OperationResult, SlashCommand,
 };
 use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
 use crate::config::extensions::is_extension_available;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, MessageContent, ToolRequest, ToolResponse};
 use crate::conversation::Conversation;
 use crate::providers::base::Provider;
@@ -127,7 +127,7 @@ impl RecipeOperation {
         conversation: &Conversation,
         message: String,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let command = messages_since_kickoff(conversation)?
             .first()
             .cloned()
@@ -155,7 +155,7 @@ impl RecipeOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for RecipeOperation {
+impl Operation<Session, ArakanEffect> for RecipeOperation {
     fn name(&self) -> &'static str {
         "recipe"
     }
@@ -165,7 +165,7 @@ impl Operation<Session, GooseEffect> for RecipeOperation {
         _session: &Session,
         _conversation: &Conversation,
         emit: &Emitter,
-    ) -> Vec<GooseEffect> {
+    ) -> Vec<ArakanEffect> {
         match self.take_response() {
             Some(response) => vec![emit.message(response).into()],
             None => Vec::new(),
@@ -178,7 +178,7 @@ impl Operation<Session, GooseEffect> for RecipeOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let (recipe, prompt) = match crate::slash_commands::recipe_slash_command::resolve_command(
             command.command,
             command.params_str,
@@ -220,9 +220,6 @@ impl Operation<Session, GooseEffect> for RecipeOperation {
             }
         }
 
-        #[cfg(feature = "telemetry")]
-        crate::posthog::emit_custom_slash_command_used();
-
         let command_message = messages_since_kickoff(conversation)?
             .first()
             .ok_or_else(|| anyhow!("recipe command conversation has no kickoff message"))?;
@@ -237,7 +234,7 @@ impl Operation<Session, GooseEffect> for RecipeOperation {
                 agent_visible: false,
             }
             .into(),
-            GooseEffect::SetRecipe(Box::new(Some(recipe))),
+            ArakanEffect::SetRecipe(Box::new(Some(recipe))),
             Message::user()
                 .with_text(prompt)
                 .with_visibility(false, true)
@@ -266,7 +263,7 @@ impl Operation<Session, GooseEffect> for RecipeOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let Some(mut final_output) = final_output_tool(session)? else {
             return not_applicable();
         };
@@ -290,7 +287,7 @@ impl Operation<Session, GooseEffect> for RecipeOperation {
             },
         );
         if let Some((request, _)) = pending {
-            if session.goose_mode == GooseMode::Chat {
+            if session.arakan_mode == ArakanMode::Chat {
                 let mut response = Message::user();
                 response.add_tool_response_with_metadata(
                     request.id,

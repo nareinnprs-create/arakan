@@ -15,7 +15,7 @@ pub struct WindowProps {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GooseApp {
+pub struct ArakanApp {
     #[serde(flatten)]
     pub resource: McpAppResource,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -29,11 +29,11 @@ pub struct GooseApp {
     pub deletable: bool,
 }
 
-impl GooseApp {
+impl ArakanApp {
     const METADATA_SCRIPT_TYPE: &'static str = "application/ld+json";
-    const PRD_SCRIPT_TYPE: &'static str = "application/x-goose-prd";
-    const GOOSE_APP_TYPE: &'static str = "GooseApp";
-    const GOOSE_SCHEMA_CONTEXT: &'static str = "urn:goose.ai:schema";
+    const PRD_SCRIPT_TYPE: &'static str = "application/x-arakan-prd";
+    const ARAKAN_APP_TYPE: &'static str = "ArakanApp";
+    const ARAKAN_SCHEMA_CONTEXT: &'static str = "urn:arakan.ai:schema";
 
     pub fn from_html(html: &str) -> Result<Self, String> {
         use regex::Regex;
@@ -53,7 +53,7 @@ impl GooseApp {
         let json_str = metadata_re
             .captures(html)
             .and_then(|cap| cap.get(1))
-            .ok_or_else(|| "No GooseApp JSON-LD metadata found in HTML".to_string())?
+            .ok_or_else(|| "No ArakanApp JSON-LD metadata found in HTML".to_string())?
             .as_str();
 
         let metadata: serde_json::Value = serde_json::from_str(json_str)
@@ -108,7 +108,7 @@ impl GooseApp {
         let clean_html = metadata_re.replace(html, "");
         let clean_html = prd_re.replace(&clean_html, "").to_string();
 
-        Ok(GooseApp {
+        Ok(ArakanApp {
             resource: McpAppResource {
                 uri: format!("ui://apps/{}", name),
                 name,
@@ -133,8 +133,8 @@ impl GooseApp {
             .ok_or("App has no HTML content")?;
 
         let mut metadata = serde_json::json!({
-            "@context": Self::GOOSE_SCHEMA_CONTEXT,
-            "@type": Self::GOOSE_APP_TYPE,
+            "@context": Self::ARAKAN_SCHEMA_CONTEXT,
+            "@type": Self::ARAKAN_APP_TYPE,
             "name": self.resource.name,
         });
 
@@ -208,7 +208,7 @@ impl GooseApp {
     }
 }
 
-pub async fn fetch_mcp_apps(lease: &ExtensionLease) -> Vec<GooseApp> {
+pub async fn fetch_mcp_apps(lease: &ExtensionLease) -> Vec<ArakanApp> {
     let mut apps = Vec::new();
 
     for (extension_name, resource) in lease.ui_resources().await {
@@ -278,7 +278,7 @@ pub async fn fetch_mcp_apps(lease: &ExtensionLease) -> Vec<GooseApp> {
                         })
                     };
 
-                    let app = GooseApp {
+                    let app = ArakanApp {
                         resource: mcp_resource,
                         mcp_servers: vec![extension_name],
                         window_props,

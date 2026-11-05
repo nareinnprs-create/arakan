@@ -8,7 +8,7 @@ use tracing_futures::Instrument;
 
 use crate::agents::state_machine::ops_llm::chat_span;
 use crate::agents::state_machine::{
-    applied, messages_since_kickoff, not_applicable, ConversationEffect, Emitter, GooseEffect,
+    applied, messages_since_kickoff, not_applicable, ConversationEffect, Emitter, ArakanEffect,
     Operation, OperationResult,
 };
 use crate::context_mgmt::{summarize_tool_call, tool_ids_to_summarize};
@@ -16,14 +16,14 @@ use crate::conversation::message::MessageContent;
 use crate::conversation::Conversation;
 use crate::providers::base::Provider;
 use crate::session::Session;
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 
 pub struct ToolPairCompactionOperation {
     provider: Arc<dyn Provider>,
     model_config: ModelConfig,
     cutoff: usize,
     enabled: bool,
-    output: std::sync::Mutex<Vec<GooseEffect>>,
+    output: std::sync::Mutex<Vec<ArakanEffect>>,
 }
 
 impl ToolPairCompactionOperation {
@@ -42,13 +42,13 @@ impl ToolPairCompactionOperation {
         }
     }
 
-    fn take_output(&self) -> Vec<GooseEffect> {
+    fn take_output(&self) -> Vec<ArakanEffect> {
         std::mem::take(&mut *self.output.lock().unwrap())
     }
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for ToolPairCompactionOperation {
+impl Operation<Session, ArakanEffect> for ToolPairCompactionOperation {
     fn name(&self) -> &'static str {
         "tool_pair_compaction"
     }
@@ -58,7 +58,7 @@ impl Operation<Session, GooseEffect> for ToolPairCompactionOperation {
         _session: &Session,
         _conversation: &Conversation,
         _emit: &Emitter,
-    ) -> Vec<GooseEffect> {
+    ) -> Vec<ArakanEffect> {
         self.take_output()
     }
 
@@ -67,7 +67,7 @@ impl Operation<Session, GooseEffect> for ToolPairCompactionOperation {
         session: &Session,
         conversation: &Conversation,
         _emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         if !self.enabled {
             return not_applicable();
         }

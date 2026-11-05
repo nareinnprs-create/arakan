@@ -2,8 +2,8 @@
 set -e
 
 if [ -z "$SKIP_BUILD" ]; then
-  echo "Building goose..."
-  cargo build --bin goose
+  echo "Building arakan..."
+  cargo build --bin arakan
   echo ""
 else
   echo "Skipping build (SKIP_BUILD is set)..."
@@ -11,10 +11,10 @@ else
 fi
 
 SCRIPT_DIR=$(pwd)
-GOOSE_BIN="$SCRIPT_DIR/target/debug/goose"
+ARAKAN_BIN="$SCRIPT_DIR/target/debug/arakan"
 
-TEST_PROVIDER=${GOOSE_PROVIDER:-anthropic}
-TEST_MODEL=${GOOSE_MODEL:-claude-haiku-5-5}
+TEST_PROVIDER=${ARAKAN_PROVIDER:-anthropic}
+TEST_MODEL=${ARAKAN_MODEL:-claude-haiku-5-5}
 
 RESULTS=()
 
@@ -53,8 +53,8 @@ extensions:
 EOF
 
 TMPFILE=$(mktemp)
-(cd "$TESTDIR" && GOOSE_PROVIDER="$TEST_PROVIDER" GOOSE_MODEL="$TEST_MODEL" \
-    "$GOOSE_BIN" run --recipe recipe.yaml 2>&1) | tee "$TMPFILE"
+(cd "$TESTDIR" && ARAKAN_PROVIDER="$TEST_PROVIDER" ARAKAN_MODEL="$TEST_MODEL" \
+    "$ARAKAN_BIN" run --recipe recipe.yaml 2>&1) | tee "$TMPFILE"
 
 if grep -qE "(add \| test_mcp)|(▸.*add.*test_mcp)" "$TMPFILE" && grep -q "100" "$TMPFILE"; then
     echo "✓ FastMCP stderr test passed"

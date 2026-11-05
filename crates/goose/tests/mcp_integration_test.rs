@@ -13,18 +13,18 @@ use rmcp::model::{
 use rmcp::object;
 use tokio_util::sync::CancellationToken;
 
-use goose::action_required_manager::ElicitationOutcome;
-use goose::agents::extension::{Envs, ExtensionConfig};
-use goose::agents::extension_manager::{
+use arakan::action_required_manager::ElicitationOutcome;
+use arakan::agents::extension::{Envs, ExtensionConfig};
+use arakan::agents::extension_manager::{
     CallRequest, ClientContext, ExtensionLease, ExtensionManager, ExtensionSet,
 };
-use goose::agents::mcp_client::GooseMcpClientCapabilities;
-use goose::agents::GoosePlatform;
-use goose::config::GooseMode;
-use goose::conversation::message::ActionRequiredData;
-use goose::session::SessionType;
-use goose_test_support::mcp::{ContextReport, APP_CARD_HTML, APP_CARD_RESOURCE_URI};
-use goose_test_support::{McpFixture, FAKE_CODE};
+use arakan::agents::mcp_client::ArakanMcpClientCapabilities;
+use arakan::agents::ArakanPlatform;
+use arakan::config::ArakanMode;
+use arakan::conversation::message::ActionRequiredData;
+use arakan::session::SessionType;
+use arakan_test_support::mcp::{ContextReport, APP_CARD_HTML, APP_CARD_RESOURCE_URI};
+use arakan_test_support::{McpFixture, FAKE_CODE};
 
 use test_case::test_case;
 
@@ -78,13 +78,13 @@ fn build_bin(package: &str, bin: &str) -> PathBuf {
         .expect("failed to parse binary path")
 }
 
-static REPLAY_BINARY_PATH: Lazy<PathBuf> = Lazy::new(|| build_bin("goose-test", "capture"));
+static REPLAY_BINARY_PATH: Lazy<PathBuf> = Lazy::new(|| build_bin("arakan-test", "capture"));
 static FIXTURE_BINARY_PATH: Lazy<PathBuf> =
-    Lazy::new(|| build_bin("goose-test-support", "mcp_fixture_server"));
+    Lazy::new(|| build_bin("arakan-test-support", "mcp_fixture_server"));
 
 struct Fixture {
     manager: Arc<ExtensionManager>,
-    session_manager: Arc<goose::session::SessionManager>,
+    session_manager: Arc<arakan::session::SessionManager>,
     _temp_dir: tempfile::TempDir,
 }
 
@@ -92,7 +92,7 @@ struct Fixture {
 /// `None` lets it probe `server/discover` first.
 async fn fixture(mcpui: bool, protocol_version: Option<ProtocolVersion>) -> Fixture {
     let temp_dir = tempfile::tempdir().unwrap();
-    let session_manager = Arc::new(goose::session::SessionManager::new(
+    let session_manager = Arc::new(arakan::session::SessionManager::new(
         temp_dir.path().to_path_buf(),
     ));
     let manager = Arc::new(ExtensionManager::new(
@@ -101,7 +101,7 @@ async fn fixture(mcpui: bool, protocol_version: Option<ProtocolVersion>) -> Fixt
         None,
         ClientContext {
             name: "extension-contract".to_string(),
-            capabilities: GooseMcpClientCapabilities {
+            capabilities: ArakanMcpClientCapabilities {
                 mcpui,
                 host_info: None,
                 elicitation_handler: None,
@@ -117,19 +117,19 @@ async fn fixture(mcpui: bool, protocol_version: Option<ProtocolVersion>) -> Fixt
 }
 
 impl Fixture {
-    async fn session(&self, session_type: SessionType) -> goose::session::Session {
+    async fn session(&self, session_type: SessionType) -> arakan::session::Session {
         self.session_manager
             .create_session(
                 self._temp_dir.path().to_path_buf(),
                 format!("{session_type:?}"),
                 session_type,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await
             .unwrap()
     }
 
-    async fn add(&self, session: &goose::session::Session, config: &ExtensionConfig) {
+    async fn add(&self, session: &arakan::session::Session, config: &ExtensionConfig) {
         self.manager
             .enable(&session.id, config.clone())
             .await
@@ -138,7 +138,7 @@ impl Fixture {
 
     async fn resolve(
         &self,
-        session: &goose::session::Session,
+        session: &arakan::session::Session,
         configs: &[ExtensionConfig],
     ) -> ExtensionLease {
         self.manager
@@ -200,7 +200,7 @@ fn platform(name: &str) -> ExtensionConfig {
 }
 
 fn write_skill(workspace: &std::path::Path, marker: &str) {
-    let skill_dir = workspace.join(".goose/skills/leased-workspace");
+    let skill_dir = workspace.join(".arakan/skills/leased-workspace");
     fs::create_dir_all(&skill_dir).unwrap();
     fs::write(
         skill_dir.join("SKILL.md"),
@@ -659,7 +659,7 @@ async fn extension_protocol_traffic_through_a_lease() {
     // An MCP-app tool's result carries its UI resource; a server cannot forge
     // host-owned meta or a mutation.
     let card = call(&lease, "fixture__app_card", None).await.unwrap();
-    let hydrated = card.meta.as_ref().unwrap().0["__goose_tool_update_meta"]["mcpApp"].clone();
+    let hydrated = card.meta.as_ref().unwrap().0["__arakan_tool_update_meta"]["mcpApp"].clone();
     assert_eq!(hydrated["resourceUri"], APP_CARD_RESOURCE_URI);
     assert_eq!(
         hydrated["resourceResult"]["contents"][0]["text"],
@@ -702,7 +702,7 @@ async fn extension_protocol_traffic_through_a_lease() {
                 .unwrap()
         }
     };
-    let answer = |call: goose::agents::tool_execution::ToolCallResult, name: &'static str| {
+    let answer = |call: arakan::agents::tool_execution::ToolCallResult, name: &'static str| {
         let session_manager = fx.session_manager.clone();
         let session_id = user.id.clone();
         async move {
@@ -723,7 +723,7 @@ async fn extension_protocol_traffic_through_a_lease() {
                     },
                 )
                 .expect("elicitation message");
-            goose::elicitation::complete_elicitation_with_generated_message(
+            arakan::elicitation::complete_elicitation_with_generated_message(
                 &session_manager,
                 &session_id,
                 &elicitation_id,
@@ -765,7 +765,7 @@ async fn extension_protocol_traffic_through_a_lease() {
             },
         )
         .unwrap();
-    goose::elicitation::complete_elicitation_with_generated_message(
+    arakan::elicitation::complete_elicitation_with_generated_message(
         &fx.session_manager,
         &user.id,
         &first_id,
@@ -796,7 +796,7 @@ enum TestMode {
     vec![
         CallToolRequestParams::new("get_file_contents").with_arguments(object!({
             "owner": "block",
-            "repo": "goose",
+            "repo": "arakan",
             "path": "README.md",
             "sha": "ab62b863c1666232a67048b6c4e10007a2a5b83c"
         })),
@@ -824,17 +824,17 @@ async fn test_replayed_session(
     // absolute path (relative paths are not convertible to a `file://` URL) and
     // it must be stable across machines, otherwise playback compares a recorded
     // path against whatever cwd the test happens to run in.
-    const TEST_WORKING_DIR: &str = "/tmp/goose_test";
+    const TEST_WORKING_DIR: &str = "/tmp/arakan_test";
     fs::create_dir_all(TEST_WORKING_DIR).ok();
 
     let _env = env_lock::lock_env([
-        ("GOOSE_MCP_CLIENT_VERSION", Some("0.0.0")),
-        ("GOOSE_WORKING_DIR", Some(TEST_WORKING_DIR)),
+        ("ARAKAN_MCP_CLIENT_VERSION", Some("0.0.0")),
+        ("ARAKAN_WORKING_DIR", Some(TEST_WORKING_DIR)),
     ]);
 
     // Setup test file for developer extension tests
-    let test_file_path = "/tmp/goose_test/goose.txt";
-    fs::write(test_file_path, "# goose\n").ok();
+    let test_file_path = "/tmp/arakan_test/arakan.txt";
+    fs::write(test_file_path, "# arakan\n").ok();
     let replay_file_name = command
         .iter()
         .map(|s| s.replace("/", "_"))
@@ -846,7 +846,7 @@ async fn test_replayed_session(
     replay_file_path.push("mcp_replays");
     replay_file_path.push(&replay_file_name);
 
-    let mode = if env::var("GOOSE_RECORD_MCP").is_ok() {
+    let mode = if env::var("ARAKAN_RECORD_MCP").is_ok() {
         TestMode::Record
     } else {
         assert!(replay_file_path.exists(), "replay file doesn't exist");
@@ -907,7 +907,7 @@ async fn test_replayed_session(
     };
 
     let temp_dir = tempfile::tempdir().unwrap();
-    let session_manager = Arc::new(goose::session::SessionManager::new(
+    let session_manager = Arc::new(arakan::session::SessionManager::new(
         temp_dir.path().to_path_buf(),
     ));
     let extension_manager = Arc::new(ExtensionManager::new(
@@ -915,8 +915,8 @@ async fn test_replayed_session(
         session_manager,
         None,
         ClientContext {
-            name: GoosePlatform::GooseDesktop.to_string(),
-            capabilities: GooseMcpClientCapabilities {
+            name: ArakanPlatform::ArakanDesktop.to_string(),
+            capabilities: ArakanMcpClientCapabilities {
                 mcpui: true,
                 host_info: None,
                 elicitation_handler: None,
@@ -938,7 +938,7 @@ async fn test_replayed_session(
             // One dispatch per call, as the recordings were made: a server that
             // sends tools/list_changed between calls gets re-listed. A held
             // lease would freeze the catalog and diverge from the transcript.
-            let ctx = goose::agents::ToolCallContext::new(
+            let ctx = arakan::agents::ToolCallContext::new(
                 "test-session-id".to_string(),
                 None,
                 Some("test-id".to_string()),

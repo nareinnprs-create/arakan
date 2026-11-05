@@ -49,7 +49,7 @@ impl AuthProvider for AzureAuthProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for AzureProvider {
+impl arakan_providers::base::ProviderDescriptor for AzureProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             AZURE_PROVIDER_NAME,

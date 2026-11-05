@@ -6,22 +6,22 @@ git_tag_name = "gdk-v{{ version }}"
 git_release_enable = false
 
 [[package]]
-name = "goose-provider-types"
+name = "arakan-provider-types"
 release = true
 version_group = "gdk"
 
 [[package]]
-name = "goose-sdk-types"
+name = "arakan-sdk-types"
 release = true
 version_group = "gdk"
 
 [[package]]
-name = "goose-download-manager"
+name = "arakan-download-manager"
 release = true
 version_group = "gdk"
 
 [[package]]
-name = "goose-local-inference"
+name = "arakan-local-inference"
 release = true
 version_group = "gdk"
 # cargo-semver-checks builds with --all-features, which turns on cuda/vulkan and
@@ -29,24 +29,24 @@ version_group = "gdk"
 semver_check = false
 
 [[package]]
-name = "goose-providers"
+name = "arakan-providers"
 release = true
 version_group = "gdk"
-# Same as goose-local-inference: --all-features pulls in the cuda/vulkan
+# Same as arakan-local-inference: --all-features pulls in the cuda/vulkan
 # accelerator features through the optional local-inference dependency.
 semver_check = false
 
 [[package]]
-name = "goose-agent"
+name = "arakan-agent"
 release = true
 version_group = "gdk"
 
 [[package]]
-name = "goose-context-management"
+name = "arakan-context-management"
 release = true
 version_group = "gdk"
 
 [[package]]
-name = "goose-sdk"
+name = "arakan-sdk"
 release = true
 version_group = "gdk"

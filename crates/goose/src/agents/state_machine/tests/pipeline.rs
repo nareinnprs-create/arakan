@@ -13,11 +13,11 @@ use crate::agents::extension::ExtensionConfig;
 use crate::agents::extension_manager::ExtensionLease;
 use crate::agents::mcp_client::McpClientTrait;
 use crate::agents::state_machine::{
-    messages_since_kickoff, Emitter, GooseEffect, Operation, RunStatus, StateMachine,
+    messages_since_kickoff, Emitter, ArakanEffect, Operation, RunStatus, StateMachine,
 };
 use crate::agents::{AgentEvent, StateMachineServices, StateMachineServicesConfig, TurnSettings};
 use crate::config::permission::{PermissionLevel, PermissionManager};
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{ActionRequiredData, Message, MessageContent, MessageErrorKind};
 use crate::conversation::Conversation;
 use crate::hooks::HookManager;
@@ -25,8 +25,8 @@ use crate::permission::Permission;
 use crate::providers::base::Provider;
 use crate::session::extension_data::EnabledExtensionsState;
 use crate::session::{GoalState, Session, SessionManager, SessionType};
-use goose_providers::model::ModelConfig;
-use goose_providers::thinking::ThinkingEffort;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::thinking::ThinkingEffort;
 
 struct FeatureProvider {
     inner: Arc<dyn Provider>,
@@ -48,7 +48,7 @@ impl Provider for RecordingProvider {
         self.inner.provider_session_id()
     }
 
-    async fn resume(&self, session_id: &str) -> Result<(), goose_providers::errors::ProviderError> {
+    async fn resume(&self, session_id: &str) -> Result<(), arakan_providers::errors::ProviderError> {
         self.inner.resume(session_id).await
     }
 
@@ -58,7 +58,7 @@ impl Provider for RecordingProvider {
         system: &str,
         messages: &[Message],
         tools: &[rmcp::model::Tool],
-    ) -> Result<crate::providers::base::MessageStream, goose_providers::errors::ProviderError> {
+    ) -> Result<crate::providers::base::MessageStream, arakan_providers::errors::ProviderError> {
         self.model_configs
             .lock()
             .unwrap()
@@ -79,7 +79,7 @@ impl Provider for RecordingProvider {
     async fn fetch_model_info(
         &self,
         model_name: &str,
-    ) -> Result<goose_providers::base::ModelInfo, goose_providers::errors::ProviderError> {
+    ) -> Result<arakan_providers::base::ModelInfo, arakan_providers::errors::ProviderError> {
         self.inner.fetch_model_info(model_name).await
     }
 }
@@ -96,7 +96,7 @@ impl Provider for FeatureProvider {
         system: &str,
         messages: &[Message],
         tools: &[rmcp::model::Tool],
-    ) -> Result<crate::providers::base::MessageStream, goose_providers::errors::ProviderError> {
+    ) -> Result<crate::providers::base::MessageStream, arakan_providers::errors::ProviderError> {
         self.inner
             .stream(model_config, system, messages, tools)
             .await
@@ -113,7 +113,7 @@ impl Provider for FeatureProvider {
     async fn fetch_model_info(
         &self,
         model_name: &str,
-    ) -> Result<goose_providers::base::ModelInfo, goose_providers::errors::ProviderError> {
+    ) -> Result<arakan_providers::base::ModelInfo, arakan_providers::errors::ProviderError> {
         let mut model_info = self.inner.fetch_model_info(model_name).await?;
         if let Some(resolved_model) = self.features.resolved_model {
             model_info.resolved_model = Some(resolved_model.to_string());
@@ -155,7 +155,7 @@ impl TestPipeline {
                     self.permission_manager.clone(),
                     self.scheduler.clone(),
                     true,
-                    crate::agents::GoosePlatform::GooseCli,
+                    crate::agents::ArakanPlatform::ArakanCli,
                 );
                 config.turn_settings = Some(self.turn_settings.clone());
                 config.hooks = Some(self.hook_manager.clone());
@@ -191,7 +191,7 @@ impl TestPipeline {
     pub(super) async fn machine(
         &self,
         cancel: CancellationToken,
-    ) -> StateMachine<'_, Session, GooseEffect> {
+    ) -> StateMachine<'_, Session, ArakanEffect> {
         let services = self.services().await;
         services
             .create_state_machine(
@@ -209,10 +209,10 @@ impl TestPipeline {
             .await
     }
 
-    pub(super) async fn with_goose_mode(self, mode: GooseMode) -> Self {
+    pub(super) async fn with_arakan_mode(self, mode: ArakanMode) -> Self {
         self.session_manager
             .update(&self.session_id)
-            .goose_mode(mode)
+            .arakan_mode(mode)
             .apply()
             .await
             .unwrap();
@@ -260,7 +260,7 @@ impl TestPipeline {
 
     pub(super) fn with_context_relevance(
         mut self,
-        decisions: Arc<dyn goose_providers::decision::DecisionProvider>,
+        decisions: Arc<dyn arakan_providers::decision::DecisionProvider>,
     ) -> Self {
         assert!(
             !self.services.initialized(),
@@ -277,7 +277,7 @@ impl TestPipeline {
 
     pub(super) fn with_auto_effort(
         mut self,
-        operation: Arc<dyn Operation<Session, GooseEffect>>,
+        operation: Arc<dyn Operation<Session, ArakanEffect>>,
     ) -> Self {
         assert!(
             !self.services.initialized(),
@@ -335,7 +335,7 @@ impl TestPipeline {
     }
 
     pub(super) async fn set_total_tokens(&self, tokens: i32) {
-        use goose_providers::conversation::token_usage::Usage;
+        use arakan_providers::conversation::token_usage::Usage;
         self.session_manager
             .update(&self.session_id)
             .usage(Usage::new(None, None, Some(tokens)))
@@ -459,7 +459,7 @@ impl TestPipeline {
                 working_dir,
                 "pipeline-test".to_string(),
                 SessionType::Hidden,
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .await?;
         self.session_manager
@@ -834,10 +834,10 @@ async fn test_pipeline_with_components(
             } else {
                 SessionType::Hidden
             },
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await?;
-    let model_config = ModelConfig::new(goose_providers::openai::OPEN_AI_DEFAULT_MODEL)
+    let model_config = ModelConfig::new(arakan_providers::openai::OPEN_AI_DEFAULT_MODEL)
         .with_canonical_limits("openai");
     session_manager
         .update(&session.id)
@@ -871,13 +871,13 @@ async fn build_test_pipeline(
         .provider_name
         .as_deref()
         .expect("test session has a provider");
-    let api_client = goose_providers::api_client::ApiClient::new_with_tls(
+    let api_client = arakan_providers::api_client::ApiClient::new_with_tls(
         api.uri(),
-        goose_providers::api_client::AuthMethod::NoAuth,
+        arakan_providers::api_client::AuthMethod::NoAuth,
         None,
     )?;
     let provider: Arc<dyn Provider> = Arc::new(
-        goose_providers::openai::OpenAiProviderBuilder::new(api_client)
+        arakan_providers::openai::OpenAiProviderBuilder::new(api_client)
             .base_path("chat/completions")
             .name(provider_name)
             .preserve_thinking_context(provider_features.preserves_thinking)
@@ -995,7 +995,7 @@ fn default_extensions() -> Vec<ExtensionConfig> {
 }
 
 /// Builtin rather than platform: a session's selection keeps only platform
-/// extensions goose ships.
+/// extensions arakan ships.
 pub(super) fn calculator_extension() -> ExtensionConfig {
     ExtensionConfig::Builtin {
         name: "calculator".to_string(),

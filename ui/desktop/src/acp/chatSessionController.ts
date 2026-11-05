@@ -1,5 +1,5 @@
 import { v7 as uuidv7 } from 'uuid';
-import type { GooseExtension } from '@aaif/goose-acp-client';
+import type { ArakanExtension } from '@aaif/arakan-acp-client';
 import { AppEvents } from '../constants/events';
 import { ChatState } from '../types/chatState';
 import type { Session } from '../types/session';
@@ -51,7 +51,7 @@ export interface AcpSubmitMessageOptions extends AcpSnapshotOptions {
 export interface AcpChatSessionController {
   createSession(
     cwd: string,
-    gooseExtensions: GooseExtension[] | undefined,
+    arakanExtensions: ArakanExtension[] | undefined,
     recipe?: AcpRecipeOptions
   ): Promise<Session>;
   loadSession(sessionId: string, options?: AcpLoadSessionOptions): Promise<void>;
@@ -117,10 +117,10 @@ async function forkSessionWithEditedMessage(
 
 async function createSession(
   cwd: string,
-  gooseExtensions: GooseExtension[] | undefined,
+  arakanExtensions: ArakanExtension[] | undefined,
   recipe?: AcpRecipeOptions
 ): Promise<Session> {
-  const { sessionId, sessionInfo, meta } = await acpNewSession(cwd, gooseExtensions, recipe);
+  const { sessionId, sessionInfo, meta } = await acpNewSession(cwd, arakanExtensions, recipe);
   const session = sessionInfoToSession(sessionInfo, meta);
 
   showExtensionLoadResults(meta.extensionResults);

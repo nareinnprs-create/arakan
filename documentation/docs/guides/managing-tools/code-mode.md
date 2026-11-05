@@ -22,7 +22,7 @@ Code Mode controls how tools are discovered and called:
 
 ## How Code Mode Works
 
-The [Code Mode extension](/docs/mcp/code-mode-mcp) is an MCP server that uses the MCP protocol to expose three foundational meta-tools. When Code Mode is enabled, goose switches to Code Mode. For every request, the LLM writes JavaScript code that goose executes in a fresh goose-owned [Boa](https://boajs.dev/) context to:
+The [Code Mode extension](/docs/mcp/code-mode-mcp) is an MCP server that uses the MCP protocol to expose three foundational meta-tools. When Code Mode is enabled, arakan switches to Code Mode. For every request, the LLM writes JavaScript code that arakan executes in a fresh arakan-owned [Boa](https://boajs.dev/) context to:
 
 - Discover available tools from your enabled extensions (if needed)
 - Learn how to work with the tools it needs for the current task
@@ -30,7 +30,7 @@ The [Code Mode extension](/docs/mcp/code-mode-mcp) is an MCP server that uses th
 
 ### Traditional vs. Code Mode Tool Calling
 
-Traditional MCP tool calling and Code Mode are two different approaches to the same goal: giving goose access to tools.
+Traditional MCP tool calling and Code Mode are two different approaches to the same goal: giving arakan access to tools.
 
 | Aspect | Traditional | Code Mode |
 |--------|------------------|-----------|
@@ -72,7 +72,7 @@ The runtime provides JavaScript built-ins, `tools.call`, and captured
 `console.log`, `info`, `warn`, `error`, and `debug` methods. It has no direct
 filesystem, shell, network, environment, or package access. Tool calls retain
 the extension lease, permission flow, cancellation, and mutation handling used
-by goose. Only assistant-visible text results reach the script.
+by arakan. Only assistant-visible text results reach the script.
 
 Each execution uses a separate worker and context. The extension timeout and
 cancellation stop execution and cancel in-flight tool calls. JavaScript state is
@@ -82,7 +82,7 @@ desktop display; saved TypeScript calls can still be displayed.
 ## Additional Resources
 
 import ContentCardCarousel from '@site/src/components/ContentCardCarousel';
-import gooseCodeMode from '@site/blog/2025-12-15-code-mode-mcp/header-image.jpg';
+import arakanCodeMode from '@site/blog/2025-12-15-code-mode-mcp/header-image.jpg';
 import notMcpReplacement from '@site/blog/2025-12-21-code-mode-doesnt-replace-mcp/header-image.png';
 
 <ContentCardCarousel
@@ -91,7 +91,7 @@ import notMcpReplacement from '@site/blog/2025-12-21-code-mode-doesnt-replace-mc
       type: 'blog',
       title: 'Code Mode for MCP',
       description: 'Learn about the code execution approach to MCP tool calling.',
-      thumbnailUrl: gooseCodeMode,
+      thumbnailUrl: arakanCodeMode,
       linkUrl: '/blog/2025/12/15/code-mode-mcp',
       date: '2025-12-15',
       duration: '5 min read'

@@ -5,15 +5,15 @@ use super::{
     derive_extension_name_from_command, session_provider, split_extension_name_prefix, CliSession,
 };
 use console::style;
-use goose::agents::final_output_tool::FinalOutputTool;
-use goose::agents::{Container, ExtensionError, StateMachineServices, StateMachineServicesConfig};
-use goose::config::extensions::name_to_key;
-use goose::config::resolve_extensions_for_new_session;
-use goose::config::{Config, ExtensionConfig, GooseMode};
-use goose::model_config::model_config_from_user_config;
-use goose::recipe::Recipe;
-use goose::session::session_manager::SessionType;
-use goose::session::{EnabledExtensionsState, SessionManager};
+use arakan::agents::final_output_tool::FinalOutputTool;
+use arakan::agents::{Container, ExtensionError, StateMachineServices, StateMachineServicesConfig};
+use arakan::config::extensions::name_to_key;
+use arakan::config::resolve_extensions_for_new_session;
+use arakan::config::{Config, ExtensionConfig, ArakanMode};
+use arakan::model_config::model_config_from_user_config;
+use arakan::recipe::Recipe;
+use arakan::session::session_manager::SessionType;
+use arakan::session::{EnabledExtensionsState, SessionManager};
 use rustyline::EditMode;
 use std::collections::{HashMap, HashSet};
 use std::process;
@@ -150,7 +150,7 @@ fn parse_cli_flag_extensions(
     extensions_to_load
 }
 
-/// Configuration for building a new Goose session
+/// Configuration for building a new Arakan session
 ///
 /// This struct contains all the parameters needed to create a new session,
 /// including session identification, extension configuration, and debug settings.
@@ -257,7 +257,7 @@ async fn load_extensions(
 struct ResolvedProviderConfig {
     provider_name: String,
     model_name: String,
-    model_config: goose_providers::model::ModelConfig,
+    model_config: arakan_providers::model::ModelConfig,
 }
 
 fn validate_provider_override_context(
@@ -290,22 +290,22 @@ async fn resolve_provider_and_model(
     session_config: &SessionBuilderConfig,
     config: &Config,
     saved_provider: Option<String>,
-    saved_model_config: Option<goose_providers::model::ModelConfig>,
+    saved_model_config: Option<arakan_providers::model::ModelConfig>,
 ) -> ResolvedProviderConfig {
     let recipe_settings = session_config
         .recipe
         .as_ref()
         .and_then(|r| r.settings.as_ref());
-    let configured_provider = config.get_goose_provider().ok();
+    let configured_provider = config.get_arakan_provider().ok();
 
     let provider_name = session_config
         .provider
         .clone()
         .or_else(|| saved_provider.clone())
-        .or_else(|| recipe_settings.and_then(|s| s.goose_provider.clone()))
+        .or_else(|| recipe_settings.and_then(|s| s.arakan_provider.clone()))
         .or_else(|| configured_provider.clone())
         .unwrap_or_else(|| {
-            output::render_error("No provider configured. Run 'goose configure' first.");
+            output::render_error("No provider configured. Run 'arakan configure' first.");
             process::exit(1);
         });
 
@@ -313,30 +313,30 @@ async fn resolve_provider_and_model(
     let provider_overridden = session_config.provider.is_some();
     let matching_recipe_model = recipe_settings.and_then(|settings| {
         let recipe_provider_matches = settings
-            .goose_provider
+            .arakan_provider
             .as_deref()
             .is_none_or(|provider| provider == provider_name);
 
         if provider_overridden && recipe_provider_matches {
-            settings.goose_model.clone()
+            settings.arakan_model.clone()
         } else {
             None
         }
     });
     let matching_environment_model =
         if provider_overridden && configured_provider.as_deref() == Some(provider_name.as_str()) {
-            std::env::var("GOOSE_MODEL").ok()
+            std::env::var("ARAKAN_MODEL").ok()
         } else {
             None
         };
     let matching_config_model =
         if provider_overridden && configured_provider.as_deref() == Some(provider_name.as_str()) {
-            config.get_goose_model().ok()
+            config.get_arakan_model().ok()
         } else {
             None
         };
     let configured_provider_model = session_config.provider.as_ref().and_then(|_| {
-        goose::config::get_provider_entry(config, &provider_name)
+        arakan::config::get_provider_entry(config, &provider_name)
             .map(|entry| entry.model)
             .filter(|model| !model.is_empty())
     });
@@ -348,7 +348,7 @@ async fn resolve_provider_and_model(
         && configured_provider_model.is_none()
     {
         Some(
-            goose::providers::get_from_registry(&provider_name)
+            arakan::providers::get_from_registry(&provider_name)
                 .await
                 .unwrap_or_else(|e| {
                     output::render_error(&e.to_string());
@@ -389,18 +389,18 @@ async fn resolve_provider_and_model(
             if provider_overridden {
                 None
             } else {
-                recipe_settings.and_then(|s| s.goose_model.clone())
+                recipe_settings.and_then(|s| s.arakan_model.clone())
             }
         })
         .or_else(|| {
             if provider_overridden {
                 None
             } else {
-                config.get_goose_model().ok()
+                config.get_arakan_model().ok()
             }
         })
         .unwrap_or_else(|| {
-            output::render_error("No model configured. Run 'goose configure' first.");
+            output::render_error("No model configured. Run 'arakan configure' first.");
             process::exit(1);
         });
 
@@ -412,7 +412,7 @@ async fn resolve_provider_and_model(
     {
         let mut config = saved_model_config.unwrap();
         config.normalize_effort_suffix();
-        config = goose::model_config::with_rederived_cache_ttl(config).unwrap_or_else(|e| {
+        config = arakan::model_config::with_rederived_cache_ttl(config).unwrap_or_else(|e| {
             output::render_error(&format!("Invalid cache TTL configuration: {}", e));
             process::exit(1);
         });
@@ -422,7 +422,7 @@ async fn resolve_provider_and_model(
         config
     } else {
         let mut config =
-            goose::model_config::model_config_from_user_config(&provider_name, &model_name)
+            arakan::model_config::model_config_from_user_config(&provider_name, &model_name)
                 .unwrap_or_else(|e| {
                     output::render_error(&format!("Failed to create model configuration: {}", e));
                     process::exit(1);
@@ -447,7 +447,7 @@ async fn resolve_provider_and_model(
 async fn resolve_session_id(
     session_config: &SessionBuilderConfig,
     session_manager: &SessionManager,
-    goose_mode: GooseMode,
+    arakan_mode: ArakanMode,
 ) -> String {
     if session_config.no_session {
         let working_dir = std::env::current_dir().unwrap_or_else(|e| {
@@ -459,7 +459,7 @@ async fn resolve_session_id(
                 working_dir,
                 "CLI Session".to_string(),
                 SessionType::Hidden,
-                goose_mode,
+                arakan_mode,
             )
             .await
             .unwrap_or_else(|e| {
@@ -590,7 +590,7 @@ async fn collect_extension_configs(
     if !session_config.no_profile && !session_config.resume && recipe_extensions.is_none() {
         let project_root = std::env::current_dir().ok();
         all.extend(
-            goose::plugins::mcp_servers::enabled_plugin_mcp_servers(project_root.as_deref())
+            arakan::plugins::mcp_servers::enabled_plugin_mcp_servers(project_root.as_deref())
                 .into_iter()
                 .map(|config| (config.name(), config)),
         );
@@ -626,7 +626,7 @@ async fn configure_session_prompts(
             .await?;
     }
 
-    let system_prompt_file: Option<String> = config.get_param("GOOSE_SYSTEM_PROMPT_FILE_PATH").ok();
+    let system_prompt_file: Option<String> = config.get_param("ARAKAN_SYSTEM_PROMPT_FILE_PATH").ok();
     if let Some(ref path) = system_prompt_file {
         let override_prompt = std::fs::read_to_string(path).unwrap_or_else(|e| {
             output::render_error(&format!(
@@ -650,9 +650,9 @@ pub async fn build_session(session_config: SessionBuilderConfig) -> CliSession {
         Err(error) => {
             output::render_error(&format!(
                 "Error {}.\n\
-                Please check your system keychain and run 'goose configure' again.\n\
+                Please check your system keychain and run 'arakan configure' again.\n\
                 If your system is unable to use the keyring, please try setting secret key(s) via environment variables.\n\
-                For more info, see: https://goose-docs.ai/docs/troubleshooting/#keychainkeyring-errors",
+                For more info, see: https://arakan-docs.ai/docs/troubleshooting/#keychainkeyring-errors",
                 error
             ));
             process::exit(1);
@@ -661,9 +661,6 @@ pub async fn build_session(session_config: SessionBuilderConfig) -> CliSession {
 }
 
 pub async fn try_build_session(session_config: SessionBuilderConfig) -> anyhow::Result<CliSession> {
-    #[cfg(feature = "telemetry")]
-    goose::posthog::set_session_context("cli", session_config.resume);
-
     let config = Config::global();
     let services = StateMachineServices::with_config(StateMachineServicesConfig::cli());
 
@@ -703,7 +700,7 @@ pub async fn try_build_session(session_config: SessionBuilderConfig) -> anyhow::
     let session_id = resolve_session_id(
         &session_config,
         &session_manager,
-        config.get_goose_mode().unwrap_or_default(),
+        config.get_arakan_mode().unwrap_or_default(),
     )
     .await;
 
@@ -755,12 +752,12 @@ pub async fn try_build_session(session_config: SessionBuilderConfig) -> anyhow::
                     && session_config.provider.is_none()
                     && is_provider_unavailable_error(&e) =>
             {
-                let fallback_provider = config.get_goose_provider().unwrap_or_else(|_| {
-                    output::render_error("No provider configured. Run 'goose configure' first.");
+                let fallback_provider = config.get_arakan_provider().unwrap_or_else(|_| {
+                    output::render_error("No provider configured. Run 'arakan configure' first.");
                     process::exit(1);
                 });
-                let fallback_model = config.get_goose_model().unwrap_or_else(|_| {
-                    output::render_error("No model configured. Run 'goose configure' first.");
+                let fallback_model = config.get_arakan_model().unwrap_or_else(|_| {
+                    output::render_error("No model configured. Run 'arakan configure' first.");
                     process::exit(1);
                 });
                 eprintln!(
@@ -828,7 +825,7 @@ pub async fn try_build_session(session_config: SessionBuilderConfig) -> anyhow::
         });
 
     services
-        .update_goose_mode(config.get_goose_mode().unwrap_or_default(), &session_id)
+        .update_arakan_mode(config.get_arakan_mode().unwrap_or_default(), &session_id)
         .await
         .unwrap_or_else(|e| {
             output::render_error(&format!("Failed to set session mode: {}", e));
@@ -846,7 +843,7 @@ pub async fn try_build_session(session_config: SessionBuilderConfig) -> anyhow::
         }
     }
 
-    for warning in goose::config::get_warnings() {
+    for warning in arakan::config::get_warnings() {
         eprintln!("{}", style(format!("Warning: {}", warning)).yellow());
     }
 
@@ -871,7 +868,7 @@ pub async fn try_build_session(session_config: SessionBuilderConfig) -> anyhow::
             }
         });
 
-    let debug_mode = session_config.debug || config.get_param("GOOSE_DEBUG").unwrap_or(false);
+    let debug_mode = session_config.debug || config.get_param("ARAKAN_DEBUG").unwrap_or(false);
 
     configure_session_prompts(&session_manager, &session_id, config, &session_config)
         .await
@@ -915,8 +912,8 @@ pub fn is_provider_unavailable_error(e: &anyhow::Error) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use goose::config::{set_provider_entry, ProviderEntry};
-    use goose::session::SessionManager;
+    use arakan::config::{set_provider_entry, ProviderEntry};
+    use arakan::session::SessionManager;
     use tempfile::TempDir;
 
     fn stdio_names(extensions: &[&str]) -> Vec<String> {
@@ -1093,13 +1090,13 @@ mod tests {
 
     fn clear_provider_env() -> env_lock::EnvGuard<'static> {
         env_lock::lock_env([
-            ("GOOSE_PROVIDER", None::<&str>),
-            ("GOOSE_MODEL", None::<&str>),
+            ("ARAKAN_PROVIDER", None::<&str>),
+            ("ARAKAN_MODEL", None::<&str>),
         ])
     }
 
-    fn saved_model_config(model_name: &str) -> goose_providers::model::ModelConfig {
-        goose_providers::model::ModelConfig::new(model_name).with_merged_request_params(
+    fn saved_model_config(model_name: &str) -> arakan_providers::model::ModelConfig {
+        arakan_providers::model::ModelConfig::new(model_name).with_merged_request_params(
             std::collections::HashMap::from([(
                 "anthropic_beta".to_string(),
                 serde_json::json!(["prompt-caching-2024-07-31"]),
@@ -1117,7 +1114,7 @@ mod tests {
             extensions: vec!["echo test".to_string()],
             streamable_http_extensions: vec![StreamableHttpOptions {
                 url: "http://localhost:8080/mcp".to_string(),
-                timeout: goose::config::DEFAULT_EXTENSION_TIMEOUT,
+                timeout: arakan::config::DEFAULT_EXTENSION_TIMEOUT,
             }],
             builtins: vec!["developer".to_string()],
             no_profile: false,
@@ -1193,7 +1190,7 @@ mod tests {
             },
             &config,
             Some("anthropic".to_string()),
-            Some(goose_providers::model::ModelConfig::new(
+            Some(arakan_providers::model::ModelConfig::new(
                 "claude-sonnet-4-6",
             )),
         )
@@ -1209,8 +1206,8 @@ mod tests {
         let _guard = clear_provider_env();
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
-        config.set_param("GOOSE_PROVIDER", "openai").unwrap();
-        config.set_param("GOOSE_MODEL", "my-custom-model").unwrap();
+        config.set_param("ARAKAN_PROVIDER", "openai").unwrap();
+        config.set_param("ARAKAN_MODEL", "my-custom-model").unwrap();
 
         let resolved = resolve_provider_and_model(
             &SessionBuilderConfig {
@@ -1231,8 +1228,8 @@ mod tests {
     #[tokio::test]
     async fn matching_environment_model_overrides_saved_model() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", Some("openai")),
-            ("GOOSE_MODEL", Some("environment-model")),
+            ("ARAKAN_PROVIDER", Some("openai")),
+            ("ARAKAN_MODEL", Some("environment-model")),
         ]);
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
@@ -1255,7 +1252,7 @@ mod tests {
             },
             &config,
             Some("openai".to_string()),
-            Some(goose_providers::model::ModelConfig::new("saved-model")),
+            Some(arakan_providers::model::ModelConfig::new("saved-model")),
         )
         .await;
 
@@ -1289,7 +1286,7 @@ mod tests {
             },
             &config,
             Some("openai".to_string()),
-            Some(goose_providers::model::ModelConfig::new("saved-model")),
+            Some(arakan_providers::model::ModelConfig::new("saved-model")),
         )
         .await;
 
@@ -1303,16 +1300,16 @@ mod tests {
         let _guard = clear_provider_env();
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
-        config.set_param("GOOSE_PROVIDER", "openai").unwrap();
-        config.set_param("GOOSE_MODEL", "configured-model").unwrap();
+        config.set_param("ARAKAN_PROVIDER", "openai").unwrap();
+        config.set_param("ARAKAN_MODEL", "configured-model").unwrap();
         let recipe = serde_json::from_value(serde_json::json!({
             "version": "1.0.0",
             "title": "test recipe",
             "description": "test recipe",
             "instructions": "test",
             "settings": {
-                "goose_provider": "openai",
-                "goose_model": "recipe-model"
+                "arakan_provider": "openai",
+                "arakan_model": "recipe-model"
             }
         }))
         .unwrap();
@@ -1355,8 +1352,8 @@ mod tests {
             "description": "test recipe",
             "instructions": "test",
             "settings": {
-                "goose_provider": "anthropic",
-                "goose_model": "claude-model"
+                "arakan_provider": "anthropic",
+                "arakan_model": "claude-model"
             }
         }))
         .unwrap();
@@ -1382,11 +1379,11 @@ mod tests {
         let _guard = clear_provider_env();
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
-        config.set_param("GOOSE_PROVIDER", "anthropic").unwrap();
+        config.set_param("ARAKAN_PROVIDER", "anthropic").unwrap();
         config
-            .set_param("GOOSE_MODEL", "claude-sonnet-4-6")
+            .set_param("ARAKAN_MODEL", "claude-sonnet-4-6")
             .unwrap();
-        let expected_model = goose::providers::get_from_registry("openai")
+        let expected_model = arakan::providers::get_from_registry("openai")
             .await
             .unwrap()
             .metadata()
@@ -1401,7 +1398,7 @@ mod tests {
             },
             &config,
             Some("anthropic".to_string()),
-            Some(goose_providers::model::ModelConfig::new(
+            Some(arakan_providers::model::ModelConfig::new(
                 "claude-sonnet-4-6",
             )),
         )
@@ -1467,14 +1464,14 @@ mod tests {
     #[tokio::test]
     async fn resume_rederives_cache_ttl_from_config_not_session() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", None::<&str>),
-            ("GOOSE_MODEL", None::<&str>),
-            ("GOOSE_CACHE_TTL", Some("1h")),
+            ("ARAKAN_PROVIDER", None::<&str>),
+            ("ARAKAN_MODEL", None::<&str>),
+            ("ARAKAN_CACHE_TTL", Some("1h")),
         ]);
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
         let saved =
-            goose_providers::model::ModelConfig::new("claude-sonnet-4-6").with_cache_ttl("5m");
+            arakan_providers::model::ModelConfig::new("claude-sonnet-4-6").with_cache_ttl("5m");
 
         let resolved = resolve_provider_and_model(
             &SessionBuilderConfig {
@@ -1494,14 +1491,14 @@ mod tests {
     #[tokio::test]
     async fn resume_drops_saved_cache_ttl_when_config_absent() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", None::<&str>),
-            ("GOOSE_MODEL", None::<&str>),
-            ("GOOSE_CACHE_TTL", None::<&str>),
+            ("ARAKAN_PROVIDER", None::<&str>),
+            ("ARAKAN_MODEL", None::<&str>),
+            ("ARAKAN_CACHE_TTL", None::<&str>),
         ]);
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
         let saved =
-            goose_providers::model::ModelConfig::new("claude-sonnet-4-6").with_cache_ttl("1h");
+            arakan_providers::model::ModelConfig::new("claude-sonnet-4-6").with_cache_ttl("1h");
 
         let resolved = resolve_provider_and_model(
             &SessionBuilderConfig {
@@ -1521,13 +1518,13 @@ mod tests {
     #[tokio::test]
     async fn headless_resume_clamps_rederived_cache_ttl() {
         let _guard = env_lock::lock_env([
-            ("GOOSE_PROVIDER", None::<&str>),
-            ("GOOSE_MODEL", None::<&str>),
-            ("GOOSE_CACHE_TTL", Some("1h")),
+            ("ARAKAN_PROVIDER", None::<&str>),
+            ("ARAKAN_MODEL", None::<&str>),
+            ("ARAKAN_CACHE_TTL", Some("1h")),
         ]);
         let temp_dir = TempDir::new().unwrap();
         let config = test_config(&temp_dir);
-        let saved = goose_providers::model::ModelConfig::new("claude-sonnet-4-6");
+        let saved = arakan_providers::model::ModelConfig::new("claude-sonnet-4-6");
 
         let resolved = resolve_provider_and_model(
             &SessionBuilderConfig {
@@ -1640,14 +1637,14 @@ mod tests {
     async fn test_implicit_resume_ignores_newer_scheduled_sessions() {
         let temp_dir = TempDir::new().unwrap();
         let session_manager = SessionManager::new(temp_dir.path().to_path_buf());
-        let goose_mode = GooseMode::default();
+        let arakan_mode = ArakanMode::default();
 
         let user_session = session_manager
             .create_session(
                 temp_dir.path().to_path_buf(),
                 "User session".to_string(),
                 SessionType::User,
-                goose_mode,
+                arakan_mode,
             )
             .await
             .unwrap();
@@ -1656,7 +1653,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "Scheduled job: test".to_string(),
                 SessionType::Scheduled,
-                goose_mode,
+                arakan_mode,
             )
             .await
             .unwrap();
@@ -1667,7 +1664,7 @@ mod tests {
                 ..SessionBuilderConfig::default()
             },
             &session_manager,
-            goose_mode,
+            arakan_mode,
         )
         .await;
 

@@ -7,7 +7,7 @@ unmaintained = "none"
 unsound = "none"
 
 # These releases require zip 8 but only read or write individual archive entries;
-# none calls ZipArchive::extract or ZipStreamReader::extract. Goose uses zip 9.
+# none calls ZipArchive::extract or ZipStreamReader::extract. Arakan uses zip 9.
 # Reassess if these dependencies or their zip callers change. Reviewed versions:
 # candle-core 0.11.0, docx-rs 0.4.22, umya-spreadsheet 3.1.0.
 # Remove when releases supporting zip 9 are available:

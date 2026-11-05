@@ -3,9 +3,9 @@ use std::sync::Arc;
 use anyhow::Result;
 use async_trait::async_trait;
 use futures::future::BoxFuture;
-use goose_providers::api_client::{AuthMethod, AuthProvider, TlsConfig};
-use goose_providers::azure_foundry::{endpoint_kind, AzureFoundryProvider, EndpointKind};
-use goose_providers::base::{ProviderDescriptor, ProviderMetadata};
+use arakan_providers::api_client::{AuthMethod, AuthProvider, TlsConfig};
+use arakan_providers::azure_foundry::{endpoint_kind, AzureFoundryProvider, EndpointKind};
+use arakan_providers::base::{ProviderDescriptor, ProviderMetadata};
 
 use crate::config::{Config, ExtensionConfig};
 use crate::providers::azureauth::{AzureAuth, AzureCredentials};

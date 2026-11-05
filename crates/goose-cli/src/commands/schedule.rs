@@ -1,10 +1,10 @@
 use anyhow::{bail, Context, Result};
-use goose::agents::{StateMachineServices, StateMachineServicesConfig};
-use goose::scheduler::{
+use arakan::agents::{StateMachineServices, StateMachineServicesConfig};
+use arakan::scheduler::{
     get_default_scheduled_recipes_dir, get_default_scheduler_storage_path, ScheduledJob, Scheduler,
     SchedulerError,
 };
-use goose::session::SessionManager;
+use arakan::session::SessionManager;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -106,7 +106,7 @@ pub async fn handle_schedule_add(
             // The scheduler has copied the recipe to its internal directory.
             // We can reconstruct the likely path for display if needed, or adjust success message.
             let scheduled_recipes_dir = get_default_scheduled_recipes_dir()
-                .unwrap_or_else(|_| Path::new("./.goose_scheduled_recipes").to_path_buf()); // Fallback for display
+                .unwrap_or_else(|_| Path::new("./.arakan_scheduled_recipes").to_path_buf()); // Fallback for display
             let extension = Path::new(&recipe_source_arg)
                 .extension()
                 .and_then(|ext| ext.to_str())
@@ -273,7 +273,7 @@ pub async fn handle_schedule_run_now(schedule_id: String) -> Result<()> {
 pub async fn handle_schedule_services_status() -> Result<()> {
     println!("Service management has been removed as Temporal scheduler is no longer supported.");
     println!(
-        "The built-in scheduler runs within the goose process and requires no external services."
+        "The built-in scheduler runs within the arakan process and requires no external services."
     );
     Ok(())
 }
@@ -281,13 +281,13 @@ pub async fn handle_schedule_services_status() -> Result<()> {
 pub async fn handle_schedule_services_stop() -> Result<()> {
     println!("Service management has been removed as Temporal scheduler is no longer supported.");
     println!(
-        "The built-in scheduler runs within the goose process and requires no external services."
+        "The built-in scheduler runs within the arakan process and requires no external services."
     );
     Ok(())
 }
 
 pub async fn handle_schedule_cron_help() -> Result<()> {
-    println!("📅 Cron Expression Guide for goose Scheduler");
+    println!("📅 Cron Expression Guide for arakan Scheduler");
     println!("===========================================\\n");
 
     println!("🕐 HOURLY SCHEDULES (Most Common Request):");
@@ -339,12 +339,12 @@ pub async fn handle_schedule_cron_help() -> Result<()> {
 
     println!("💡 EXAMPLES:");
     println!(
-        "  goose schedule add --schedule-id hourly-report --cron \"0 * * * *\" --recipe-source report.yaml"
+        "  arakan schedule add --schedule-id hourly-report --cron \"0 * * * *\" --recipe-source report.yaml"
     );
     println!(
-        "  goose schedule add --schedule-id daily-backup --cron \"@daily\" --recipe-source backup.yaml"
+        "  arakan schedule add --schedule-id daily-backup --cron \"@daily\" --recipe-source backup.yaml"
     );
-    println!("  goose schedule add --schedule-id weekly-summary --cron \"0 9 * * 1\" --recipe-source summary.yaml");
+    println!("  arakan schedule add --schedule-id weekly-summary --cron \"0 9 * * 1\" --recipe-source summary.yaml");
 
     Ok(())
 }

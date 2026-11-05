@@ -4,7 +4,7 @@ use async_stream::try_stream;
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use futures::TryStreamExt;
-use goose_providers::formats::anthropic::AnthropicFormatOptions;
+use arakan_providers::formats::anthropic::AnthropicFormatOptions;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -29,9 +29,9 @@ use super::openai_compatible::handle_status;
 use super::retry::ProviderRetry;
 use crate::conversation::message::Message;
 use futures::future::BoxFuture;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::Tool;
 
 const KIMI_CODE_PROVIDER_NAME: &str = "kimi_code";
@@ -331,7 +331,7 @@ impl KimiCodeProvider {
 
         let request = (self.request_builder)(builder)
             .map_err(|e| ProviderError::ExecutionError(e.to_string()))?;
-        goose_providers::http_status::send_bounded(
+        arakan_providers::http_status::send_bounded(
             request,
             StdDuration::from_secs(DEFAULT_PROVIDER_TIMEOUT_SECS),
         )
@@ -368,7 +368,7 @@ fn kimi_refresh_error(error: anyhow::Error) -> ProviderError {
 
 // ── ProviderDef ───────────────────────────────────────────────────────────────
 
-impl goose_providers::base::ProviderDescriptor for KimiCodeProvider {
+impl arakan_providers::base::ProviderDescriptor for KimiCodeProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             KIMI_CODE_PROVIDER_NAME,
@@ -386,9 +386,9 @@ impl goose_providers::base::ProviderDescriptor for KimiCodeProvider {
             )],
         )
         .with_setup_steps(vec![
-            "Run `goose configure` and select 'Kimi Code'",
+            "Run `arakan configure` and select 'Kimi Code'",
             "A browser window will open — log in to kimi.com and enter the displayed code",
-            "Once authorized, Goose will save your token automatically",
+            "Once authorized, Arakan will save your token automatically",
         ])
     }
 }
@@ -520,7 +520,7 @@ impl Provider for KimiCodeProvider {
 mod tests {
     use super::*;
     use chrono::Utc;
-    use goose_providers::base::ProviderDescriptor as _;
+    use arakan_providers::base::ProviderDescriptor as _;
     use serde_json::json;
     use wiremock::matchers::{body_string_contains, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -530,7 +530,7 @@ mod tests {
             client: Client::new(),
             token_cache: TokenCache {
                 path: std::env::temp_dir()
-                    .join(format!("goose-kimicode-test-{}.json", Uuid::new_v4())),
+                    .join(format!("arakan-kimicode-test-{}.json", Uuid::new_v4())),
             },
             cached_token: tokio::sync::Mutex::new(None),
             device_id: device_id.to_string(),

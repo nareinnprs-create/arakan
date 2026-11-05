@@ -1,11 +1,11 @@
-# goose Documentation
-# https://goose-docs.ai/
+# arakan Documentation
+# https://arakan-docs.ai/
 
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://goose-docs.ai/sitemap.xml
+Sitemap: https://arakan-docs.ai/sitemap.xml
 
 # LLM context file available at /llms.txt
 

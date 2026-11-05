@@ -12,7 +12,7 @@ use crate::{
 use anyhow::{anyhow, Result};
 use futures::stream::BoxStream;
 use futures::StreamExt;
-use goose_agent::subagent::{SubagentOutcome, SubagentUpdate};
+use arakan_agent::subagent::{SubagentOutcome, SubagentUpdate};
 use rmcp::model::Role;
 use serde::Serialize;
 use std::future::Future;
@@ -317,7 +317,7 @@ mod tests {
     use super::{failure_reason, spawn_run};
     use crate::agents::state_machine::MAX_TURNS_MESSAGE;
     use crate::conversation::message::Message;
-    use goose_agent::subagent::{SubagentOutcome, SubagentUpdate};
+    use arakan_agent::subagent::{SubagentOutcome, SubagentUpdate};
     use tokio::sync::{mpsc, oneshot};
 
     #[tokio::test]

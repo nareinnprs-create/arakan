@@ -13,11 +13,11 @@ use fixtures::{
     SessionData, TestConnectionConfig,
 };
 use fs_err as fs;
-use goose::acp::server::AcpProviderFactory;
-use goose::config::base::CONFIG_YAML_NAME;
-use goose::config::GooseMode;
-use goose::session::{EnabledExtensionsState, SessionManager};
-use goose_test_support::{McpFixture, FAKE_CODE, TEST_IMAGE_B64, TEST_MODEL};
+use arakan::acp::server::AcpProviderFactory;
+use arakan::config::base::CONFIG_YAML_NAME;
+use arakan::config::ArakanMode;
+use arakan::session::{EnabledExtensionsState, SessionManager};
+use arakan_test_support::{McpFixture, FAKE_CODE, TEST_IMAGE_B64, TEST_MODEL};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::sync::Arc;
 use std::time::Duration;
@@ -233,7 +233,7 @@ pub async fn run_config_mcp<C: Connection>() {
     let mcp = McpFixture::new().await;
 
     let config_yaml = format!(
-        "GOOSE_MODEL: {TEST_MODEL}\nGOOSE_PROVIDER: openai\nextensions:\n  mcp-fixture:\n    enabled: true\n    type: streamable_http\n    name: mcp-fixture\n    description: MCP fixture\n    uri: \"{}\"\n",
+        "ARAKAN_MODEL: {TEST_MODEL}\nARAKAN_PROVIDER: openai\nextensions:\n  mcp-fixture:\n    enabled: true\n    type: streamable_http\n    name: mcp-fixture\n    description: MCP fixture\n    uri: \"{}\"\n",
         mcp.url
     );
     fs::write(temp_dir.path().join(CONFIG_YAML_NAME), config_yaml).unwrap();
@@ -349,7 +349,7 @@ pub async fn run_load_mode<C: Connection>() {
     let mcp = McpFixture::new().await;
 
     let config_yaml = format!(
-        "GOOSE_MODEL: {TEST_MODEL}\nGOOSE_PROVIDER: openai\nextensions:\n  mcp-fixture:\n    enabled: true\n    type: streamable_http\n    name: mcp-fixture\n    description: MCP fixture\n    uri: \"{}\"\n",
+        "ARAKAN_MODEL: {TEST_MODEL}\nARAKAN_PROVIDER: openai\nextensions:\n  mcp-fixture:\n    enabled: true\n    type: streamable_http\n    name: mcp-fixture\n    description: MCP fixture\n    uri: \"{}\"\n",
         mcp.url
     );
     fs::write(temp_dir.path().join(CONFIG_YAML_NAME), config_yaml).unwrap();
@@ -378,10 +378,10 @@ pub async fn run_load_mode<C: Connection>() {
     let SessionData { session, modes, .. } = conn.new_session().await.unwrap();
     assert_eq!(
         modes.unwrap().current_mode_id,
-        SessionModeId::new(<&str>::from(GooseMode::default()))
+        SessionModeId::new(<&str>::from(ArakanMode::default()))
     );
     let session_id = session.session_id().0.to_string();
-    conn.set_mode(&session_id, <&str>::from(GooseMode::Approve))
+    conn.set_mode(&session_id, <&str>::from(ArakanMode::Approve))
         .await
         .unwrap();
 
@@ -392,7 +392,7 @@ pub async fn run_load_mode<C: Connection>() {
     } = conn.load_session(&session_id, vec![]).await.unwrap();
     assert_eq!(
         modes.unwrap().current_mode_id,
-        SessionModeId::new(<&str>::from(GooseMode::Approve))
+        SessionModeId::new(<&str>::from(ArakanMode::Approve))
     );
 
     // Approve mode + Cancel = permission denied → tool fails
@@ -448,7 +448,7 @@ pub async fn run_load_session_mcp<C: Connection>() {
     fs::write(
         temp_dir.path().join(CONFIG_YAML_NAME),
         format!(
-            "GOOSE_MODEL: {TEST_MODEL}\nGOOSE_PROVIDER: openai\nextensions:\n  developer:\n    enabled: true\n    type: platform\n    name: developer\n    description: Developer\n    display_name: Developer\n    bundled: true\n    available_tools: []\n"
+            "ARAKAN_MODEL: {TEST_MODEL}\nARAKAN_PROVIDER: openai\nextensions:\n  developer:\n    enabled: true\n    type: platform\n    name: developer\n    description: Developer\n    display_name: Developer\n    bundled: true\n    available_tools: []\n"
         ),
     )
     .unwrap();
@@ -599,7 +599,7 @@ pub async fn run_load_session_replays_image_attachment<C: Connection>() {
         )
         .await
         .unwrap();
-    assert!(output.text.contains("Hello Goose!"));
+    assert!(output.text.contains("Hello Arakan!"));
     session.session_updates();
 
     let SessionData { session, .. } = conn.load_session(&session_id, vec![]).await.unwrap();
@@ -709,7 +709,7 @@ async fn run_mode_set_impl<C: Connection>(via: SetModeVia) {
     let mcp = McpFixture::new().await;
 
     let config_yaml = format!(
-        "GOOSE_MODEL: {TEST_MODEL}\nGOOSE_PROVIDER: openai\nextensions:\n  mcp-fixture:\n    enabled: true\n    type: streamable_http\n    name: mcp-fixture\n    description: MCP fixture\n    uri: \"{}\"\n",
+        "ARAKAN_MODEL: {TEST_MODEL}\nARAKAN_PROVIDER: openai\nextensions:\n  mcp-fixture:\n    enabled: true\n    type: streamable_http\n    name: mcp-fixture\n    description: MCP fixture\n    uri: \"{}\"\n",
         mcp.url
     );
     fs::write(temp_dir.path().join(CONFIG_YAML_NAME), config_yaml).unwrap();
@@ -753,7 +753,7 @@ async fn run_mode_set_impl<C: Connection>(via: SetModeVia) {
         ..
     } = conn.new_session().await.unwrap();
     let session_id = &session_b.session_id().0;
-    let approve = <&str>::from(GooseMode::Approve);
+    let approve = <&str>::from(ArakanMode::Approve);
     match via {
         SetModeVia::Dedicated => conn.set_mode(session_id, approve).await.unwrap(),
         SetModeVia::ConfigOption => conn
@@ -883,17 +883,17 @@ pub async fn run_new_session_returns_initial_config<C: Connection>() {
 
 pub async fn run_new_session_uses_current_config_mode<C: Connection>() {
     let temp_dir = tempfile::tempdir().unwrap();
-    let config_path = temp_dir.path().join(goose::config::base::CONFIG_YAML_NAME);
+    let config_path = temp_dir.path().join(arakan::config::base::CONFIG_YAML_NAME);
     fs::write(
         &config_path,
-        format!("GOOSE_MODEL: {TEST_MODEL}\nGOOSE_PROVIDER: openai\nGOOSE_MODE: approve\n"),
+        format!("ARAKAN_MODEL: {TEST_MODEL}\nARAKAN_PROVIDER: openai\nARAKAN_MODE: approve\n"),
     )
     .unwrap();
 
     let expected_session_id = C::expected_session_id();
     let openai = OpenAiFixture::new(vec![], expected_session_id.clone()).await;
     let config = TestConnectionConfig {
-        goose_mode: GooseMode::Approve,
+        arakan_mode: ArakanMode::Approve,
         data_root: temp_dir.path().to_path_buf(),
         ..Default::default()
     };
@@ -901,10 +901,10 @@ pub async fn run_new_session_uses_current_config_mode<C: Connection>() {
     let mut conn = C::new(config, openai).await;
 
     let global_config_path =
-        goose::config::paths::Paths::config_dir().join(goose::config::base::CONFIG_YAML_NAME);
+        arakan::config::paths::Paths::config_dir().join(arakan::config::base::CONFIG_YAML_NAME);
     fs::write(
         &global_config_path,
-        format!("GOOSE_MODEL: {TEST_MODEL}\nGOOSE_PROVIDER: openai\nGOOSE_MODE: auto\n"),
+        format!("ARAKAN_MODEL: {TEST_MODEL}\nARAKAN_PROVIDER: openai\nARAKAN_MODE: auto\n"),
     )
     .unwrap();
 
@@ -1081,7 +1081,7 @@ pub async fn run_permission_persistence<C: Connection>() {
 
     let config = TestConnectionConfig {
         mcp_servers: vec![McpServer::Http(McpServerHttp::new("mcp-fixture", &mcp.url))],
-        goose_mode: GooseMode::Approve,
+        arakan_mode: ArakanMode::Approve,
         data_root: temp_dir.path().to_path_buf(),
         ..Default::default()
     };
@@ -1126,25 +1126,25 @@ pub async fn run_prompt_basic<C: Connection>() {
         .unwrap();
     assert_eq!(output.text, "2");
     let updates = session.session_updates();
-    let (standard_message_id, goose_message_id) = updates
+    let (standard_message_id, arakan_message_id) = updates
         .iter()
         .find_map(|update| {
             let SessionUpdate::AgentMessageChunk(chunk) = update else {
                 return None;
             };
             let standard_message_id = chunk.message_id.as_ref()?.0.to_string();
-            let goose_message_id = chunk
+            let arakan_message_id = chunk
                 .meta
                 .as_ref()?
-                .get("goose")?
+                .get("arakan")?
                 .get("messageId")?
                 .as_str()?
                 .to_string();
-            Some((standard_message_id, goose_message_id))
+            Some((standard_message_id, arakan_message_id))
         })
-        .expect("expected live agent message chunk with standard and goose message IDs");
+        .expect("expected live agent message chunk with standard and arakan message IDs");
     assert!(!standard_message_id.is_empty());
-    assert_eq!(standard_message_id, goose_message_id);
+    assert_eq!(standard_message_id, arakan_message_id);
     assert_notifications(
         &fixtures::to_notifications(&updates),
         &[Notification::AgentMessage],
@@ -1236,7 +1236,7 @@ pub async fn run_prompt_image<C: Connection>() {
         )
         .await
         .unwrap();
-    assert_eq!(output.text, "Hello Goose!\nThis is a test image.");
+    assert_eq!(output.text, "Hello Arakan!\nThis is a test image.");
     assert_notifications(
         &session.notifications(),
         &[
@@ -1273,7 +1273,7 @@ pub async fn run_prompt_image_attachment<C: Connection>() {
         )
         .await
         .unwrap();
-    assert!(output.text.contains("Hello Goose!"));
+    assert!(output.text.contains("Hello Arakan!"));
     assert_notifications(&session.notifications(), &[Notification::AgentMessage]);
     expected_session_id.assert_matches(&session.session_id().0);
 }

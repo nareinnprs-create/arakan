@@ -1,4 +1,4 @@
-use goose::config::permission::{PermissionConfig, PermissionLevel, PermissionManager};
+use arakan::config::permission::{PermissionConfig, PermissionLevel, PermissionManager};
 use std::collections::HashMap;
 
 #[test]

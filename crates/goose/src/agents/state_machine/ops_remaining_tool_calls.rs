@@ -4,12 +4,12 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::post_tool_call_hook::PostToolCallHook;
+use arakan_agent::post_tool_call_hook::PostToolCallHook;
 use rmcp::model::{CallToolResult, ContentBlock, ErrorCode, ErrorData};
 use tracing_futures::Instrument;
 
 use crate::agents::final_output_tool::FINAL_OUTPUT_TOOL_NAME;
-use crate::agents::state_machine::effects::GooseEffect;
+use crate::agents::state_machine::effects::ArakanEffect;
 use crate::agents::state_machine::ops_toolcalling::{
     emit_extended_pre_hooks, pending_tool_requests, request_was_advertised, tool_span,
     ToolDisposition,
@@ -19,13 +19,13 @@ use crate::agents::state_machine::{
     applied, messages_since_kickoff, not_applicable, Emitter, Operation, OperationResult,
 };
 use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, ToolResponse};
 use crate::conversation::Conversation;
 use crate::hooks::HookManager;
 use crate::session::Session;
 
-pub(crate) const UNCLAIMED_TOOL_ERROR: &str = "goose.unclaimed_tool";
+pub(crate) const UNCLAIMED_TOOL_ERROR: &str = "arakan.unclaimed_tool";
 
 pub struct RemainingToolCallsOperation {
     hook_manager: HookManager,
@@ -45,7 +45,7 @@ impl RemainingToolCallsOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for RemainingToolCallsOperation {
+impl Operation<Session, ArakanEffect> for RemainingToolCallsOperation {
     fn name(&self) -> &'static str {
         "remaining_tool_calls"
     }
@@ -55,7 +55,7 @@ impl Operation<Session, GooseEffect> for RemainingToolCallsOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let active_final_output = session
             .recipe
             .as_ref()
@@ -101,7 +101,7 @@ impl Operation<Session, GooseEffect> for RemainingToolCallsOperation {
                         true,
                     )
                 }
-                ToolDisposition::Execute if session.goose_mode == GooseMode::Chat => (
+                ToolDisposition::Execute if session.arakan_mode == ArakanMode::Chat => (
                     Ok(CallToolResult::success(vec![ContentBlock::text(
                         CHAT_MODE_TOOL_SKIPPED_RESPONSE,
                     )])),
@@ -188,7 +188,7 @@ mod tests {
     use super::*;
     use crate::conversation::message::ToolRequest;
     use crate::recipe::{Recipe, Response};
-    use goose_agent::tool_call_state::EXECUTABLE_KEY;
+    use arakan_agent::tool_call_state::EXECUTABLE_KEY;
     use rmcp::model::CallToolRequestParams;
     use std::sync::Mutex;
     use tokio::sync::mpsc;
@@ -219,7 +219,7 @@ mod tests {
         session: &Session,
         messages: Vec<Message>,
         hook: Arc<RecordingHook>,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let (tx, _rx) = mpsc::unbounded_channel();
         let emit = Emitter::new(tx, CancellationToken::new());
         RemainingToolCallsOperation::new(HookManager::default(), hook)
@@ -230,7 +230,7 @@ mod tests {
     async fn run(
         session: &Session,
         messages: Vec<Message>,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         run_with_hook(session, messages, Arc::default()).await
     }
 
@@ -267,7 +267,7 @@ mod tests {
         );
 
         let chat = Session {
-            goose_mode: GooseMode::Chat,
+            arakan_mode: ArakanMode::Chat,
             ..Session::default()
         };
         let hook = Arc::new(RecordingHook::default());

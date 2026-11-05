@@ -100,7 +100,7 @@ fn schema_field(node: SchemaNode, field: &str) -> Option<SchemaNode> {
             _ => None,
         },
         SchemaNode::Settings => match field {
-            "goose_provider" | "goose_model" | "temperature" | "max_turns" => {
+            "arakan_provider" | "arakan_model" | "temperature" | "max_turns" => {
                 Some(SchemaNode::Scalar)
             }
             _ => None,

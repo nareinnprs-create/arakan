@@ -1,14 +1,14 @@
 use super::interaction::{LiveMainAgent, LiveVoiceInteraction, LiveVoiceInteractionId};
 use crate::agents::ActiveRunRegistry;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, MessageContent};
 use crate::conversation::Conversation;
 use crate::session::SessionManager;
 use crate::token_counter::TokenCounter;
-use goose_providers::live_voice_provider::{LiveVoiceInputMessage, LiveVoiceProvider};
-pub(crate) use goose_providers::live_voice_provider::{WebRtcAnswer, WebRtcOffer};
+use arakan_providers::live_voice_provider::{LiveVoiceInputMessage, LiveVoiceProvider};
+pub(crate) use arakan_providers::live_voice_provider::{WebRtcAnswer, WebRtcOffer};
 #[cfg(feature = "live-voice")]
-use goose_providers::openai_live_voice_provider::OpenAiLiveVoiceProvider;
+use arakan_providers::openai_live_voice_provider::OpenAiLiveVoiceProvider;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -19,28 +19,28 @@ use tokio_util::sync::CancellationToken;
 const LIVE_VOICE_INPUT_MESSAGE_LIMIT: usize = 128;
 const LIVE_VOICE_INPUT_TOKEN_LIMIT: usize = 8_192;
 #[cfg(feature = "live-voice")]
-const LIVE_VOICE_ENABLED_CONFIG_KEY: &str = "GOOSE_LIVE_VOICE_ENABLED";
+const LIVE_VOICE_ENABLED_CONFIG_KEY: &str = "ARAKAN_LIVE_VOICE_ENABLED";
 #[cfg(feature = "live-voice")]
-const LIVE_VOICE_CONFIG_KEY: &str = "GOOSE_LIVE_VOICE";
+const LIVE_VOICE_CONFIG_KEY: &str = "ARAKAN_LIVE_VOICE";
 #[cfg(feature = "live-voice")]
 const DEFAULT_OPENAI_LIVE_VOICE: &str = "marin";
 #[cfg(feature = "live-voice")]
 const LIVE_SESSION_INSTRUCTIONS: &str = concat!(
-    "You are Goose's live voice interface. Keep the conversation natural and concise.\n",
+    "You are Arakan's live voice interface. Keep the conversation natural and concise.\n",
     "Interruption policy: Stop speaking when the user interrupts and listen to what they say.\n",
     "Delegation policy:\n",
     "Backend tools:\n",
-    "- Goose can use backend reasoning and tools for longer tasks.\n",
-    "Delegate to Goose when:\n",
+    "- Arakan can use backend reasoning and tools for longer tasks.\n",
+    "Delegate to Arakan when:\n",
     "- The user has finished stating a complete request that needs backend tools or reasoning.\n",
     "- The user corrects or changes backend work already in progress.\n",
-    "Do not delegate to Goose when:\n",
+    "Do not delegate to Arakan when:\n",
     "- The request is unfinished or is missing a required detail such as a location, object, ",
     "command, or desired outcome. Ask one brief clarification and wait for the answer.\n",
     "- The user is greeting you or making conversation that you can answer directly.\n",
     "After delegating, briefly say the work is underway. Keep listening and accept corrections ",
-    "while Goose works. Do not guess the result. Present delegated results directly. Only say ",
-    "the task stopped or finished after Goose confirms it."
+    "while Arakan works. Do not guess the result. Present delegated results directly. Only say ",
+    "the task stopped or finished after Arakan confirms it."
 );
 #[cfg(feature = "live-voice")]
 const DELEGATION_DELIVERY_FAILURE_INSTRUCTIONS: &str = concat!(
@@ -197,7 +197,7 @@ impl LiveVoiceService {
     pub(crate) fn availability(
         &self,
         session_id: Option<&str>,
-        mode: GooseMode,
+        mode: ArakanMode,
     ) -> Result<(), &'static str> {
         self.eligible_provider(session_id, mode).map(|_| ())
     }
@@ -205,7 +205,7 @@ impl LiveVoiceService {
     fn eligible_provider(
         &self,
         session_id: Option<&str>,
-        mode: GooseMode,
+        mode: ArakanMode,
     ) -> Result<Arc<dyn LiveVoiceProvider>, &'static str> {
         let provider = self.provider_for_mode(mode)?;
         if session_id.is_some_and(|session_id| self.active_runs.is_active(session_id)) {
@@ -217,10 +217,10 @@ impl LiveVoiceService {
 
     fn provider_for_mode(
         &self,
-        mode: GooseMode,
+        mode: ArakanMode,
     ) -> Result<Arc<dyn LiveVoiceProvider>, &'static str> {
         let provider = (self.live_voice_resolver)()?;
-        if mode != GooseMode::Auto {
+        if mode != ArakanMode::Auto {
             Err("Live voice requires Autonomous mode")
         } else {
             Ok(provider)
@@ -230,7 +230,7 @@ impl LiveVoiceService {
     pub(crate) fn reserve_interaction(
         &self,
         session_id: &str,
-        mode: GooseMode,
+        mode: ArakanMode,
     ) -> Result<LiveVoiceInteractionGuard, LiveVoiceError> {
         self.eligible_provider(Some(session_id), mode)
             .map_err(|_| LiveVoiceError::Unavailable)?;
@@ -272,7 +272,7 @@ impl LiveVoiceService {
             .await
             .map_err(|_| LiveVoiceError::Unavailable)?;
         let provider = self
-            .provider_for_mode(session.goose_mode)
+            .provider_for_mode(session.arakan_mode)
             .map_err(|_| LiveVoiceError::Unavailable)?;
         let input_messages =
             live_voice_input_messages(&session.conversation.unwrap_or_default()).await?;

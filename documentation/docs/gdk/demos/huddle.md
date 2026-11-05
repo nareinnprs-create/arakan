@@ -10,10 +10,10 @@ Huddle is a small desktop application for talking to a local agent. A live voice
 model handles the conversation. When a request needs work, Huddle passes it to
 an ACP agent and sends the result back to the voice model to speak aloud.
 
-Built with **GDK + ACP**: the live provider interface from `goose-providers`,
-with goose or another ACP agent doing the delegated work.
+Built with **GDK + ACP**: the live provider interface from `arakan-providers`,
+with arakan or another ACP agent doing the delegated work.
 
-[Source](https://github.com/jamadeo/goose-huddle)
+[Source](https://github.com/jamadeo/arakan-huddle)
 
 ## The clever bit
 
@@ -36,7 +36,7 @@ agent instead of rebuilding the entire stack for a new interface.
 3. A delegation becomes a prompt to the persistent ACP session.
 4. The agent's result is returned through the live provider connection.
 
-In [`voice.rs`](https://github.com/jamadeo/goose-huddle/blob/main/src-tauri/src/voice.rs),
+In [`voice.rs`](https://github.com/jamadeo/arakan-huddle/blob/main/src-tauri/src/voice.rs),
 the return path uses the provider's delegation interface:
 
 ```rust
@@ -48,27 +48,27 @@ let delivery = connection
     .await?;
 ```
 
-The [transcript code](https://github.com/jamadeo/goose-huddle/blob/main/src-tauri/src/transcript.rs)
+The [transcript code](https://github.com/jamadeo/arakan-huddle/blob/main/src-tauri/src/transcript.rs)
 chooses the context for each request. The
-[ACP client](https://github.com/jamadeo/goose-huddle/blob/main/src-tauri/src/acp.rs)
+[ACP client](https://github.com/jamadeo/arakan-huddle/blob/main/src-tauri/src/acp.rs)
 owns the agent subprocess and serializes prompts.
 
 ## Run it yourself
 
 You need Rust 1.94 or later, an OpenAI API key with GPT-Live access, microphone
-permission, and an ACP agent on your `PATH`. The default is `goose acp`.
-Configure goose's model provider separately if you use that default.
+permission, and an ACP agent on your `PATH`. The default is `arakan acp`.
+Configure arakan's model provider separately if you use that default.
 
 With `OPENAI_API_KEY` set in your environment:
 
 ```bash
-git clone https://github.com/jamadeo/goose-huddle.git
-cd goose-huddle/src-tauri
+git clone https://github.com/jamadeo/arakan-huddle.git
+cd arakan-huddle/src-tauri
 cargo run
 ```
 
 Open Settings to choose the agent command and working directory, then start a
-huddle. See the [README](https://github.com/jamadeo/goose-huddle#running) for
+huddle. See the [README](https://github.com/jamadeo/arakan-huddle#running) for
 packaging and configuration details.
 
 :::warning Prototype permissions

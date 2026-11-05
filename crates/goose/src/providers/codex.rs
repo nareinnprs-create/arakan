@@ -2,8 +2,8 @@ use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use futures::future::BoxFuture;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::thinking::ThinkingEffort;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::thinking::ThinkingEffort;
 use serde_json::json;
 use std::collections::HashMap;
 use std::io::Write;
@@ -17,12 +17,12 @@ use super::base::{ConfigKey, MessageStream, Provider, ProviderDef, ProviderMetad
 use super::utils::filter_extensions_from_system_prompt;
 use crate::config::paths::Paths;
 use crate::config::search_path::SearchPaths;
-use crate::config::{Config, ExtensionConfig, GooseMode};
+use crate::config::{Config, ExtensionConfig, ArakanMode};
 use crate::conversation::message::{Message, MessageContent};
 use crate::subprocess::configure_subprocess;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::Role;
 use rmcp::model::Tool;
 
@@ -50,7 +50,7 @@ pub struct CodexProvider {
     /// CLI config overrides for MCP servers
     mcp_config_overrides: Vec<String>,
     #[serde(skip)]
-    mode_by_session: tokio::sync::RwLock<HashMap<String, GooseMode>>,
+    mode_by_session: tokio::sync::RwLock<HashMap<String, ArakanMode>>,
 }
 
 impl CodexProvider {
@@ -82,25 +82,25 @@ impl CodexProvider {
         }
     }
 
-    /// Apply permission flags based on GooseMode
+    /// Apply permission flags based on ArakanMode
     fn apply_permission_flags(
         cmd: &mut Command,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> Result<(), ProviderError> {
-        match goose_mode {
-            GooseMode::Auto => {
+        match arakan_mode {
+            ArakanMode::Auto => {
                 // --yolo is shorthand for --dangerously-bypass-approvals-and-sandbox
                 cmd.arg("--yolo");
             }
-            GooseMode::SmartApprove => {
+            ArakanMode::SmartApprove => {
                 // --full-auto applies workspace-write sandbox and approvals only on failure
                 cmd.arg("--full-auto");
             }
-            GooseMode::Approve => {
+            ArakanMode::Approve => {
                 // Default codex behavior - interactive approvals
                 // No special flags needed
             }
-            GooseMode::Chat => {
+            ArakanMode::Chat => {
                 // Read-only sandbox mode
                 cmd.arg("--sandbox").arg("read-only");
             }
@@ -115,14 +115,14 @@ impl CodexProvider {
         system: &str,
         messages: &[Message],
         _tools: &[Tool],
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> Result<Vec<String>, ProviderError> {
         // Single pass: text → prompt (stdin), images → temp files (-i flags)
         let image_dir = Paths::state_dir().join("codex/images");
         std::fs::create_dir_all(&image_dir).ok();
         let (prompt, temp_files) = prepare_input(system, messages, &image_dir)?;
 
-        if std::env::var("GOOSE_CODEX_DEBUG").is_ok() {
+        if std::env::var("ARAKAN_CODEX_DEBUG").is_ok() {
             let reasoning_effort =
                 Self::map_thinking_effort(&model.model_name, model.thinking_effort());
             println!("=== CODEX PROVIDER DEBUG ===");
@@ -150,7 +150,7 @@ impl CodexProvider {
         cmd.arg("exec");
 
         // Only pass model parameter if it's in the known models list
-        // This allows users to set GOOSE_PROVIDER=codex without needing to specify a model
+        // This allows users to set ARAKAN_PROVIDER=codex without needing to specify a model
         if CODEX_KNOWN_MODELS.contains(&model.model_name.as_str()) {
             cmd.arg("-m").arg(&model.model_name);
         }
@@ -169,7 +169,7 @@ impl CodexProvider {
         // JSON output format for structured parsing
         cmd.arg("--json");
 
-        Self::apply_permission_flags(&mut cmd, goose_mode)?;
+        Self::apply_permission_flags(&mut cmd, arakan_mode)?;
 
         // Skip git repo check if configured
         if self.skip_git_check {
@@ -617,7 +617,7 @@ fn codex_mcp_config_overrides(extensions: &[ExtensionConfig]) -> Result<Vec<Stri
     Ok(overrides)
 }
 
-impl goose_providers::base::ProviderDescriptor for CodexProvider {
+impl arakan_providers::base::ProviderDescriptor for CodexProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             CODEX_PROVIDER_NAME,
@@ -688,12 +688,12 @@ impl Provider for CodexProvider {
         tools: &[Tool],
     ) -> Result<MessageStream, ProviderError> {
         let session_id = crate::session_context::current_session_id().unwrap_or_default();
-        let goose_mode = {
+        let arakan_mode = {
             let map = self.mode_by_session.read().await;
             map.get(&session_id).copied().unwrap_or_default()
         };
         let lines = self
-            .execute_command(model_config, system, messages, tools, goose_mode)
+            .execute_command(model_config, system, messages, tools, arakan_mode)
             .await?;
 
         let (message, usage) = self.parse_response(&lines)?;
@@ -725,7 +725,7 @@ impl Provider for CodexProvider {
         ))
     }
 
-    async fn update_mode(&self, session_id: &str, mode: GooseMode) -> Result<(), ProviderError> {
+    async fn update_mode(&self, session_id: &str, mode: ArakanMode) -> Result<(), ProviderError> {
         self.mode_by_session
             .write()
             .await
@@ -742,8 +742,8 @@ impl Provider for CodexProvider {
 mod tests {
     use super::*;
     use crate::agents::extension::Envs;
-    use goose_providers::base::ProviderDescriptor as _;
-    use goose_test_support::TEST_IMAGE_B64;
+    use arakan_providers::base::ProviderDescriptor as _;
+    use arakan_test_support::TEST_IMAGE_B64;
     use std::collections::HashMap;
     #[cfg(unix)]
     use std::fs;
@@ -1290,7 +1290,7 @@ printf '%s\n' '{"type":"item.completed","item":{"type":"agent_message","text":"p
 
         let _guard = env_lock::lock_env([
             ("CODEX_REASONING_EFFORT", None::<&str>),
-            ("GOOSE_THINKING_EFFORT", None::<&str>),
+            ("ARAKAN_THINKING_EFFORT", None::<&str>),
         ]);
 
         assert_eq!(
@@ -1315,7 +1315,7 @@ printf '%s\n' '{"type":"item.completed","item":{"type":"agent_message","text":"p
     fn test_map_thinking_effort_uses_legacy_codex_env() {
         let _guard = env_lock::lock_env([
             ("CODEX_REASONING_EFFORT", Some("low")),
-            ("GOOSE_THINKING_EFFORT", None::<&str>),
+            ("ARAKAN_THINKING_EFFORT", None::<&str>),
         ]);
 
         assert_eq!(
@@ -1360,11 +1360,11 @@ printf '%s\n' '{"type":"item.completed","item":{"type":"agent_message","text":"p
         assert_eq!(CODEX_DEFAULT_MODEL, "gpt-5.2-codex");
     }
 
-    #[test_case(GooseMode::Auto, &["--yolo"] ; "auto_yolo")]
-    #[test_case(GooseMode::SmartApprove, &["--full-auto"] ; "smart_approve_full_auto")]
-    #[test_case(GooseMode::Approve, &[] as &[&str] ; "approve_no_flags")]
-    #[test_case(GooseMode::Chat, &["--sandbox", "read-only"] ; "chat_read_only")]
-    fn test_apply_permission_flags(mode: GooseMode, expected: &[&str]) {
+    #[test_case(ArakanMode::Auto, &["--yolo"] ; "auto_yolo")]
+    #[test_case(ArakanMode::SmartApprove, &["--full-auto"] ; "smart_approve_full_auto")]
+    #[test_case(ArakanMode::Approve, &[] as &[&str] ; "approve_no_flags")]
+    #[test_case(ArakanMode::Chat, &["--sandbox", "read-only"] ; "chat_read_only")]
+    fn test_apply_permission_flags(mode: ArakanMode, expected: &[&str]) {
         let mut cmd = tokio::process::Command::new("codex");
         CodexProvider::apply_permission_flags(&mut cmd, mode).unwrap();
         let args: Vec<&str> = cmd

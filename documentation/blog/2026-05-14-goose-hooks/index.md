@@ -1,14 +1,14 @@
 ---
-title: "Hooks: run your own scripts on every goose event"
-description: "goose now supports lifecycle hooks via the Open Plugins spec. Wire shell scripts into PreToolUse, PostToolUse, UserPromptSubmit, SessionStart, and more."
-image: /img/blog/goose-hooks.jpg
+title: "Hooks: run your own scripts on every arakan event"
+description: "arakan now supports lifecycle hooks via the Open Plugins spec. Wire shell scripts into PreToolUse, PostToolUse, UserPromptSubmit, SessionStart, and more."
+image: /img/blog/arakan-hooks.jpg
 authors:
   - alexhancock
 ---
 
-![Hooks: run your own scripts on every goose event](/img/blog/goose-hooks.jpg)
+![Hooks: run your own scripts on every arakan event](/img/blog/arakan-hooks.jpg)
 
-goose now supports **lifecycle hooks**. Drop a plugin into a directory on disk and goose will run your shell scripts when things happen during a session: a tool is about to fire, a tool just finished, the user submitted a prompt, the session started, the session ended.
+arakan now supports **lifecycle hooks**. Drop a plugin into a directory on disk and arakan will run your shell scripts when things happen during a session: a tool is about to fire, a tool just finished, the user submitted a prompt, the session started, the session ended.
 
 If you've used Claude Code's hooks or git hooks, it's the same idea. If you haven't: the agent loop is now scriptable from the outside, without writing any Rust or any MCP server.
 
@@ -16,7 +16,7 @@ If you've used Claude Code's hooks or git hooks, it's the same idea. If you have
 
 ## How it works
 
-goose follows the [Open Plugins hooks specification](https://open-plugins.com/agent-builders/components/hooks). Any plugin directory under `~/.agents/plugins/<name>/` (user scope) or `<project>/.agents/plugins/<name>/` (project scope) that contains a `hooks/hooks.json` file is auto-discovered at startup.
+arakan follows the [Open Plugins hooks specification](https://open-plugins.com/agent-builders/components/hooks). Any plugin directory under `~/.agents/plugins/<name>/` (user scope) or `<project>/.agents/plugins/<name>/` (project scope) that contains a `hooks/hooks.json` file is auto-discovered at startup.
 
 A minimal hook config looks like this:
 
@@ -35,7 +35,7 @@ A minimal hook config looks like this:
 }
 ```
 
-When the event fires, goose runs the command, sets `PLUGIN_ROOT` in the environment, and pipes a JSON payload to the script on stdin:
+When the event fires, arakan runs the command, sets `PLUGIN_ROOT` in the environment, and pipes a JSON payload to the script on stdin:
 
 ```json
 {
@@ -59,9 +59,9 @@ The `matcher` field is a regex tested against the most relevant string for the e
 
 ## A few things to try
 
-### 1. Have goose talk to you when it actually needs you
+### 1. Have arakan talk to you when it actually needs you
 
-Pick a handful of events that mean "the human's attention would be useful right now" — a tool failed, the session wrapped, a long-running command finished — and have goose speak a line when one of them fires:
+Pick a handful of events that mean "the human's attention would be useful right now" — a tool failed, the session wrapped, a long-running command finished — and have arakan speak a line when one of them fires:
 
 ```json
 {
@@ -94,9 +94,9 @@ esac
 
 Tune the `matcher` regex to whatever counts as "long-running" in your world — test suites, builds, deploys, `terraform apply`.
 
-### 2. The "goose is doing something" desk light 🪿💡
+### 2. The "arakan is doing something" desk light 🪿💡
 
-If you have a smart bulb with an HTTP API (Hue, LIFX, Home Assistant, etc.), turn it on when goose starts a tool call and off when it finishes:
+If you have a smart bulb with an HTTP API (Hue, LIFX, Home Assistant, etc.), turn it on when arakan starts a tool call and off when it finishes:
 
 ```json
 {
@@ -107,9 +107,9 @@ If you have a smart bulb with an HTTP API (Hue, LIFX, Home Assistant, etc.), tur
 }
 ```
 
-Now your desk lamp is a status indicator for the agent. Walk away, glance back, and if it's on, goose is still working.
+Now your desk lamp is a status indicator for the agent. Walk away, glance back, and if it's on, arakan is still working.
 
-### 3. Auto-format every file goose edits
+### 3. Auto-format every file arakan edits
 
 Hook `AfterFileEdit` and run the formatter yourself so the agent doesn't have to remember:
 
@@ -141,12 +141,12 @@ Hook `SessionEnd` and append a one-line summary to a markdown file:
 payload="$(cat)"
 session_id="$(printf '%s' "$payload" | jq -r .session_id)"
 date_str="$(date '+%Y-%m-%d %H:%M')"
-echo "- $date_str — session $session_id ended" >> ~/notes/goose-journal.md
+echo "- $date_str — session $session_id ended" >> ~/notes/arakan-journal.md
 ```
 
 Capture `UserPromptSubmit` payloads too and you've got a log of every question you asked your agent today.
 
-### 5. Make goose sound like a submarine
+### 5. Make arakan sound like a submarine
 
 Because you can:
 
@@ -177,18 +177,18 @@ Because you can:
 }
 ```
 
-Useful when goose is working on a long task in another window. The audio cue tells you it's actually doing things instead of sitting there waiting on you.
+Useful when arakan is working on a long task in another window. The audio cue tells you it's actually doing things instead of sitting there waiting on you.
 
 ## Try the example
 
-There's a working example in the repo at [`examples/plugins/hello-hooks`](https://github.com/block/goose/tree/main/examples/plugins/hello-hooks) — a plugin that wires up `SessionStart`, `UserPromptSubmit`, `PreToolUse`, and `PostToolUse` and prints a friendly emoji to stderr for each one. Copy it to `~/.agents/plugins/`, start a session, and watch the events fly by:
+There's a working example in the repo at [`examples/plugins/hello-hooks`](https://github.com/block/arakan/tree/main/examples/plugins/hello-hooks) — a plugin that wires up `SessionStart`, `UserPromptSubmit`, `PreToolUse`, and `PostToolUse` and prints a friendly emoji to stderr for each one. Copy it to `~/.agents/plugins/`, start a session, and watch the events fly by:
 
 ```bash
 mkdir -p ~/.agents/plugins
 cp -R examples/plugins/hello-hooks ~/.agents/plugins/hello-hooks
 chmod +x ~/.agents/plugins/hello-hooks/scripts/announce.sh
 
-goose session
+arakan session
 # 🚀 [hello-hooks] SessionStart
 # 💬 [hello-hooks] UserPromptSubmit
 # ⚡ [hello-hooks] PreToolUse tool=developer__shell
@@ -199,9 +199,9 @@ Every event also gets appended to `~/.agents/plugins/hello-hooks/last-event.log`
 
 ## Why this matters
 
-MCP servers give goose new tools. Hooks go the other direction: they give you a way to react to what goose is doing, in real time, with whatever language you already know. Bash, Python, a Go binary, a one-line `curl`. It's all just a command on stdin.
+MCP servers give arakan new tools. Hooks go the other direction: they give you a way to react to what arakan is doing, in real time, with whatever language you already know. Bash, Python, a Go binary, a one-line `curl`. It's all just a command on stdin.
 
-The plugin model is small on purpose: a folder, a JSON file, a script. No registration step, no daemon, no rebuild. Drop it in, start goose, it works. Take it out and goose doesn't notice it's gone.
+The plugin model is small on purpose: a folder, a JSON file, a script. No registration step, no daemon, no rebuild. Drop it in, start arakan, it works. Take it out and arakan doesn't notice it's gone.
 
 If you build something fun, share it. The `examples/plugins/` directory is a good home for community plugins, and the [Open Plugins spec](https://open-plugins.com) means anything you build here works with other agents that adopt it.
 

@@ -15,7 +15,7 @@ pub struct LoggingConfig<'a> {
     pub component: &'a str,
     /// Optional session/run name appended to the log filename.
     pub name: Option<&'a str>,
-    /// Additional `EnvFilter` directives beyond the defaults (e.g. "goose_cli=info").
+    /// Additional `EnvFilter` directives beyond the defaults (e.g. "arakan_cli=info").
     /// Only applied when `RUST_LOG` is **not** set.
     pub extra_directives: &'a [&'a str],
     /// Whether to emit a pretty console layer to stderr in addition to the file layer.
@@ -34,7 +34,7 @@ fn build_env_filter(extra_directives: &[&str]) -> EnvFilter {
 
     let mut filter = EnvFilter::new("")
         .add_directive("mcp_client=info".parse().unwrap())
-        .add_directive("goose=info".parse().unwrap())
+        .add_directive("arakan=info".parse().unwrap())
         .add_directive(LevelFilter::WARN.into());
 
     for directive in extra_directives {
@@ -45,7 +45,7 @@ fn build_env_filter(extra_directives: &[&str]) -> EnvFilter {
     filter
 }
 
-/// Set up file-based (and optionally console) tracing for a goose component.
+/// Set up file-based (and optionally console) tracing for a arakan component.
 ///
 /// Call `try_init` on the returned subscriber; callers are responsible for the
 /// `Once` guard or direct init as appropriate for their use case.

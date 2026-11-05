@@ -16,12 +16,12 @@ use base64::Engine;
 use chrono::{DateTime, Utc};
 use futures::future::BoxFuture;
 use futures::{StreamExt, TryStreamExt};
-use goose_providers::errors::ProviderError;
-use goose_providers::formats::openai_responses::{
+use arakan_providers::errors::ProviderError;
+use arakan_providers::formats::openai_responses::{
     is_encrypted_reasoning_error, reasoning_input_item, responses_api_to_streaming_message,
     strip_reasoning_items,
 };
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 use rmcp::model::{ContentBlock, Role, Tool};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -237,7 +237,7 @@ fn get_reasoning_effort(model_name: &str) -> String {
 }
 
 fn reasoning_effort_for_config(model_config: &ModelConfig) -> Option<String> {
-    use goose_providers::thinking::ThinkingEffort;
+    use arakan_providers::thinking::ThinkingEffort;
 
     model_config
         .thinking_effort()
@@ -452,7 +452,7 @@ fn build_authorize_url(redirect_uri: &str, pkce: &PkceChallenge, state: &str) ->
         ("id_token_add_organizations", "true"),
         ("codex_cli_simplified_flow", "true"),
         ("state", state),
-        ("originator", "goose"),
+        ("originator", "arakan"),
     ];
     let query = serde_urlencoded::to_string(params)?;
     Ok(format!("{}/oauth/authorize?{}", ISSUER, query))
@@ -527,7 +527,7 @@ async fn refresh_access_token_with_issuer(
 const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
 <html>
   <head>
-    <title>goose - ChatGPT Authorization Successful</title>
+    <title>arakan - ChatGPT Authorization Successful</title>
     <style>
       body {
         font-family: system-ui, -apple-system, sans-serif;
@@ -547,7 +547,7 @@ const HTML_SUCCESS_TEMPLATE: &str = r#"<!doctype html>
   <body>
     <div class="container">
       <h1>Authorization Successful</h1>
-      <p>You can close this window and return to goose.</p>
+      <p>You can close this window and return to arakan.</p>
     </div>
     <script>const AUTO_CLOSE_TIMEOUT_MS = __AUTO_CLOSE_TIMEOUT_MS__; setTimeout(() => window.close(), AUTO_CLOSE_TIMEOUT_MS)</script>
   </body>
@@ -566,7 +566,7 @@ fn html_error(error: &str) -> String {
         r#"<!doctype html>
 <html>
   <head>
-    <title>goose - ChatGPT Authorization Failed</title>
+    <title>arakan - ChatGPT Authorization Failed</title>
     <style>
       body {{
         font-family: system-ui, -apple-system, sans-serif;
@@ -877,7 +877,7 @@ impl ChatGptCodexProvider {
 
         let request = (self.request_builder)(request)
             .map_err(|e| ProviderError::ExecutionError(e.to_string()))?;
-        let response = goose_providers::http_status::send_bounded(
+        let response = arakan_providers::http_status::send_bounded(
             request,
             std::time::Duration::from_secs(DEFAULT_PROVIDER_TIMEOUT_SECS),
         )
@@ -887,7 +887,7 @@ impl ChatGptCodexProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for ChatGptCodexProvider {
+impl arakan_providers::base::ProviderDescriptor for ChatGptCodexProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             CHATGPT_CODEX_PROVIDER_NAME,
@@ -1013,7 +1013,7 @@ impl Provider for ChatGptCodexProvider {
 mod tests {
     use super::*;
     use crate::conversation::message::Message;
-    use goose_test_support::TEST_IMAGE_B64;
+    use arakan_test_support::TEST_IMAGE_B64;
     use rmcp::model::{CallToolRequestParams, CallToolResult, ContentBlock, ErrorCode, ErrorData};
     use rmcp::object;
     use test_case::test_case;
@@ -1046,7 +1046,7 @@ mod tests {
     fn inventory_configured_uses_oauth_token_cache() {
         let root = tempfile::tempdir().unwrap();
         let root_path = root.path().to_string_lossy().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path.as_str()))]);
 
         TokenCache::new().clear();
         assert!(!TokenCache::new().has_token());

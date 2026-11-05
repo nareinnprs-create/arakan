@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::post_tool_call_hook::PostToolCallHook;
+use arakan_agent::post_tool_call_hook::PostToolCallHook;
 use rmcp::model::{CallToolResult, ErrorData};
 
 use crate::agents::extension_manager::ExtensionLease;
@@ -15,12 +15,12 @@ use crate::conversation::Conversation;
 use crate::hooks::{HookContext, HookEvent, HookManager};
 use crate::session::Session;
 
-pub struct GoosePostToolHook {
+pub struct ArakanPostToolHook {
     hook_manager: HookManager,
     extension_lease: Arc<Mutex<Option<Arc<ExtensionLease>>>>,
 }
 
-impl GoosePostToolHook {
+impl ArakanPostToolHook {
     pub fn new(
         hook_manager: HookManager,
         extension_lease: Arc<Mutex<Option<Arc<ExtensionLease>>>>,
@@ -33,7 +33,7 @@ impl GoosePostToolHook {
 }
 
 #[async_trait]
-impl PostToolCallHook<Session> for GoosePostToolHook {
+impl PostToolCallHook<Session> for ArakanPostToolHook {
     async fn after_call(
         &self,
         session: &Session,

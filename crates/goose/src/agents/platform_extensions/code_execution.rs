@@ -21,7 +21,7 @@ use tokio_util::sync::CancellationToken;
 
 pub static EXTENSION_NAME: &str = "code_execution";
 
-const INSTRUCTIONS: &str = "Discover exact Goose tool names with list_functions and inspect unfamiliar parameters with get_function_details. Write JavaScript defining async function run() and execute it with execute_javascript. Call tools using await tools.call(\"extension__tool_name\", { ... }); no imports or generated namespaces are needed. Await every tool call and batch independent operations with Promise.all. Return or log only information needed for the next step. JavaScript contexts are isolated, with no filesystem, shell, network, packages, or environment access; use discovered tools for authorized external operations.";
+const INSTRUCTIONS: &str = "Discover exact Arakan tool names with list_functions and inspect unfamiliar parameters with get_function_details. Write JavaScript defining async function run() and execute it with execute_javascript. Call tools using await tools.call(\"extension__tool_name\", { ... }); no imports or generated namespaces are needed. Await every tool call and batch independent operations with Promise.all. Return or log only information needed for the next step. JavaScript contexts are isolated, with no filesystem, shell, network, packages, or environment access; use discovered tools for authorized external operations.";
 
 pub struct CodeExecutionClient {
     info: InitializeResult,
@@ -30,7 +30,7 @@ pub struct CodeExecutionClient {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 struct ToolGraphNode {
-    /// Exact Goose tool name, such as shell or extension__tool_name.
+    /// Exact Arakan tool name, such as shell or extension__tool_name.
     tool: String,
     /// Brief description of what this call does.
     description: String,
@@ -159,7 +159,7 @@ fn is_summon_delegate(tool: &McpTool) -> bool {
 
 fn execution_timeout() -> Duration {
     let secs = crate::config::Config::global()
-        .get_goose_default_extension_timeout()
+        .get_arakan_default_extension_timeout()
         .unwrap_or(crate::config::DEFAULT_EXTENSION_TIMEOUT);
     Duration::from_secs(secs)
 }
@@ -212,7 +212,7 @@ fn dispatch_tool(
                 biased;
                 result = &mut execution => result,
                 _ = cancellation_token.cancelled() => {
-                    // Cleanup runs on Goose's runtime even if the Boa worker cannot yield.
+                    // Cleanup runs on Arakan's runtime even if the Boa worker cannot yield.
                     tokio::time::timeout(javascript::DRAIN_TIMEOUT, &mut execution)
                         .await
                         .unwrap_or_else(|_| Err("Execution cancelled".into()))
@@ -274,7 +274,7 @@ impl McpClientTrait for CodeExecutionClient {
             ToolAnnotations::from_raw(None, Some(true), Some(false), Some(true), Some(false));
         Ok(ListToolsResult {
             tools: vec![
-                McpTool::new("list_functions", "List callable tools with their exact Goose names and short descriptions. Inspect unfamiliar parameters with get_function_details before calling tools.", json!({"type":"object","properties":{}}).as_object().unwrap().clone()).annotate(read_only.clone()),
+                McpTool::new("list_functions", "List callable tools with their exact Arakan names and short descriptions. Inspect unfamiliar parameters with get_function_details before calling tools.", json!({"type":"object","properties":{}}).as_object().unwrap().clone()).annotate(read_only.clone()),
                 McpTool::new("get_function_details", "Get descriptions and original JSON input/output schemas for exact tool names returned by list_functions. Schemas are data, including recursive references.", schema::<GetFunctionDetailsInput>()).annotate(read_only),
                 McpTool::new("execute_javascript", format!("Execute JavaScript and return captured console output, the JSON result, or an error. {INSTRUCTIONS}"), schema::<ExecuteWithToolGraph>()).annotate(ToolAnnotations::from_raw(Some("Execute JavaScript".into()), Some(false), Some(true), Some(false), Some(true))),
             ],
@@ -436,7 +436,7 @@ mod tests {
                 temp.path().to_path_buf(),
                 "blocked-worker".into(),
                 crate::session::session_manager::SessionType::Hidden,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -603,7 +603,7 @@ mod tests {
                 temp.path().to_path_buf(),
                 "code-mode-delegate".to_string(),
                 crate::session::session_manager::SessionType::Hidden,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -643,7 +643,7 @@ mod tests {
                 temp.path().to_path_buf(),
                 "code-mode-mutation".to_string(),
                 crate::session::session_manager::SessionType::Hidden,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -725,7 +725,7 @@ mod tests {
                 temp.path().to_path_buf(),
                 "snapshot-session".into(),
                 crate::session::session_manager::SessionType::Hidden,
-                crate::config::GooseMode::default(),
+                crate::config::ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -857,12 +857,12 @@ mod tests {
                 .with_meta(MetaObject(meta.as_object().unwrap().clone()))
         };
         let tools = vec![
-            make("shell", json!({"goose_extension": "developer"})),
+            make("shell", json!({"arakan_extension": "developer"})),
             make(
                 "execute_javascript",
-                json!({"goose_extension": "code_execution"}),
+                json!({"arakan_extension": "code_execution"}),
             ),
-            make("delegate", json!({"goose_extension": "summon"})),
+            make("delegate", json!({"arakan_extension": "summon"})),
             make(
                 "resource__view",
                 json!({"ui": {"resourceUri": "ui://example"}}),

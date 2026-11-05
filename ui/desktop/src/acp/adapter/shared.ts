@@ -10,7 +10,7 @@ export type AcpChatStateChange =
       type: 'sessionInfo';
       name?: string;
       activeRunId?: string | null;
-      gooseMode?: string;
+      arakanMode?: string;
     }
   | { type: 'localSteerConfirmed'; messageId: string }
   | { type: 'notification'; notification: NotificationEvent };
@@ -23,7 +23,7 @@ export interface AdapterState {
 
 export type ToolCallState = Omit<ToolCallUpdate, '_meta'>;
 
-export interface GooseMessageMeta {
+export interface ArakanMessageMeta {
   messageId?: string;
   created?: number;
   outputTokenLimitReached?: boolean;
@@ -59,29 +59,29 @@ export function cloneMessage(message: Message): Message {
   };
 }
 
-export function getGooseMessageMeta(update: { _meta?: unknown }): GooseMessageMeta {
+export function getArakanMessageMeta(update: { _meta?: unknown }): ArakanMessageMeta {
   if (!isRecord(update._meta)) {
     return {};
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose)) {
+  const arakan = update._meta.arakan;
+  if (!isRecord(arakan)) {
     return {};
   }
 
-  const outputTokenLimitReached = goose.outputTokenLimitReached === true;
-  const operationLogs = Array.isArray(goose.operationLogs)
-    ? goose.operationLogs.filter((line): line is string => typeof line === 'string')
+  const outputTokenLimitReached = arakan.outputTokenLimitReached === true;
+  const operationLogs = Array.isArray(arakan.operationLogs)
+    ? arakan.operationLogs.filter((line): line is string => typeof line === 'string')
     : undefined;
 
   return {
-    created: typeof goose.created === 'number' ? goose.created : undefined,
-    messageId: typeof goose.messageId === 'string' ? goose.messageId : undefined,
+    created: typeof arakan.created === 'number' ? arakan.created : undefined,
+    messageId: typeof arakan.messageId === 'string' ? arakan.messageId : undefined,
     outputTokenLimitReached: outputTokenLimitReached ? true : undefined,
-    fallbackContent: goose.fallbackContent === true ? true : undefined,
+    fallbackContent: arakan.fallbackContent === true ? true : undefined,
     operationLogs,
-    steer: goose.steer === true ? true : undefined,
-    inference: getInferenceMeta(goose.inference),
+    steer: arakan.steer === true ? true : undefined,
+    inference: getInferenceMeta(arakan.inference),
   };
 }
 
@@ -103,32 +103,32 @@ function getInferenceMeta(inference: unknown): InferenceMetadata | undefined {
   };
 }
 
-export function applyInferenceMeta(message: Message, gooseMeta: GooseMessageMeta): void {
-  if (message.role === 'assistant' && gooseMeta.inference) {
-    message.metadata.inference = gooseMeta.inference;
+export function applyInferenceMeta(message: Message, arakanMeta: ArakanMessageMeta): void {
+  if (message.role === 'assistant' && arakanMeta.inference) {
+    message.metadata.inference = arakanMeta.inference;
   }
 }
 
-export function getGooseActiveRunId(update: { _meta?: unknown }): string | null | undefined {
+export function getArakanActiveRunId(update: { _meta?: unknown }): string | null | undefined {
   if (!isRecord(update._meta)) {
     return undefined;
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !('activeRunId' in goose)) {
+  const arakan = update._meta.arakan;
+  if (!isRecord(arakan) || !('activeRunId' in arakan)) {
     return undefined;
   }
 
-  return typeof goose.activeRunId === 'string' || goose.activeRunId === null
-    ? goose.activeRunId
+  return typeof arakan.activeRunId === 'string' || arakan.activeRunId === null
+    ? arakan.activeRunId
     : undefined;
 }
 
-export function getGooseQueuedSteer(update: { _meta?: unknown }): string | undefined {
+export function getArakanQueuedSteer(update: { _meta?: unknown }): string | undefined {
   if (!isRecord(update._meta)) return undefined;
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !isRecord(goose.queuedSteer)) return undefined;
-  return typeof goose.queuedSteer.messageId === 'string' ? goose.queuedSteer.messageId : undefined;
+  const arakan = update._meta.arakan;
+  if (!isRecord(arakan) || !isRecord(arakan.queuedSteer)) return undefined;
+  return typeof arakan.queuedSteer.messageId === 'string' ? arakan.queuedSteer.messageId : undefined;
 }
 
 export function rawInputToArguments(rawInput: unknown): Record<string, unknown> {
@@ -140,15 +140,15 @@ export function toolIdentity(update: ToolCall | ToolCallUpdate): ToolIdentity {
     return {};
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !isRecord(goose.toolCall)) {
+  const arakan = update._meta.arakan;
+  if (!isRecord(arakan) || !isRecord(arakan.toolCall)) {
     return {};
   }
 
   return {
-    toolName: typeof goose.toolCall.toolName === 'string' ? goose.toolCall.toolName : undefined,
+    toolName: typeof arakan.toolCall.toolName === 'string' ? arakan.toolCall.toolName : undefined,
     extensionName:
-      typeof goose.toolCall.extensionName === 'string' ? goose.toolCall.extensionName : undefined,
+      typeof arakan.toolCall.extensionName === 'string' ? arakan.toolCall.extensionName : undefined,
   };
 }
 

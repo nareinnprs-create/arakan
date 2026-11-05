@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use goose::checks::{Check, DiscoveredReview};
+use arakan::checks::{Check, DiscoveredReview};
 
 /// The default review prompt embedded in the binary.
 pub const DEFAULT_REVIEW_PROMPT: &str = include_str!("default_review_prompt.md");

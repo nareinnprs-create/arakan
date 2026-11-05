@@ -8,14 +8,14 @@ use agent_client_protocol::schema::v1::{
 use agent_client_protocol::{Client, DynConnectTo};
 use async_trait::async_trait;
 use futures::StreamExt;
-use goose::acp::{AcpProvider, AcpProviderConfig};
-use goose::config::{GooseMode, PermissionManager};
-use goose::conversation::message::{ActionRequiredData, Message, MessageContent};
-use goose::permission::permission_confirmation::PrincipalType;
-use goose::permission::{Permission, PermissionConfirmation};
-use goose::providers::base::Provider;
-use goose_providers::model::ModelConfig;
-use goose_test_support::{ExpectedSessionId, IgnoreSessionId, TEST_MODEL};
+use arakan::acp::{AcpProvider, AcpProviderConfig};
+use arakan::config::{ArakanMode, PermissionManager};
+use arakan::conversation::message::{ActionRequiredData, Message, MessageContent};
+use arakan::permission::permission_confirmation::PrincipalType;
+use arakan::permission::{Permission, PermissionConfirmation};
+use arakan::providers::base::Provider;
+use arakan_providers::model::ModelConfig;
+use arakan_test_support::{ExpectedSessionId, IgnoreSessionId, TEST_MODEL};
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -75,7 +75,7 @@ impl AcpProviderSession {
             .get(session_id.as_ref())
             .cloned()
             .unwrap_or_else(|| ModelConfig::new(TEST_MODEL));
-        let mut stream = goose::session_context::with_session_id(
+        let mut stream = arakan::session_context::with_session_id(
             Some(session_id.to_string()),
             provider.stream(&model_config, "", &[message], &[]),
         )
@@ -151,7 +151,7 @@ impl Connection for AcpProviderConnection {
             false => (config.data_root.clone(), None),
         };
 
-        let goose_mode = config.goose_mode;
+        let arakan_mode = config.arakan_mode;
         let mcp_servers = config.mcp_servers;
 
         let current_model = config.current_model.clone();
@@ -159,7 +159,7 @@ impl Connection for AcpProviderConnection {
             openai.uri(),
             &config.builtins,
             data_root.as_path(),
-            goose_mode,
+            arakan_mode,
             config.provider_factory,
             &current_model,
             config.disable_session_naming,
@@ -185,10 +185,10 @@ impl Connection for AcpProviderConnection {
             session_mode_id: None,
             session_config_options: vec![],
             model_config_option_id: None,
-            mode_mapping: GooseMode::VARIANTS
+            mode_mapping: ArakanMode::VARIANTS
                 .iter()
                 .map(|v| {
-                    let mode = GooseMode::from_str(v).unwrap();
+                    let mode = ArakanMode::from_str(v).unwrap();
                     (mode, vec![mode.to_string()])
                 })
                 .collect(),
@@ -200,7 +200,7 @@ impl Connection for AcpProviderConnection {
         let transport: DynConnectTo<Client> = DynConnectTo::new(transport.into_byte_streams());
         let provider = AcpProvider::connect_with_transport(
             "acp-test".to_string(),
-            goose_mode,
+            arakan_mode,
             provider_config,
             transport,
         )
@@ -223,7 +223,7 @@ impl Connection for AcpProviderConnection {
 
     async fn new_session(&mut self) -> anyhow::Result<SessionData<AcpProviderSession>> {
         self.session_counter += 1;
-        let goose_id = format!("test-session-{}", self.session_counter);
+        let arakan_id = format!("test-session-{}", self.session_counter);
 
         let models = {
             let provider = self.provider.lock().await;
@@ -237,7 +237,7 @@ impl Connection for AcpProviderConnection {
 
         let session = AcpProviderSession {
             provider: Arc::clone(&self.provider),
-            session_id: agent_client_protocol::schema::v1::SessionId::new(goose_id),
+            session_id: agent_client_protocol::schema::v1::SessionId::new(arakan_id),
             notification_sink: self.notification_sink.clone(),
             session_models: self.session_models.clone(),
             work_dir: self.work_dir.clone(),

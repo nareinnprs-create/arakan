@@ -2,7 +2,7 @@ use crate::acp::server::{
     acp_services_config, AcpBuiltinSelection, AcpConnection, AcpConnectionOptions,
     AcpProviderFactory, LiveVoiceService,
 };
-use crate::agents::GoosePlatform;
+use crate::agents::ArakanPlatform;
 use crate::agents::StateMachineServices;
 use crate::config::paths::Paths;
 use crate::session::SessionManager;
@@ -15,7 +15,7 @@ use tracing::info;
 pub struct AcpServerFactoryConfig {
     pub builtins: AcpBuiltinSelection,
     pub config_dir: std::path::PathBuf,
-    pub goose_platform: GoosePlatform,
+    pub arakan_platform: ArakanPlatform,
     pub additional_source_roots: Vec<SourceRoot>,
     /// When set, new sessions use this host-controlled working directory
     /// instead of the `cwd` the connecting client sends. Used by roaming, where
@@ -43,7 +43,7 @@ impl AcpServer {
     }
 
     /// Builds the services, and with them the scheduler, before any client connects, so
-    /// a headless `goose serve` runs scheduled jobs; on failure the first connection retries.
+    /// a headless `arakan serve` runs scheduled jobs; on failure the first connection retries.
     pub async fn start_scheduler(&self) -> Result<()> {
         self.services().await.map(|_| ())
     }
@@ -72,9 +72,9 @@ impl AcpServer {
                     session_manager,
                     self.config.config_dir.clone(),
                     crate::config::Config::global()
-                        .get_goose_disable_session_naming()
+                        .get_arakan_disable_session_naming()
                         .unwrap_or(false),
-                    self.config.goose_platform.clone(),
+                    self.config.arakan_platform.clone(),
                 );
                 anyhow::Ok(StateMachineServices::with_config(
                     crate::agents::StateMachineServicesConfig {
@@ -93,7 +93,7 @@ impl AcpServer {
     }
 
     /// Create an agent whose sessions use `session_cwd` instead of this
-    /// server's configured default. Used by the roaming bridge on `goose
+    /// server's configured default. Used by the roaming bridge on `arakan
     /// serve --roam`: the serve-wide server keeps `session_cwd: None` for
     /// local ACP clients whose paths are real on this machine, while each
     /// roaming connection gets a host-controlled working directory (the
@@ -150,7 +150,7 @@ mod tests {
             AcpServerFactoryConfig {
                 builtins: AcpBuiltinSelection::default(),
                 config_dir: data_dir.clone(),
-                goose_platform: GoosePlatform::GooseCli,
+                arakan_platform: ArakanPlatform::ArakanCli,
                 additional_source_roots: Vec::new(),
                 session_cwd: None,
                 enable_scheduler,

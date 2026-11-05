@@ -9,7 +9,7 @@ use crate::hints::load_hints::build_gitignore;
 use crate::hints::{get_context_filenames, load_hint_files};
 use crate::session::Session;
 use crate::{
-    config::{Config, GooseMode},
+    config::{Config, ArakanMode},
     prompt_template,
     utils::sanitize_unicode_tags,
 };
@@ -29,7 +29,7 @@ impl Default for PromptManager {
 struct SystemPromptContext {
     extensions: Vec<ExtensionInfo>,
     current_date_time: String,
-    goose_mode: GooseMode,
+    arakan_mode: ArakanMode,
     is_autonomous: bool,
     code_execution_mode: bool,
     include_extensions: bool,
@@ -46,7 +46,7 @@ pub struct SystemPromptBuilder<'a, M> {
     hints: Option<String>,
     code_execution_mode: bool,
     include_extensions: bool,
-    goose_mode: Option<GooseMode>,
+    arakan_mode: Option<ArakanMode>,
 }
 
 impl<'a> SystemPromptBuilder<'a, PromptManager> {
@@ -99,8 +99,8 @@ impl<'a> SystemPromptBuilder<'a, PromptManager> {
         self
     }
 
-    pub fn with_goose_mode(mut self, mode: GooseMode) -> Self {
-        self.goose_mode = Some(mode);
+    pub fn with_arakan_mode(mut self, mode: ArakanMode) -> Self {
+        self.arakan_mode = Some(mode);
         self
     }
 
@@ -121,15 +121,15 @@ impl<'a> SystemPromptBuilder<'a, PromptManager> {
                 ext_info
             })
             .collect();
-        let goose_mode = self
-            .goose_mode
-            .unwrap_or_else(|| Config::global().get_goose_mode().unwrap_or_default());
+        let arakan_mode = self
+            .arakan_mode
+            .unwrap_or_else(|| Config::global().get_arakan_mode().unwrap_or_default());
 
         let context = SystemPromptContext {
             extensions: sanitized_extensions_info,
             current_date_time: self.manager.current_date_timestamp.clone(),
-            goose_mode,
-            is_autonomous: goose_mode == GooseMode::Auto,
+            arakan_mode,
+            is_autonomous: arakan_mode == ArakanMode::Auto,
             code_execution_mode: self.code_execution_mode,
             include_extensions: self.include_extensions,
             moim_system_prompt_block: moim::system_prompt_block(),
@@ -150,7 +150,7 @@ impl<'a> SystemPromptBuilder<'a, PromptManager> {
             extras.insert("hints".to_string(), hints);
         }
 
-        if goose_mode == GooseMode::Chat {
+        if arakan_mode == ArakanMode::Chat {
             extras.insert(
                 "chat_mode".to_string(),
                 "Right now you are in the chat only mode, no access to any tool use and system."
@@ -216,10 +216,10 @@ impl PromptManager {
         &self,
         session: &Session,
         prompt_parts: Vec<(String, String)>,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> anyhow::Result<String> {
         Ok(self
-            .build_system_prompt_parts(session, prompt_parts, goose_mode)?
+            .build_system_prompt_parts(session, prompt_parts, arakan_mode)?
             .join())
     }
 
@@ -227,13 +227,13 @@ impl PromptManager {
         &self,
         session: &Session,
         prompt_parts: Vec<(String, String)>,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> anyhow::Result<SystemPromptParts> {
         self.builder()
             .with_session(session)
             .with_prompt_extras(prompt_parts)
             .with_hints(&session.working_dir)
-            .with_goose_mode(goose_mode)
+            .with_arakan_mode(arakan_mode)
             .without_extensions()
             .build_parts()
     }
@@ -248,7 +248,7 @@ impl PromptManager {
             hints: None,
             code_execution_mode: false,
             include_extensions: true,
-            goose_mode: None,
+            arakan_mode: None,
         }
     }
 }
@@ -360,7 +360,7 @@ mod tests {
                     "extensions".to_string(),
                     "# Extensions\n\n## developer".to_string(),
                 )],
-                GooseMode::Auto,
+                ArakanMode::Auto,
             )
             .unwrap();
 
@@ -536,7 +536,7 @@ mod tests {
     #[tokio::test]
     async fn test_all_platform_extensions() {
         use crate::agents::platform_extensions::{PlatformExtensionContext, PLATFORM_EXTENSIONS};
-        use crate::config::GooseMode;
+        use crate::config::ArakanMode;
         use crate::session::SessionManager;
         use std::sync::Arc;
 
@@ -544,7 +544,7 @@ mod tests {
         let temp_root = tmp_dir.path().display().to_string();
         let _guard = env_lock::lock_env([
             ("HOME", Some(temp_root.as_str())),
-            ("GOOSE_PATH_ROOT", Some(temp_root.as_str())),
+            ("ARAKAN_PATH_ROOT", Some(temp_root.as_str())),
         ]);
         let session_manager = Arc::new(SessionManager::new(tmp_dir.path().to_path_buf()));
         let session = session_manager
@@ -552,7 +552,7 @@ mod tests {
                 tmp_dir.path().to_path_buf(),
                 "test session".to_owned(),
                 crate::session::SessionType::Hidden,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();

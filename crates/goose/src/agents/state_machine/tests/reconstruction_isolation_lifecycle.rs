@@ -38,10 +38,10 @@ async fn reconstruction_and_session_isolation() -> Result<()> {
     use crate::agents::final_output_tool::FINAL_OUTPUT_TOOL_NAME;
     use crate::agents::platform_extensions::MANAGE_EXTENSIONS_TOOL_NAME_COMPLETE;
     use crate::agents::tool_execution::CHAT_MODE_TOOL_SKIPPED_RESPONSE;
-    use crate::config::GooseMode;
+    use crate::config::ArakanMode;
     use crate::conversation::message::MessageContent;
     use crate::recipe::{Recipe, Response};
-    use goose_providers::model::ModelConfig;
+    use arakan_providers::model::ModelConfig;
 
     let (pipeline, api) = test_pipeline_with(ProviderFeatures {
         cache_read_tokens: Some(11),
@@ -81,7 +81,7 @@ async fn reconstruction_and_session_isolation() -> Result<()> {
     let pipeline = pipeline
         .with_model_config(model_config)
         .await
-        .with_goose_mode(GooseMode::Chat)
+        .with_arakan_mode(ArakanMode::Chat)
         .await;
 
     let pipeline = pipeline.reconstruct().await?.with_max_turns(2);
@@ -95,7 +95,7 @@ async fn reconstruction_and_session_isolation() -> Result<()> {
         Some("gpt-4o")
     );
     assert_eq!(pipeline.context_limit(), 128_000);
-    assert_eq!(restored.goose_mode, GooseMode::Chat);
+    assert_eq!(restored.arakan_mode, ArakanMode::Chat);
     assert_eq!(
         restored.recipe.as_ref().map(|recipe| recipe.title.as_str()),
         Some("Persisted recipe")
@@ -139,7 +139,7 @@ async fn reconstruction_and_session_isolation() -> Result<()> {
     assert!(restored_call.advertises_tool("analyze"));
     assert!(restored_call.advertises_tool(FINAL_OUTPUT_TOOL_NAME));
 
-    let pipeline = pipeline.with_goose_mode(GooseMode::Auto).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Auto).await;
     let pipeline = pipeline.reconstruct().await?;
     api.on("collect restored structured state").call(
         FINAL_OUTPUT_TOOL_NAME,
@@ -148,7 +148,7 @@ async fn reconstruction_and_session_isolation() -> Result<()> {
     let restored_auto = pipeline.run(["collect restored structured state"]).await?;
     restored_auto.assert_message(-1, Agent, r#"{"answer":"state restored"}"#);
 
-    let pipeline = pipeline.with_goose_mode(GooseMode::Chat).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Chat).await;
     pipeline
         .session_manager
         .update(&pipeline.session_id)
@@ -165,7 +165,7 @@ async fn reconstruction_and_session_isolation() -> Result<()> {
     chat.assert_message(-1, Agent, "chat mode kept the tool idle");
     assert_eq!(pipeline.calculator_total(), 0);
 
-    let pipeline = pipeline.with_goose_mode(GooseMode::Auto).await;
+    let pipeline = pipeline.with_arakan_mode(ArakanMode::Auto).await;
     let pipeline = pipeline.reconstruct().await?.with_max_turns(2);
     api.on("keep adding").call(ADD, value(1));
     let calls_before = api.call_count();

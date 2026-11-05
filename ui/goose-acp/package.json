@@ -1,14 +1,14 @@
 {
-  "name": "@aaif/goose-acp",
+  "name": "@aaif/arakan-acp",
   "version": "1.58.0",
-  "description": "Install and resolve the Goose executable through npm",
+  "description": "Install and resolve the Arakan executable through npm",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aaif-goose/goose.git"
+    "url": "git+https://github.com/aaif-arakan/arakan.git"
   },
   "keywords": [
-    "goose",
+    "arakan",
     "ai",
     "agent",
     "acp",
@@ -24,7 +24,7 @@
     }
   },
   "bin": {
-    "goose": "./bin/goose.mjs"
+    "arakan": "./bin/arakan.mjs"
   },
   "files": [
     "bin",
@@ -38,11 +38,11 @@
     "prepack": "npm run build"
   },
   "optionalDependencies": {
-    "@aaif/goose-binary-darwin-arm64": "workspace:*",
-    "@aaif/goose-binary-darwin-x64": "workspace:*",
-    "@aaif/goose-binary-linux-arm64": "workspace:*",
-    "@aaif/goose-binary-linux-x64": "workspace:*",
-    "@aaif/goose-binary-win32-x64": "workspace:*"
+    "@aaif/arakan-binary-darwin-arm64": "workspace:*",
+    "@aaif/arakan-binary-darwin-x64": "workspace:*",
+    "@aaif/arakan-binary-linux-arm64": "workspace:*",
+    "@aaif/arakan-binary-linux-x64": "workspace:*",
+    "@aaif/arakan-binary-win32-x64": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",

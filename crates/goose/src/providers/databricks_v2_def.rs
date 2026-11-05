@@ -1,11 +1,11 @@
 use anyhow::Result;
 use futures::future::BoxFuture;
-use goose_providers::api_client::TlsConfig;
-use goose_providers::base::ProviderDescriptor;
-use goose_providers::databricks_auth::{
+use arakan_providers::api_client::TlsConfig;
+use arakan_providers::base::ProviderDescriptor;
+use arakan_providers::databricks_auth::{
     DatabricksAuth, DatabricksOauthTokenProvider, DatabricksRefreshHook, DatabricksTokenResolver,
 };
-use goose_providers::databricks_v2::DatabricksV2Provider;
+use arakan_providers::databricks_v2::DatabricksV2Provider;
 use std::sync::Arc;
 
 use crate::config::{Config, ConfigError, ExtensionConfig};
@@ -14,7 +14,7 @@ use crate::providers::base::ProviderDef;
 pub struct DatabricksV2ProviderDef;
 
 impl ProviderDescriptor for DatabricksV2ProviderDef {
-    fn metadata() -> goose_providers::base::ProviderMetadata {
+    fn metadata() -> arakan_providers::base::ProviderMetadata {
         DatabricksV2Provider::metadata().with_setup(
             crate::providers::catalog::ProviderSetupMetadata::new(
                 crate::providers::catalog::ProviderSetupCategory::Model,

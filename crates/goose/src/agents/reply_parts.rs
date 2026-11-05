@@ -1,5 +1,5 @@
 use anyhow::Result;
-use goose_providers::errors::ProviderError;
+use arakan_providers::errors::ProviderError;
 use regex::Regex;
 use std::sync::Arc;
 
@@ -19,8 +19,8 @@ use crate::providers::toolshim::{
     augment_message_with_selected_tool_interpreter, convert_tool_messages_to_text,
     modify_system_prompt_for_tool_json, sanitize_residual_markers,
 };
-use goose_providers::conversation::token_usage::{ProviderStats, ProviderUsage};
-use goose_providers::model::ModelConfig;
+use arakan_providers::conversation::token_usage::{ProviderStats, ProviderUsage};
+use arakan_providers::model::ModelConfig;
 use rmcp::model::Tool;
 use tracing::warn;
 
@@ -290,7 +290,7 @@ pub(crate) async fn stream_response_from_provider(
     // Capture errors during stream creation and return them as part of the stream
     // so they can be handled by the existing error handling logic in the agent
     let model_config =
-        model_config.with_default_thinking_effort(Config::global().get_goose_thinking_effort());
+        model_config.with_default_thinking_effort(Config::global().get_arakan_thinking_effort());
     let request_started = std::time::Instant::now();
     debug!("WAITING_LLM_STREAM_START");
     let stream_result = crate::session_context::with_session_id(
@@ -333,7 +333,7 @@ pub(crate) async fn stream_response_from_provider(
                         break;
                     }
                     Some(Err(error))
-                        if goose_providers::retry::should_retry(&error, &retry_config)
+                        if arakan_providers::retry::should_retry(&error, &retry_config)
                             && attempts < retry_config.max_retries =>
                     {
                         attempts += 1;
@@ -349,7 +349,7 @@ pub(crate) async fn stream_response_from_provider(
                             attempts, retry_config.max_retries, error
                         );
 
-                        let skip_backoff = std::env::var("GOOSE_PROVIDER_SKIP_BACKOFF")
+                        let skip_backoff = std::env::var("ARAKAN_PROVIDER_SKIP_BACKOFF")
                             .unwrap_or_default()
                             .parse::<bool>()
                             .unwrap_or(false);
@@ -539,8 +539,8 @@ mod tests {
     use crate::conversation::message::{Message, SystemNotificationType};
     use crate::providers::base::Provider;
     use async_trait::async_trait;
-    use goose_providers::conversation::token_usage::{ProviderStats, ProviderUsage, Usage};
-    use goose_providers::model::ModelConfig;
+    use arakan_providers::conversation::token_usage::{ProviderStats, ProviderUsage, Usage};
+    use arakan_providers::model::ModelConfig;
     use rmcp::model::{Annotations, Role, TextContent};
     use rmcp::object;
     use std::sync::Mutex;
@@ -601,7 +601,7 @@ mod tests {
     #[tokio::test]
     async fn provider_stream_records_gen_ai_span_attributes() {
         use futures::StreamExt;
-        use goose_test_support::otel::clear_otel_env;
+        use arakan_test_support::otel::clear_otel_env;
 
         let _env = clear_otel_env(&[(gen_ai_telemetry::CAPTURE_MESSAGE_CONTENT_ENV, "true")]);
         let capture = SpanFieldCapture::new("stream_response_from_provider");
@@ -1272,8 +1272,8 @@ mod tests {
             "sequenced"
         }
 
-        fn retry_config(&self) -> goose_providers::retry::RetryConfig {
-            goose_providers::retry::RetryConfig::new(2, 0, 1.0, 0)
+        fn retry_config(&self) -> arakan_providers::retry::RetryConfig {
+            arakan_providers::retry::RetryConfig::new(2, 0, 1.0, 0)
         }
 
         fn manages_own_context(&self) -> bool {
@@ -1464,10 +1464,10 @@ mod tests {
         let mut final_output = make_tool_with_meta(None);
         final_output.name = FINAL_OUTPUT_TOOL_NAME.into();
         let mut extension_final_output =
-            make_tool_with_meta(Some(serde_json::json!({"goose_extension": "recipe"})));
+            make_tool_with_meta(Some(serde_json::json!({"arakan_extension": "recipe"})));
         extension_final_output.name = FINAL_OUTPUT_TOOL_NAME.into();
         let mut first_class =
-            make_tool_with_meta(Some(serde_json::json!({"goose_extension": "developer"})));
+            make_tool_with_meta(Some(serde_json::json!({"arakan_extension": "developer"})));
         first_class.name = "shell".into();
         let mut resource = make_tool_with_meta(Some(
             serde_json::json!({"ui": {"resourceUri": "ui://example"}}),
@@ -1475,7 +1475,7 @@ mod tests {
         resource.name = "resource__view".into();
         let ordinary = make_tool_with_meta(None);
         let hidden = make_tool_with_meta(Some(
-            serde_json::json!({"goose_extension": "developer", "ui": {"visibility": ["app"]}}),
+            serde_json::json!({"arakan_extension": "developer", "ui": {"visibility": ["app"]}}),
         ));
         let filtered = prepare_inference_tools(
             vec![

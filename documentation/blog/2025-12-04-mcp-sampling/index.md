@@ -8,7 +8,7 @@ authors:
 ![](mcp-sampling.png)
 
 :::note
-This post describes a historical MCP feature. [Sampling was deprecated](https://modelcontextprotocol.io/specification/2026-07-28/deprecated) in the 2026-07-28 MCP specification, and goose no longer supports it. MCP servers that need model inference should integrate directly with an LLM provider API.
+This post describes a historical MCP feature. [Sampling was deprecated](https://modelcontextprotocol.io/specification/2026-07-28/deprecated) in the 2026-07-28 MCP specification, and arakan no longer supports it. MCP servers that need model inference should integrate directly with an LLM provider API.
 :::
 
 If you've been following MCP, you've probably heard about tools which are functions that let AI assistants do things like read files, query databases, or call APIs. But there's another MCP feature that's less talked about and arguably more interesting: **[Sampling](https://modelcontextprotocol.io/docs/learn/client-concepts#sampling)**.
@@ -34,7 +34,7 @@ Ask the AI that's already connected to do the thinking for you. No extra API key
 
 ## How Sampling Works
 
-When an MCP client like goose connects to an MCP server, it establishes a two-way channel. The server can expose tools for the AI to call, but it can also *request* that the AI generate text on its behalf.
+When an MCP client like arakan connects to an MCP server, it establishes a two-way channel. The server can expose tools for the AI to call, but it can also *request* that the AI generate text on its behalf.
 
 Here's what that looks like in code (using Python with FastMCP):
 
@@ -198,12 +198,12 @@ This isn't bulletproof, but it raises the bar significantly.
 <head>
   <meta property="og:title" content="MCP Sampling: When Your Tools Need to Think" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/12/04/mcp-sampling" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/12/04/mcp-sampling" />
   <meta property="og:description" content="Learn how MCP Sampling lets your tools call the AI instead of the other way around." />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/mcp-sampling-4e857d422eb4fcbfbf474003069ba732.png" />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/mcp-sampling-4e857d422eb4fcbfbf474003069ba732.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
   <meta name="twitter:title" content="MCP Sampling: When Your Tools Need to Think" />
   <meta name="twitter:description" content="Learn how MCP Sampling lets your tools call the AI instead of the other way around." />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/mcp-sampling-4e857d422eb4fcbfbf474003069ba732.png" />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/mcp-sampling-4e857d422eb4fcbfbf474003069ba732.png" />
 </head>

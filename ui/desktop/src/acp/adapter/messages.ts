@@ -8,7 +8,7 @@ import {
   type AdapterState,
   applyInferenceMeta,
   DEFAULT_VISIBLE_MESSAGE_METADATA,
-  getGooseMessageMeta,
+  getArakanMessageMeta,
   messagesChange,
 } from './shared';
 
@@ -27,58 +27,58 @@ export function applyContentChunk(
     return [];
   }
 
-  const gooseMeta = getGooseMessageMeta(update);
-  const messageId = update.messageId ?? gooseMeta.messageId;
-  const existing = findMessageForChunk(state, role, messageId, gooseMeta.created);
+  const arakanMeta = getArakanMessageMeta(update);
+  const messageId = update.messageId ?? arakanMeta.messageId;
+  const existing = findMessageForChunk(state, role, messageId, arakanMeta.created);
 
   if (existing) {
     const isOutputLimitFallbackChunk =
-      gooseMeta.outputTokenLimitReached === true && gooseMeta.fallbackContent === true;
+      arakanMeta.outputTokenLimitReached === true && arakanMeta.fallbackContent === true;
     const existingMessageHasContent = existing.content.length > 0;
     const shouldSkipFallbackChunk = isOutputLimitFallbackChunk && existingMessageHasContent;
 
-    existing.metadata.outputTokenLimitReached = gooseMeta.outputTokenLimitReached;
+    existing.metadata.outputTokenLimitReached = arakanMeta.outputTokenLimitReached;
     existing.metadata.fallbackContent = shouldSkipFallbackChunk
       ? undefined
-      : gooseMeta.fallbackContent;
-    if (gooseMeta.operationLogs) {
-      existing.metadata.operationLogs = gooseMeta.operationLogs;
+      : arakanMeta.fallbackContent;
+    if (arakanMeta.operationLogs) {
+      existing.metadata.operationLogs = arakanMeta.operationLogs;
     }
-    applyInferenceMeta(existing, gooseMeta);
+    applyInferenceMeta(existing, arakanMeta);
 
     if (shouldSkipFallbackChunk) {
-      return messagesChangeWithLocalSteerConfirmation(state, existing, gooseMeta.steer);
+      return messagesChangeWithLocalSteerConfirmation(state, existing, arakanMeta.steer);
     }
 
     const lastContent = existing.content[existing.content.length - 1];
-    if (reconcileLocalSteerTextChunk(state, existing, content, gooseMeta.steer)) {
-      return messagesChangeWithLocalSteerConfirmation(state, existing, gooseMeta.steer);
+    if (reconcileLocalSteerTextChunk(state, existing, content, arakanMeta.steer)) {
+      return messagesChangeWithLocalSteerConfirmation(state, existing, arakanMeta.steer);
     }
 
     if (lastContent?.type === 'text' && content.type === 'text') {
       lastContent.text += content.text;
     } else if (content.type === 'image' && hasImageContent(existing, content)) {
-      return messagesChangeWithLocalSteerConfirmation(state, existing, gooseMeta.steer);
+      return messagesChangeWithLocalSteerConfirmation(state, existing, arakanMeta.steer);
     } else {
       existing.content.push(content);
     }
 
-    return messagesChangeWithLocalSteerConfirmation(state, existing, gooseMeta.steer);
+    return messagesChangeWithLocalSteerConfirmation(state, existing, arakanMeta.steer);
   } else {
     const message: Message = {
       ...(messageId ? { id: messageId } : {}),
       role,
-      created: gooseMeta.created ?? Math.floor(Date.now() / 1000),
+      created: arakanMeta.created ?? Math.floor(Date.now() / 1000),
       content: [content],
       metadata: {
         ...DEFAULT_VISIBLE_MESSAGE_METADATA,
-        ...(gooseMeta.steer ? { steer: true } : {}),
-        outputTokenLimitReached: gooseMeta.outputTokenLimitReached,
-        fallbackContent: gooseMeta.fallbackContent,
-        ...(gooseMeta.operationLogs ? { operationLogs: gooseMeta.operationLogs } : {}),
+        ...(arakanMeta.steer ? { steer: true } : {}),
+        outputTokenLimitReached: arakanMeta.outputTokenLimitReached,
+        fallbackContent: arakanMeta.fallbackContent,
+        ...(arakanMeta.operationLogs ? { operationLogs: arakanMeta.operationLogs } : {}),
       },
     };
-    applyInferenceMeta(message, gooseMeta);
+    applyInferenceMeta(message, arakanMeta);
     state.messages.push(message);
   }
 
@@ -93,26 +93,26 @@ export function applyThoughtChunk(
     return [];
   }
 
-  const gooseMeta = getGooseMessageMeta(update);
-  const messageId = update.messageId ?? gooseMeta.messageId;
-  let message = findMessageForChunk(state, 'assistant', messageId, gooseMeta.created);
+  const arakanMeta = getArakanMessageMeta(update);
+  const messageId = update.messageId ?? arakanMeta.messageId;
+  let message = findMessageForChunk(state, 'assistant', messageId, arakanMeta.created);
 
   if (!message) {
     message = {
       ...(messageId ? { id: messageId } : {}),
       role: 'assistant',
-      created: gooseMeta.created ?? Math.floor(Date.now() / 1000),
+      created: arakanMeta.created ?? Math.floor(Date.now() / 1000),
       content: [],
       metadata: { ...DEFAULT_VISIBLE_MESSAGE_METADATA },
     };
     state.messages.push(message);
   }
 
-  message.metadata.outputTokenLimitReached = gooseMeta.outputTokenLimitReached;
-  if (gooseMeta.operationLogs) {
-    message.metadata.operationLogs = gooseMeta.operationLogs;
+  message.metadata.outputTokenLimitReached = arakanMeta.outputTokenLimitReached;
+  if (arakanMeta.operationLogs) {
+    message.metadata.operationLogs = arakanMeta.operationLogs;
   }
-  applyInferenceMeta(message, gooseMeta);
+  applyInferenceMeta(message, arakanMeta);
 
   const lastContent = message.content[message.content.length - 1];
   if (lastContent?.type === 'thinking') {

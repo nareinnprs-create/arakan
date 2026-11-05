@@ -1,7 +1,7 @@
 use crate::agents::platform_extensions::MANAGE_EXTENSIONS_TOOL_NAME_COMPLETE;
 use crate::agents::provider_manager::ProviderManager;
 use crate::config::permission::PermissionLevel;
-use crate::config::{GooseMode, PermissionManager};
+use crate::config::{ArakanMode, PermissionManager};
 use crate::conversation::message::{Message, ToolRequest};
 use crate::permission::permission_judge::{detect_read_only_requests, PermissionCheckResult};
 use crate::tool_inspection::{InspectionAction, InspectionResult, ToolInspector};
@@ -146,7 +146,7 @@ impl ToolInspector for PermissionInspector {
         session_id: &str,
         tool_requests: &[ToolRequest],
         _messages: &[Message],
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> Result<Vec<InspectionResult>> {
         let mut results = Vec::new();
         let permission_manager = &self.permission_manager;
@@ -156,10 +156,10 @@ impl ToolInspector for PermissionInspector {
             if let Ok(tool_call) = &request.tool_call {
                 let tool_name = &tool_call.name;
 
-                let action = match goose_mode {
-                    GooseMode::Chat => continue,
-                    GooseMode::Auto => InspectionAction::Allow,
-                    GooseMode::Approve | GooseMode::SmartApprove => {
+                let action = match arakan_mode {
+                    ArakanMode::Chat => continue,
+                    ArakanMode::Auto => InspectionAction::Allow,
+                    ArakanMode::Approve | ArakanMode::SmartApprove => {
                         // 1. Check user-defined permission first
                         if let Some(level) = permission_manager.get_user_permission(tool_name) {
                             match level {
@@ -170,7 +170,7 @@ impl ToolInspector for PermissionInspector {
                                 }
                             }
                         // 2. Check for a read-only annotation in SmartApprove mode
-                        } else if goose_mode == GooseMode::SmartApprove
+                        } else if arakan_mode == ArakanMode::SmartApprove
                             && self.is_readonly_annotated_tool(tool_name)
                         {
                             InspectionAction::Allow
@@ -180,7 +180,7 @@ impl ToolInspector for PermissionInspector {
                                 "Extension management requires approval for security".to_string(),
                             ))
                         // 4. Defer to LLM detection (SmartApprove, uncached or legacy cached allow)
-                        } else if goose_mode == GooseMode::SmartApprove
+                        } else if arakan_mode == ArakanMode::SmartApprove
                             && matches!(
                                 permission_manager.get_smart_approve_permission(tool_name),
                                 None | Some(PermissionLevel::AlwaysAllow)
@@ -197,7 +197,7 @@ impl ToolInspector for PermissionInspector {
 
                 let reason = match &action {
                     InspectionAction::Allow => {
-                        if goose_mode == GooseMode::Auto {
+                        if arakan_mode == ArakanMode::Auto {
                             "Auto mode - all tools approved".to_string()
                         } else if self.is_readonly_annotated_tool(tool_name) {
                             "Tool annotated as read-only".to_string()
@@ -282,7 +282,7 @@ mod tests {
     use test_case::test_case;
 
     async fn inspect_tool(
-        mode: GooseMode,
+        mode: ArakanMode,
         smart_approved: bool,
         user_permission: Option<PermissionLevel>,
         smart_approve_cache: Option<PermissionLevel>,
@@ -309,7 +309,7 @@ mod tests {
             tool_meta: None,
         };
         let mut results = inspector
-            .inspect(goose_test_support::TEST_SESSION_ID, &[req], &[], mode)
+            .inspect(arakan_test_support::TEST_SESSION_ID, &[req], &[], mode)
             .await
             .unwrap();
 
@@ -319,17 +319,17 @@ mod tests {
         )
     }
 
-    #[test_case(GooseMode::Auto, false, None, InspectionAction::Allow; "auto_allows")]
-    #[test_case(GooseMode::SmartApprove, true, None, InspectionAction::Allow; "smart_approve_annotation_allows")]
-    #[test_case(GooseMode::SmartApprove, false, Some(PermissionLevel::AlwaysAllow), InspectionAction::RequireApproval(None); "smart_approve_ignores_legacy_cached_allow")]
-    #[test_case(GooseMode::SmartApprove, false, Some(PermissionLevel::AskBefore), InspectionAction::RequireApproval(None); "smart_approve_cached_ask")]
-    #[test_case(GooseMode::SmartApprove, false, None, InspectionAction::RequireApproval(None); "smart_approve_unknown_defers")]
-    #[test_case(GooseMode::Approve, false, None, InspectionAction::RequireApproval(None); "approve_requires_approval")]
-    #[test_case(GooseMode::Approve, false, Some(PermissionLevel::AlwaysAllow), InspectionAction::RequireApproval(None); "approve_ignores_cache")]
-    #[test_case(GooseMode::Approve, true, None, InspectionAction::RequireApproval(None); "approve_ignores_annotation")]
+    #[test_case(ArakanMode::Auto, false, None, InspectionAction::Allow; "auto_allows")]
+    #[test_case(ArakanMode::SmartApprove, true, None, InspectionAction::Allow; "smart_approve_annotation_allows")]
+    #[test_case(ArakanMode::SmartApprove, false, Some(PermissionLevel::AlwaysAllow), InspectionAction::RequireApproval(None); "smart_approve_ignores_legacy_cached_allow")]
+    #[test_case(ArakanMode::SmartApprove, false, Some(PermissionLevel::AskBefore), InspectionAction::RequireApproval(None); "smart_approve_cached_ask")]
+    #[test_case(ArakanMode::SmartApprove, false, None, InspectionAction::RequireApproval(None); "smart_approve_unknown_defers")]
+    #[test_case(ArakanMode::Approve, false, None, InspectionAction::RequireApproval(None); "approve_requires_approval")]
+    #[test_case(ArakanMode::Approve, false, Some(PermissionLevel::AlwaysAllow), InspectionAction::RequireApproval(None); "approve_ignores_cache")]
+    #[test_case(ArakanMode::Approve, true, None, InspectionAction::RequireApproval(None); "approve_ignores_annotation")]
     #[tokio::test]
     async fn test_inspect_action(
-        mode: GooseMode,
+        mode: ArakanMode,
         smart_approved: bool,
         cache: Option<PermissionLevel>,
         expected: InspectionAction,
@@ -347,7 +347,7 @@ mod tests {
         expected: InspectionAction,
     ) {
         let (action, cache) = inspect_tool(
-            GooseMode::SmartApprove,
+            ArakanMode::SmartApprove,
             false,
             Some(user_permission),
             Some(PermissionLevel::AlwaysAllow),
@@ -361,7 +361,7 @@ mod tests {
     #[tokio::test]
     async fn smart_approve_rejudges_legacy_cached_allow() {
         let (action, cache) = inspect_tool(
-            GooseMode::SmartApprove,
+            ArakanMode::SmartApprove,
             false,
             None,
             Some(PermissionLevel::AlwaysAllow),

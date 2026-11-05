@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import os from 'node:os';
 
-import type { Logger } from './gooseServe';
+import type { Logger } from './arakanServe';
 
 const RESOLVE_TIMEOUT_MS = 5000;
 
@@ -10,8 +10,8 @@ const RESOLVE_TIMEOUT_MS = 5000;
  *
  * Apps launched from Finder, the Dock or a Linux app menu get the session's
  * PATH, which misses what shell profiles add (Homebrew, nvm, pyenv, ...).
- * Resolving it here rather than in goose keeps the goose CLI on the PATH it
- * was started with. Inside Flatpak this would run the sandbox's shell, so goose
+ * Resolving it here rather than in arakan keeps the arakan CLI on the PATH it
+ * was started with. Inside Flatpak this would run the sandbox's shell, so arakan
  * resolves the host's PATH itself there.
  */
 const resolveLoginShellPath = (logger?: Logger): Promise<string | null> => {

@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use goose_providers::base::Provider;
-use goose_providers::model::ModelConfig;
+use arakan_providers::base::Provider;
+use arakan_providers::model::ModelConfig;
 
 use crate::agents::state_machine::{
-    messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter, GooseEffect,
+    messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter, ArakanEffect,
     Operation, OperationResult, SlashCommand,
 };
 use crate::conversation::message::Message;
@@ -28,7 +28,7 @@ impl StatusOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for StatusOperation {
+impl Operation<Session, ArakanEffect> for StatusOperation {
     fn name(&self) -> &'static str {
         "status"
     }
@@ -39,7 +39,7 @@ impl Operation<Session, GooseEffect> for StatusOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         if command.command != "status" {
             return not_applicable();
         }
@@ -72,7 +72,7 @@ impl Operation<Session, GooseEffect> for StatusOperation {
                 session.id,
                 self.model_config.model_name,
                 self.provider.get_name(),
-                session.goose_mode,
+                session.arakan_mode,
                 lifetime_tokens,
                 context_tokens,
                 context_limit,

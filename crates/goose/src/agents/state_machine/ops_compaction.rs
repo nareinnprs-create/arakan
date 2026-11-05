@@ -10,17 +10,17 @@ use crate::agents::state_machine::ops_llm::{chat_span, record_chat_usage};
 use crate::agents::state_machine::proactive_compaction::proactive_compaction_tokens;
 use crate::agents::state_machine::{
     applied, messages_since_kickoff, not_applicable, trailing_error, yielded_with,
-    ConversationEffect, Emitter, GooseEffect, Operation, OperationResult, SlashCommand,
+    ConversationEffect, Emitter, ArakanEffect, Operation, OperationResult, SlashCommand,
 };
 use crate::context_mgmt::compact_messages;
 use crate::conversation::message::{Message, MessageErrorKind, SystemNotificationType};
 use crate::conversation::Conversation;
 use crate::providers::base::Provider;
 use crate::session::Session;
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 
-const COMPACTION_THINKING_TEXT: &str = "goose is compacting the conversation...";
+const COMPACTION_THINKING_TEXT: &str = "arakan is compacting the conversation...";
 
 pub(super) const MAX_CONTEXT_ERROR_COMPACTIONS: usize = 2;
 
@@ -53,7 +53,7 @@ impl CompactionOperation {
         conversation: &Conversation,
         error: &anyhow::Error,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let command = messages_since_kickoff(conversation)?
             .first()
             .cloned()
@@ -77,7 +77,7 @@ impl CompactionOperation {
         ])
     }
 
-    fn clear(conversation: &Conversation, emit: &Emitter) -> Result<OperationResult<GooseEffect>> {
+    fn clear(conversation: &Conversation, emit: &Emitter) -> Result<OperationResult<ArakanEffect>> {
         let command = messages_since_kickoff(conversation)?
             .first()
             .cloned()
@@ -97,7 +97,7 @@ impl CompactionOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for CompactionOperation {
+impl Operation<Session, ArakanEffect> for CompactionOperation {
     fn name(&self) -> &'static str {
         "compaction"
     }
@@ -108,7 +108,7 @@ impl Operation<Session, GooseEffect> for CompactionOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         match command.command {
             "clear" => return Self::clear(conversation, emit),
             "compact" => {}
@@ -152,7 +152,7 @@ impl Operation<Session, GooseEffect> for CompactionOperation {
         emit.message(command);
         let response = emit.message(response);
         yielded_with([
-            GooseEffect::CompactConversation {
+            ArakanEffect::CompactConversation {
                 conversation: compacted,
                 usage: Some(usage),
             },
@@ -165,7 +165,7 @@ impl Operation<Session, GooseEffect> for CompactionOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         if self.manages_own_context {
             return not_applicable();
         }
@@ -249,7 +249,7 @@ impl Operation<Session, GooseEffect> for CompactionOperation {
                     SystemNotificationType::InlineMessage,
                     "Compaction complete",
                 ));
-                applied([GooseEffect::CompactConversation {
+                applied([ArakanEffect::CompactConversation {
                     conversation: compacted,
                     usage: Some(usage),
                 }])

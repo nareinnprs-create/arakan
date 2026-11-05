@@ -1,5 +1,5 @@
 use super::*;
-use goose_providers::thinking::ThinkingEffort;
+use arakan_providers::thinking::ThinkingEffort;
 
 const SECRET_MASK_SHOW_LEN: usize = 8;
 
@@ -68,16 +68,16 @@ impl AcpConnection {
     ) -> Result<ConfigReadResponse, agent_client_protocol::Error> {
         let config = self.config()?;
 
-        if req.key == "GOOSE_PROVIDER" || req.key == "active_provider" {
+        if req.key == "ARAKAN_PROVIDER" || req.key == "active_provider" {
             let value = config
-                .get_goose_provider()
+                .get_arakan_provider()
                 .map(serde_json::Value::String)
                 .unwrap_or(serde_json::Value::Null);
             return Ok(ConfigReadResponse { value });
         }
-        if req.key == "GOOSE_MODEL" {
+        if req.key == "ARAKAN_MODEL" {
             let value = config
-                .get_goose_model()
+                .get_arakan_model()
                 .map(serde_json::Value::String)
                 .unwrap_or(serde_json::Value::Null);
             return Ok(ConfigReadResponse { value });
@@ -100,19 +100,19 @@ impl AcpConnection {
     ) -> Result<EmptyResponse, agent_client_protocol::Error> {
         let config = self.config()?;
 
-        if req.key == "GOOSE_PROVIDER" {
+        if req.key == "ARAKAN_PROVIDER" {
             if let Some(name) = req.value.as_str() {
                 let model = crate::config::get_provider_entry(config, name)
                     .map(|e| e.model)
-                    .or_else(|| config.get_goose_model().ok())
+                    .or_else(|| config.get_arakan_model().ok())
                     .unwrap_or_default();
                 crate::config::set_active_provider(config, name, &model).internal_err()?;
                 return Ok(EmptyResponse {});
             }
         }
-        if req.key == "GOOSE_MODEL" {
+        if req.key == "ARAKAN_MODEL" {
             if let Some(model) = req.value.as_str() {
-                if let Ok(provider) = config.get_goose_provider() {
+                if let Ok(provider) = config.get_arakan_provider() {
                     crate::config::set_active_provider(config, &provider, model).internal_err()?;
                     return Ok(EmptyResponse {});
                 }
@@ -133,14 +133,14 @@ impl AcpConnection {
 
         if req.is_secret {
             config.delete_secret(&req.key).internal_err()?;
-        } else if req.key == "GOOSE_PROVIDER" || req.key == "active_provider" {
+        } else if req.key == "ARAKAN_PROVIDER" || req.key == "active_provider" {
             config.delete("active_provider").internal_err()?;
-            config.delete("GOOSE_PROVIDER").internal_err()?;
-        } else if req.key == "GOOSE_MODEL" {
-            if let Ok(provider) = config.get_goose_provider() {
+            config.delete("ARAKAN_PROVIDER").internal_err()?;
+        } else if req.key == "ARAKAN_MODEL" {
+            if let Ok(provider) = config.get_arakan_provider() {
                 crate::config::set_active_provider(config, &provider, "").internal_err()?;
             }
-            config.delete("GOOSE_MODEL").internal_err()?;
+            config.delete("ARAKAN_MODEL").internal_err()?;
         } else {
             config.delete(&req.key).internal_err()?;
         }
@@ -163,8 +163,8 @@ impl AcpConnection {
     ) -> Result<DefaultsReadResponse, agent_client_protocol::Error> {
         let config = self.config()?;
         Ok(DefaultsReadResponse {
-            provider_id: config.get_goose_provider().ok(),
-            model_id: config.get_goose_model().ok(),
+            provider_id: config.get_arakan_provider().ok(),
+            model_id: config.get_arakan_model().ok(),
         })
     }
 
@@ -277,12 +277,12 @@ struct PreferenceDef {
 const PREFERENCE_DEFS: &[PreferenceDef] = &[
     PreferenceDef {
         key: PreferenceKey::AutoCompactThreshold,
-        config_key: "GOOSE_AUTO_COMPACT_THRESHOLD",
+        config_key: "ARAKAN_AUTO_COMPACT_THRESHOLD",
         prepare: prepare_auto_compact_threshold,
     },
     PreferenceDef {
-        key: PreferenceKey::GooseThinkingEffort,
-        config_key: "GOOSE_THINKING_EFFORT",
+        key: PreferenceKey::ArakanThinkingEffort,
+        config_key: "ARAKAN_THINKING_EFFORT",
         prepare: prepare_thinking_effort,
     },
     PreferenceDef {
@@ -334,11 +334,11 @@ fn prepare_thinking_effort(
 ) -> Result<serde_json::Value, agent_client_protocol::Error> {
     let Some(value) = value.as_str() else {
         return Err(agent_client_protocol::Error::invalid_params()
-            .data("gooseThinkingEffort must be a string"));
+            .data("arakanThinkingEffort must be a string"));
     };
     let effort = value.parse::<ThinkingEffort>().map_err(|err| {
         agent_client_protocol::Error::invalid_params()
-            .data(format!("Invalid gooseThinkingEffort: {err}"))
+            .data(format!("Invalid arakanThinkingEffort: {err}"))
     })?;
 
     Ok(serde_json::Value::String(effort.to_string()))

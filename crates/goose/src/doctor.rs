@@ -11,9 +11,9 @@ use crate::session::{
     config_path, latest_llm_log_path, read_capped, read_tail, recent_cli_log_paths, Session,
     SessionManager, SystemInfo,
 };
-use goose_providers::errors::ProviderError;
+use arakan_providers::errors::ProviderError;
 
-pub(crate) const DEVELOPER_EXTENSION_REQUIRED_MESSAGE: &str = "**Goose Doctor**\n\n\
+pub(crate) const DEVELOPER_EXTENSION_REQUIRED_MESSAGE: &str = "**Arakan Doctor**\n\n\
 `/doctor` requires the Developer extension, but it is disabled for this session.\n\n\
 Enable it for this session and run `/doctor` again:\n\
 - CLI: `/builtin developer`\n\
@@ -95,8 +95,8 @@ async fn ensure_working_provider(
     let config = Config::global();
     let mut log: Vec<String> = Vec::new();
 
-    let provider_name = config.get_goose_provider().ok();
-    let model_name = config.get_goose_model().ok();
+    let provider_name = config.get_arakan_provider().ok();
+    let model_name = config.get_arakan_model().ok();
 
     if let (Some(ref pname), Some(ref mname)) = (&provider_name, &model_name) {
         log.push(format!("Checking {} / {} ...", pname, mname));
@@ -115,7 +115,7 @@ async fn ensure_working_provider(
             save_and_set(session_manager, session_id, working, model_config).await?;
             let preamble = log.join("\n");
             return Ok(Some(Message::assistant().with_text(format!(
-                "**Goose Doctor**\n\n{}\n\n\
+                "**Arakan Doctor**\n\n{}\n\n\
                  Your configured model wasn't working, so I switched to \
                  **{} / {}**. Your next message will use it.",
                 preamble, pname, new_model,
@@ -133,7 +133,7 @@ async fn ensure_working_provider(
         save_and_set(session_manager, session_id, working, model_config).await?;
         let preamble = log.join("\n");
         return Ok(Some(Message::assistant().with_text(format!(
-            "**Goose Doctor**\n\n{}\n\n\
+            "**Arakan Doctor**\n\n{}\n\n\
              Switched to **{} / {}**. Your next message will use it.",
             preamble, name, model,
         ))));
@@ -141,8 +141,8 @@ async fn ensure_working_provider(
 
     let preamble = log.join("\n");
     Ok(Some(Message::assistant().with_text(format!(
-        "**Goose Doctor**\n\n{}\n\n\
-         No working provider found. Run `goose configure` to set one up.",
+        "**Arakan Doctor**\n\n{}\n\n\
+         No working provider found. Run `arakan configure` to set one up.",
         preamble,
     ))))
 }
@@ -151,7 +151,7 @@ async fn save_and_set(
     session_manager: &SessionManager,
     session_id: &str,
     provider: Arc<dyn Provider>,
-    model_config: goose_providers::model::ModelConfig,
+    model_config: arakan_providers::model::ModelConfig,
 ) -> anyhow::Result<()> {
     let config = Config::global();
     crate::config::set_active_provider(config, provider.get_name(), &model_config.model_name)?;
@@ -165,7 +165,7 @@ async fn save_and_set(
 
 async fn test_provider(
     provider: &dyn Provider,
-    model_config: &goose_providers::model::ModelConfig,
+    model_config: &arakan_providers::model::ModelConfig,
 ) -> Result<(), ProviderError> {
     let messages = vec![Message::user().with_text("Say 'hello' and nothing else.")];
     crate::session_context::with_session_id(
@@ -184,7 +184,7 @@ async fn test_provider(
 async fn try_create_and_test(
     provider_name: &str,
     model_name: &str,
-) -> Result<(Arc<dyn Provider>, goose_providers::model::ModelConfig), ProviderError> {
+) -> Result<(Arc<dyn Provider>, arakan_providers::model::ModelConfig), ProviderError> {
     let model_config =
         crate::model_config::model_config_from_user_config(provider_name, model_name)
             .map_err(|e| ProviderError::ExecutionError(e.to_string()))?;
@@ -201,11 +201,11 @@ async fn try_other_models(
     provider_name: &str,
     skip_model: &str,
     log: &mut Vec<String>,
-) -> Option<(Arc<dyn Provider>, goose_providers::model::ModelConfig)> {
+) -> Option<(Arc<dyn Provider>, arakan_providers::model::ModelConfig)> {
     let entry = providers::get_from_registry(provider_name).await.ok()?;
     let temp = entry.create_with_default_model(vec![]).await.ok()?;
     let toolshim = Config::global()
-        .get_param::<bool>("GOOSE_TOOLSHIM")
+        .get_param::<bool>("ARAKAN_TOOLSHIM")
         .unwrap_or(false);
     let models = temp.fetch_recommended_models(toolshim).await.ok()?;
 
@@ -225,7 +225,7 @@ async fn try_other_models(
 async fn try_other_providers(
     skip: &str,
     log: &mut Vec<String>,
-) -> Option<(Arc<dyn Provider>, goose_providers::model::ModelConfig)> {
+) -> Option<(Arc<dyn Provider>, arakan_providers::model::ModelConfig)> {
     for (meta, _) in providers::providers().await {
         if meta.name == skip {
             continue;
@@ -259,10 +259,10 @@ async fn try_other_providers(
 fn describe_error(e: &ProviderError) -> String {
     match e {
         ProviderError::NotConfigured => {
-            "Provider is not configured. Run `goose configure` to set it up.".to_string()
+            "Provider is not configured. Run `arakan configure` to set it up.".to_string()
         }
         ProviderError::Authentication(_) => {
-            "Authentication failed — check your API key. Run `goose configure` to update it."
+            "Authentication failed — check your API key. Run `arakan configure` to update it."
                 .to_string()
         }
         ProviderError::CreditsExhausted { top_up_url, .. } => {

@@ -1,19 +1,19 @@
-//! Goose-specific inference request preparation.
+//! Arakan-specific inference request preparation.
 
 use crate::agents::extension_manager::{ExtensionLease, ExtensionManager};
 use crate::agents::PromptManager;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::session::Session;
 use crate::tool_inspection::ToolInspectionManager;
 use anyhow::Result;
 use async_trait::async_trait;
-use goose_agent::inference::{InferenceRequestPreparer, PreparedInferenceRequest};
-use goose_agent::operation::{messages_since_kickoff, InferenceInput};
-use goose_providers::conversation::message::Message;
-use goose_providers::conversation::Conversation;
+use arakan_agent::inference::{InferenceRequestPreparer, PreparedInferenceRequest};
+use arakan_agent::operation::{messages_since_kickoff, InferenceInput};
+use arakan_providers::conversation::message::Message;
+use arakan_providers::conversation::Conversation;
 use std::sync::{Arc, Mutex as StdMutex};
 
-pub struct GooseInferenceRequestPreparer<'a> {
+pub struct ArakanInferenceRequestPreparer<'a> {
     pub(crate) extension_manager: Arc<ExtensionManager>,
     pub(crate) extension_lease: Arc<StdMutex<Option<Arc<ExtensionLease>>>>,
     pub(crate) tool_inspection_manager: &'a ToolInspectionManager,
@@ -21,7 +21,7 @@ pub struct GooseInferenceRequestPreparer<'a> {
 }
 
 #[async_trait]
-impl InferenceRequestPreparer<Session> for GooseInferenceRequestPreparer<'_> {
+impl InferenceRequestPreparer<Session> for ArakanInferenceRequestPreparer<'_> {
     async fn prepare_session(&self, session: &Session) -> Result<Option<Session>> {
         let (session, lease) = self
             .extension_manager
@@ -52,15 +52,15 @@ impl InferenceRequestPreparer<Session> for GooseInferenceRequestPreparer<'_> {
         #[cfg(not(feature = "code-mode"))]
         let code_execution_mode = false;
 
-        let goose_mode = session.goose_mode;
-        if goose_mode == GooseMode::SmartApprove {
+        let arakan_mode = session.arakan_mode;
+        if arakan_mode == ArakanMode::SmartApprove {
             self.tool_inspection_manager
                 .apply_tool_annotations(&input.tools);
         }
         let tools =
             crate::agents::reply_parts::prepare_inference_tools(input.tools, code_execution_mode);
         let system_prompt =
-            PromptManager::new().build_system_prompt(session, input.prompt_parts, goose_mode)?;
+            PromptManager::new().build_system_prompt(session, input.prompt_parts, arakan_mode)?;
         let turn = messages_since_kickoff(conversation)?;
         let turn_start = turn
             .first()

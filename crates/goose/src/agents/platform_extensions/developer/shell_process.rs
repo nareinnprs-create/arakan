@@ -73,7 +73,7 @@ mod platform {
         pub(super) fn terminate(&self) -> io::Result<()> {
             if let Some(pgid) = self.pgid {
                 // SAFETY: this positive PGID belongs to the fresh process group
-                // created for this invocation, never Goose's shared group.
+                // created for this invocation, never Arakan's shared group.
                 if unsafe { libc::kill(-pgid, libc::SIGKILL) } != 0 {
                     let error = io::Error::last_os_error();
                     if error.raw_os_error() != Some(libc::ESRCH) {

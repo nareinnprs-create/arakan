@@ -9,12 +9,12 @@ use crate::conversation::message::Message;
 use anyhow::Result;
 use async_trait::async_trait;
 use futures::future::BoxFuture;
-use goose_providers::errors::ProviderError;
-use goose_providers::images::ImageFormat;
+use arakan_providers::errors::ProviderError;
+use arakan_providers::images::ImageFormat;
 
-use goose_providers::formats::openai::create_request;
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::formats::openai::create_request;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::Tool;
 use serde_json::Value;
 
@@ -54,8 +54,8 @@ impl TetrateProvider {
         let auth = AuthMethod::BearerToken(api_key);
         let api_client = ApiClient::new_with_tls(host, auth, tls_config)?
             .with_request_builder(crate::session_context::session_id_request_builder())
-            .with_header("HTTP-Referer", "https://goose-docs.ai")?
-            .with_header("X-Title", "goose")?;
+            .with_header("HTTP-Referer", "https://arakan-docs.ai")?
+            .with_header("X-Title", "arakan")?;
 
         Ok(Self {
             api_client,
@@ -86,7 +86,7 @@ impl TetrateProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for TetrateProvider {
+impl arakan_providers::base::ProviderDescriptor for TetrateProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             TETRATE_PROVIDER_NAME,
@@ -165,7 +165,7 @@ impl Provider for TetrateProvider {
                     .is_some_and(|v| v.contains("json"));
 
                 if is_json {
-                    let body = goose_providers::http_status::read_error_body(resp)
+                    let body = arakan_providers::http_status::read_error_body(resp)
                         .await
                         .unwrap_or_default();
                     if let Ok(payload) = serde_json::from_str::<serde_json::Value>(&body) {

@@ -156,7 +156,7 @@ fn message_snippet(message: &Message, max_chars: usize) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::GooseMode;
+    use crate::config::ArakanMode;
     use crate::conversation::message::{MessageContent, MessageMetadata};
     use crate::session::session_manager::{
         SessionListFilters, SessionListPageQuery, SessionManager, SessionType,
@@ -169,7 +169,7 @@ mod tests {
             PathBuf::from("/tmp/snippet"),
             "Snippet session".to_string(),
             SessionType::User,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await
         .unwrap()

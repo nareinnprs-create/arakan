@@ -20,8 +20,8 @@ use crate::plugins::{
 use crate::sources::parse_frontmatter;
 use agent_client_protocol::Error;
 use anyhow::Result;
-use goose_agent::skills::SkillRoot;
-use goose_sdk_types::custom_requests::{SourceEntry, SourceType};
+use arakan_agent::skills::SkillRoot;
+use arakan_sdk_types::custom_requests::{SourceEntry, SourceType};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -106,29 +106,29 @@ pub(crate) fn validate_skill_name(name: &str) -> Result<(), Error> {
     Ok(())
 }
 
-const DEFAULT_GOOSE_DOCS_ROOT: &str = "https://goose-docs.ai";
-const GOOSE_DOCS_ROOT_PLACEHOLDER: &str = "{{GOOSE_DOCS_ROOT}}";
+const DEFAULT_ARAKAN_DOCS_ROOT: &str = "https://arakan-docs.ai";
+const ARAKAN_DOCS_ROOT_PLACEHOLDER: &str = "{{ARAKAN_DOCS_ROOT}}";
 
-/// Substitute the `{{GOOSE_DOCS_ROOT}}` placeholder in the builtin
-/// `goose-doc-guide` skill with the resolved docs root. Resolution is
-/// deterministic: the configured `GOOSE_DOCS_ROOT` if set, otherwise the
+/// Substitute the `{{ARAKAN_DOCS_ROOT}}` placeholder in the builtin
+/// `arakan-doc-guide` skill with the resolved docs root. Resolution is
+/// deterministic: the configured `ARAKAN_DOCS_ROOT` if set, otherwise the
 /// canonical online docs root.
 fn resolve_docs_root_placeholder(skill: &SourceEntry, content: &str, docs_root: &str) -> String {
-    if skill.name != "goose-doc-guide" || skill.source_type != SourceType::BuiltinSkill {
+    if skill.name != "arakan-doc-guide" || skill.source_type != SourceType::BuiltinSkill {
         return content.to_string();
     }
 
-    content.replace(GOOSE_DOCS_ROOT_PLACEHOLDER, docs_root)
+    content.replace(ARAKAN_DOCS_ROOT_PLACEHOLDER, docs_root)
 }
 
 pub fn loaded_skill_context_with_args(skill: &SourceEntry, args: Option<&str>) -> Result<String> {
-    let content = goose_agent::skills::skill_content_with_args(skill, args)?;
+    let content = arakan_agent::skills::skill_content_with_args(skill, args)?;
     let docs_root = Config::global()
-        .get_goose_docs_root()?
-        .unwrap_or_else(|| DEFAULT_GOOSE_DOCS_ROOT.to_string());
+        .get_arakan_docs_root()?
+        .unwrap_or_else(|| DEFAULT_ARAKAN_DOCS_ROOT.to_string());
     let content = resolve_docs_root_placeholder(skill, &content, &docs_root);
 
-    Ok(goose_agent::skills::loaded_skill_context(skill, &content))
+    Ok(arakan_agent::skills::loaded_skill_context(skill, &content))
 }
 
 pub fn skill_argument_hint(skill: &SourceEntry) -> Option<String> {
@@ -186,7 +186,7 @@ fn inferred_discoverable_skill_root(path: &Path) -> Option<PathBuf> {
             == Some("skills")
             && matches!(
                 parent.file_name().and_then(|name| name.to_str()),
-                Some(".goose") | Some(".claude") | Some(".agents")
+                Some(".arakan") | Some(".claude") | Some(".agents")
             );
         is_project_skills_root.then(|| ancestor.to_path_buf())
     })
@@ -321,7 +321,7 @@ fn all_skill_dirs_with_config(working_dir: Option<&Path>, config: &Config) -> Ve
     if let Some(wd) = working_dir {
         for path in [
             wd.join(".agents").join("skills"),
-            wd.join(".goose").join("skills"),
+            wd.join(".arakan").join("skills"),
             wd.join(".claude").join("skills"),
         ] {
             dirs.push(SkillDirectory {
@@ -448,7 +448,7 @@ fn discover_skills_with_config(working_dir: Option<&Path>, config: &Config) -> V
             writable: dir.writable,
             preserve_path: dir.preserve_path,
         });
-    let mut sources = goose_agent::skills::discover_skills(roots);
+    let mut sources = arakan_agent::skills::discover_skills(roots);
     let mut seen: HashSet<_> = sources.iter().map(|source| source.name.clone()).collect();
 
     for content in builtin::get_all() {
@@ -540,13 +540,13 @@ mod tests {
         }
     }
 
-    fn builtin_goose_doc_guide_skill() -> SourceEntry {
+    fn builtin_arakan_doc_guide_skill() -> SourceEntry {
         SourceEntry {
             source_type: SourceType::BuiltinSkill,
-            name: "goose-doc-guide".to_string(),
+            name: "arakan-doc-guide".to_string(),
             description: "Test docs skill".to_string(),
-            content: "Docs root: {{GOOSE_DOCS_ROOT}}.".to_string(),
-            path: "builtin://skills/goose-doc-guide".to_string(),
+            content: "Docs root: {{ARAKAN_DOCS_ROOT}}.".to_string(),
+            path: "builtin://skills/arakan-doc-guide".to_string(),
             global: true,
             writable: true,
             supporting_files: Vec::new(),
@@ -575,7 +575,7 @@ mod tests {
 
     #[test]
     fn loaded_skill_context_shows_resolved_paths_for_supporting_files() {
-        let skill_dir = std::env::temp_dir().join("goose-test-skill");
+        let skill_dir = std::env::temp_dir().join("arakan-test-skill");
         let script_path = skill_dir.join("scripts").join("my-tool.exe");
         let mut skill = skill_with_content("Run scripts/my-tool.exe.");
         skill.path = skill_dir.to_string_lossy().into_owned();
@@ -591,21 +591,21 @@ mod tests {
     }
 
     #[test]
-    fn resolve_docs_root_placeholder_substitutes_builtin_goose_doc_guide_root() {
-        let skill = builtin_goose_doc_guide_skill();
+    fn resolve_docs_root_placeholder_substitutes_builtin_arakan_doc_guide_root() {
+        let skill = builtin_arakan_doc_guide_skill();
 
         let rendered =
-            resolve_docs_root_placeholder(&skill, &skill.content, "/tmp/goose docs/root");
+            resolve_docs_root_placeholder(&skill, &skill.content, "/tmp/arakan docs/root");
 
-        assert_eq!(rendered, "Docs root: /tmp/goose docs/root.");
+        assert_eq!(rendered, "Docs root: /tmp/arakan docs/root.");
     }
 
     #[test]
-    fn resolve_docs_root_placeholder_ignores_non_builtin_goose_doc_guide_skills() {
-        let mut skill = builtin_goose_doc_guide_skill();
+    fn resolve_docs_root_placeholder_ignores_non_builtin_arakan_doc_guide_skills() {
+        let mut skill = builtin_arakan_doc_guide_skill();
         skill.source_type = SourceType::Skill;
 
-        let rendered = resolve_docs_root_placeholder(&skill, &skill.content, "/tmp/goose-docs");
+        let rendered = resolve_docs_root_placeholder(&skill, &skill.content, "/tmp/arakan-docs");
 
         assert_eq!(rendered, skill.content);
     }
@@ -637,7 +637,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -673,7 +673,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -718,7 +718,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -741,7 +741,7 @@ mod tests {
         )
         .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -779,7 +779,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -806,7 +806,7 @@ mod tests {
         .unwrap();
         std::fs::create_dir_all(plugin_link.parent().unwrap()).unwrap();
         std::os::unix::fs::symlink(external_root.path(), &plugin_link).unwrap();
-        let settings_dir = project.path().join(".config/goose");
+        let settings_dir = project.path().join(".config/arakan");
         std::fs::create_dir_all(&settings_dir).unwrap();
         std::fs::write(
             settings_dir.join("settings.json"),
@@ -815,7 +815,7 @@ mod tests {
         .unwrap();
         let config = Config::new(path_root.path().join("test-config.yaml"), "skills-test").unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -855,7 +855,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -894,7 +894,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -942,7 +942,7 @@ mod tests {
             .unwrap();
         {
             let _guard = env_lock::lock_env([
-                ("GOOSE_PATH_ROOT", project_path_root.path().to_str()),
+                ("ARAKAN_PATH_ROOT", project_path_root.path().to_str()),
                 ("PLUGINS", None),
             ]);
             let project_skill = discover_skills_with_config(Some(project.path()), &project_config)
@@ -967,7 +967,7 @@ mod tests {
             )
             .unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 
@@ -1014,7 +1014,7 @@ mod tests {
         .unwrap();
         let config = Config::new(path_root.path().join("test-config.yaml"), "skills-test").unwrap();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", path_root.path().to_str()),
+            ("ARAKAN_PATH_ROOT", path_root.path().to_str()),
             ("PLUGINS", None),
         ]);
 

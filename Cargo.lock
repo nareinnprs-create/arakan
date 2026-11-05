@@ -4186,7 +4186,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose"
+name = "arakan"
 version = "1.58.0"
 dependencies = [
  "agent-client-protocol",
@@ -4224,14 +4224,14 @@ dependencies = [
  "fs2",
  "futures",
  "gethostname",
- "goose-acp-macros",
- "goose-agent",
- "goose-context-management",
- "goose-download-manager",
- "goose-mcp",
- "goose-providers",
- "goose-sdk-types",
- "goose-test-support",
+ "arakan-acp-macros",
+ "arakan-agent",
+ "arakan-context-management",
+ "arakan-download-manager",
+ "arakan-mcp",
+ "arakan-providers",
+ "arakan-sdk-types",
+ "arakan-test-support",
  "http 1.5.0",
  "ignore",
  "image 0.24.9",
@@ -4321,7 +4321,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-acp-macros"
+name = "arakan-acp-macros"
 version = "1.58.0"
 dependencies = [
  "quote",
@@ -4329,14 +4329,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-agent"
+name = "arakan-agent"
 version = "0.1.0-alpha.13"
 dependencies = [
  "anyhow",
  "async-trait",
  "futures",
- "goose-provider-types",
- "goose-sdk-types",
+ "arakan-provider-types",
+ "arakan-sdk-types",
  "js-sys",
  "regex",
  "rmcp",
@@ -4354,7 +4354,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-cli"
+name = "arakan-cli"
 version = "1.58.0"
 dependencies = [
  "agent-client-protocol",
@@ -4378,10 +4378,10 @@ dependencies = [
  "etcetera",
  "fs2",
  "futures",
- "goose",
- "goose-mcp",
- "goose-providers",
- "goose-roaming",
+ "arakan",
+ "arakan-mcp",
+ "arakan-providers",
+ "arakan-roaming",
  "indicatif",
  "libc",
  "ntapi",
@@ -4417,12 +4417,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-context-management"
+name = "arakan-context-management"
 version = "0.1.0-alpha.13"
 dependencies = [
  "anyhow",
  "async-trait",
- "goose-provider-types",
+ "arakan-provider-types",
  "include_dir",
  "minijinja",
  "rmcp",
@@ -4433,7 +4433,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-download-manager"
+name = "arakan-download-manager"
 version = "0.1.0-alpha.13"
 dependencies = [
  "anyhow",
@@ -4445,7 +4445,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-local-inference"
+name = "arakan-local-inference"
 version = "0.1.0-alpha.13"
 dependencies = [
  "anyhow",
@@ -4457,9 +4457,9 @@ dependencies = [
  "env-lock",
  "etcetera",
  "futures",
- "goose-download-manager",
- "goose-provider-types",
- "goose-sdk-types",
+ "arakan-download-manager",
+ "arakan-provider-types",
+ "arakan-sdk-types",
  "hf-hub",
  "include_dir",
  "llama-cpp-2",
@@ -4479,7 +4479,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-mcp"
+name = "arakan-mcp"
 version = "1.58.0"
 dependencies = [
  "anyhow",
@@ -4507,7 +4507,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-provider-types"
+name = "arakan-provider-types"
 version = "0.1.0-alpha.13"
 dependencies = [
  "anyhow",
@@ -4539,7 +4539,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-providers"
+name = "arakan-providers"
 version = "0.1.0-alpha.13"
 dependencies = [
  "anyhow",
@@ -4550,8 +4550,8 @@ dependencies = [
  "env-lock",
  "flate2",
  "futures",
- "goose-local-inference",
- "goose-provider-types",
+ "arakan-local-inference",
+ "arakan-provider-types",
  "http 1.5.0",
  "include_dir",
  "pem 4.0.0",
@@ -4578,7 +4578,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-roaming"
+name = "arakan-roaming"
 version = "1.58.0"
 dependencies = [
  "anyhow",
@@ -4598,7 +4598,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-sdk"
+name = "arakan-sdk"
 version = "0.1.0-alpha.13"
 dependencies = [
  "agent-client-protocol",
@@ -4606,9 +4606,9 @@ dependencies = [
  "anyhow",
  "base64 0.23.1",
  "futures",
- "goose-context-management",
- "goose-providers",
- "goose-sdk-types",
+ "arakan-context-management",
+ "arakan-providers",
+ "arakan-sdk-types",
  "rmcp",
  "serde_json",
  "thiserror 2.0.20",
@@ -4618,7 +4618,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-sdk-types"
+name = "arakan-sdk-types"
 version = "0.1.0-alpha.13"
 dependencies = [
  "agent-client-protocol",
@@ -4629,7 +4629,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-test"
+name = "arakan-test"
 version = "1.58.0"
 dependencies = [
  "clap",
@@ -4637,7 +4637,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-test-support"
+name = "arakan-test-support"
 version = "1.58.0"
 dependencies = [
  "axum",

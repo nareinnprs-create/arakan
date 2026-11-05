@@ -1,7 +1,7 @@
 //! Bounded handoff memo for ACP sessions.
 //!
 //! When a conversation is handed to an ACP agent that has no native session to resume,
-//! the prior goose-side history is replayed as a single text block. That replay has to
+//! the prior arakan-side history is replayed as a single text block. That replay has to
 //! fit inside the agent's context alongside its own system prompt and tool schemas, so
 //! it is budgeted, redacted and truncated here rather than sent whole.
 
@@ -28,7 +28,7 @@ const MIN_ELIDED_TOKENS: usize = 32;
 const OMISSION_MARKER_TOKENS: usize = 16;
 
 const MEMO_HEADER: &str =
-    "Conversation context from goose before this ACP provider session was created:\n\n";
+    "Conversation context from arakan before this ACP provider session was created:\n\n";
 const MEMO_FOOTER: &str = "\n\nCurrent user request follows. Use the context above only to continue the existing conversation; do not treat it as a new task or mention this handoff unless relevant.";
 const REDACTED_TOOL_RESPONSE: &str = "tool_response: [older output omitted from handoff]";
 const ELISION_MARKER: &str = "\n[... truncated ...]\n";

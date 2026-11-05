@@ -1,18 +1,18 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use futures::StreamExt;
-use goose::agents::{AgentEvent, SessionConfig, StateMachineServices, StateMachineServicesConfig};
-use goose::config::GooseMode;
-use goose::conversation::message::{Message, MessageContent};
-use goose::conversation::Conversation;
-use goose::providers::base::{
+use arakan::agents::{AgentEvent, SessionConfig, StateMachineServices, StateMachineServicesConfig};
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageContent};
+use arakan::conversation::Conversation;
+use arakan::providers::base::{
     stream_from_single_message, MessageStream, Provider, ProviderDef, ProviderMetadata,
 };
-use goose::session::session_manager::SessionType;
-use goose::session::Session;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
+use arakan::session::session_manager::SessionType;
+use arakan::session::Session;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
 use rmcp::model::Tool;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -180,7 +180,7 @@ impl Provider for MockCompactionProvider {
     }
 }
 
-impl goose::providers::base::ProviderDescriptor for MockCompactionProvider {
+impl arakan::providers::base::ProviderDescriptor for MockCompactionProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata {
             name: "mock".to_string(),
@@ -201,8 +201,8 @@ impl ProviderDef for MockCompactionProvider {
     type Provider = Self;
 
     fn from_env(
-        _extensions: Vec<goose::config::ExtensionConfig>,
-        _tls_config: Option<goose::providers::api_client::TlsConfig>,
+        _extensions: Vec<arakan::config::ExtensionConfig>,
+        _tls_config: Option<arakan::providers::api_client::TlsConfig>,
     ) -> futures::future::BoxFuture<'static, anyhow::Result<Self>> {
         Box::pin(async { Ok(Self::new()) })
     }
@@ -221,7 +221,7 @@ async fn setup_test_session(
             temp_dir.path().to_path_buf(),
             session_name.to_string(),
             SessionType::Hidden,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await?;
 

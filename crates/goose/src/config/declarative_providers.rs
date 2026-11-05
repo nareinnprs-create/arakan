@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-pub use goose_providers::declarative::*;
+pub use arakan_providers::declarative::*;
 
 pub fn custom_providers_dir() -> std::path::PathBuf {
     Paths::config_dir().join("custom_providers")
@@ -646,7 +646,7 @@ mod tests {
 
     #[test]
     fn toolshim_changes_declarative_inventory_identity() {
-        let _guard = env_lock::lock_env([("GOOSE_TOOLSHIM", None::<&str>)]);
+        let _guard = env_lock::lock_env([("ARAKAN_TOOLSHIM", None::<&str>)]);
         let mut config = test_huggingface_config();
 
         let native = declarative_inventory_identity(&config)
@@ -664,7 +664,7 @@ mod tests {
 
     #[test]
     fn session_id_header_override_changes_declarative_inventory_identity() {
-        let _guard = env_lock::lock_env([("GOOSE_TOOLSHIM", None::<&str>)]);
+        let _guard = env_lock::lock_env([("ARAKAN_TOOLSHIM", None::<&str>)]);
         let mut config = test_huggingface_config();
 
         let default = declarative_inventory_identity(&config)
@@ -807,7 +807,7 @@ mod tests {
     fn custom_provider_update_preserves_model_metadata() {
         let temp_dir = tempfile::tempdir().unwrap();
         let temp_root = temp_dir.path().display().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(temp_root.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(temp_root.as_str()))]);
 
         let mut model = ModelInfo::with_cost("large-model", 1_048_576, 0.000002, 0.000006)
             .with_vision_support(true);
@@ -949,7 +949,7 @@ mod tests {
     fn test_load_provider_allows_legacy_custom_id_with_punctuation() {
         let temp_dir = tempfile::tempdir().unwrap();
         let temp_root = temp_dir.path().display().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(temp_root.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(temp_root.as_str()))]);
 
         write_legacy_provider_config("custom_z.ai", "Z.AI");
 
@@ -962,7 +962,7 @@ mod tests {
     fn test_update_and_remove_provider_allow_legacy_custom_id_with_punctuation() {
         let temp_dir = tempfile::tempdir().unwrap();
         let temp_root = temp_dir.path().display().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(temp_root.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(temp_root.as_str()))]);
 
         write_legacy_provider_config("custom_z.ai", "Z.AI");
 

@@ -21,7 +21,7 @@ const i18n = defineMessages({
   },
   description: {
     id: 'authSettings.description',
-    defaultMessage: 'Manage provider credentials stored locally by goose.',
+    defaultMessage: 'Manage provider credentials stored locally by arakan.',
   },
   loading: {
     id: 'authSettings.loading',

@@ -29,15 +29,15 @@ use common_tests::{
     run_prompt_model_mismatch, run_prompt_skill, run_session_name_update_notification, run_shell,
     run_write_file, GENERATED_SESSION_TITLE, OPENAI_SESSION_NAME_RESPONSE, TURN_CONTEXT_OPEN,
 };
-use goose::config::GooseMode;
-use goose::conversation::message::{Message, MessageMetadata};
-use goose::custom_requests::{
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageMetadata};
+use arakan::custom_requests::{
     GetSessionInfoRequest, GetSessionInfoResponse, UpdateSessionProjectRequest,
 };
-use goose::recipe::{Recipe, Settings};
-use goose::recipe_deeplink;
-use goose::session::{SessionManager, SessionType};
-use goose_test_support::{McpFixture, FAKE_CODE};
+use arakan::recipe::{Recipe, Settings};
+use arakan::recipe_deeplink;
+use arakan::session::{SessionManager, SessionType};
+use arakan_test_support::{McpFixture, FAKE_CODE};
 use std::path::Path;
 
 tests_config_option_set_error!(AcpServerConnection);
@@ -51,7 +51,7 @@ async fn seed_list_sessions(data_root: &Path, working_dir: &Path, count: usize) 
                 working_dir.to_path_buf(),
                 format!("Seed session {index}"),
                 SessionType::Acp,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -75,7 +75,7 @@ async fn seed_list_session_with_message(
             working_dir.to_path_buf(),
             name.to_string(),
             session_type,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await
         .unwrap();
@@ -176,11 +176,11 @@ async fn session_title(conn: &AcpServerConnection, session_id: &str) -> (String,
 fn include_last_message_snippet_meta(
     value: serde_json::Value,
 ) -> serde_json::Map<String, serde_json::Value> {
-    let mut goose = serde_json::Map::new();
-    goose.insert("includeLastMessageSnippet".to_string(), value);
+    let mut arakan = serde_json::Map::new();
+    arakan.insert("includeLastMessageSnippet".to_string(), value);
 
     let mut meta = serde_json::Map::new();
-    meta.insert("goose".to_string(), serde_json::Value::Object(goose));
+    meta.insert("arakan".to_string(), serde_json::Value::Object(arakan));
     meta
 }
 
@@ -218,7 +218,7 @@ fn test_list_sessions_emits_computed_snippet() {
                 cwd.to_path_buf(),
                 "Live subtitle".to_string(),
                 SessionType::Acp,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -478,7 +478,7 @@ fn test_get_session_info() {
                 cwd.to_path_buf(),
                 "Session info".to_string(),
                 SessionType::Acp,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -537,7 +537,7 @@ fn test_update_session_project_rejects_hidden_session_types() {
                         working_dir.path().to_path_buf(),
                         format!("{session_type} session"),
                         session_type,
-                        GooseMode::default(),
+                        ArakanMode::default(),
                     )
                     .await
                     .unwrap(),
@@ -577,14 +577,14 @@ fn test_update_session_project_rejects_unknown_persisted_session_type() {
                 working_dir.path().to_path_buf(),
                 "Future session".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
         let db_path = data_root
             .path()
-            .join(goose::session::session_manager::SESSIONS_FOLDER)
-            .join(goose::session::session_manager::DB_NAME);
+            .join(arakan::session::session_manager::SESSIONS_FOLDER)
+            .join(arakan::session::session_manager::DB_NAME);
         let pool = sqlx::sqlite::SqlitePoolOptions::new()
             .connect_with(sqlx::sqlite::SqliteConnectOptions::new().filename(db_path))
             .await
@@ -641,7 +641,7 @@ fn test_update_session_project_allows_visible_session_types() {
                         working_dir.path().to_path_buf(),
                         format!("{session_type} session"),
                         session_type,
-                        GooseMode::default(),
+                        ArakanMode::default(),
                     )
                     .await
                     .unwrap(),
@@ -831,7 +831,7 @@ async fn seed_session_awaiting_approval(data_root: &Path, session_type: SessionT
             data_root.to_path_buf(),
             "Awaiting approval".to_string(),
             session_type,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await
         .unwrap();
@@ -857,8 +857,8 @@ fn starts_a_run(updates: &[SessionUpdate]) -> bool {
         SessionUpdate::SessionInfoUpdate(info) => info
             .meta
             .as_ref()
-            .and_then(|meta| meta.get("goose"))
-            .and_then(|goose| goose.get("activeRunId"))
+            .and_then(|meta| meta.get("arakan"))
+            .and_then(|arakan| arakan.get("activeRunId"))
             .is_some_and(serde_json::Value::is_string),
         _ => false,
     })
@@ -917,9 +917,9 @@ fn test_new_session_response_precedes_available_commands() {
             openai.uri(),
             &[],
             data_root.path(),
-            GooseMode::default(),
+            ArakanMode::default(),
             None,
-            goose_test_support::TEST_MODEL,
+            arakan_test_support::TEST_MODEL,
             true,
         )
         .await;
@@ -947,8 +947,8 @@ fn test_new_session_honors_recipe_model_without_recipe_provider() {
             .description("A recipe that only overrides the model")
             .instructions("Use the requested model")
             .settings(Settings {
-                goose_provider: None,
-                goose_model: Some(recipe_model.to_string()),
+                arakan_provider: None,
+                arakan_model: Some(recipe_model.to_string()),
                 temperature: None,
                 max_turns: None,
             })
@@ -1089,7 +1089,7 @@ fn test_new_session_prefers_recipe_title_over_meta_session_title() {
             .unwrap();
 
         // The recipe title wins, and the session is not marked user-set so
-        // goose's own recipe-title naming path still applies.
+        // arakan's own recipe-title naming path still applies.
         assert_eq!(
             session_title(&conn, &session_id).await,
             ("Recipe title".to_string(), false)

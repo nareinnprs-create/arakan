@@ -10,9 +10,9 @@ use common_tests::fixtures::server::{
 use common_tests::fixtures::{
     run_test, spawn_acp_server_in_process, Connection, OpenAiFixture, TestConnectionConfig,
 };
-use goose::config::GooseMode;
-use goose::conversation::message::{Message, MessageContent};
-use goose::session::{SessionManager, SessionType};
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageContent};
+use arakan::session::{SessionManager, SessionType};
 use std::path::Path;
 
 async fn new_connection(data_root: &Path) -> AcpServerConnection {
@@ -46,13 +46,13 @@ async fn seed_session_with_messages(
     session_manager: &SessionManager,
     cwd: &Path,
     messages: &[(&str, i64)],
-) -> goose::session::Session {
+) -> arakan::session::Session {
     let session = session_manager
         .create_session(
             cwd.to_path_buf(),
             "Fork before".to_string(),
             SessionType::Acp,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await
         .unwrap();
@@ -112,9 +112,9 @@ fn fork_session_response_precedes_available_commands() {
             openai.uri(),
             &[],
             data_root.path(),
-            GooseMode::default(),
+            ArakanMode::default(),
             None,
-            goose_test_support::TEST_MODEL,
+            arakan_test_support::TEST_MODEL,
             true,
         )
         .await;

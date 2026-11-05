@@ -21,15 +21,15 @@ use crate::agents::extension::ExtensionConfig;
 use crate::agents::mcp_client::McpClientTrait;
 use crate::agents::state_machine::ops_toolcalling::EXPIRED_APPROVAL_RESPONSE;
 use crate::agents::{
-    AgentEvent, GoosePlatform, SessionConfig, StateMachineServices, StateMachineServicesConfig,
+    AgentEvent, ArakanPlatform, SessionConfig, StateMachineServices, StateMachineServicesConfig,
 };
 use crate::config::permission::PermissionManager;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{ActionRequiredData, Message, MessageContent};
 use crate::permission::Permission;
 use crate::providers::base::Provider;
 use crate::session::{SessionManager, SessionType};
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 
 async fn agent_with_dummy_api() -> Result<(
     Arc<StateMachineServices>,
@@ -61,14 +61,14 @@ async fn agent_with(
     tempfile::TempDir,
 )> {
     let api = Arc::new(DummyApi::start(ProviderFeatures::default()).await);
-    let api_client = goose_providers::api_client::ApiClient::new_with_tls(
+    let api_client = arakan_providers::api_client::ApiClient::new_with_tls(
         api.uri(),
-        goose_providers::api_client::AuthMethod::NoAuth,
+        arakan_providers::api_client::AuthMethod::NoAuth,
         None,
     )?
     .with_request_builder(crate::session_context::session_id_request_builder());
     let provider: Arc<dyn Provider> = Arc::new(
-        goose_providers::openai::OpenAiProviderBuilder::new(api_client)
+        arakan_providers::openai::OpenAiProviderBuilder::new(api_client)
             .base_path("chat/completions")
             .name("openai")
             .build(),
@@ -81,7 +81,7 @@ async fn agent_with(
             temp_dir.path().to_path_buf(),
             "state-machine-reply".to_string(),
             SessionType::Hidden,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await?;
     let mut config = StateMachineServicesConfig::new(
@@ -89,7 +89,7 @@ async fn agent_with(
         Arc::new(PermissionManager::new(temp_dir.path().join("permissions"))),
         None,
         true,
-        GoosePlatform::GooseCli,
+        ArakanPlatform::ArakanCli,
     );
     config.hooks = Some(hooks);
     config.max_sessions = max_sessions;
@@ -97,7 +97,7 @@ async fn agent_with(
     services
         .update_provider(
             provider,
-            ModelConfig::new(goose_providers::openai::OPEN_AI_DEFAULT_MODEL)
+            ModelConfig::new(arakan_providers::openai::OPEN_AI_DEFAULT_MODEL)
                 .with_canonical_limits("openai"),
             &session.id,
         )
@@ -117,7 +117,7 @@ async fn agent_with_calculator(
 )> {
     let (services, api, session_id, temp_dir) = agent_with_hooks(hooks).await?;
     services
-        .update_goose_mode(GooseMode::Approve, &session_id)
+        .update_arakan_mode(ArakanMode::Approve, &session_id)
         .await?;
     let calculator = Arc::new(CalculatorExtension::new(
         services.session_manager.action_required(),
@@ -467,7 +467,7 @@ async fn pre_tool_use_reports_the_leased_working_dir_after_a_mid_run_change() ->
     let (hooks, _hook_dir, hook_log_path) = hook_log(&["PreToolUse"], 0)?;
     let (services, api, session_id, calculator, temp_dir) = agent_with_calculator(hooks).await?;
     services
-        .update_goose_mode(GooseMode::Auto, &session_id)
+        .update_arakan_mode(ArakanMode::Auto, &session_id)
         .await?;
 
     let model_reply = api.on("add one").hold_call(ADD, value(1));
@@ -523,7 +523,7 @@ async fn state_machine_skill_approval_uses_its_leased_working_dir() -> Result<()
     let (services, api, session_id, old_working_dir) = agent_with_dummy_api().await?;
     install_skill(old_working_dir.path(), "OLD_SKILL_CONTENT")?;
     services
-        .update_goose_mode(GooseMode::Approve, &session_id)
+        .update_arakan_mode(ArakanMode::Approve, &session_id)
         .await?;
 
     api.on("load review")
@@ -586,7 +586,7 @@ async fn state_machine_rejects_resumed_skill_approval_without_its_lease() -> Res
     let (services, api, session_id, working_dir) = agent_with_dummy_api().await?;
     install_skill(working_dir.path(), "SKILL_MUST_NOT_LOAD")?;
     services
-        .update_goose_mode(GooseMode::Approve, &session_id)
+        .update_arakan_mode(ArakanMode::Approve, &session_id)
         .await?;
 
     api.on("load review")
@@ -714,7 +714,7 @@ async fn state_machine_rejects_resumed_bang_shell_without_its_lease() -> Result<
     api.on(EXPIRED_APPROVAL_RESPONSE).reply("request it again");
     enable_developer(&services, &session_id).await?;
     services
-        .update_goose_mode(GooseMode::Approve, &session_id)
+        .update_arakan_mode(ArakanMode::Approve, &session_id)
         .await?;
     let session_config = SessionConfig {
         id: session_id,
@@ -1104,7 +1104,7 @@ async fn a_subagent_asks_the_parents_client_for_approval_in_the_parents_mode() -
     services
         .session_manager
         .update(&session_id)
-        .goose_mode(GooseMode::Approve)
+        .arakan_mode(ArakanMode::Approve)
         .apply()
         .await?;
     enable_developer(&services, &session_id).await?;
@@ -1181,7 +1181,7 @@ async fn a_subagent_asks_the_parents_client_for_approval_in_the_parents_mode() -
 fn serve_elicit_fixture(read: tokio::io::DuplexStream, write: tokio::io::DuplexStream) {
     use rmcp::ServiceExt;
     tokio::spawn(async move {
-        let running = goose_test_support::mcp::McpFixtureServer::new()
+        let running = arakan_test_support::mcp::McpFixtureServer::new()
             .serve((read, write))
             .await
             .unwrap();
@@ -1291,7 +1291,7 @@ async fn concurrent_subagents_get_their_own_answers_for_the_same_tool_call_id() 
     services
         .session_manager
         .update(&session_id)
-        .goose_mode(GooseMode::Approve)
+        .arakan_mode(ArakanMode::Approve)
         .apply()
         .await?;
     enable_developer(&services, &session_id).await?;
@@ -1455,7 +1455,7 @@ async fn cancelling_the_parent_ends_a_waiting_subagent() -> Result<()> {
     services
         .session_manager
         .update(&session_id)
-        .goose_mode(GooseMode::Approve)
+        .arakan_mode(ArakanMode::Approve)
         .apply()
         .await?;
     enable_developer(&services, &session_id).await?;
@@ -1678,7 +1678,7 @@ async fn a_stopped_subagent_is_released_before_a_slow_session_end_hook_and_resum
     services
         .session_manager
         .update(&session_id)
-        .goose_mode(GooseMode::Approve)
+        .arakan_mode(ArakanMode::Approve)
         .apply()
         .await?;
     enable_developer(&services, &session_id).await?;
@@ -1719,7 +1719,7 @@ async fn a_parent_tool_call_id_that_looks_forwarded_is_still_the_parents() -> Re
     services
         .session_manager
         .update(&session_id)
-        .goose_mode(GooseMode::Approve)
+        .arakan_mode(ArakanMode::Approve)
         .apply()
         .await?;
     enable_developer(&services, &session_id).await?;
@@ -1760,7 +1760,7 @@ async fn a_parent_tool_call_id_that_looks_forwarded_is_still_the_parents() -> Re
 fn attachment() -> crate::agents::Attachment {
     crate::agents::Attachment {
         client: crate::agents::extension_manager::ClientContext::new(
-            &GoosePlatform::GooseDesktop,
+            &ArakanPlatform::ArakanDesktop,
             None,
         ),
         session_names: None,

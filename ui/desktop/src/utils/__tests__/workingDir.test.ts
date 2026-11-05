@@ -3,11 +3,11 @@ import { getEffectiveWorkingDir, resolveWorkingDir } from '../workingDir';
 
 describe('resolveWorkingDir', () => {
   it('uses the configured external backend directory when present', () => {
-    expect(resolveWorkingDir(' /home/goose ', 'C:\\Users\\goose', 'C:\\Users\\goose')).toBe(
-      '/home/goose'
+    expect(resolveWorkingDir(' /home/arakan ', 'C:\\Users\\arakan', 'C:\\Users\\arakan')).toBe(
+      '/home/arakan'
     );
-    expect(resolveWorkingDir(' ', 'C:\\work', 'C:\\Users\\goose')).toBe('C:\\work');
-    expect(resolveWorkingDir(undefined, undefined, 'C:\\Users\\goose')).toBe('C:\\Users\\goose');
+    expect(resolveWorkingDir(' ', 'C:\\work', 'C:\\Users\\arakan')).toBe('C:\\work');
+    expect(resolveWorkingDir(undefined, undefined, 'C:\\Users\\arakan')).toBe('C:\\Users\\arakan');
   });
 });
 
@@ -17,10 +17,10 @@ describe('getEffectiveWorkingDir', () => {
 
   const mockWindow = (externalBackend: boolean, boundUrl: string, source = 'settings') => {
     appConfigGetMock.mockImplementation((key: string) => {
-      if (key === 'GOOSE_EXTERNAL_BACKEND') return externalBackend;
-      if (key === 'GOOSE_EXTERNAL_BACKEND_URL') return boundUrl;
-      if (key === 'GOOSE_EXTERNAL_BACKEND_SOURCE') return source;
-      if (key === 'GOOSE_WORKING_DIR') return '/Users/johannes/home/workspace';
+      if (key === 'ARAKAN_EXTERNAL_BACKEND') return externalBackend;
+      if (key === 'ARAKAN_EXTERNAL_BACKEND_URL') return boundUrl;
+      if (key === 'ARAKAN_EXTERNAL_BACKEND_SOURCE') return source;
+      if (key === 'ARAKAN_WORKING_DIR') return '/Users/johannes/home/workspace';
       return undefined;
     });
   };
@@ -39,11 +39,11 @@ describe('getEffectiveWorkingDir', () => {
     getSettingMock.mockResolvedValue({
       enabled: true,
       url: 'http://remote:3000',
-      workingDir: ' /home/goose/workspace ',
+      workingDir: ' /home/arakan/workspace ',
     });
-    await expect(getEffectiveWorkingDir()).resolves.toBe('/home/goose/workspace');
-    await expect(getEffectiveWorkingDir('/home/goose/previous-project')).resolves.toBe(
-      '/home/goose/workspace'
+    await expect(getEffectiveWorkingDir()).resolves.toBe('/home/arakan/workspace');
+    await expect(getEffectiveWorkingDir('/home/arakan/previous-project')).resolves.toBe(
+      '/home/arakan/workspace'
     );
   });
 
@@ -52,9 +52,9 @@ describe('getEffectiveWorkingDir', () => {
     getSettingMock.mockResolvedValue({
       enabled: false,
       url: 'http://unrelated:4000',
-      workingDir: '/home/goose/workspace',
+      workingDir: '/home/arakan/workspace',
     });
-    await expect(getEffectiveWorkingDir()).resolves.toBe('/home/goose/workspace');
+    await expect(getEffectiveWorkingDir()).resolves.toBe('/home/arakan/workspace');
   });
 
   it('falls back to the remembered directory for env-mode backends without a configured dir', async () => {
@@ -65,7 +65,7 @@ describe('getEffectiveWorkingDir', () => {
 
   it('ignores the remote directory when the window is bound to the local backend', async () => {
     mockWindow(false, '');
-    getSettingMock.mockResolvedValue({ enabled: true, workingDir: '/home/goose/workspace' });
+    getSettingMock.mockResolvedValue({ enabled: true, workingDir: '/home/arakan/workspace' });
     await expect(getEffectiveWorkingDir()).resolves.toBe('/Users/johannes/home/workspace');
     await expect(getEffectiveWorkingDir('/projects/website')).resolves.toBe('/projects/website');
   });
@@ -75,14 +75,14 @@ describe('getEffectiveWorkingDir', () => {
     getSettingMock.mockResolvedValue({
       enabled: true,
       url: 'http://server-b:3000',
-      workingDir: '/home/goose/workspace',
+      workingDir: '/home/arakan/workspace',
     });
     await expect(getEffectiveWorkingDir()).resolves.toBe('/Users/johannes/home/workspace');
   });
 
   it('falls back to the remembered directory when the external backend is disabled', async () => {
     mockWindow(true, 'http://remote:3000');
-    getSettingMock.mockResolvedValue({ enabled: false, workingDir: '/home/goose/workspace' });
+    getSettingMock.mockResolvedValue({ enabled: false, workingDir: '/home/arakan/workspace' });
     await expect(getEffectiveWorkingDir()).resolves.toBe('/Users/johannes/home/workspace');
   });
 

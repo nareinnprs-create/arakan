@@ -1,7 +1,7 @@
-use crate::acp::custom_requests::GooseExtension;
+use crate::acp::custom_requests::ArakanExtension;
 use crate::acp::server::{meta_string, validate_absolute_cwd, ResultExt};
 use crate::agents::ExtensionLoadResult;
-use crate::config::{Config, GooseMode};
+use crate::config::{Config, ArakanMode};
 use crate::model_config::resolve_provider_and_model_config;
 use crate::providers::get_from_registry;
 use crate::recipe::Recipe;
@@ -10,8 +10,8 @@ use crate::session::{ExtensionData, Session, SessionType};
 use super::AcpConnection;
 use agent_client_protocol::schema::v1::{Meta, NewSessionRequest, NewSessionResponse, SessionId};
 use agent_client_protocol::{Client, ConnectionTo};
-use goose_providers::model::ModelConfig;
-use goose_providers::thinking::ThinkingEffortSupport;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::thinking::ThinkingEffortSupport;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use tracing::warn;
@@ -29,7 +29,7 @@ struct InitialSessionConfig {
 /// session row after it is created.
 struct NewSessionMetaFields {
     project_id: Option<String>,
-    /// Client-supplied title, recorded as user-set so goose's own name
+    /// Client-supplied title, recorded as user-set so arakan's own name
     /// generation leaves it alone. `None` when a recipe title took precedence.
     client_title: Option<String>,
 }
@@ -49,7 +49,7 @@ impl AcpConnection {
         validate_absolute_cwd(&args.cwd)?;
         let config = Config::global();
         let session_type = session_type_from_meta(args.meta.as_ref())?;
-        let current_mode: GooseMode = config.get_goose_mode().unwrap_or_default();
+        let current_mode: ArakanMode = config.get_arakan_mode().unwrap_or_default();
         let recipe = self.resolve_recipe_from_meta(args.meta.as_ref()).await?;
         let meta = new_session_meta_fields(args.meta.as_ref(), recipe.as_ref())?;
         let session_name = recipe_title(recipe.as_ref())
@@ -139,7 +139,7 @@ impl AcpConnection {
         let recipe_settings = rendered.as_ref().and_then(|r| r.settings.as_ref());
         let requested_provider = meta_string(args.meta.as_ref(), "provider")?;
         if let Some(provider) = recipe_settings
-            .and_then(|s| s.goose_provider.as_deref())
+            .and_then(|s| s.arakan_provider.as_deref())
             .or(requested_provider.as_deref())
         {
             get_from_registry(provider).await.invalid_params_err()?;
@@ -149,13 +149,13 @@ impl AcpConnection {
                 .await
                 .internal_err_ctx("Failed to resolve provider and model")?;
 
-        let goose_extensions = meta_goose_extensions(args.meta.as_ref())?;
+        let arakan_extensions = meta_arakan_extensions(args.meta.as_ref())?;
         let recipe_extensions = rendered.as_ref().and_then(|r| r.extensions.as_deref());
         let extension_data = self.build_enabled_extensions_data(
             config,
             session,
             args.mcp_servers,
-            goose_extensions,
+            arakan_extensions,
             recipe_extensions,
         )?;
 
@@ -281,9 +281,9 @@ fn new_session_meta_fields(
     })
 }
 
-fn meta_goose_extensions(
+fn meta_arakan_extensions(
     meta: Option<&Meta>,
-) -> Result<Option<Vec<GooseExtension>>, agent_client_protocol::Error> {
+) -> Result<Option<Vec<ArakanExtension>>, agent_client_protocol::Error> {
     let Some(value) = meta.and_then(|m| m.get("enabledExtensions")) else {
         return Ok(None);
     };

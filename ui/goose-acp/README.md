@@ -1,27 +1,27 @@
-# @aaif/goose-acp
+# @aaif/arakan-acp
 
-Install and resolve the Goose executable through npm.
+Install and resolve the Arakan executable through npm.
 
-This package distributes the Goose CLI using platform-specific optional npm
-dependencies. It does not contain or depend on the Goose ACP client.
+This package distributes the Arakan CLI using platform-specific optional npm
+dependencies. It does not contain or depend on the Arakan ACP client.
 
 ## Installation
 
 ```bash
-npm install @aaif/goose-acp
+npm install @aaif/arakan-acp
 ```
 
-The matching `@aaif/goose-binary-*` package is installed automatically. Do not
-install a platform package directly; `@aaif/goose-acp` provides the supported
-`goose` command.
+The matching `@aaif/arakan-binary-*` package is installed automatically. Do not
+install a platform package directly; `@aaif/arakan-acp` provides the supported
+`arakan` command.
 
 ## Usage
 
-Run the Goose CLI installed by the package:
+Run the Arakan CLI installed by the package:
 
 ```bash
-npx goose acp
-npx goose serve
+npx arakan acp
+npx arakan serve
 ```
 
 The launcher forwards arguments and standard input, output, and error streams to
@@ -31,23 +31,23 @@ termination signals.
 Resolve the executable path programmatically:
 
 ```typescript
-import { resolveGooseBinary } from "@aaif/goose-acp";
+import { resolveArakanBinary } from "@aaif/arakan-acp";
 
-const binaryPath = resolveGooseBinary();
+const binaryPath = resolveArakanBinary();
 ```
 
-`resolveGooseBinary()` first uses `GOOSE_BINARY` when it is set. Otherwise, it
+`resolveArakanBinary()` first uses `ARAKAN_BINARY` when it is set. Otherwise, it
 selects the package matching `process.platform` and `process.arch`. In both
 cases it verifies that the executable exists and returns an absolute path.
 
-Use the override to run a locally built or custom Goose executable:
+Use the override to run a locally built or custom Arakan executable:
 
 ```bash
-GOOSE_BINARY=/path/to/goose npx goose acp
+ARAKAN_BINARY=/path/to/arakan npx arakan acp
 ```
 
-`GOOSE_BINARY` must point directly to a native Goose executable, not a
-`node_modules/.bin/goose` command shim.
+`ARAKAN_BINARY` must point directly to a native Arakan executable, not a
+`node_modules/.bin/arakan` command shim.
 
 Supported platforms:
 

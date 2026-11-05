@@ -6,8 +6,8 @@ use crate::agents::reply_parts::{
 use crate::agents::tool_execution::ToolCallContext;
 use crate::config::paths::Paths;
 use crate::conversation::message::Message;
-use crate::goose_apps::McpAppResource;
-use crate::goose_apps::{GooseApp, McpAppCache, WindowProps};
+use crate::arakan_apps::McpAppResource;
+use crate::arakan_apps::{ArakanApp, McpAppCache, WindowProps};
 use crate::prompt_template::render_template;
 use crate::providers::base::{Provider, ProviderUsage};
 use async_trait::async_trait;
@@ -27,7 +27,7 @@ use tokio_util::sync::CancellationToken;
 
 async fn complete_app_content(
     provider: Arc<dyn Provider>,
-    model_config: &goose_providers::model::ModelConfig,
+    model_config: &arakan_providers::model::ModelConfig,
     session_id: &str,
     system_prompt: String,
     messages: &[Message],
@@ -56,7 +56,7 @@ async fn complete_app_content(
 
 pub static EXTENSION_NAME: &str = "apps";
 const CLOCK_APP_NAME: &str = "clock";
-const CLOCK_HTML: &str = include_str!("../../goose_apps/clock.html");
+const CLOCK_HTML: &str = include_str!("../../arakan_apps/clock.html");
 
 const DEFAULT_WINDOW_PROPS: WindowProps = WindowProps {
     width: 800,
@@ -169,7 +169,7 @@ impl AppsManagerClient {
         let clock_path = self.apps_dir.join(format!("{CLOCK_APP_NAME}.html"));
         if !clock_path.exists() {
             // Parse and save the default clock app
-            let clock_app = GooseApp::from_html(CLOCK_HTML)?;
+            let clock_app = ArakanApp::from_html(CLOCK_HTML)?;
             self.save_app(&clock_app)?;
         }
 
@@ -197,19 +197,19 @@ impl AppsManagerClient {
         Ok(apps)
     }
 
-    fn load_app(&self, name: &str) -> Result<GooseApp, String> {
+    fn load_app(&self, name: &str) -> Result<ArakanApp, String> {
         let path = self.app_path(name)?;
         if name == CLOCK_APP_NAME {
-            return GooseApp::from_html(CLOCK_HTML);
+            return ArakanApp::from_html(CLOCK_HTML);
         }
 
         let html =
             fs::read_to_string(&path).map_err(|e| format!("Failed to read app file: {}", e))?;
 
-        GooseApp::from_html(&html)
+        ArakanApp::from_html(&html)
     }
 
-    fn load_editable_app(&self, name: &str) -> Result<GooseApp, String> {
+    fn load_editable_app(&self, name: &str) -> Result<ArakanApp, String> {
         if name == CLOCK_APP_NAME {
             return Err(format!("Cannot modify bundled default app '{name}'"));
         }
@@ -223,7 +223,7 @@ impl AppsManagerClient {
         Ok(app)
     }
 
-    fn save_app(&self, app: &GooseApp) -> Result<(), String> {
+    fn save_app(&self, app: &ArakanApp) -> Result<(), String> {
         let path = self.app_path(&app.resource.name)?;
 
         let html_content = app.to_html()?;
@@ -266,7 +266,7 @@ impl AppsManagerClient {
         &self,
         session_id: &str,
         provider_name: &str,
-    ) -> Result<goose_providers::model::ModelConfig, String> {
+    ) -> Result<arakan_providers::model::ModelConfig, String> {
         let model_config = self.context.model_config_for_session(session_id).await?;
         match crate::providers::get_from_registry(provider_name).await {
             Ok(entry) => Ok(entry
@@ -289,7 +289,7 @@ impl AppsManagerClient {
     fn create_app_content_tool() -> rmcp::model::Tool {
         rmcp::model::Tool::new(
             "create_app_content".to_string(),
-            "Generate content for a new Goose app. Returns the HTML code, app name, description, and window properties.".to_string(),
+            "Generate content for a new Arakan app. Returns the HTML code, app name, description, and window properties.".to_string(),
             Self::schema::<CreateAppContentResponse>(),
         )
     }
@@ -297,7 +297,7 @@ impl AppsManagerClient {
     fn update_app_content_tool() -> rmcp::model::Tool {
         rmcp::model::Tool::new(
             "update_app_content".to_string(),
-            "Generate updated content for an existing Goose app. Returns the improved HTML code, updated description, and optionally updated window properties.".to_string(),
+            "Generate updated content for an existing Arakan app. Returns the improved HTML code, updated description, and optionally updated window properties.".to_string(),
             Self::schema::<UpdateAppContentResponse>(),
         )
     }
@@ -459,7 +459,7 @@ impl AppsManagerClient {
             ));
         }
 
-        let app = GooseApp {
+        let app = ArakanApp {
             resource: McpAppResource {
                 uri: format!("ui://apps/{}", content.name),
                 name: content.name.clone(),
@@ -573,12 +573,12 @@ impl McpClientTrait for AppsManagerClient {
         let tools = vec![
             McpTool::new(
                 "list_apps".to_string(),
-                "List all available Goose apps with their names and descriptions. Use this to see what apps exist before creating or modifying apps.".to_string(),
+                "List all available Arakan apps with their names and descriptions. Use this to see what apps exist before creating or modifying apps.".to_string(),
                 schema::<ListAppsParams>(),
             ),
             model_only_tool(McpTool::new(
                 "create_app".to_string(),
-                "Create a new Goose app based on a description or PRD. The extension will use an LLM to generate the HTML/CSS/JavaScript. Apps are sandboxed and run in standalone windows.".to_string(),
+                "Create a new Arakan app based on a description or PRD. The extension will use an LLM to generate the HTML/CSS/JavaScript. Apps are sandboxed and run in standalone windows.".to_string(),
                 schema::<CreateAppParams>(),
             )),
             model_only_tool(McpTool::new(
@@ -778,7 +778,7 @@ mod tests {
     use crate::agents::reply_parts::{is_tool_visible_to_app, is_tool_visible_to_model};
     use crate::providers::base::{stream_from_single_message, MessageStream, Usage};
     use crate::session::SessionManager;
-    use goose_providers::errors::ProviderError;
+    use arakan_providers::errors::ProviderError;
     use std::path::Path;
     use std::sync::Mutex;
 
@@ -795,7 +795,7 @@ mod tests {
 
         async fn stream(
             &self,
-            model_config: &goose_providers::model::ModelConfig,
+            model_config: &arakan_providers::model::ModelConfig,
             system: &str,
             _messages: &[Message],
             tools: &[McpTool],
@@ -823,8 +823,8 @@ mod tests {
         }
     }
 
-    fn test_app(name: &str) -> GooseApp {
-        GooseApp {
+    fn test_app(name: &str) -> ArakanApp {
+        ArakanApp {
             resource: McpAppResource {
                 uri: format!("ui://apps/{name}"),
                 name: name.to_string(),
@@ -845,7 +845,7 @@ mod tests {
     async fn app_content_completion_uses_toolshim() {
         let provider = Arc::new(AppContentProvider::default());
         let model_config =
-            goose_providers::model::ModelConfig::new("test-model").with_toolshim(true);
+            arakan_providers::model::ModelConfig::new("test-model").with_toolshim(true);
         let tool = AppsManagerClient::create_app_content_tool();
         let tool_schema = AppsManagerClient::schema::<CreateAppContentResponse>();
 
@@ -1017,7 +1017,7 @@ mod tests {
         let error = client.delete_app("clock").unwrap_err();
         assert_eq!(error, "Cannot modify bundled default app 'clock'");
         assert!(client.apps_dir.join("clock.html").exists());
-        let compiled_clock = GooseApp::from_html(CLOCK_HTML).unwrap();
+        let compiled_clock = ArakanApp::from_html(CLOCK_HTML).unwrap();
         let loaded_clock = client.load_app("clock").unwrap();
         assert_eq!(loaded_clock.resource.name, compiled_clock.resource.name);
         assert_eq!(loaded_clock.resource.uri, compiled_clock.resource.uri);

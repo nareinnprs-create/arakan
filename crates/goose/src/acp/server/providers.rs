@@ -2,7 +2,7 @@ use super::*;
 use crate::config::declarative_providers;
 use crate::providers::inventory::ensure_refresh_identity_current;
 use crate::providers::provider_secrets;
-use goose_providers::base::ModelInfo;
+use arakan_providers::base::ModelInfo;
 use std::str::FromStr;
 
 const ACP_READINESS_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(60);
@@ -509,10 +509,10 @@ impl AcpConnection {
             .internal_err_ctx("Failed to initialize provider")?;
         let models = match provider.fetch_supported_models().await {
             Ok(models) => models,
-            Err(goose_providers::errors::ProviderError::Authentication(error)) => {
+            Err(arakan_providers::errors::ProviderError::Authentication(error)) => {
                 return Err(agent_client_protocol::Error::auth_required().data(error));
             }
-            Err(goose_providers::errors::ProviderError::NotConfigured) => {
+            Err(arakan_providers::errors::ProviderError::NotConfigured) => {
                 return Err(agent_client_protocol::Error::invalid_params()
                     .data(format!("Provider is not configured: {}", req.provider_id)));
             }
@@ -769,7 +769,7 @@ impl AcpConnection {
                 .data(format!("Provider is not editable: {}", req.provider_id)));
         }
 
-        if Config::global().get_goose_provider().ok().as_deref() == Some(req.provider_id.as_str()) {
+        if Config::global().get_arakan_provider().ok().as_deref() == Some(req.provider_id.as_str()) {
             return Err(agent_client_protocol::Error::invalid_params().data(format!(
                 "Cannot delete active provider: {}",
                 req.provider_id
@@ -1121,7 +1121,7 @@ impl AcpConnection {
                 .await
                 .internal_err_ctx("Failed to initialize provider")?;
 
-            if self.supports_goose_custom_notifications() {
+            if self.supports_arakan_custom_notifications() {
                 let client_cx = self.client_cx.get().cloned();
                 let provider_id = req.provider_id.clone();
                 let announce: Box<dyn Fn(String, String, u64) + Send + Sync> =
@@ -1196,7 +1196,7 @@ impl AcpConnection {
         &self,
         req: CanonicalModelInfoRequest,
     ) -> Result<CanonicalModelInfoResponse, agent_client_protocol::Error> {
-        use goose_providers::model::ModelConfig;
+        use arakan_providers::model::ModelConfig;
 
         let config_info =
             crate::providers::canonical_cost::configured_model_info(&req.provider, &req.model);

@@ -4,7 +4,7 @@
 compile_error!("Features `rustls-tls` and `native-tls` are mutually exclusive");
 
 pub mod acp;
-pub use goose_sdk_types::{custom_notifications, custom_requests};
+pub use arakan_sdk_types::{custom_notifications, custom_requests};
 pub mod action_required_manager;
 pub mod agents;
 pub mod builtin_extension;
@@ -13,14 +13,14 @@ pub mod config;
 pub mod context_limit;
 pub mod context_mgmt;
 pub mod conversation {
-    pub use goose_providers::conversation::*;
+    pub use arakan_providers::conversation::*;
 }
 pub mod dictation;
 pub mod doctor;
 pub mod download_manager;
 pub mod elicitation;
 pub mod gateway;
-pub mod goose_apps;
+pub mod arakan_apps;
 pub mod hints;
 pub mod hooks;
 pub mod instance_id;
@@ -35,8 +35,6 @@ pub mod oauth;
 pub mod otel;
 pub mod permission;
 pub mod plugins;
-#[cfg(feature = "telemetry")]
-pub mod posthog;
 pub mod prompt_template;
 pub mod providers;
 pub mod recipe;

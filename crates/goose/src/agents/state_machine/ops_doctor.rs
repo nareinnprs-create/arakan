@@ -8,7 +8,7 @@ use rmcp::model::Role;
 
 use crate::agents::state_machine::{
     applied, messages_since_kickoff, not_applicable, yielded_with, ConversationEffect, Emitter,
-    GooseEffect, Operation, OperationResult, SlashCommand,
+    ArakanEffect, Operation, OperationResult, SlashCommand,
 };
 use crate::conversation::message::Message;
 use crate::conversation::Conversation;
@@ -25,7 +25,7 @@ impl DoctorOperation {
 }
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for DoctorOperation {
+impl Operation<Session, ArakanEffect> for DoctorOperation {
     fn name(&self) -> &'static str {
         "doctor"
     }
@@ -36,7 +36,7 @@ impl Operation<Session, GooseEffect> for DoctorOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         if command.command != "doctor" {
             return not_applicable();
         }

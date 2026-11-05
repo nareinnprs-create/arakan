@@ -5,12 +5,12 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use goose::agents::ScheduleTool;
-use goose::config::GooseMode;
-use goose::conversation::message::{Message, MessageContent};
-use goose::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
-use goose::scheduler_trait::SchedulerTrait;
-use goose::session::{Session, SessionManager, SessionType};
+use arakan::agents::ScheduleTool;
+use arakan::config::ArakanMode;
+use arakan::conversation::message::{Message, MessageContent};
+use arakan::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
+use arakan::scheduler_trait::SchedulerTrait;
+use arakan::session::{Session, SessionManager, SessionType};
 use rmcp::model::{Annotations, ContentBlock, Role, TextContent};
 use tempfile::TempDir;
 
@@ -138,7 +138,7 @@ async fn session_content_only_serializes_agent_visible_conversation() {
             working_dir.clone(),
             "Project session".to_string(),
             SessionType::Scheduled,
-            GooseMode::Auto,
+            ArakanMode::Auto,
         )
         .await
         .unwrap();
@@ -199,7 +199,7 @@ async fn session_content_only_serializes_agent_visible_conversation() {
     );
     assert_eq!(serialized["name"], "Project session");
     assert_eq!(serialized["session_type"], "scheduled");
-    assert_eq!(serialized["goose_mode"], "auto");
+    assert_eq!(serialized["arakan_mode"], "auto");
     assert_eq!(serialized["message_count"], 3);
     assert!(!content.text.contains("hidden-message-secret"));
     assert!(!content.text.contains("hidden-content-secret"));

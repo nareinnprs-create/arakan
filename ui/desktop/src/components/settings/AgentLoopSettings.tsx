@@ -247,16 +247,16 @@ export default function AgentLoopSettings() {
     let active = true;
 
     Promise.all([
-      read('GOOSE_MAX_TURNS', false),
-      read('GOOSE_AUTO_COMPACT_THRESHOLD', false),
-      read('GOOSE_AUTO_COMPACT_TOKEN_LIMIT', false),
-      read('GOOSE_SLASH_COMMANDS_ENABLED', false),
-      read('GOOSE_TOOL_PAIR_SUMMARIZATION', false),
-      read('GOOSE_TOOL_CALL_CUTOFF', false),
-      read('GOOSE_RECIPE_RETRY_TIMEOUT_SECONDS', false),
-      read('GOOSE_RECIPE_ON_FAILURE_TIMEOUT_SECONDS', false),
-      read('GOOSE_STOP_HOOK_BLOCK_CAP', false),
-      read('GOOSE_AUTO_EFFORT_ENABLED', false),
+      read('ARAKAN_MAX_TURNS', false),
+      read('ARAKAN_AUTO_COMPACT_THRESHOLD', false),
+      read('ARAKAN_AUTO_COMPACT_TOKEN_LIMIT', false),
+      read('ARAKAN_SLASH_COMMANDS_ENABLED', false),
+      read('ARAKAN_TOOL_PAIR_SUMMARIZATION', false),
+      read('ARAKAN_TOOL_CALL_CUTOFF', false),
+      read('ARAKAN_RECIPE_RETRY_TIMEOUT_SECONDS', false),
+      read('ARAKAN_RECIPE_ON_FAILURE_TIMEOUT_SECONDS', false),
+      read('ARAKAN_STOP_HOOK_BLOCK_CAP', false),
+      read('ARAKAN_AUTO_EFFORT_ENABLED', false),
       read('TYPESAFE_API_KEY', true),
     ]).then(
       ([
@@ -323,17 +323,17 @@ export default function AgentLoopSettings() {
 
   const handleToolPairCompactionToggle = async (checked: boolean) => {
     setToolPairCompactionEnabled(checked);
-    await upsert('GOOSE_TOOL_PAIR_SUMMARIZATION', checked, false);
+    await upsert('ARAKAN_TOOL_PAIR_SUMMARIZATION', checked, false);
   };
 
   const handleSlashCommandsToggle = async (checked: boolean) => {
     setSlashCommandsEnabled(checked);
-    await upsert('GOOSE_SLASH_COMMANDS_ENABLED', checked, false);
+    await upsert('ARAKAN_SLASH_COMMANDS_ENABLED', checked, false);
   };
 
   const handleAutoEffortToggle = async (checked: boolean) => {
     setAutoEffortEnabled(checked);
-    await upsert('GOOSE_AUTO_EFFORT_ENABLED', checked, false);
+    await upsert('ARAKAN_AUTO_EFFORT_ENABLED', checked, false);
   };
 
   const saveTypesafeApiKey = async () => {
@@ -352,10 +352,10 @@ export default function AgentLoopSettings() {
 
   const saveToolCallCutoff = async () => {
     if (numbers.toolCallCutoff.trim() === '') {
-      await remove('GOOSE_TOOL_CALL_CUTOFF', false);
+      await remove('ARAKAN_TOOL_CALL_CUTOFF', false);
       return;
     }
-    await saveNumber('toolCallCutoff', 'GOOSE_TOOL_CALL_CUTOFF', 1, 100000);
+    await saveNumber('toolCallCutoff', 'ARAKAN_TOOL_CALL_CUTOFF', 1, 100000);
   };
 
   return (
@@ -431,7 +431,7 @@ export default function AgentLoopSettings() {
               min={1}
               max={10000}
               onChange={(value) => setNumber('maxTurns', value)}
-              onBlur={() => saveNumber('maxTurns', 'GOOSE_MAX_TURNS', 1, 10000)}
+              onBlur={() => saveNumber('maxTurns', 'ARAKAN_MAX_TURNS', 1, 10000)}
             />
           </OperationRow>
 
@@ -450,7 +450,7 @@ export default function AgentLoopSettings() {
                 onBlur={() =>
                   saveNumber(
                     'compactionThreshold',
-                    'GOOSE_AUTO_COMPACT_THRESHOLD',
+                    'ARAKAN_AUTO_COMPACT_THRESHOLD',
                     1,
                     99,
                     (value) => value / 100,
@@ -468,7 +468,7 @@ export default function AgentLoopSettings() {
                 onBlur={() =>
                   saveNumber(
                     'compactionTokenLimit',
-                    'GOOSE_AUTO_COMPACT_TOKEN_LIMIT',
+                    'ARAKAN_AUTO_COMPACT_TOKEN_LIMIT',
                     1000,
                     10000000
                   )
@@ -509,7 +509,7 @@ export default function AgentLoopSettings() {
                 max={3600}
                 onChange={(value) => setNumber('retryTimeout', value)}
                 onBlur={() =>
-                  saveNumber('retryTimeout', 'GOOSE_RECIPE_RETRY_TIMEOUT_SECONDS', 1, 3600)
+                  saveNumber('retryTimeout', 'ARAKAN_RECIPE_RETRY_TIMEOUT_SECONDS', 1, 3600)
                 }
               />
               <NumberInput
@@ -519,7 +519,7 @@ export default function AgentLoopSettings() {
                 max={3600}
                 onChange={(value) => setNumber('failureTimeout', value)}
                 onBlur={() =>
-                  saveNumber('failureTimeout', 'GOOSE_RECIPE_ON_FAILURE_TIMEOUT_SECONDS', 1, 3600)
+                  saveNumber('failureTimeout', 'ARAKAN_RECIPE_ON_FAILURE_TIMEOUT_SECONDS', 1, 3600)
                 }
               />
             </div>
@@ -535,7 +535,7 @@ export default function AgentLoopSettings() {
               min={1}
               max={100}
               onChange={(value) => setNumber('stopHookBlockCap', value)}
-              onBlur={() => saveNumber('stopHookBlockCap', 'GOOSE_STOP_HOOK_BLOCK_CAP', 1, 100)}
+              onBlur={() => saveNumber('stopHookBlockCap', 'ARAKAN_STOP_HOOK_BLOCK_CAP', 1, 100)}
             />
           </OperationRow>
         </CardContent>

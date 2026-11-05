@@ -20,7 +20,7 @@ use crate::providers::base::{
     ConfigKey, MessageStream, Provider, ProviderDef, ProviderMetadata,
     DEFAULT_CONNECT_TIMEOUT_SECS, DEFAULT_PROVIDER_TIMEOUT_SECS,
 };
-use goose_providers::model::ModelConfig;
+use arakan_providers::model::ModelConfig;
 
 use crate::providers::formats::gcpvertexai::{
     create_request, response_to_streaming_message, GcpLocation, ModelProvider, RequestContext,
@@ -29,9 +29,9 @@ use crate::providers::formats::gcpvertexai::{
 use crate::providers::gcpauth::GcpAuth;
 use crate::providers::openai_compatible::{map_http_error_to_provider_error, sanitize_url};
 use crate::providers::retry::RetryConfig;
-use goose_providers::errors::ProviderError;
-use goose_providers::http_status::{extract_retry_after, read_error_body};
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::http_status::{extract_retry_after, read_error_body};
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::Tool;
 
 const GCP_VERTEX_AI_PROVIDER_NAME: &str = "gcp_vertex_ai";
@@ -356,7 +356,7 @@ impl GcpVertexAIProvider {
 
             let request = (self.request_builder)(request)
                 .map_err(|e| ProviderError::ExecutionError(e.to_string()))?;
-            let response = goose_providers::http_status::send_bounded(
+            let response = arakan_providers::http_status::send_bounded(
                 request,
                 Duration::from_secs(DEFAULT_PROVIDER_TIMEOUT_SECS),
             )
@@ -563,7 +563,7 @@ impl GcpVertexAIProvider {
     }
 }
 
-impl goose_providers::base::ProviderDescriptor for GcpVertexAIProvider {
+impl arakan_providers::base::ProviderDescriptor for GcpVertexAIProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             GCP_VERTEX_AI_PROVIDER_NAME,
@@ -701,7 +701,7 @@ impl Provider for GcpVertexAIProvider {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use goose_providers::base::ProviderDescriptor as _;
+    use arakan_providers::base::ProviderDescriptor as _;
     use reqwest::StatusCode;
 
     #[test]

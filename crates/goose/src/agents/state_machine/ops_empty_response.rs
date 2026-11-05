@@ -2,9 +2,9 @@
 
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use goose_agent::inference::is_empty_response_marker;
+use arakan_agent::inference::is_empty_response_marker;
 
-use crate::agents::state_machine::effects::GooseEffect;
+use crate::agents::state_machine::effects::ArakanEffect;
 use crate::agents::state_machine::{
     applied, messages_since_kickoff, not_applicable, ConversationEffect, Emitter, Operation,
     OperationResult,
@@ -15,7 +15,7 @@ use crate::session::Session;
 pub struct EmptyResponseOperation;
 
 #[async_trait]
-impl Operation<Session, GooseEffect> for EmptyResponseOperation {
+impl Operation<Session, ArakanEffect> for EmptyResponseOperation {
     fn name(&self) -> &'static str {
         "empty_response"
     }
@@ -25,7 +25,7 @@ impl Operation<Session, GooseEffect> for EmptyResponseOperation {
         session: &Session,
         conversation: &Conversation,
         emit: &Emitter,
-    ) -> Result<OperationResult<GooseEffect>> {
+    ) -> Result<OperationResult<ArakanEffect>> {
         let Some(fallback) = messages_since_kickoff(conversation)?
             .last()
             .filter(|message| is_empty_response_marker(message) && !message.is_user_visible())

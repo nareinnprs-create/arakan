@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
 use chrono;
-use goose::config::Config;
-use goose::conversation::message::{Message, MessageContent, MessageMetadata};
-use goose::session::{SessionManager, SessionType};
+use arakan::config::Config;
+use arakan::conversation::message::{Message, MessageContent, MessageMetadata};
+use arakan::session::{SessionManager, SessionType};
 use rmcp::model::Role;
 
 use crate::session::{build_session, SessionBuilderConfig};
@@ -40,28 +40,28 @@ impl Shell {
 
 static BASH_CONFIG: ShellConfig = ShellConfig {
     script_template: r#"export AGENT_SESSION_ID="{session_id}"
-alias @goose='{goose_bin} term run'
-alias @g='{goose_bin} term run'{history_hook}{command_not_found_handler}"#,
+alias @arakan='{arakan_bin} term run'
+alias @g='{arakan_bin} term run'{history_hook}{command_not_found_handler}"#,
     history_hook_template: Some(
         r#"
 
-goose_preexec() {
-    [[ "$1" =~ ^goose\ term ]] && return
-    [[ "$1" =~ ^(@goose|@g)($|[[:space:]]) ]] && return
-    ('{goose_bin}' term log "$1" &) 2>/dev/null
+arakan_preexec() {
+    [[ "$1" =~ ^arakan\ term ]] && return
+    [[ "$1" =~ ^(@arakan|@g)($|[[:space:]]) ]] && return
+    ('{arakan_bin}' term log "$1" &) 2>/dev/null
 }
 
-if [[ -z "$goose_preexec_installed" ]]; then
-    goose_preexec_installed=1
-    trap 'goose_preexec "$BASH_COMMAND"' DEBUG
+if [[ -z "$arakan_preexec_installed" ]]; then
+    arakan_preexec_installed=1
+    trap 'arakan_preexec "$BASH_COMMAND"' DEBUG
 fi"#,
     ),
     command_not_found: Some(
         r#"
 
 command_not_found_handle() {
-    echo "🪿 Command '$1' not found. Asking goose..."
-    '{goose_bin}' term run "$@"
+    echo "🪿 Command '$1' not found. Asking arakan..."
+    '{arakan_bin}' term run "$@"
     return 0
 }"#,
     ),
@@ -69,26 +69,26 @@ command_not_found_handle() {
 
 static ZSH_CONFIG: ShellConfig = ShellConfig {
     script_template: r#"export AGENT_SESSION_ID="{session_id}"
-alias @goose='{goose_bin} term run'
-alias @g='{goose_bin} term run'{history_hook}{command_not_found_handler}"#,
+alias @arakan='{arakan_bin} term run'
+alias @g='{arakan_bin} term run'{history_hook}{command_not_found_handler}"#,
     history_hook_template: Some(
         r#"
 
-goose_preexec() {
-    [[ "$1" =~ ^goose\ term ]] && return
-    [[ "$1" =~ ^(@goose|@g)($|[[:space:]]) ]] && return
-    ('{goose_bin}' term log "$1" &) 2>/dev/null
+arakan_preexec() {
+    [[ "$1" =~ ^arakan\ term ]] && return
+    [[ "$1" =~ ^(@arakan|@g)($|[[:space:]]) ]] && return
+    ('{arakan_bin}' term log "$1" &) 2>/dev/null
 }
 
 autoload -Uz add-zsh-hook
-add-zsh-hook preexec goose_preexec"#,
+add-zsh-hook preexec arakan_preexec"#,
     ),
     command_not_found: Some(
         r#"
 
 command_not_found_handler() {
-    echo "🪿 Command '$1' not found. Asking goose..."
-    '{goose_bin}' term run "$@"
+    echo "🪿 Command '$1' not found. Asking arakan..."
+    '{arakan_bin}' term run "$@"
     return 0
 }"#,
     ),
@@ -96,15 +96,15 @@ command_not_found_handler() {
 
 static FISH_CONFIG: ShellConfig = ShellConfig {
     script_template: r#"set -gx AGENT_SESSION_ID "{session_id}"
-function @goose; {goose_bin} term run $argv; end
-function @g; {goose_bin} term run $argv; end{history_hook}"#,
+function @arakan; {arakan_bin} term run $argv; end
+function @g; {arakan_bin} term run $argv; end{history_hook}"#,
     history_hook_template: Some(
         r#"
 
-function goose_preexec --on-event fish_preexec
-    string match -q -r '^goose term' -- $argv[1]; and return
-    string match -q -r '^(@goose|@g)($|\s)' -- $argv[1]; and return
-    {goose_bin} term log "$argv[1]" 2>/dev/null &
+function arakan_preexec --on-event fish_preexec
+    string match -q -r '^arakan term' -- $argv[1]; and return
+    string match -q -r '^(@arakan|@g)($|\s)' -- $argv[1]; and return
+    {arakan_bin} term log "$argv[1]" 2>/dev/null &
 end"#,
     ),
     command_not_found: None,
@@ -112,14 +112,14 @@ end"#,
 
 static NU_CONFIG: ShellConfig = ShellConfig {
     script_template: r#"$env.AGENT_SESSION_ID = "{session_id}"
-def --wrapped @goose [...args] { run-external "{goose_bin}" "term" "run" ...$args }
-def --wrapped @g [...args] { run-external "{goose_bin}" "term" "run" ...$args }{history_hook}
+def --wrapped @arakan [...args] { run-external "{arakan_bin}" "term" "run" ...$args }
+def --wrapped @g [...args] { run-external "{arakan_bin}" "term" "run" ...$args }{history_hook}
 {command_not_found_handler}"#,
     history_hook_template: Some(
         r#"
 
-if (($env | get -o GOOSE_NU_PREEXEC_INSTALLED | default false) != true) {
-    $env.GOOSE_NU_PREEXEC_INSTALLED = true
+if (($env | get -o ARAKAN_NU_PREEXEC_INSTALLED | default false) != true) {
+    $env.ARAKAN_NU_PREEXEC_INSTALLED = true
     $env.config.hooks.pre_execution = (
         $env.config.hooks.pre_execution
         | append {||
@@ -127,13 +127,13 @@ if (($env | get -o GOOSE_NU_PREEXEC_INSTALLED | default false) != true) {
             if ($line | is-empty) {
                 return
             }
-            if ($line =~ '^goose term(\s|$)') {
+            if ($line =~ '^arakan term(\s|$)') {
                 return
             }
-            if ($line =~ '^(@goose|@g)(\s|$)') {
+            if ($line =~ '^(@arakan|@g)(\s|$)') {
                 return
             }
-            job spawn { run-external "{goose_bin}" "term" "log" $line | complete | ignore } | ignore
+            job spawn { run-external "{arakan_bin}" "term" "log" $line | complete | ignore } | ignore
         }
     )
 }"#,
@@ -142,8 +142,8 @@ if (($env | get -o GOOSE_NU_PREEXEC_INSTALLED | default false) != true) {
         r#"
 $env.config.hooks.command_not_found = {|command_name|
     let prompt = (try { commandline | str trim } catch { $command_name })
-    print $"🪿 Command '($command_name)' not found. Asking goose..."
-    run-external "{goose_bin}" "term" "run" $prompt | complete | ignore
+    print $"🪿 Command '($command_name)' not found. Asking arakan..."
+    run-external "{arakan_bin}" "term" "run" $prompt | complete | ignore
     null
 }"#,
     ),
@@ -151,16 +151,16 @@ $env.config.hooks.command_not_found = {|command_name|
 
 static POWERSHELL_CONFIG: ShellConfig = ShellConfig {
     script_template: r#"$env:AGENT_SESSION_ID = "{session_id}"
-function @goose {{ & '{goose_bin}' term run @args }}
-function @g {{ & '{goose_bin}' term run @args }}{history_hook}"#,
+function @arakan {{ & '{arakan_bin}' term run @args }}
+function @g {{ & '{arakan_bin}' term run @args }}{history_hook}"#,
     history_hook_template: Some(
         r#"
 
 Set-PSReadLineKeyHandler -Chord Enter -ScriptBlock {{
     $line = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$null)
-    if ($line -notmatch '^goose term' -and $line -notmatch '^(@goose|@g)($|\s)') {{
-        Start-Job -ScriptBlock {{ & '{goose_bin}' term log $using:line }} | Out-Null
+    if ($line -notmatch '^arakan term' -and $line -notmatch '^(@arakan|@g)($|\s)') {{
+        Start-Job -ScriptBlock {{ & '{arakan_bin}' term log $using:line }} | Out-Null
     }}
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }}"#,
@@ -171,7 +171,7 @@ Set-PSReadLineKeyHandler -Chord Enter -ScriptBlock {{
 fn render_term_init_script(
     shell: Shell,
     session_id: &str,
-    goose_bin: &str,
+    arakan_bin: &str,
     with_command_not_found: bool,
     include_history: bool,
 ) -> String {
@@ -179,7 +179,7 @@ fn render_term_init_script(
     let history_hook = if include_history {
         config
             .history_hook_template
-            .map(|h| h.replace("{goose_bin}", goose_bin))
+            .map(|h| h.replace("{arakan_bin}", arakan_bin))
             .unwrap_or_default()
     } else {
         String::new()
@@ -187,7 +187,7 @@ fn render_term_init_script(
     let command_not_found_handler = if with_command_not_found {
         config
             .command_not_found
-            .map(|handler| handler.replace("{goose_bin}", goose_bin))
+            .map(|handler| handler.replace("{arakan_bin}", arakan_bin))
             .unwrap_or_default()
     } else {
         String::new()
@@ -198,7 +198,7 @@ fn render_term_init_script(
         .replace("{history_hook}", &history_hook)
         .replace("{command_not_found_handler}", &command_not_found_handler)
         .replace("{session_id}", session_id)
-        .replace("{goose_bin}", goose_bin)
+        .replace("{arakan_bin}", arakan_bin)
 }
 
 pub async fn handle_term_init(
@@ -225,9 +225,9 @@ pub async fn handle_term_init(
             let session = session_manager
                 .create_session(
                     working_dir,
-                    "Goose Term Session".to_string(),
+                    "Arakan Term Session".to_string(),
                     SessionType::Terminal,
-                    Config::global().get_goose_mode().unwrap_or_default(),
+                    Config::global().get_arakan_mode().unwrap_or_default(),
                 )
                 .await?;
 
@@ -243,9 +243,9 @@ pub async fn handle_term_init(
         }
     };
 
-    let goose_bin = std::env::current_exe()
+    let arakan_bin = std::env::current_exe()
         .map(|p| p.to_string_lossy().into_owned())
-        .unwrap_or_else(|_| "goose".to_string());
+        .unwrap_or_else(|_| "arakan".to_string());
 
     if include_history {
         eprintln!(
@@ -260,7 +260,7 @@ pub async fn handle_term_init(
         render_term_init_script(
             shell,
             &session.id,
-            &goose_bin,
+            &arakan_bin,
             with_command_not_found,
             include_history
         )
@@ -271,7 +271,7 @@ pub async fn handle_term_init(
 pub async fn handle_term_log(command: String) -> Result<()> {
     let session_id = std::env::var("AGENT_SESSION_ID").map_err(|_| {
         anyhow!(
-            "AGENT_SESSION_ID not set. Initialize terminal integration with `goose term init <shell>` and reload your shell first."
+            "AGENT_SESSION_ID not set. Initialize terminal integration with `arakan term init <shell>` and reload your shell first."
         )
     })?;
 
@@ -308,7 +308,7 @@ pub async fn handle_term_run(prompt: Vec<String>) -> Result<()> {
     let session_id = std::env::var("AGENT_SESSION_ID").map_err(|_| {
         anyhow!(
             "AGENT_SESSION_ID not set.\n\n\
-             Initialize terminal integration with `goose term init <shell>` in your shell profile, \
+             Initialize terminal integration with `arakan term init <shell>` in your shell profile, \
              then restart or reload that shell."
         )
     })?;
@@ -368,7 +368,7 @@ pub async fn handle_term_run(prompt: Vec<String>) -> Result<()> {
     Ok(())
 }
 
-/// Handle `goose term info` - print compact session info for prompt integration
+/// Handle `arakan term info` - print compact session info for prompt integration
 pub async fn handle_term_info() -> Result<()> {
     let session_id = match std::env::var("AGENT_SESSION_ID") {
         Ok(id) => id,
@@ -382,15 +382,15 @@ pub async fn handle_term_info() -> Result<()> {
         .and_then(|s| s.usage.total_tokens)
         .unwrap_or(0) as usize;
 
-    let config = goose::config::Config::global();
+    let config = arakan::config::Config::global();
     let model_name = session
         .as_ref()
         .and_then(|session| session.model_config.as_ref())
         .map(|model| model.model_name.clone())
-        .or_else(|| config.get_goose_model().ok())
+        .or_else(|| config.get_arakan_model().ok())
         .map(|name| {
             let short = name.rsplit('/').next().unwrap_or(&name);
-            if let Some(stripped) = short.strip_prefix("goose-") {
+            if let Some(stripped) = short.strip_prefix("arakan-") {
                 stripped.to_string()
             } else {
                 short.to_string()
@@ -403,9 +403,9 @@ pub async fn handle_term_info() -> Result<()> {
         .and_then(|session| {
             let provider_name = session.provider_name.as_deref()?;
             let model = session.model_config.as_ref()?;
-            goose::context_limit::get_local_context_limit(provider_name, &model.model_name).ok()
+            arakan::context_limit::get_local_context_limit(provider_name, &model.model_name).ok()
         })
-        .unwrap_or(goose_providers::model::DEFAULT_CONTEXT_LIMIT);
+        .unwrap_or(arakan_providers::model::DEFAULT_CONTEXT_LIMIT);
 
     let percentage = if context_limit > 0 {
         ((total_tokens as f64 / context_limit as f64) * 100.0).round() as usize
@@ -428,44 +428,44 @@ mod tests {
 
     #[test]
     fn render_term_init_script_includes_nushell_basics() {
-        let script = render_term_init_script(Shell::Nu, "session-123", "/tmp/goose", false, false);
+        let script = render_term_init_script(Shell::Nu, "session-123", "/tmp/arakan", false, false);
 
         assert!(script.contains("$env.AGENT_SESSION_ID = \"session-123\""));
-        assert!(script.contains("def --wrapped @goose [...args]"));
+        assert!(script.contains("def --wrapped @arakan [...args]"));
         assert!(script.contains("def --wrapped @g [...args]"));
-        assert!(!script.contains("GOOSE_NU_PREEXEC_INSTALLED"));
+        assert!(!script.contains("ARAKAN_NU_PREEXEC_INSTALLED"));
         assert!(!script.contains("term log"));
     }
 
     #[test]
     fn render_term_init_script_includes_nushell_hooks_with_history() {
-        let script = render_term_init_script(Shell::Nu, "session-123", "/tmp/goose", false, true);
+        let script = render_term_init_script(Shell::Nu, "session-123", "/tmp/arakan", false, true);
 
-        assert!(script.contains("GOOSE_NU_PREEXEC_INSTALLED"));
+        assert!(script.contains("ARAKAN_NU_PREEXEC_INSTALLED"));
         assert!(script.contains("$env.config.hooks.pre_execution"));
-        assert!(script.contains("job spawn { run-external \"/tmp/goose\" \"term\" \"log\" $line | complete | ignore } | ignore"));
+        assert!(script.contains("job spawn { run-external \"/tmp/arakan\" \"term\" \"log\" $line | complete | ignore } | ignore"));
         assert!(!script.contains("command_not_found = {|command_name|"));
     }
 
     #[test]
     fn render_term_init_script_includes_nushell_default_handler() {
-        let script = render_term_init_script(Shell::Nu, "session-123", "/tmp/goose", true, false);
+        let script = render_term_init_script(Shell::Nu, "session-123", "/tmp/arakan", true, false);
 
         assert!(script.contains("$env.config.hooks.command_not_found = {|command_name|"));
         assert!(script
-            .contains("run-external \"/tmp/goose\" \"term\" \"run\" $prompt | complete | ignore"));
+            .contains("run-external \"/tmp/arakan\" \"term\" \"run\" $prompt | complete | ignore"));
     }
 
     #[test]
     fn render_term_init_script_skips_unsupported_default_handler() {
-        let script = render_term_init_script(Shell::Fish, "session-123", "/tmp/goose", true, false);
+        let script = render_term_init_script(Shell::Fish, "session-123", "/tmp/arakan", true, false);
 
         assert!(!script.contains("command_not_found"));
     }
 
     #[test]
     fn shell_history_skips_turn_context_events() {
-        use goose::conversation::message::MessageMetadata;
+        use arakan::conversation::message::MessageMetadata;
 
         let older = Message::user().with_text("git status");
         let block = Message::user()
@@ -486,33 +486,33 @@ mod tests {
     #[test]
     fn render_term_init_script_bash_excludes_history_by_default() {
         let script =
-            render_term_init_script(Shell::Bash, "session-123", "/tmp/goose", false, false);
+            render_term_init_script(Shell::Bash, "session-123", "/tmp/arakan", false, false);
 
         assert!(!script.contains("term log"));
-        assert!(!script.contains("goose_preexec"));
+        assert!(!script.contains("arakan_preexec"));
     }
 
     #[test]
     fn render_term_init_script_bash_includes_history_when_opted_in() {
-        let script = render_term_init_script(Shell::Bash, "session-123", "/tmp/goose", false, true);
+        let script = render_term_init_script(Shell::Bash, "session-123", "/tmp/arakan", false, true);
 
-        assert!(script.contains("('/tmp/goose' term log \"$1\" &) 2>/dev/null"));
-        assert!(script.contains("trap 'goose_preexec \"$BASH_COMMAND\"' DEBUG"));
+        assert!(script.contains("('/tmp/arakan' term log \"$1\" &) 2>/dev/null"));
+        assert!(script.contains("trap 'arakan_preexec \"$BASH_COMMAND\"' DEBUG"));
     }
 
     #[test]
     fn render_term_init_script_zsh_excludes_history_by_default() {
-        let script = render_term_init_script(Shell::Zsh, "session-123", "/tmp/goose", false, false);
+        let script = render_term_init_script(Shell::Zsh, "session-123", "/tmp/arakan", false, false);
 
         assert!(!script.contains("term log"));
-        assert!(!script.contains("goose_preexec"));
+        assert!(!script.contains("arakan_preexec"));
     }
 
     #[test]
     fn render_term_init_script_zsh_includes_history_when_opted_in() {
-        let script = render_term_init_script(Shell::Zsh, "session-123", "/tmp/goose", false, true);
+        let script = render_term_init_script(Shell::Zsh, "session-123", "/tmp/arakan", false, true);
 
-        assert!(script.contains("('/tmp/goose' term log \"$1\" &) 2>/dev/null"));
-        assert!(script.contains("add-zsh-hook preexec goose_preexec"));
+        assert!(script.contains("('/tmp/arakan' term log \"$1\" &) 2>/dev/null"));
+        assert!(script.contains("add-zsh-hook preexec arakan_preexec"));
     }
 }

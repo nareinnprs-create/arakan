@@ -21,7 +21,7 @@ use crate::providers::ollama::OLLAMA_PROVIDER_NAME;
 use crate::providers::openai::{OPEN_AI_DEFAULT_BASE_PATH, OPEN_AI_PROVIDER_NAME};
 use crate::providers::pi_acp::{PI_ACP_BINARY, PI_ACP_PROVIDER_NAME};
 use crate::providers::xai_oauth::TokenCache as XaiOAuthTokenCache;
-use goose_providers::azure_foundry::{endpoint_kind, EndpointKind, AZURE_FOUNDRY_PROVIDER_NAME};
+use arakan_providers::azure_foundry::{endpoint_kind, EndpointKind, AZURE_FOUNDRY_PROVIDER_NAME};
 
 pub fn openai_inventory() -> InventoryRegistration {
     InventoryRegistration::new(true, || {
@@ -299,7 +299,7 @@ mod tests {
     fn gemini_oauth_inventory_configured_uses_token_cache() {
         let root = tempfile::tempdir().unwrap();
         let root_path = root.path().to_string_lossy().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path.as_str()))]);
 
         let registration = gemini_oauth_inventory();
         let configured = registration
@@ -332,7 +332,7 @@ mod tests {
     fn kimi_code_inventory_configured_uses_token_cache() {
         let root = tempfile::tempdir().unwrap();
         let root_path = root.path().to_string_lossy().to_string();
-        let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path.as_str()))]);
+        let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path.as_str()))]);
 
         let registration = kimi_code_inventory();
         let configured = registration
@@ -363,8 +363,8 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         let root_path = root.path().to_string_lossy().to_string();
         let _guard = env_lock::lock_env([
-            ("GOOSE_PATH_ROOT", Some(root_path.as_str())),
-            ("MUSE_AUTH_PATH", Some("/tmp/goose-missing-muse-auth.json")),
+            ("ARAKAN_PATH_ROOT", Some(root_path.as_str())),
+            ("MUSE_AUTH_PATH", Some("/tmp/arakan-missing-muse-auth.json")),
             ("XDG_CONFIG_HOME", Some(root_path.as_str())),
         ]);
 

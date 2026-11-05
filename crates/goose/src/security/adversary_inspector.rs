@@ -5,7 +5,7 @@ use std::sync::{Arc, OnceLock};
 
 use crate::agents::provider_manager::ProviderManager;
 use crate::config::paths::Paths;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, MessageContent, ToolRequest};
 use crate::conversation::Conversation;
 use crate::tool_inspection::{InspectionAction, InspectionResult, ToolInspector};
@@ -33,8 +33,8 @@ struct AdversaryConfig {
 
 /// Adversary inspector that reviews tool calls against user-defined rules.
 ///
-/// Activated by placing an `adversary.md` file in the Goose config directory
-/// (`~/.config/goose/adversary.md`). The file contains optional frontmatter
+/// Activated by placing an `adversary.md` file in the Arakan config directory
+/// (`~/.config/arakan/adversary.md`). The file contains optional frontmatter
 /// to select which tools are reviewed, followed by rules.
 ///
 /// Example `adversary.md`:
@@ -366,7 +366,7 @@ impl ToolInspector for AdversaryInspector {
         session_id: &str,
         tool_requests: &[ToolRequest],
         messages: &[Message],
-        _goose_mode: GooseMode,
+        _arakan_mode: ArakanMode,
     ) -> Result<Vec<InspectionResult>> {
         let config = match self.get_config() {
             Some(c) => c,
@@ -678,7 +678,7 @@ mod tests {
         };
 
         let results = inspector
-            .inspect("test", &[request], &[], GooseMode::Auto)
+            .inspect("test", &[request], &[], ArakanMode::Auto)
             .await
             .unwrap();
         assert!(results.is_empty());

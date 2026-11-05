@@ -23,8 +23,8 @@ and session store. This walkthrough uses revision `dc25c57`, which pins GDK
 ## Run it first
 
 You need Rust 1.94.1 or later, macOS or Linux with `/bin/bash`, and an OpenAI
-API key. Choose a model that supports tool calling. You do not need the goose
-CLI, a goose configuration file, or an MCP server.
+API key. Choose a model that supports tool calling. You do not need the arakan
+CLI, a arakan configuration file, or an MCP server.
 
 :::warning Shell access
 This example executes shell commands without approval or sandboxing, with your
@@ -104,13 +104,13 @@ The example uses three GDK crates:
 
 ```toml
 [dependencies]
-goose-agent = "=0.1.0-alpha.12"
-goose-provider-types = "=0.1.0-alpha.12"
-goose-providers = { version = "=0.1.0-alpha.12", features = ["rustls-tls"] }
+arakan-agent = "=0.1.0-alpha.12"
+arakan-provider-types = "=0.1.0-alpha.12"
+arakan-providers = { version = "=0.1.0-alpha.12", features = ["rustls-tls"] }
 ```
 
-`goose-agent` provides the state machine and operations. `goose-provider-types`
-provides shared interfaces and message types. `goose-providers` supplies the
+`arakan-agent` provides the state machine and operations. `arakan-provider-types`
+provides shared interfaces and message types. `arakan-providers` supplies the
 OpenAI implementation. The `rustls-tls` feature enables HTTPS for this setup.
 The [full manifest](https://github.com/jamadeo/ngrc/blob/dc25c579cd40d85f8d90b61e80cbf02b8838564f/Cargo.toml)
 also includes Tokio, serialization, and the typed tool dependencies.

@@ -17,10 +17,10 @@ use crate::config::search_path::SearchPaths;
 use crate::conversation::message::{Message, MessageContent};
 use crate::subprocess::configure_subprocess;
 use futures::future::BoxFuture;
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::errors::ProviderError;
-use goose_providers::model::ModelConfig;
-use goose_providers::request_log::{start_log, LoggerHandleExt};
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::errors::ProviderError;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::request_log::{start_log, LoggerHandleExt};
 use rmcp::model::Tool;
 
 const CURSOR_AGENT_PROVIDER_NAME: &str = "cursor-agent";
@@ -133,7 +133,7 @@ impl CursorAgentProvider {
         Ok(Vec::new())
     }
 
-    /// Convert goose messages to a simple prompt format for cursor-agent CLI
+    /// Convert arakan messages to a simple prompt format for cursor-agent CLI
     fn messages_to_cursor_agent_format(&self, system: &str, messages: &[Message]) -> String {
         let mut full_prompt = String::new();
 
@@ -260,7 +260,7 @@ impl CursorAgentProvider {
     ) -> Result<Vec<String>, ProviderError> {
         let prompt = self.messages_to_cursor_agent_format(system, messages);
 
-        if std::env::var("GOOSE_CURSOR_AGENT_DEBUG").is_ok() {
+        if std::env::var("ARAKAN_CURSOR_AGENT_DEBUG").is_ok() {
             println!("=== CURSOR AGENT PROVIDER DEBUG ===");
             println!("Command: {:?}", self.command);
             println!("Original system prompt length: {} chars", system.len());
@@ -459,7 +459,7 @@ fn strip_ansi(input: &str) -> String {
     out
 }
 
-impl goose_providers::base::ProviderDescriptor for CursorAgentProvider {
+impl arakan_providers::base::ProviderDescriptor for CursorAgentProvider {
     fn metadata() -> ProviderMetadata {
         ProviderMetadata::new(
             CURSOR_AGENT_PROVIDER_NAME,

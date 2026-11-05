@@ -45,7 +45,7 @@ vi.mock('./ChatInput', () => ({
   },
 }));
 
-vi.mock('./LoadingGoose', () => ({ default: () => <div /> }));
+vi.mock('./LoadingArakan', () => ({ default: () => <div /> }));
 
 vi.mock('./ConfigContext', () => ({
   useConfig: () => ({ extensionsList: [] }),
@@ -54,9 +54,9 @@ vi.mock('./ConfigContext', () => ({
 vi.mock('../sessions', () => ({ createSession: vi.fn() }));
 
 vi.mock('../utils/workingDir', () => ({
-  getInitialWorkingDir: () => '/tmp/goose',
+  getInitialWorkingDir: () => '/tmp/arakan',
   getEffectiveWorkingDir: (inheritedWorkingDir?: string) =>
-    Promise.resolve(inheritedWorkingDir ?? '/tmp/goose'),
+    Promise.resolve(inheritedWorkingDir ?? '/tmp/arakan'),
 }));
 
 vi.mock('../utils/nextChatExtensions', () => ({
@@ -179,7 +179,7 @@ describe('Hub', () => {
     });
     await submit();
 
-    expect(createSession).toHaveBeenCalledWith('/tmp/goose', { extensionConfigs: [] });
+    expect(createSession).toHaveBeenCalledWith('/tmp/arakan', { extensionConfigs: [] });
   });
 
   it('leaves the set unspecified when the picker was never touched', async () => {
@@ -188,7 +188,7 @@ describe('Hub', () => {
 
     await submit();
 
-    expect(createSession).toHaveBeenCalledWith('/tmp/goose', { allExtensions: [] });
+    expect(createSession).toHaveBeenCalledWith('/tmp/arakan', { allExtensions: [] });
   });
 
   it('hands the draft to the input', () => {

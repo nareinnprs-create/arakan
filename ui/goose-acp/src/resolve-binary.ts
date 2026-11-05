@@ -3,11 +3,11 @@ import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 
 const PLATFORM_PACKAGES: Record<string, string> = {
-  "darwin-arm64": "@aaif/goose-binary-darwin-arm64",
-  "darwin-x64": "@aaif/goose-binary-darwin-x64",
-  "linux-arm64": "@aaif/goose-binary-linux-arm64",
-  "linux-x64": "@aaif/goose-binary-linux-x64",
-  "win32-x64": "@aaif/goose-binary-win32-x64",
+  "darwin-arm64": "@aaif/arakan-binary-darwin-arm64",
+  "darwin-x64": "@aaif/arakan-binary-darwin-x64",
+  "linux-arm64": "@aaif/arakan-binary-linux-arm64",
+  "linux-x64": "@aaif/arakan-binary-linux-x64",
+  "win32-x64": "@aaif/arakan-binary-win32-x64",
 };
 
 const require = createRequire(import.meta.url);
@@ -28,24 +28,24 @@ const resolverDependencies: BinaryResolverDependencies = {
   },
 };
 
-export function resolveGooseBinary(): string {
-  const override = process.env.GOOSE_BINARY?.trim();
+export function resolveArakanBinary(): string {
+  const override = process.env.ARAKAN_BINARY?.trim();
   if (override) {
     const binaryPath = resolve(override);
     if (!resolverDependencies.isFile(binaryPath)) {
-      throw new Error(`GOOSE_BINARY does not point to a file: ${binaryPath}.`);
+      throw new Error(`ARAKAN_BINARY does not point to a file: ${binaryPath}.`);
     }
     return binaryPath;
   }
 
-  return resolveGooseBinaryForRuntime(
+  return resolveArakanBinaryForRuntime(
     process.platform,
     process.arch,
     resolverDependencies,
   );
 }
 
-export function resolveGooseBinaryForRuntime(
+export function resolveArakanBinaryForRuntime(
   platform: string,
   arch: string,
   dependencies: BinaryResolverDependencies,
@@ -55,7 +55,7 @@ export function resolveGooseBinaryForRuntime(
 
   if (!packageName) {
     throw new Error(
-      `No Goose npm binary is available for ${platformKey}. Supported platforms: ${Object.keys(PLATFORM_PACKAGES).join(", ")}.`,
+      `No Arakan npm binary is available for ${platformKey}. Supported platforms: ${Object.keys(PLATFORM_PACKAGES).join(", ")}.`,
     );
   }
 
@@ -66,17 +66,17 @@ export function resolveGooseBinaryForRuntime(
     );
   } catch (cause) {
     throw new Error(
-      `Goose binary package ${packageName} is not installed. Reinstall @aaif/goose-acp with optional dependencies enabled.`,
+      `Arakan binary package ${packageName} is not installed. Reinstall @aaif/arakan-acp with optional dependencies enabled.`,
       { cause },
     );
   }
 
-  const executableName = platform === "win32" ? "goose.exe" : "goose";
+  const executableName = platform === "win32" ? "arakan.exe" : "arakan";
   const binaryPath = resolve(dirname(packageJsonPath), "bin", executableName);
 
   if (!dependencies.isFile(binaryPath)) {
     throw new Error(
-      `Goose executable from ${packageName} was not found at ${binaryPath}.`,
+      `Arakan executable from ${packageName} was not found at ${binaryPath}.`,
     );
   }
 

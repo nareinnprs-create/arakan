@@ -1,4 +1,4 @@
-import type { GooseSessionNotification_unstable } from '@aaif/goose-acp-client';
+import type { ArakanSessionNotification_unstable } from '@aaif/arakan-acp-client';
 import type { RequestPermissionRequest, SessionNotification } from '@agentclientprotocol/sdk';
 import { describe, expect, it } from 'vitest';
 import { getToolResponses, type Message, type NotificationEvent } from '../../types/message';
@@ -28,9 +28,9 @@ function acpUpdate(update: SessionNotification['update']): SessionNotification {
   };
 }
 
-function gooseUpdate(
-  update: GooseSessionNotification_unstable['update']
-): GooseSessionNotification_unstable {
+function arakanUpdate(
+  update: ArakanSessionNotification_unstable['update']
+): ArakanSessionNotification_unstable {
   return {
     sessionId: SESSION_ID,
     update,
@@ -142,7 +142,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_message_chunk',
             content: { type: 'text', text: 'Hello ' },
-            _meta: { goose: { operationLogs: ['ops_auto_effort: thinking high'] } },
+            _meta: { arakan: { operationLogs: ['ops_auto_effort: thinking high'] } },
           } as SessionNotification['update'])
         );
 
@@ -179,7 +179,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_message_chunk',
             content: { type: 'text', text: 'Partial response' },
-            _meta: { goose: { messageId: 'msg-1' } },
+            _meta: { arakan: { messageId: 'msg-1' } },
           } as SessionNotification['update'])
         );
 
@@ -189,7 +189,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'agent_message_chunk',
               content: { type: 'text', text: OUTPUT_TOKEN_LIMIT_FALLBACK_TEXT },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'msg-1',
                   outputTokenLimitReached: true,
                   fallbackContent: true,
@@ -228,7 +228,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'hel' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -252,7 +252,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'lo' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -270,7 +270,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'image', data: 'base64-image', mimeType: 'image/png' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -303,7 +303,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'ha' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -321,7 +321,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'ha' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -351,7 +351,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_thought_chunk',
             content: { type: 'text', text: 'Thinking ' },
-            _meta: { goose: { operationLogs: ['ops_auto_effort: thinking high'] } },
+            _meta: { arakan: { operationLogs: ['ops_auto_effort: thinking high'] } },
           } as SessionNotification['update'])
         );
 
@@ -378,7 +378,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'agent_thought_chunk',
               content: { type: 'text', text: 'Truncated thinking' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'thought-1',
                   outputTokenLimitReached: true,
                 },
@@ -398,7 +398,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_thought_chunk',
             content: { type: 'text', text: 'Truncated ' },
-            _meta: { goose: { messageId: 'thought-1' } },
+            _meta: { arakan: { messageId: 'thought-1' } },
           } as SessionNotification['update'])
         );
 
@@ -408,7 +408,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'agent_thought_chunk',
               content: { type: 'text', text: 'thinking' },
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'thought-1',
                   outputTokenLimitReached: true,
                 },
@@ -433,14 +433,14 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_thought_chunk',
             content: { type: 'text', text: 'Thinking' },
-            _meta: { goose: { messageId: 'msg-1', inference } },
+            _meta: { arakan: { messageId: 'msg-1', inference } },
           } as SessionNotification['update'])
         );
         adapter.apply(
           acpUpdate({
             sessionUpdate: 'agent_message_chunk',
             content: { type: 'text', text: 'Answer' },
-            _meta: { goose: { messageId: 'msg-1', inference } },
+            _meta: { arakan: { messageId: 'msg-1', inference } },
           } as SessionNotification['update'])
         );
         const messages = expectOnlyMessagesChange(
@@ -448,7 +448,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             acpUpdate({
               ...DEFAULT_TOOL_CALL,
               _meta: {
-                goose: {
+                arakan: {
                   messageId: 'msg-2',
                   inference: {
                     provider: 'openai',
@@ -480,7 +480,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             sessionUpdate: 'user_message_chunk',
             content: { type: 'text', text: 'Hi' },
             _meta: {
-              goose: {
+              arakan: {
                 messageId: 'user-1',
                 inference: { provider: 'openai', requestedModel: 'gpt-4o' },
               },
@@ -492,7 +492,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             acpUpdate({
               sessionUpdate: 'agent_message_chunk',
               content: { type: 'text', text: 'Hello' },
-              _meta: { goose: { messageId: 'msg-1', inference: { provider: 'openai' } } },
+              _meta: { arakan: { messageId: 'msg-1', inference: { provider: 'openai' } } },
             } as SessionNotification['update'])
           )
         );
@@ -512,7 +512,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             acpUpdate({
               ...DEFAULT_TOOL_CALL_UPDATE,
               status: 'completed',
-              _meta: { goose: { subagentSessionId: 'child-session' } },
+              _meta: { arakan: { subagentSessionId: 'child-session' } },
             })
           )
         );
@@ -536,7 +536,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             rawInput: { path: 'README.md' },
             locations: [{ path: 'README.md', line: 1 }],
             _meta: {
-              goose: {
+              arakan: {
                 operationLogs: ['ops_auto_effort: thinking high'],
                 toolCall: {
                   extensionName: 'developer',
@@ -583,7 +583,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               },
             ],
             _meta: {
-              goose: {
+              arakan: {
                 subagentSessionId: 'child-session',
                 mcpApp: {
                   resourceUri: 'ui://app/resource',
@@ -975,13 +975,13 @@ describe('createAcpSessionNotificationAdapter', () => {
     });
   });
 
-  describe('applyGoose', () => {
+  describe('applyArakan', () => {
     it('maps usage updates into token state', () => {
       const adapter = createAcpSessionNotificationAdapter();
 
       expect(
-        adapter.applyGoose(
-          gooseUpdate({
+        adapter.applyArakan(
+          arakanUpdate({
             sessionUpdate: 'usage_update',
             used: 42,
             contextLimit: 200,
@@ -1008,8 +1008,8 @@ describe('createAcpSessionNotificationAdapter', () => {
     it('maps status messages and keeps later id-less chunks separate', () => {
       const adapter = createAcpSessionNotificationAdapter();
 
-      const noticeStateChanges = adapter.applyGoose(
-        gooseUpdate({
+      const noticeStateChanges = adapter.applyArakan(
+        arakanUpdate({
           sessionUpdate: 'status_message',
           status: { type: 'notice', message: 'Checking files' },
         })
@@ -1030,8 +1030,8 @@ describe('createAcpSessionNotificationAdapter', () => {
       expect(messages).toHaveLength(2);
       expect(firstContent(messages[1])).toMatchObject({ type: 'text', text: 'Result' });
 
-      const progressStateChanges = adapter.applyGoose(
-        gooseUpdate({
+      const progressStateChanges = adapter.applyArakan(
+        arakanUpdate({
           sessionUpdate: 'status_message',
           status: { type: 'progress', message: 'Still working' },
         })
@@ -1058,7 +1058,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             },
           ],
           _meta: {
-            goose: {
+            arakan: {
               toolCall: {
                 toolName: 'edit_file',
               },
@@ -1133,7 +1133,7 @@ describe('createAcpSessionNotificationAdapter', () => {
         acpUpdate({
           sessionUpdate: 'session_info_update',
           _meta: {
-            goose: {
+            arakan: {
               queuedSteer: { messageId: 'steer-msg-1', runId: 'run-1' },
             },
           },
@@ -1150,7 +1150,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           sessionUpdate: 'session_info_update',
           title: 'New Title',
           _meta: {
-            goose: {
+            arakan: {
               queuedSteer: { messageId: 'steer-msg-2', runId: 'run-2' },
             },
           },

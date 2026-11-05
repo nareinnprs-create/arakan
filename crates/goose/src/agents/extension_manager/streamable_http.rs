@@ -197,12 +197,12 @@ pub(super) fn resolve_static_oauth_client(
     }))
 }
 
-const GOOSE_USER_AGENT: reqwest::header::HeaderValue =
-    reqwest::header::HeaderValue::from_static(concat!("goose/", env!("CARGO_PKG_VERSION")));
+const ARAKAN_USER_AGENT: reqwest::header::HeaderValue =
+    reqwest::header::HeaderValue::from_static(concat!("arakan/", env!("CARGO_PKG_VERSION")));
 
 fn header_map(headers: &HashMap<String, String>) -> ExtensionResult<HeaderMap> {
     let mut map = HeaderMap::new();
-    map.insert(reqwest::header::USER_AGENT, GOOSE_USER_AGENT);
+    map.insert(reqwest::header::USER_AGENT, ARAKAN_USER_AGENT);
     for (key, value) in headers {
         map.insert(
             HeaderName::try_from(key)
@@ -235,7 +235,7 @@ fn http_client(
 
 fn should_retry_legacy_after_empty_discover(
     result: &Result<McpClient, Box<ClientInitializeError>>,
-    capabilities: &super::super::mcp_client::GooseMcpClientCapabilities,
+    capabilities: &super::super::mcp_client::ArakanMcpClientCapabilities,
 ) -> bool {
     capabilities.protocol_version.is_none()
         && result.as_ref().is_err_and(|error| {
@@ -686,15 +686,15 @@ async fn connect_over_unix_socket(
 mod tests {
     use super::*;
     use crate::action_required_manager::ActionRequiredManager;
-    use crate::agents::mcp_client::GooseMcpClientCapabilities;
+    use crate::agents::mcp_client::ArakanMcpClientCapabilities;
     use rmcp::transport::auth::InMemoryCredentialStore;
     use tempfile::tempdir;
 
     fn test_ctx(working_dir: &std::path::Path) -> ConnectContext {
         ConnectContext {
             timeout: Duration::from_secs(5),
-            client_name: "goose-test".to_string(),
-            capabilities: GooseMcpClientCapabilities {
+            client_name: "arakan-test".to_string(),
+            capabilities: ArakanMcpClientCapabilities {
                 mcpui: false,
                 host_info: None,
                 elicitation_handler: None,

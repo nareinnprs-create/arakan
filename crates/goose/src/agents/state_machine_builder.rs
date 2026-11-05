@@ -2,20 +2,20 @@ use std::num::NonZeroUsize;
 use std::sync::{Arc, Mutex as StdMutex};
 use std::time::Duration;
 
-use goose_agent::post_tool_call_hook::PostToolCallHook;
-use goose_providers::api_client::{ApiClient, AuthMethod};
-use goose_providers::decision::DecisionProvider;
-use goose_providers::model::ModelConfig;
-use goose_providers::typesafe::{TypeSafeProvider, TYPESAFE_DEFAULT_HOST};
+use arakan_agent::post_tool_call_hook::PostToolCallHook;
+use arakan_providers::api_client::{ApiClient, AuthMethod};
+use arakan_providers::decision::DecisionProvider;
+use arakan_providers::model::ModelConfig;
+use arakan_providers::typesafe::{TypeSafeProvider, TYPESAFE_DEFAULT_HOST};
 use tokio_util::sync::CancellationToken;
 
 use crate::agents::extension_manager::{ExtensionLease, ExtensionManager};
 use crate::agents::state_machine::UnavailableDecisions;
 use crate::agents::state_machine::{
     deny_limit_warning, BangShellOperation, CompactionOperation, ContextRelevanceOperation,
-    DoctorOperation, EmptyResponseOperation, ExitOnErrorOperation, GooseEffect,
-    GooseInferenceProvider, GooseInferenceRequestPreparer, GoosePostToolHook, GoosePreToolHook,
-    GooseStopHook, GooseToolApproval, InferenceRunner, MaxTurnsOperation, Operation,
+    DoctorOperation, EmptyResponseOperation, ExitOnErrorOperation, ArakanEffect,
+    ArakanInferenceProvider, ArakanInferenceRequestPreparer, ArakanPostToolHook, ArakanPreToolHook,
+    ArakanStopHook, ArakanToolApproval, InferenceRunner, MaxTurnsOperation, Operation,
     PreToolCallHookOperation, ProjectOperation, RecipeOperation, RemainingToolCallsOperation,
     RetryOperation, SkillOperation, SlashCommandOperation, StateMachine, StatusOperation,
     SteerOperation, SteerQueue, Step, StopHookOperation, SubagentOperation, ToolApprovalOperation,
@@ -47,7 +47,7 @@ pub(crate) struct StateMachineConfig<'a> {
     pub(crate) on_failure_timeout: Duration,
     pub(crate) stop_hook_block_cap: u32,
     pub(crate) max_turns: u32,
-    pub(crate) extra_operations: Vec<Arc<dyn Operation<Session, GooseEffect>>>,
+    pub(crate) extra_operations: Vec<Arc<dyn Operation<Session, ArakanEffect>>>,
     pub(crate) cancel: CancellationToken,
     pub(crate) context_relevance: Option<Arc<dyn DecisionProvider>>,
 }
@@ -62,7 +62,7 @@ pub(crate) fn context_relevance_provider(
 ) -> Option<Arc<dyn DecisionProvider>> {
     if provider.manages_own_context()
         || !config
-            .get_param::<bool>("GOOSE_CONTEXT_RELEVANCE_SHADOW")
+            .get_param::<bool>("ARAKAN_CONTEXT_RELEVANCE_SHADOW")
             .unwrap_or(false)
     {
         return None;
@@ -91,7 +91,7 @@ fn typesafe_provider(config: &Config) -> anyhow::Result<Arc<dyn DecisionProvider
 
 pub(crate) fn build_state_machine(
     config: StateMachineConfig<'_>,
-) -> StateMachine<'_, Session, GooseEffect> {
+) -> StateMachine<'_, Session, ArakanEffect> {
     let StateMachineConfig {
         provider,
         model_config,
@@ -116,17 +116,17 @@ pub(crate) fn build_state_machine(
     } = config;
     let manages_own_context = provider.manages_own_context();
 
-    let post_tool_call_hook: Arc<dyn PostToolCallHook<Session>> = Arc::new(GoosePostToolHook::new(
+    let post_tool_call_hook: Arc<dyn PostToolCallHook<Session>> = Arc::new(ArakanPostToolHook::new(
         hook_manager.clone(),
         Arc::clone(&extension_lease),
     ));
-    let mut operations: Vec<Arc<dyn Operation<Session, GooseEffect> + '_>> = vec![
+    let mut operations: Vec<Arc<dyn Operation<Session, ArakanEffect> + '_>> = vec![
         Arc::new(
-            ToolApprovalOperation::new(Arc::new(GooseToolApproval::new(tool_inspection_manager)))
+            ToolApprovalOperation::new(Arc::new(ArakanToolApproval::new(tool_inspection_manager)))
                 .with_declined_message(DECLINED_RESPONSE),
         ),
         Arc::new(PreToolCallHookOperation::new(Arc::new(
-            GoosePreToolHook::new(hook_manager.clone(), Arc::clone(&extension_lease)),
+            ArakanPreToolHook::new(hook_manager.clone(), Arc::clone(&extension_lease)),
         ))),
         Arc::new(SkillOperation::new(
             Arc::clone(&extension_lease),
@@ -151,7 +151,7 @@ pub(crate) fn build_state_machine(
         Arc::new(
             SubagentOperation::new(Arc::new(subagent_runner)).with_max_concurrency(
                 Config::global()
-                    .get_param::<NonZeroUsize>("GOOSE_MAX_CONCURRENT_SUBAGENTS")
+                    .get_param::<NonZeroUsize>("ARAKAN_MAX_CONCURRENT_SUBAGENTS")
                     .unwrap_or(NonZeroUsize::new(5).unwrap()),
             ),
         ),
@@ -173,7 +173,7 @@ pub(crate) fn build_state_machine(
             compaction_threshold,
         )));
     }
-    let remaining_operations: Vec<Arc<dyn Operation<Session, GooseEffect> + '_>> = vec![
+    let remaining_operations: Vec<Arc<dyn Operation<Session, ArakanEffect> + '_>> = vec![
         Arc::new(ToolPairCompactionOperation::new(
             provider.clone(),
             model_config.clone(),
@@ -185,7 +185,7 @@ pub(crate) fn build_state_machine(
         Arc::new(RetryOperation::new(retry_timeout, on_failure_timeout)),
         Arc::new(EmptyResponseOperation),
         Arc::new(
-            StopHookOperation::new(Arc::new(GooseStopHook::new(hook_manager)))
+            StopHookOperation::new(Arc::new(ArakanStopHook::new(hook_manager)))
                 .with_deny_limit_per_turn(stop_hook_block_cap)
                 .with_deny_limit_message(move || deny_limit_warning(stop_hook_block_cap)),
         ),
@@ -194,21 +194,21 @@ pub(crate) fn build_state_machine(
     ];
     operations.extend(remaining_operations);
     operations.extend(extra_operations);
-    let request_preparer = GooseInferenceRequestPreparer {
+    let request_preparer = ArakanInferenceRequestPreparer {
         extension_manager,
         extension_lease,
         tool_inspection_manager,
         context_limit,
     };
     let status_operation = Arc::new(StatusOperation::new(provider.clone(), model_config.clone()));
-    let inference_provider = Arc::new(GooseInferenceProvider::new(provider));
+    let inference_provider = Arc::new(ArakanInferenceProvider::new(provider));
     let inference = Arc::new(
         InferenceRunner::new(inference_provider, model_config)
             .with_request_preparer(Arc::new(request_preparer)),
     );
     let mut command_handlers = operations.clone();
     command_handlers.push(status_operation);
-    let command_operation: Arc<dyn Operation<Session, GooseEffect> + '_> =
+    let command_operation: Arc<dyn Operation<Session, ArakanEffect> + '_> =
         Arc::new(SlashCommandOperation::new(command_handlers));
     let steps = std::iter::once(command_operation)
         .chain(operations)

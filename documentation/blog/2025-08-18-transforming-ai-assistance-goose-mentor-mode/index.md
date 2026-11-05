@@ -1,21 +1,21 @@
 ---
-title: "Transforming AI Assistance from Automation to Education: The Story Behind Goose Mentor Mode"
-description: "How a Junior developer's AI Agent confusion, led to creating an educational MCP extension that transforms Goose from an automation tool into a learning mentor."
+title: "Transforming AI Assistance from Automation to Education: The Story Behind Arakan Mentor Mode"
+description: "How a Junior developer's AI Agent confusion, led to creating an educational MCP extension that transforms Arakan from an automation tool into a learning mentor."
 authors:
   - jeuston
 ---
 
-![Goose Mentor Mode Header](goose-mentor-mode-header.png)
+![Arakan Mentor Mode Header](arakan-mentor-mode-header.png)
 
-Kim is fresh out of the academy and has spent only 18 months learning development. When I asked her how she felt about Goose she had mixed reactions. While she found it cool that it could do so much for her, she wasn’t actually sure of *what* it was doing for her half the time, and also *why*. When she asked Goose to fix a broken build, or chase a bug, It would complete the task and claim ‘Success\!’. Which is great, however she felt she wasn’t actually learning as much as when she was in the academy. Add on that sometimes she didn’t even know *what* to ask Goose to do sometimes.
+Kim is fresh out of the academy and has spent only 18 months learning development. When I asked her how she felt about Arakan she had mixed reactions. While she found it cool that it could do so much for her, she wasn’t actually sure of *what* it was doing for her half the time, and also *why*. When she asked Arakan to fix a broken build, or chase a bug, It would complete the task and claim ‘Success\!’. Which is great, however she felt she wasn’t actually learning as much as when she was in the academy. Add on that sometimes she didn’t even know *what* to ask Arakan to do sometimes.
 
-That afternoon I started to see if I could get Goose to be more than just a ‘magic box’ for my Junior Devs. What if Goose could instead act as a mentor and also teach as well as speeding up development?
+That afternoon I started to see if I could get Arakan to be more than just a ‘magic box’ for my Junior Devs. What if Arakan could instead act as a mentor and also teach as well as speeding up development?
 
 <!-- truncate -->
 
-# **Transforming AI Assistance from Automation to Education: The Story Behind Goose Mentor Mode**
+# **Transforming AI Assistance from Automation to Education: The Story Behind Arakan Mentor Mode**
 
-Working as an Engineering Manager in the enterprise space, I have around 16 developers in my team. Like a lot of the industry right now I’ve been seeing where AI can fit within our processes, and what efficiencies it can provide. In July of this year I picked up Goose and quickly saw the incredible potential it had for both myself and my team. Excited to see what was possible, I quickly granted access to all my developers, hooked them up with a few different models, and then let them play for a couple of weeks.
+Working as an Engineering Manager in the enterprise space, I have around 16 developers in my team. Like a lot of the industry right now I’ve been seeing where AI can fit within our processes, and what efficiencies it can provide. In July of this year I picked up Arakan and quickly saw the incredible potential it had for both myself and my team. Excited to see what was possible, I quickly granted access to all my developers, hooked them up with a few different models, and then let them play for a couple of weeks.
 
 Within my team I have a vast range of developer experience. From Tech Leads, all the way down to fresh graduates. The Seniors and Tech Leads were marvelling at the speed with which they could now progress their work. My mid level Devs were also amazed at how fast they could debug broken builds. It wasn’t until one of my regular catch up meetings with one of my Junior Graduates did I hear something different.
 
@@ -28,9 +28,9 @@ Traditional AI coding assistants operate on a simple premise: user asks, AI deli
 * **One-Size-Fits-All**: No differentiation between a junior developer learning authentication and a senior developer implementing it under deadline pressure  
 * **Context Blindness**: AI treats "how do I implement JWT?" the same whether it's asked by someone with 6 months or 6 years of experience
 
-## **The Vision: Goose Mentor Mode**
+## **The Vision: Arakan Mentor Mode**
 
-The mission behind Goose Mentor Mode is simple but transformative: **Transform AI assistance from automation to education while maintaining the efficiency developers need**.
+The mission behind Arakan Mentor Mode is simple but transformative: **Transform AI assistance from automation to education while maintaining the efficiency developers need**.
 
 The core philosophy centers on four principles:
 
@@ -93,7 +93,7 @@ Some features of a fully implemented solution may include:
 
 ### **⚙️ Developer-Centric Configuration**
 
-Easy setup through environment variables that integrate seamlessly with Goose Desktop:
+Easy setup through environment variables that integrate seamlessly with Arakan Desktop:
 
 ```bash
 DEFAULT_ASSISTANCE_LEVEL=guided          # Customize default behavior
@@ -107,7 +107,7 @@ DEVELOPER_EXPERIENCE_MONTHS=6           # Personalize experience
 
 ## **Future Features: The Roadmap Ahead**
 
-This being just a Proof of Concept it is very early days for the extension. I currently have a couple of my junior developers testing it out and providing feedback. Below is a list of ideas I’ve put together with help from Goose on what a future roadmap may look like.
+This being just a Proof of Concept it is very early days for the extension. I currently have a couple of my junior developers testing it out and providing feedback. Below is a list of ideas I’ve put together with help from Arakan on what a future roadmap may look like.
 
 ### **Phase 1: Enhanced Intelligence (In Progress)**
 
@@ -141,22 +141,22 @@ Although I did come up with the idea while at work, I quickly decided this would
 
 ## **The Bigger Picture: Changing How We Think About AI**
 
-Goose Mentor Mode represents more than just a new extension—it's a proof of concept for a fundamentally different relationship between developers and AI. Instead of creating dependency, it builds capability. Instead of providing fish, it teaches fishing.
+Arakan Mentor Mode represents more than just a new extension—it's a proof of concept for a fundamentally different relationship between developers and AI. Instead of creating dependency, it builds capability. Instead of providing fish, it teaches fishing.
 
-The early results suggest this approach resonates with developers who want to grow, not just get things done. As AI becomes more prevalent in software development, tools like Goose Mentor Mode point toward a future where AI enhances human capability rather than replacing human thinking.
+The early results suggest this approach resonates with developers who want to grow, not just get things done. As AI becomes more prevalent in software development, tools like Arakan Mentor Mode point toward a future where AI enhances human capability rather than replacing human thinking.
 
 ---
-*Goose Mentor Mode is open source and available on [PyPI](https://pypi.org/project/goose-mentor-mode/). Join the conversation on [GitHub](https://github.com/joeeuston-dev/goose-mentor-mode) and help shape the future of educational AI assistance.*
+*Arakan Mentor Mode is open source and available on [PyPI](https://pypi.org/project/arakan-mentor-mode/). Join the conversation on [GitHub](https://github.com/joeeuston-dev/arakan-mentor-mode) and help shape the future of educational AI assistance.*
 
 <head>
-  <meta property="og:title" content="Transforming AI Assistance from Automation to Education: The Story Behind Goose Mentor Mode" />
+  <meta property="og:title" content="Transforming AI Assistance from Automation to Education: The Story Behind Arakan Mentor Mode" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://goose-docs.ai/blog/2025/08/14/transforming-ai-assistance-gooe-mentor-mode" />
-  <meta property="og:description" content="How a Junior developer's AI Agent confusion, led to creating an educational MCP extension that transforms Goose from an automation tool into a learning mentor." />
-  <meta property="og:image" content="https://goose-docs.ai/assets/images/goose-mentor-mode-header-77058a250a163440d791e057ef3196ea.png" />
+  <meta property="og:url" content="https://arakan-docs.ai/blog/2025/08/14/transforming-ai-assistance-gooe-mentor-mode" />
+  <meta property="og:description" content="How a Junior developer's AI Agent confusion, led to creating an educational MCP extension that transforms Arakan from an automation tool into a learning mentor." />
+  <meta property="og:image" content="https://arakan-docs.ai/assets/images/arakan-mentor-mode-header-77058a250a163440d791e057ef3196ea.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="goose-docs.ai" />
-  <meta name="twitter:title" content="Transforming AI Assistance from Automation to Education: The Story Behind Goose Mentor Mode" />
-  <meta name="twitter:description" content="How a Junior developer's AI Agent confusion, led to creating an educational MCP extension that transforms Goose from an automation tool into a learning mentor." />
-  <meta name="twitter:image" content="https://goose-docs.ai/assets/images/goose-mentor-mode-header-77058a250a163440d791e057ef3196ea.png" />
+  <meta property="twitter:domain" content="arakan-docs.ai" />
+  <meta name="twitter:title" content="Transforming AI Assistance from Automation to Education: The Story Behind Arakan Mentor Mode" />
+  <meta name="twitter:description" content="How a Junior developer's AI Agent confusion, led to creating an educational MCP extension that transforms Arakan from an automation tool into a learning mentor." />
+  <meta name="twitter:image" content="https://arakan-docs.ai/assets/images/arakan-mentor-mode-header-77058a250a163440d791e057ef3196ea.png" />
 </head>

@@ -1,6 +1,6 @@
-import type { GooseApp } from '../types/apps';
+import type { ArakanApp } from '../types/apps';
 
-export function isRetiredGooseChatApp(app: GooseApp) {
+export function isRetiredArakanChatApp(app: ArakanApp) {
   return (
     app.mcpServers?.includes('apps') &&
     app.uri === 'ui://apps/chat' &&

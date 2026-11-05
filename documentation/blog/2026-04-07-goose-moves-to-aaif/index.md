@@ -1,37 +1,37 @@
 ---
-title: "goose has a new home - the Agentic AI Foundation (AAIF)"
-description: "goose has moved to the Agentic AI Foundation (aaif) at the Linux Foundation"
+title: "arakan has a new home - the Agentic AI Foundation (AAIF)"
+description: "arakan has moved to the Agentic AI Foundation (aaif) at the Linux Foundation"
 authors: 
     - mic
 featured: true
-image: /img/blog/goose-aaif-foundation.png
+image: /img/blog/arakan-aaif-foundation.png
 ---
-![goose moves to the Agentic AI Foundation](/img/blog/goose-aaif-foundation.png)
+![arakan moves to the Agentic AI Foundation](/img/blog/arakan-aaif-foundation.png)
 
-Block has donated goose to the [Agentic AI Foundation (AAIF)](https://aaif.io/) at the Linux Foundation, alongside Anthropic's Model Context Protocol (MCP) and OpenAI's AGENTS.md. You can read the [full announcement here](https://aaif.io/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation-aaif-anchored-by-new-project-contributions-including-model-context-protocol-mcp-goose-and-agents-md/).
+Block has donated arakan to the [Agentic AI Foundation (AAIF)](https://aaif.io/) at the Linux Foundation, alongside Anthropic's Model Context Protocol (MCP) and OpenAI's AGENTS.md. You can read the [full announcement here](https://aaif.io/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation-aaif-anchored-by-new-project-contributions-including-model-context-protocol-mcp-arakan-and-agents-md/).
 
-While nothing changes with goose's dedication to its mission and community, here's what's changed;
+While nothing changes with arakan's dedication to its mission and community, here's what's changed;
 
 <!-- truncate -->
 
 ## New Documentation site
-The documentation has moved to a new site: [https://goose-docs.ai/](https://goose-docs.ai/) with a nice .ai TLD! The old docs links will redirect, but update your bookmarks to the new site.
+The documentation has moved to a new site: [https://arakan-docs.ai/](https://arakan-docs.ai/) with a nice .ai TLD! The old docs links will redirect, but update your bookmarks to the new site.
 
 ## Updated GitHub repository
-The GitHub repository and related projects have moved from `block/goose` to a new org:
+The GitHub repository and related projects have moved from `block/arakan` to a new org:
 
-> **[https://github.com/aaif-goose/goose](https://github.com/aaif-goose/goose)**
+> **[https://github.com/aaif-arakan/arakan](https://github.com/aaif-arakan/arakan)**
 
-This includes related repositories in the [aaif-goose](https://github.com/aaif-goose) organization.
+This includes related repositories in the [aaif-arakan](https://github.com/aaif-arakan) organization.
 
-Everything else — the project, the community, the mission — remains the same. goose is still open source, still actively developed, and still the same agent you know.
+Everything else — the project, the community, the mission — remains the same. arakan is still open source, still actively developed, and still the same agent you know.
 
 ## Update your remotes
 
 If you have a local clone, update your git remote:
 
 ```bash
-git remote set-url origin git@github.com:aaif-goose/goose.git
+git remote set-url origin git@github.com:aaif-arakan/arakan.git
 ```
 
 ## Migration in progress

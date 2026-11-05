@@ -1,7 +1,7 @@
 #![recursion_limit = "256"]
 
 use anyhow::Result;
-use goose_cli::cli::cli;
+use arakan_cli::cli::cli;
 
 /// Enable ANSI/VT escape sequence processing on Windows Console Host.
 ///
@@ -17,18 +17,18 @@ fn enable_windows_vt_processing() {
 }
 
 async fn run() -> Result<()> {
-    if let Err(e) = goose_cli::logging::setup_logging(None) {
+    if let Err(e) = arakan_cli::logging::setup_logging(None) {
         eprintln!("Warning: Failed to initialize logging: {}", e);
     }
 
     #[cfg(feature = "online-model-meta")]
-    goose::model_catalog::initialize();
+    arakan::model_catalog::initialize();
 
     let result = cli().await;
 
     #[cfg(feature = "otel")]
-    if goose::otel::otlp::is_otlp_initialized() {
-        goose::otel::otlp::shutdown_otlp();
+    if arakan::otel::otlp::is_otlp_initialized() {
+        arakan::otel::otlp::shutdown_otlp();
     }
 
     result
@@ -39,7 +39,7 @@ fn main() -> Result<()> {
     enable_windows_vt_processing();
 
     let handle = std::thread::Builder::new()
-        .name("goose-cli-main".to_string())
+        .name("arakan-cli-main".to_string())
         .stack_size(8 * 1024 * 1024)
         .spawn(|| {
             let runtime = tokio::runtime::Builder::new_multi_thread()
@@ -48,9 +48,9 @@ fn main() -> Result<()> {
                 .expect("Failed to build Tokio runtime");
             runtime.block_on(run())
         })
-        .map_err(|e| anyhow::anyhow!("Failed to spawn goose-cli main thread: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("Failed to spawn arakan-cli main thread: {}", e))?;
 
     handle
         .join()
-        .map_err(|_| anyhow::anyhow!("goose-cli main thread panicked"))?
+        .map_err(|_| anyhow::anyhow!("arakan-cli main thread panicked"))?
 }

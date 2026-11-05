@@ -8,20 +8,20 @@ use agent_client_protocol::schema::v1::{
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use fs_err as fs;
-use goose::acp::server::{serve, AcpConnection, AcpConnectionOptions, AcpProviderFactory};
-pub use goose::acp::{map_permission_response, PermissionDecision};
-use goose::agents::GoosePlatform;
-use goose::builtin_extension::register_builtin_extensions;
-use goose::config::paths::Paths;
-use goose::config::{GooseMode, PermissionManager};
-use goose::providers::api_client::{ApiClient, AuthMethod as ApiAuthMethod};
-use goose::providers::base::Provider;
-use goose::providers::openai::OpenAiProvider;
-use goose::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
-use goose::scheduler_trait::SchedulerTrait;
-use goose::session::Session as GooseSession;
-use goose::session_context::SESSION_ID_HEADER;
-use goose_test_support::{ExpectedSessionId, TEST_MODEL};
+use arakan::acp::server::{serve, AcpConnection, AcpConnectionOptions, AcpProviderFactory};
+pub use arakan::acp::{map_permission_response, PermissionDecision};
+use arakan::agents::ArakanPlatform;
+use arakan::builtin_extension::register_builtin_extensions;
+use arakan::config::paths::Paths;
+use arakan::config::{ArakanMode, PermissionManager};
+use arakan::providers::api_client::{ApiClient, AuthMethod as ApiAuthMethod};
+use arakan::providers::base::Provider;
+use arakan::providers::openai::OpenAiProvider;
+use arakan::scheduler::{ScheduledJob, SchedulerError, ValidatedScheduleRecipe};
+use arakan::scheduler_trait::SchedulerTrait;
+use arakan::session::Session as ArakanSession;
+use arakan::session_context::SESSION_ID_HEADER;
+use arakan_test_support::{ExpectedSessionId, TEST_MODEL};
 use std::collections::VecDeque;
 use std::future::Future;
 use std::path::{Path, PathBuf};
@@ -153,7 +153,7 @@ impl SchedulerTrait for FixtureScheduler {
         &self,
         sched_id: &str,
         _limit: usize,
-    ) -> Result<Vec<(String, GooseSession)>, SchedulerError> {
+    ) -> Result<Vec<(String, ArakanSession)>, SchedulerError> {
         let jobs = self.jobs.lock().await;
         if jobs.iter().any(|job| job.id == sched_id) {
             Ok(Vec::new())
@@ -207,7 +207,7 @@ fn write_global_test_config(config_path: &Path, openai_base_url: &str) {
 
     let global_config_dir = Paths::config_dir();
     fs::create_dir_all(&global_config_dir).unwrap();
-    let global_config_path = global_config_dir.join(goose::config::base::CONFIG_YAML_NAME);
+    let global_config_path = global_config_dir.join(arakan::config::base::CONFIG_YAML_NAME);
     fs::write(&global_config_path, serde_yaml::to_string(&config).unwrap()).unwrap();
 }
 
@@ -373,7 +373,7 @@ pub async fn spawn_acp_server_in_process(
     openai_base_url: &str,
     builtins: &[String],
     data_root: &std::path::Path,
-    goose_mode: GooseMode,
+    arakan_mode: ArakanMode,
     provider_factory: Option<AcpProviderFactory>,
     current_model: &str,
     disable_session_naming: bool,
@@ -381,13 +381,13 @@ pub async fn spawn_acp_server_in_process(
     fs::create_dir_all(data_root).unwrap();
     // TODO: Paths::in_state_dir is global, ignoring per-test data_root
     fs::create_dir_all(Paths::in_state_dir("logs")).unwrap();
-    let config_path = data_root.join(goose::config::base::CONFIG_YAML_NAME);
+    let config_path = data_root.join(arakan::config::base::CONFIG_YAML_NAME);
     if !config_path.exists() {
         fs::write(
             &config_path,
             format!(
-                "GOOSE_MODEL: {current_model}\nGOOSE_PROVIDER: openai\nGOOSE_MODE: {}\nGOOSE_TOOL_PAIR_SUMMARIZATION: false\n",
-                goose_mode
+                "ARAKAN_MODEL: {current_model}\nARAKAN_PROVIDER: openai\nARAKAN_MODE: {}\nARAKAN_TOOL_PAIR_SUMMARIZATION: false\n",
+                arakan_mode
             ),
         )
         .unwrap();
@@ -410,20 +410,20 @@ pub async fn spawn_acp_server_in_process(
         })
     });
 
-    let mut services_config = goose::acp::server::acp_services_config(
-        Arc::new(goose::session::SessionManager::new(data_root.to_path_buf())),
+    let mut services_config = arakan::acp::server::acp_services_config(
+        Arc::new(arakan::session::SessionManager::new(data_root.to_path_buf())),
         data_root.to_path_buf(),
         disable_session_naming,
-        GoosePlatform::GooseCli,
+        ArakanPlatform::ArakanCli,
     );
     services_config.scheduler_service = Some(Arc::new(FixtureScheduler::new()));
-    let services = goose::agents::StateMachineServices::with_config(services_config);
-    let live_voice = Arc::new(goose::acp::server::LiveVoiceService::from_config(
+    let services = arakan::agents::StateMachineServices::with_config(services_config);
+    let live_voice = Arc::new(arakan::acp::server::LiveVoiceService::from_config(
         services.runtime.runs.clone(),
     ));
     let connection = AcpConnection::new(AcpConnectionOptions {
         provider_factory,
-        builtin_selection: goose::acp::server::AcpBuiltinSelection {
+        builtin_selection: arakan::acp::server::AcpBuiltinSelection {
             explicit: builtins.to_vec(),
             ..Default::default()
         },
@@ -514,7 +514,7 @@ pub fn to_notifications(updates: &[SessionUpdate]) -> Vec<Notification> {
             SessionUpdate::SessionInfoUpdate(update) => {
                 let meta = update.meta.as_ref();
                 let is_active_run_update = meta
-                    .and_then(|m| m.get("goose"))
+                    .and_then(|m| m.get("arakan"))
                     .and_then(|g| g.get("activeRunId"))
                     .is_some();
                 if is_active_run_update {
@@ -557,7 +557,7 @@ pub struct SessionData<S> {
 pub struct TestConnectionConfig {
     pub mcp_servers: Vec<McpServer>,
     pub builtins: Vec<String>,
-    pub goose_mode: GooseMode,
+    pub arakan_mode: ArakanMode,
     pub cwd: Option<tempfile::TempDir>,
     pub data_root: PathBuf,
     pub provider_factory: Option<AcpProviderFactory>,
@@ -571,7 +571,7 @@ impl Default for TestConnectionConfig {
         Self {
             mcp_servers: Vec::new(),
             builtins: Vec::new(),
-            goose_mode: GooseMode::default(),
+            arakan_mode: ArakanMode::default(),
             cwd: None,
             data_root: PathBuf::new(),
             provider_factory: None,
@@ -637,10 +637,10 @@ where
     F: Future<Output = ()> + Send + 'static,
 {
     let _guard = ACP_TEST_LOCK.lock().unwrap_or_else(|err| err.into_inner());
-    if std::env::var_os("GOOSE_PATH_ROOT").is_none() {
-        std::env::set_var("GOOSE_PATH_ROOT", ACP_CONFIG_ROOT.path());
+    if std::env::var_os("ARAKAN_PATH_ROOT").is_none() {
+        std::env::set_var("ARAKAN_PATH_ROOT", ACP_CONFIG_ROOT.path());
     }
-    register_builtin_extensions(goose_mcp::BUILTIN_EXTENSIONS.clone());
+    register_builtin_extensions(arakan_mcp::BUILTIN_EXTENSIONS.clone());
 
     let handle = std::thread::Builder::new()
         .name("acp-test".to_string())

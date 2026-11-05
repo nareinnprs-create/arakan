@@ -1,13 +1,13 @@
-use goose::config::declarative_providers::custom_providers_dir;
-use goose::providers::canonical_cost::estimate_model_cost;
-use goose_providers::conversation::token_usage::Usage;
+use arakan::config::declarative_providers::custom_providers_dir;
+use arakan::providers::canonical_cost::estimate_model_cost;
+use arakan_providers::conversation::token_usage::Usage;
 use serde_json::json;
 
 #[test]
 fn custom_cache_prices_require_input_and_output_prices() {
     let root = tempfile::tempdir().unwrap();
     let root_path = root.path().to_str().unwrap();
-    let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path))]);
+    let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path))]);
     let dir = custom_providers_dir();
     std::fs::create_dir_all(&dir).unwrap();
     let usage = Usage::new(Some(1_000_000), Some(1_000_000), None)
@@ -75,7 +75,7 @@ fn custom_cache_prices_require_input_and_output_prices() {
 fn custom_cache_prices_work_without_a_catalog_entry() {
     let root = tempfile::tempdir().unwrap();
     let root_path = root.path().to_str().unwrap();
-    let _guard = env_lock::lock_env([("GOOSE_PATH_ROOT", Some(root_path))]);
+    let _guard = env_lock::lock_env([("ARAKAN_PATH_ROOT", Some(root_path))]);
     let dir = custom_providers_dir();
     std::fs::create_dir_all(&dir).unwrap();
     let mut config = json!({

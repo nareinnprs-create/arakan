@@ -1,5 +1,5 @@
 use anyhow::Result;
-use goose::providers::utils::init_goose_request_log;
+use arakan::providers::utils::init_arakan_request_log;
 use std::sync::OnceLock;
 
 // Used to ensure we only set up tracing once
@@ -11,15 +11,15 @@ pub fn setup_logging(name: Option<&str>) -> &'static Result<()> {
     INIT.get_or_init(|| {
         use tracing_subscriber::util::SubscriberInitExt;
 
-        init_goose_request_log()?;
-        let config = goose::logging::LoggingConfig {
+        init_arakan_request_log()?;
+        let config = arakan::logging::LoggingConfig {
             component: "cli",
             name,
-            extra_directives: &["goose_cli=info"],
+            extra_directives: &["arakan_cli=info"],
             console: false,
             json: true,
         };
-        let subscriber = goose::logging::build_logging_subscriber(&config)?;
+        let subscriber = arakan::logging::build_logging_subscriber(&config)?;
 
         subscriber
             .try_init()
@@ -30,7 +30,7 @@ pub fn setup_logging(name: Option<&str>) -> &'static Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use goose::tracing::langfuse_layer;
+    use arakan::tracing::langfuse_layer;
     use std::env;
     use tempfile::TempDir;
 
@@ -47,12 +47,12 @@ mod tests {
     #[test]
     fn test_log_directory_creation() {
         let _temp_dir = setup_temp_home();
-        let log_dir = goose::logging::prepare_log_directory("cli", true).unwrap();
+        let log_dir = arakan::logging::prepare_log_directory("cli", true).unwrap();
         assert!(log_dir.exists());
         assert!(log_dir.is_dir());
 
         let path_components: Vec<_> = log_dir.components().collect();
-        assert!(path_components.iter().any(|c| c.as_os_str() == "goose"));
+        assert!(path_components.iter().any(|c| c.as_os_str() == "arakan"));
         assert!(path_components.iter().any(|c| c.as_os_str() == "logs"));
         assert!(path_components.iter().any(|c| c.as_os_str() == "cli"));
     }
@@ -107,13 +107,13 @@ mod tests {
         // The shared helper honours RUST_LOG; without it the defaults apply.
         // We just smoke-check that building the subscriber doesn't panic.
         let _temp_dir = setup_temp_home();
-        let config = goose::logging::LoggingConfig {
+        let config = arakan::logging::LoggingConfig {
             component: "cli-test",
             name: None,
-            extra_directives: &["goose_cli=info"],
+            extra_directives: &["arakan_cli=info"],
             console: false,
             json: true,
         };
-        assert!(goose::logging::build_logging_subscriber(&config).is_ok());
+        assert!(arakan::logging::build_logging_subscriber(&config).is_ok());
     }
 }

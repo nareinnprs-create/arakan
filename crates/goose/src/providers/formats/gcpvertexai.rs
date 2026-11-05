@@ -1,9 +1,9 @@
 use super::{anthropic, google};
 use crate::conversation::message::Message;
 use anyhow::{Context, Result};
-use goose_providers::conversation::token_usage::{ProviderUsage, Usage};
-use goose_providers::formats::anthropic::AnthropicFormatOptions;
-use goose_providers::model::ModelConfig;
+use arakan_providers::conversation::token_usage::{ProviderUsage, Usage};
+use arakan_providers::formats::anthropic::AnthropicFormatOptions;
+use arakan_providers::model::ModelConfig;
 use rmcp::model::Tool;
 use serde_json::Value;
 
@@ -78,7 +78,7 @@ pub const KNOWN_MODELS: &[&str] = &[
     "gemini-2.5-flash-lite",
 ];
 
-/// Represents available GCP Vertex AI models for goose.
+/// Represents available GCP Vertex AI models for arakan.
 ///
 /// This enum encompasses different model families that are supported
 /// in the GCP Vertex AI platform.

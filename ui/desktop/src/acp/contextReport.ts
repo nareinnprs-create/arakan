@@ -1,4 +1,4 @@
-import type { ContextReportResponse_unstable } from '@aaif/goose-acp-client';
+import type { ContextReportResponse_unstable } from '@aaif/arakan-acp-client';
 import { getAcpClient } from './acpConnection';
 
 export type ContextReport = ContextReportResponse_unstable;
@@ -8,7 +8,7 @@ export type ContextCategory = ContextSegment['category'];
 
 export async function getContextReport(sessionId: string): Promise<ContextReport> {
   const client = await getAcpClient();
-  return client.goose.contextReport_unstable({
+  return client.arakan.contextReport_unstable({
     sessionId,
   });
 }

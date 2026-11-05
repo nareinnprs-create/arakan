@@ -1,6 +1,6 @@
-use goose::conversation::message::ToolRequest;
-use goose::permission::permission_judge::PermissionCheckResult;
-use goose::tool_inspection::{
+use arakan::conversation::message::ToolRequest;
+use arakan::permission::permission_judge::PermissionCheckResult;
+use arakan::tool_inspection::{
     apply_inspection_results_to_permissions, InspectionAction, InspectionResult,
 };
 use rmcp::model::CallToolRequestParams;

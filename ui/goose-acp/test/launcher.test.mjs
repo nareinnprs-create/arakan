@@ -18,19 +18,19 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const tempDirs = [];
 
 const platformPackageNames = {
-  "darwin-arm64": "@aaif/goose-binary-darwin-arm64",
-  "darwin-x64": "@aaif/goose-binary-darwin-x64",
-  "linux-arm64": "@aaif/goose-binary-linux-arm64",
-  "linux-x64": "@aaif/goose-binary-linux-x64",
-  "win32-x64": "@aaif/goose-binary-win32-x64",
+  "darwin-arm64": "@aaif/arakan-binary-darwin-arm64",
+  "darwin-x64": "@aaif/arakan-binary-darwin-x64",
+  "linux-arm64": "@aaif/arakan-binary-linux-arm64",
+  "linux-x64": "@aaif/arakan-binary-linux-x64",
+  "win32-x64": "@aaif/arakan-binary-win32-x64",
 };
 
 function createLauncherHarness() {
-  const root = mkdtempSync(join(tmpdir(), "goose-acp-launcher-"));
+  const root = mkdtempSync(join(tmpdir(), "arakan-acp-launcher-"));
   tempDirs.push(root);
 
   const scopeDir = join(root, "node_modules", "@aaif");
-  const wrapperDir = join(scopeDir, "goose-acp");
+  const wrapperDir = join(scopeDir, "arakan-acp");
   mkdirSync(wrapperDir, { recursive: true });
 
   cpSync(join(packageRoot, "dist"), join(wrapperDir, "dist"), {
@@ -38,8 +38,8 @@ function createLauncherHarness() {
   });
   mkdirSync(join(wrapperDir, "bin"));
   copyFileSync(
-    join(packageRoot, "bin", "goose.mjs"),
-    join(wrapperDir, "bin", "goose.mjs"),
+    join(packageRoot, "bin", "arakan.mjs"),
+    join(wrapperDir, "bin", "arakan.mjs"),
   );
 
   const platformKey = `${process.platform}-${process.arch}`;
@@ -48,7 +48,7 @@ function createLauncherHarness() {
 
   const platformPackageDir = join(scopeDir, packageName.slice("@aaif/".length));
   const platformBinDir = join(platformPackageDir, "bin");
-  const executableName = process.platform === "win32" ? "goose.exe" : "goose";
+  const executableName = process.platform === "win32" ? "arakan.exe" : "arakan";
   const executablePath = join(platformBinDir, executableName);
   mkdirSync(platformBinDir, { recursive: true });
   writeFileSync(
@@ -60,12 +60,12 @@ function createLauncherHarness() {
   } else {
     writeFileSync(
       executablePath,
-      '#!/bin/sh\nexec "$GOOSE_ACP_TEST_NODE" "$@"\n',
+      '#!/bin/sh\nexec "$ARAKAN_ACP_TEST_NODE" "$@"\n',
     );
   }
   chmodSync(executablePath, 0o755);
 
-  return join(wrapperDir, "bin", "goose.mjs");
+  return join(wrapperDir, "bin", "arakan.mjs");
 }
 
 function runLauncher(args, input) {
@@ -74,8 +74,8 @@ function runLauncher(args, input) {
     encoding: "utf8",
     env: {
       ...process.env,
-      GOOSE_BINARY: "",
-      GOOSE_ACP_TEST_NODE: process.execPath,
+      ARAKAN_BINARY: "",
+      ARAKAN_ACP_TEST_NODE: process.execPath,
     },
     input,
   });
@@ -159,8 +159,8 @@ test(
       {
         env: {
           ...process.env,
-          GOOSE_BINARY: "",
-          GOOSE_ACP_TEST_NODE: process.execPath,
+          ARAKAN_BINARY: "",
+          ARAKAN_ACP_TEST_NODE: process.execPath,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },

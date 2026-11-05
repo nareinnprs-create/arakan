@@ -13,8 +13,8 @@ export function appendToWindowsPath(currentPath: string, dir: string): string {
 }
 
 /**
- * Ensures Windows shims are available in %LOCALAPPDATA%\Goose\bin
- * This allows the bundled executables to be found via PATH regardless of where Goose is installed
+ * Ensures Windows shims are available in %LOCALAPPDATA%\Arakan\bin
+ * This allows the bundled executables to be found via PATH regardless of where Arakan is installed
  */
 export async function ensureWinShims(): Promise<void> {
   if (process.platform !== 'win32') return;
@@ -22,14 +22,14 @@ export async function ensureWinShims(): Promise<void> {
   const srcDir = path.join(process.resourcesPath, 'bin'); // existing dir
   const tgtDir = path.join(
     process.env.LOCALAPPDATA ?? path.join(os.homedir(), 'AppData', 'Local'),
-    'Goose',
+    'Arakan',
     'bin'
   );
 
   try {
     await fs.promises.mkdir(tgtDir, { recursive: true });
 
-    // Copy command-line tools only; the goose binary is never shimmed
+    // Copy command-line tools only; the arakan binary is never shimmed
     const shims = ['uvx.exe', 'uv.exe', 'npx.cmd'];
 
     await Promise.all(

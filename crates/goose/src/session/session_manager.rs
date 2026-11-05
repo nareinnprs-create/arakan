@@ -1,7 +1,7 @@
 use crate::agents::Container;
 use crate::config::paths::Paths;
 use crate::config::ExtensionConfig;
-use crate::config::GooseMode;
+use crate::config::ArakanMode;
 use crate::conversation::message::{Message, MessageMetadata, MessageUsage, TokenState};
 use crate::conversation::Conversation;
 use crate::providers::base::CostSource;
@@ -15,8 +15,8 @@ use crate::session::session_naming::{
 };
 use anyhow::Result;
 use chrono::{DateTime, TimeZone, Utc};
-use goose_providers::conversation::token_usage::Usage;
-use goose_providers::model::ModelConfig;
+use arakan_providers::conversation::token_usage::Usage;
+use arakan_providers::model::ModelConfig;
 use indexmap::IndexMap;
 use rmcp::model::Role;
 use serde::de::DeserializeOwned;
@@ -101,7 +101,7 @@ pub struct Session {
     pub provider_name: Option<String>,
     pub model_config: Option<ModelConfig>,
     #[serde(default)]
-    pub goose_mode: GooseMode,
+    pub arakan_mode: ArakanMode,
     #[serde(default)]
     pub archived_at: Option<DateTime<Utc>>,
     #[serde(default)]
@@ -183,7 +183,7 @@ pub struct SessionUpdateBuilder<'a> {
     user_recipe_values: Option<Option<HashMap<String, String>>>,
     provider_name: Option<Option<String>>,
     model_config: Option<Option<ModelConfig>>,
-    goose_mode: Option<GooseMode>,
+    arakan_mode: Option<ArakanMode>,
     archived_at: Option<Option<DateTime<Utc>>>,
 
     project_id: Option<Option<String>>,
@@ -224,7 +224,7 @@ impl<'a> SessionUpdateBuilder<'a> {
             user_recipe_values: None,
             provider_name: None,
             model_config: None,
-            goose_mode: None,
+            arakan_mode: None,
             archived_at: None,
             project_id: None,
             parent_session_id: None,
@@ -319,8 +319,8 @@ impl<'a> SessionUpdateBuilder<'a> {
         self
     }
 
-    pub fn goose_mode(mut self, mode: GooseMode) -> Self {
-        self.goose_mode = Some(mode);
+    pub fn arakan_mode(mut self, mode: ArakanMode) -> Self {
+        self.arakan_mode = Some(mode);
         self
     }
 
@@ -464,10 +464,10 @@ impl SessionManager {
         working_dir: PathBuf,
         name: String,
         session_type: SessionType,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> Result<Session> {
         self.storage
-            .create_session(None, working_dir, name, session_type, goose_mode)
+            .create_session(None, working_dir, name, session_type, arakan_mode)
             .await
     }
 
@@ -477,10 +477,10 @@ impl SessionManager {
         working_dir: PathBuf,
         name: String,
         session_type: SessionType,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> Result<Session> {
         self.storage
-            .create_session(Some(id), working_dir, name, session_type, goose_mode)
+            .create_session(Some(id), working_dir, name, session_type, arakan_mode)
             .await
     }
 
@@ -676,7 +676,7 @@ impl SessionManager {
             None => {
                 let model_name =
                     crate::config::Config::global()
-                        .get_goose_model()
+                        .get_arakan_model()
                         .map_err(|_| {
                             anyhow::anyhow!("Could not resolve model config: missing model")
                         })?;
@@ -893,7 +893,7 @@ impl Default for Session {
             last_message_at: None,
             provider_name: None,
             model_config: None,
-            goose_mode: GooseMode::default(),
+            arakan_mode: ArakanMode::default(),
             archived_at: None,
             project_id: None,
             parent_session_id: None,
@@ -918,7 +918,7 @@ fn deserialize_session_model_config(
 ) -> Option<ModelConfig> {
     let mut model_config: ModelConfig = serde_json::from_str(json).ok()?;
     // TODO: Remove this workaround once ModelConfig guarantees deserialize(serialize(config)) == config.
-    if provider_name == Some(goose_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME) {
+    if provider_name == Some(arakan_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME) {
         #[derive(Deserialize)]
         struct AzurePersistedFields {
             model_name: String,
@@ -1011,8 +1011,8 @@ impl sqlx::FromRow<'_, sqlx::sqlite::SqliteRow> for Session {
             last_message_at,
             provider_name,
             model_config,
-            goose_mode: row
-                .try_get::<String, _>("goose_mode")
+            arakan_mode: row
+                .try_get::<String, _>("arakan_mode")
                 .ok()
                 .and_then(|s| s.parse().ok())
                 .unwrap_or_default(),
@@ -1187,7 +1187,7 @@ impl SessionStorage {
                 user_recipe_values_json TEXT,
                 provider_name TEXT,
                 model_config_json TEXT,
-                goose_mode TEXT NOT NULL DEFAULT 'auto',
+                arakan_mode TEXT NOT NULL DEFAULT 'auto',
                 archived_at TIMESTAMP,
                 project_id TEXT,
                 parent_session_id TEXT,
@@ -1356,7 +1356,7 @@ impl SessionStorage {
             accumulated_cache_read_tokens, accumulated_cache_write_tokens,
             accumulated_cost,
             schedule_id, recipe_json, user_recipe_values_json,
-            provider_name, model_config_json, goose_mode
+            provider_name, model_config_json, arakan_mode
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         "#,
         )
@@ -1384,7 +1384,7 @@ impl SessionStorage {
         .bind(user_recipe_values_json)
         .bind(&session.provider_name)
         .bind(model_config_json)
-        .bind(session.goose_mode.to_string())
+        .bind(session.arakan_mode.to_string())
         .execute(&mut *tx)
         .await?;
 
@@ -1560,7 +1560,7 @@ impl SessionStorage {
             8 => {
                 sqlx::query(
                     r#"
-                    ALTER TABLE sessions ADD COLUMN goose_mode TEXT NOT NULL DEFAULT 'auto'
+                    ALTER TABLE sessions ADD COLUMN arakan_mode TEXT NOT NULL DEFAULT 'auto'
                 "#,
                 )
                 .execute(&mut **tx)
@@ -1784,7 +1784,7 @@ impl SessionStorage {
         working_dir: PathBuf,
         name: String,
         session_type: SessionType,
-        goose_mode: GooseMode,
+        arakan_mode: ArakanMode,
     ) -> Result<Session> {
         if let Some(id) = id {
             anyhow::ensure!(
@@ -1809,7 +1809,7 @@ impl SessionStorage {
         let today = chrono::Utc::now().format("%Y%m%d").to_string();
         let session = sqlx::query_as(
             r#"
-                INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, goose_mode)
+                INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, arakan_mode)
                 VALUES (
                     COALESCE(?, ? || '_' || CAST(COALESCE((
                         SELECT MAX(CAST(SUBSTR(id, 10) AS INTEGER))
@@ -1832,7 +1832,7 @@ impl SessionStorage {
             .bind(&name)
             .bind(session_type.to_string())
             .bind(&*working_dir.to_string_lossy())
-            .bind(goose_mode.to_string())
+            .bind(arakan_mode.to_string())
             .fetch_one(&mut *tx)
             .await
             .map_err(|error| match (id, &error) {
@@ -1847,8 +1847,6 @@ impl SessionStorage {
             })?;
 
         tx.commit().await?;
-        #[cfg(feature = "telemetry")]
-        crate::posthog::emit_session_started();
         Ok(session)
     }
 
@@ -1863,7 +1861,7 @@ impl SessionStorage {
                accumulated_cache_read_tokens, accumulated_cache_write_tokens,
                accumulated_cost,
                schedule_id, recipe_json, user_recipe_values_json,
-               provider_name, model_config_json, goose_mode,
+               provider_name, model_config_json, arakan_mode,
                archived_at, project_id, parent_session_id,
                system_prompt_override, system_prompt_extras_json, container_id
         FROM sessions
@@ -1946,7 +1944,7 @@ impl SessionStorage {
         add_update!(builder.user_recipe_values, "user_recipe_values_json");
         add_update!(builder.provider_name, "provider_name");
         add_update!(builder.model_config, "model_config_json");
-        add_update!(builder.goose_mode, "goose_mode");
+        add_update!(builder.arakan_mode, "arakan_mode");
         add_update!(builder.archived_at, "archived_at");
 
         add_update!(builder.project_id, "project_id");
@@ -2020,8 +2018,8 @@ impl SessionStorage {
                 .transpose()?;
             q = q.bind(model_config_json);
         }
-        if let Some(goose_mode) = builder.goose_mode {
-            q = q.bind(goose_mode.to_string());
+        if let Some(arakan_mode) = builder.arakan_mode {
+            q = q.bind(arakan_mode.to_string());
         }
         if let Some(ref archived_at) = builder.archived_at {
             q = q.bind(archived_at.as_ref());
@@ -2367,7 +2365,7 @@ impl SessionStorage {
                    s.accumulated_cache_read_tokens, s.accumulated_cache_write_tokens,
                    s.accumulated_cost,
                    s.schedule_id, s.recipe_json, s.user_recipe_values_json,
-                   s.provider_name, s.model_config_json, s.goose_mode,
+                   s.provider_name, s.model_config_json, s.arakan_mode,
                    s.archived_at, s.project_id, s.parent_session_id,
                    s.system_prompt_override, s.system_prompt_extras_json, s.container_id,
                    page.message_count, page.last_message_timestamp, page.sort_timestamp
@@ -2777,7 +2775,7 @@ impl SessionStorage {
         json: &str,
         session_type_override: Option<SessionType>,
     ) -> Result<Session> {
-        let normalized = super::import_formats::convert_to_goose_session_json(json)?;
+        let normalized = super::import_formats::convert_to_arakan_session_json(json)?;
         let import: Session = serde_json::from_str(&normalized)?;
 
         let session = self
@@ -2786,7 +2784,7 @@ impl SessionStorage {
                 import.working_dir.clone(),
                 import.name.clone(),
                 session_type_override.unwrap_or(import.session_type),
-                import.goose_mode,
+                import.arakan_mode,
             )
             .await?;
 
@@ -2831,7 +2829,7 @@ impl SessionStorage {
                 original_session.working_dir.clone(),
                 new_name,
                 original_session.session_type,
-                original_session.goose_mode,
+                original_session.arakan_mode,
             )
             .await?;
 
@@ -2852,7 +2850,7 @@ impl SessionStorage {
             builder = builder.model_config(model_config);
         }
         builder = builder
-            .goose_mode(original_session.goose_mode)
+            .arakan_mode(original_session.arakan_mode)
             .system_prompt_override(original_session.system_prompt_override)
             .system_prompt_extras(original_session.system_prompt_extras)
             .container(original_session.container);
@@ -3043,8 +3041,8 @@ mod tests {
     use super::*;
     use crate::conversation::message::{Message, MessageContent};
     use crate::providers::base::MessageStream;
-    use goose_providers::conversation::token_usage::{CostSource, ProviderUsage};
-    use goose_providers::errors::ProviderError;
+    use arakan_providers::conversation::token_usage::{CostSource, ProviderUsage};
+    use arakan_providers::errors::ProviderError;
     use rmcp::model::Tool;
     use tempfile::TempDir;
     use test_case::test_case;
@@ -3087,7 +3085,7 @@ mod tests {
                 PathBuf::from("/tmp/private-session-store"),
                 "Private session".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3121,7 +3119,7 @@ mod tests {
         .unwrap();
 
         let config = deserialize_session_model_config(
-            Some(goose_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME),
+            Some(arakan_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME),
             &json,
         )
         .unwrap();
@@ -3145,7 +3143,7 @@ mod tests {
     #[test]
     fn azure_session_model_config_preserves_explicit_thinking_effort() {
         let config = deserialize_session_model_config(
-            Some(goose_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME),
+            Some(arakan_providers::azure_foundry::AZURE_FOUNDRY_PROVIDER_NAME),
             r#"{"model_name":"gpt-5-high","context_limit":null,"temperature":null,"max_tokens":null,"toolshim":false,"toolshim_model":null,"request_params":{"thinking_effort":"low"}}"#,
         )
         .unwrap();
@@ -3153,14 +3151,14 @@ mod tests {
         assert_eq!(config.model_name, "gpt-5-high");
         assert_eq!(
             config.thinking_effort(),
-            Some(goose_providers::thinking::ThinkingEffort::Low)
+            Some(arakan_providers::thinking::ThinkingEffort::Low)
         );
     }
 
     #[test]
     fn non_azure_session_model_config_keeps_suffix_normalization() {
         let config = deserialize_session_model_config(
-            Some(goose_providers::openai::OPEN_AI_PROVIDER_NAME),
+            Some(arakan_providers::openai::OPEN_AI_PROVIDER_NAME),
             r#"{"model_name":"gpt-5-high","context_limit":null,"temperature":null,"max_tokens":null,"toolshim":false,"toolshim_model":null}"#,
         )
         .unwrap();
@@ -3168,7 +3166,7 @@ mod tests {
         assert_eq!(config.model_name, "gpt-5");
         assert_eq!(
             config.thinking_effort(),
-            Some(goose_providers::thinking::ThinkingEffort::High)
+            Some(arakan_providers::thinking::ThinkingEffort::High)
         );
     }
 
@@ -3190,7 +3188,7 @@ mod tests {
             _system: &str,
             _messages: &[Message],
             _tools: &[rmcp::model::Tool],
-        ) -> std::result::Result<MessageStream, goose_providers::errors::ProviderError> {
+        ) -> std::result::Result<MessageStream, arakan_providers::errors::ProviderError> {
             unimplemented!("session naming calls complete")
         }
 
@@ -3273,7 +3271,7 @@ mod tests {
                 PathBuf::from(working_dir),
                 format!("Session in {working_dir}"),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3400,7 +3398,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 "Arrival order".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3437,7 +3435,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 "Reused ids".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3528,7 +3526,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 "Session recency".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3562,7 +3560,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 "Hidden events".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3604,7 +3602,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "Same second truncation".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3661,7 +3659,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "New Chat".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3697,7 +3695,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "New Chat".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3732,7 +3730,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "New Chat".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3768,7 +3766,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "New Chat".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3801,7 +3799,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "New Chat".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3846,7 +3844,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "Recipe snapshot".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3899,7 +3897,7 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 original_name.to_string(),
                 SessionType::Scheduled,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -3929,7 +3927,7 @@ mod tests {
                 PathBuf::from("/tmp/search-test"),
                 name.to_string(),
                 session_type,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4098,7 +4096,7 @@ mod tests {
                 PathBuf::from("/tmp/lock-upgrade-test"),
                 "Lock Upgrade Session".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4581,7 +4579,7 @@ mod tests {
                 PathBuf::from("/tmp/custom-session"),
                 "Custom session".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4608,7 +4606,7 @@ mod tests {
                 PathBuf::from("/tmp/other-session"),
                 "Collision".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap_err();
@@ -4626,7 +4624,7 @@ mod tests {
                 PathBuf::from("/tmp/generated-session"),
                 "Generated session".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4658,7 +4656,7 @@ mod tests {
                     PathBuf::from("/tmp/custom-session"),
                     "Invalid".to_string(),
                     SessionType::User,
-                    GooseMode::default(),
+                    ArakanMode::default(),
                 )
                 .await
                 .is_err());
@@ -4672,7 +4670,7 @@ mod tests {
                 PathBuf::from("/tmp/custom-session"),
                 "Invalid".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .is_err());
@@ -4681,7 +4679,7 @@ mod tests {
                 PathBuf::from("/tmp/generated-session"),
                 "Generated".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4690,7 +4688,7 @@ mod tests {
                 PathBuf::from("/tmp/generated-session"),
                 "Generated".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4715,7 +4713,7 @@ mod tests {
                         working_dir.clone(),
                         description,
                         SessionType::User,
-                        GooseMode::default(),
+                        ArakanMode::default(),
                     )
                     .await
                     .unwrap();
@@ -4805,7 +4803,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 DESCRIPTION.to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4880,7 +4878,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 "User session".to_string(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4903,7 +4901,7 @@ mod tests {
                 PathBuf::from("/tmp/test"),
                 "ACP session".to_string(),
                 SessionType::Acp,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
@@ -4971,11 +4969,11 @@ mod tests {
         );
     }
 
-    #[test_case(GooseMode::Approve)]
-    #[test_case(GooseMode::SmartApprove)]
-    #[test_case(GooseMode::Chat)]
+    #[test_case(ArakanMode::Approve)]
+    #[test_case(ArakanMode::SmartApprove)]
+    #[test_case(ArakanMode::Chat)]
     #[tokio::test]
-    async fn test_goose_mode_persists(mode: GooseMode) {
+    async fn test_arakan_mode_persists(mode: ArakanMode) {
         let temp_dir = TempDir::new().unwrap();
         let sm = SessionManager::new(temp_dir.path().to_path_buf());
 
@@ -4990,11 +4988,11 @@ mod tests {
             .unwrap();
 
         let reloaded = sm.get_session(&session.id, false).await.unwrap();
-        assert_eq!(reloaded.goose_mode, mode);
+        assert_eq!(reloaded.arakan_mode, mode);
     }
 
     #[tokio::test]
-    async fn test_goose_mode_update() {
+    async fn test_arakan_mode_update() {
         let temp_dir = TempDir::new().unwrap();
         let sm = SessionManager::new(temp_dir.path().to_path_buf());
 
@@ -5003,23 +5001,23 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "test".into(),
                 SessionType::User,
-                GooseMode::default(),
+                ArakanMode::default(),
             )
             .await
             .unwrap();
 
         sm.update(&session.id)
-            .goose_mode(GooseMode::Approve)
+            .arakan_mode(ArakanMode::Approve)
             .apply()
             .await
             .unwrap();
 
         let reloaded = sm.get_session(&session.id, false).await.unwrap();
-        assert_eq!(reloaded.goose_mode, GooseMode::Approve);
+        assert_eq!(reloaded.arakan_mode, ArakanMode::Approve);
     }
 
     #[tokio::test]
-    async fn test_goose_mode_malformed_defaults_to_auto() {
+    async fn test_arakan_mode_malformed_defaults_to_auto() {
         let temp_dir = TempDir::new().unwrap();
         let sm = SessionManager::new(temp_dir.path().to_path_buf());
 
@@ -5028,20 +5026,20 @@ mod tests {
                 temp_dir.path().to_path_buf(),
                 "test".into(),
                 SessionType::User,
-                GooseMode::Approve,
+                ArakanMode::Approve,
             )
             .await
             .unwrap();
 
         let pool = &sm.storage().pool;
-        sqlx::query("UPDATE sessions SET goose_mode = 'garbage' WHERE id = ?")
+        sqlx::query("UPDATE sessions SET arakan_mode = 'garbage' WHERE id = ?")
             .bind(&session.id)
             .execute(pool)
             .await
             .unwrap();
 
         let reloaded = sm.get_session(&session.id, false).await.unwrap();
-        assert_eq!(reloaded.goose_mode, GooseMode::default());
+        assert_eq!(reloaded.arakan_mode, ArakanMode::default());
     }
 
     #[tokio::test]
@@ -5072,7 +5070,7 @@ mod tests {
             .unwrap();
 
         sqlx::query(
-            "INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, goose_mode)
+            "INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, arakan_mode)
              VALUES (?, ?, ?, ?, ?, ?, ?)",
         )
         .bind("user_id")
@@ -5087,7 +5085,7 @@ mod tests {
         .unwrap();
 
         sqlx::query(
-            "INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, goose_mode)
+            "INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, arakan_mode)
              VALUES (?, ?, ?, ?, ?, ?, ?)",
         )
         .bind("acp_id")
@@ -5153,7 +5151,7 @@ mod tests {
             .unwrap();
 
         sqlx::query(
-            "INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, goose_mode)
+            "INSERT INTO sessions (id, name, user_set_name, session_type, working_dir, extension_data, arakan_mode)
              VALUES (?, ?, ?, ?, ?, ?, ?)",
         )
         .bind("cache_id")
@@ -5206,7 +5204,7 @@ mod tests {
             PathBuf::from("/tmp"),
             "s".to_string(),
             SessionType::User,
-            GooseMode::default(),
+            ArakanMode::default(),
         )
         .await
         .unwrap()

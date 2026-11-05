@@ -50,7 +50,7 @@ test("publishes the linked APIs and preserves versioned snapshots", (t) => {
         path.join(outputDir, doc.version, filename),
         "utf8",
       );
-      assert.ok(snapshot.includes(`goose-sdk ${doc.version}`));
+      assert.ok(snapshot.includes(`arakan-sdk ${doc.version}`));
       if (index === 0) assert.equal(latest, snapshot);
       else assert.notEqual(latest, snapshot);
       for (const func of doc.functions) {
@@ -106,9 +106,9 @@ test("renders binding signatures, defaults, error payloads, and field documentat
     ),
   );
   assert.ok(
-    python.includes('id="gooseerror-variant-ratelimited-field-retry-after-ms"'),
+    python.includes('id="arakanerror-variant-ratelimited-field-retry-after-ms"'),
   );
-  assert.ok(python.includes("Raises `GooseError`."));
+  assert.ok(python.includes("Raises `ArakanError`."));
   assert.ok(!python.includes("<GdkApiReference"));
 
   const kotlin = renderMarkdown(
@@ -126,8 +126,8 @@ test("renders binding signatures, defaults, error payloads, and field documentat
   assert.ok(
     kotlin.includes("`requestHeaders` | `Map<String, String>?` | `null`"),
   );
-  assert.ok(kotlin.includes("@Throws(GooseException::class)"));
-  assert.ok(kotlin.includes("### `GooseException.RateLimited`"));
+  assert.ok(kotlin.includes("@Throws(ArakanException::class)"));
+  assert.ok(kotlin.includes("### `ArakanException.RateLimited`"));
 });
 
 test("Markdown exports turn static download links into fetchable paths", async (t) => {

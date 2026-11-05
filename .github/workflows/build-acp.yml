@@ -1,6 +1,6 @@
 # Keep this build separate from the CLI so Cargo feature unification does not
 # pull the CLI's heavier features into the lean ACP binary.
-name: Build Goose ACP
+name: Build Arakan ACP
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   build-acp:
-    name: Build Goose ACP (${{ matrix.target }})
+    name: Build Arakan ACP (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container || null }}
     defaults:
@@ -83,7 +83,7 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
         run: |
-          cargo build -p goose --bin goose-acp \
+          cargo build -p arakan --bin arakan-acp \
             --profile lean \
             --no-default-features \
             --features rustls-tls,system-keyring,online-model-meta \
@@ -94,10 +94,10 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
         run: |
-          otool -L "target/${TARGET}/lean/goose-acp" | tail -n +2 | while read -r library _; do
+          otool -L "target/${TARGET}/lean/arakan-acp" | tail -n +2 | while read -r library _; do
             case "$library" in
               /usr/lib/*|/System/Library/*) ;;
-              *) echo "::error::goose-acp links a non-system library: $library"; exit 1 ;;
+              *) echo "::error::arakan-acp links a non-system library: $library"; exit 1 ;;
             esac
           done
 
@@ -105,7 +105,7 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
         run: |
-          binary="target/${TARGET}/lean/goose-acp"
+          binary="target/${TARGET}/lean/arakan-acp"
           if [ "$RUNNER_OS" = 'Windows' ]; then
             binary="${binary}.exe"
           fi
@@ -118,7 +118,7 @@ jobs:
           TARGET: ${{ matrix.target }}
         run: |
           mkdir -p dist
-          COPYFILE_DISABLE=1 tar -czf "dist/goose-acp-${TARGET}.tar.gz" -C "target/${TARGET}/lean" goose-acp
+          COPYFILE_DISABLE=1 tar -czf "dist/arakan-acp-${TARGET}.tar.gz" -C "target/${TARGET}/lean" arakan-acp
 
       - name: Package ACP binary (Windows)
         if: runner.os == 'Windows'
@@ -127,11 +127,11 @@ jobs:
           TARGET: ${{ matrix.target }}
         run: |
           New-Item -ItemType Directory -Force dist
-          Compress-Archive -Path "target/$env:TARGET/lean/goose-acp.exe" -DestinationPath "dist/goose-acp-$env:TARGET.zip"
+          Compress-Archive -Path "target/$env:TARGET/lean/arakan-acp.exe" -DestinationPath "dist/arakan-acp-$env:TARGET.zip"
 
       - name: Upload ACP artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: goose-acp-${{ matrix.target }}
-          path: dist/goose-acp-${{ matrix.target }}.*
+          name: arakan-acp-${{ matrix.target }}
+          path: dist/arakan-acp-${{ matrix.target }}.*
           if-no-files-found: error
